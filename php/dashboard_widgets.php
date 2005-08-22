@@ -1,5 +1,7 @@
 <?php
 
+require_once(ASSIGNMENT_DESK_DIR_PATH . "/php/utils.php");
+
 /*
 * This class manages the widgets that appear in the Wordpress Administration Dashboard.
 * The assignment_desk class holds an instance of this class as a member.
@@ -19,25 +21,28 @@ class ad_dashboard_widgets {
                    
            // Add the editor_overview_widget widget, if enabled
            // if ($assignment_desk->get_plugin_option('editor_overview_widget_enabled')) {
-               wp_add_dashboard_widget('ad_editor_overview', 'Story Pitches', array(&$this, 'editor_overview_widget'));
+               wp_add_dashboard_widget('ad_editor_overview', 'Assignment Desk Overview', array(&$this, 'overview_widget'));
            // }
         }
         
         wp_add_dashboard_widget('ad_assignments', 'Assignments', array(&$this, 'assignments_widget'));
     }
 
+    /**
+     * Return the number of objects associated with this status
+     * $status is a term
+     */
 	function count_pitches($status){
 		global $assignment_desk, $wpdb;
-		$term_id = $wpdb->get_var("SELECT term_id FROM $wpdb->terms WHERE name=$status");
 		$count = $wpdb->get_var($wpdb->prepare("SELECT count FROM $wpdb->term_taxonomy 
-													WHERE taxonomy = %s AND term_id = %d", 
+													WHERE taxonomy = '%s' AND term_id = %d", 
 													$assignment_desk->custom_taxonomies->assignment_status_label,
-													$term_id));
+													$status->term_id));
 		$count = $count ? $count : 0;
 		return $count;
 	}
    
-    function editor_overview_widget() {
+    function overview_widget() {
         global $assignment_desk, $current_user, $wpdb;
 
 		$new_pitches_count = $this->count_pitches('New');
@@ -48,29 +53,22 @@ class ad_dashboard_widgets {
                 echo "<div class='message info'>$message</div>";
             }
         }
-?>
-<div class="table">
-<table>
-    <tbody>
-        <tr>
-            <td class="b">
-                <a href="admin.php?page=assignment_desk-pitch&active_status=New" class="ad-new-count">
-                    <?php echo $new_pitches_count ?></a>
-            </td>
-            <td class="t"><a href="admin.php?page=assignment_desk-pitch&active_status=New">New</a></td>
-        </tr>
-        <tr>
-            <td class="b">
-                <a href="admin.php?page=assignment_desk-pitch&active_status=New" class="ad-approved-count">
-                    <?php echo $approved_post_count ?></a>
-            </td>
-            <td class="t"><a href="admin.php?page=assignment_desk-pitch&active_status=New">Approved</a></td>
-        </tr>
-    </tbody>
-</table>
-</div>
-<div class="inside">&raquo; <a href="?page=assignment_desk-index">Go to Assignment Desk landing page.</a></div>
-
+        ?>
+        <div class="table">
+        <table>
+            <tbody>
+            <?php if($assignment_desk->coauthors_plus_exists()){
+                
+                echo "<tr><td class='b'>" . count(get_unassigned_posts()) . "</td> <td>" . _('Unassigned', 'assignment-desk') . "</td></tr>";
+            }
+            $this_month_link = admin_url() . '/edit.php?post_status=publish&monthnum=' . date('M');
+            $q = new WP_Query( array('post_status' => 'publish', 'monthnum' => date('M')));
+            echo "<tr><td class='b'><a href='$this_month_link'>$q->found_posts</a></td>";
+            echo "<td><a href='$this_month_link'>" . _('Published this month', 'assignment-desk') . "</a></td></tr>";
+            ?>        
+            </tbody>
+        </table>
+        </div>
 <?php
     }
    
