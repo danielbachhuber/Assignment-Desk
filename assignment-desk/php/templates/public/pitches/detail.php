@@ -76,32 +76,19 @@ if(!empty($_POST)){
 	    $user_search = $user->user_login;
 	}
 	
-	$exist = $wpdb->get_row($wpdb->prepare("SELECT * 
-                                            FROM {$assignment_desk->tables['pitch_volunteer']}
-                                            WHERE user_email=%s AND pitch_id=%d", 
-                                            $user_search, $pitch->pitch_id));
-										
+	$volunteers = get_post_meta($pitch_id, '_ad_volunteer');
+	
 	// Has this person volunteered for the story already?
-	if (!empty($exist)){
-		$messages['errors'][] = 'You already volunteered to write this story. Thanks!';	
-		$valid_submission = False;
+	foreach($volunteers as $volunteer){
+		if ($volunteer[0] == $user_search)){
+			$messages['errors'][] = 'You already volunteered to write this story. Thanks!';	
+			$valid_submission = False;
+		}
 	}
 	
 	if ($valid_submission){
-	    $wpdb->insert( $assignment_desk->tables['pitch_volunteer'],
-	                array( 'pitch_id' => $pitch->pitch_id,
-	                       'user_nicename' => $user_nicename,
-	                       'user_email' => $user_email,
-							'reason' => $reason
-	                    ),
-	                array("%d", "%s", "%s", "%s")
-	        );
-	    if ($wpdb->insert_id >= 0){
-	        $successful_volunteer = True;
-	    }
-	    else {
-	        $messages['errors'][] = 'There was an error saving a record to the DB. Please try again later.';
-	    }
+		add_post_meta($pitch_id, '_ad_volunteer', array($user_nicename, $user_email, $reason))
+	    $successful_volunteer = True; 
 	}
 }
 ?>
