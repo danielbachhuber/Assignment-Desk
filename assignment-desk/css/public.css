@@ -1,0 +1,22 @@
+a.adsk-button {
+	-moz-border-radius: 8px;
+	-webkit-border-radius: 8px;
+	border: solid 1px #999;
+	background-color: #eee;
+	padding: 5px 8px;
+	display:inline-block;
+}
+
+a.adsk-button:hover {
+	text-decoration: none;
+	border: solid 1px #666;
+}
+
+label { font-weight: 900; }
+
+textarea {
+    
+}
+
+table.form-table td { padding-top: 15px;}
+

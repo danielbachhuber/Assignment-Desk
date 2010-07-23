@@ -1,0 +1,9 @@
+span.commentsvote_positive {
+	font-weight:		bold;
+	color:				green;
+}
+
+span.commentsvote_negative {
+	font-weight:		bold;
+	color:				red;
+}

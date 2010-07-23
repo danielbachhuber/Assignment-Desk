@@ -1,0 +1,41 @@
+div.ad-module {
+    padding: 2px;
+}
+.ad-module h4 {
+    background: #F1F1F1;
+    border: 1px solid #DFDFDF;
+    font-weight: bold;
+    margin: 0px;
+    padding: 6px;
+}
+
+ul.plain {
+	list-style: none;
+	margin: 8px 0 5px;
+	padding: 2;
+	white-space: nowrap;
+	font-size: 11px;
+}
+
+ul.plain a {
+	line-height: 2;
+	padding: .2em;
+	text-decoration: none;
+}
+
+.plain a .count, .plain a.current .count {
+	color: #999;
+	font-weight: normal;
+}
+
+.plain a.current {
+	font-weight: bold;
+	background: none;
+	border: none;
+}
+
+.plain li {
+	display: inline;
+	margin: 0;
+	padding: 0;
+}
