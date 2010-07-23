@@ -147,6 +147,25 @@ class assignment_desk_assignment_controller {
 		$duedate        = strtotime($duedate_month . ' ' . $duedate_day . ', ' . $duedate_year);
 		update_post_meta($post_id, '_ef_duedate', $duedate);
 	}
+	
+	/**
+	* Assign a post to a user. Marks the post meta and post status as 'Waiting for Reply'
+	* @param $post_id The id of the post.
+	* @param $post_id The user id of the assignee.
+	* @param $role_id The id of the term from the $assignment_desk->custom_user_roles.
+	*/
+	function assign_post($post_id, $user_id, $role_id){
+		
+		$post = get_post($post_id);
+		$user = get_userdata($user_id);
+		
+		if (!post || !$user){
+			return false;
+		}
+		add_post_meta($post_id, "_ad_waiting_for_reply", array($user_id, $role_id));
+		$post['post_status'] = __('Waiting for Reply')
+		return true;
+	}
 
 	/**
 	    Assign a pitch to a user. 
