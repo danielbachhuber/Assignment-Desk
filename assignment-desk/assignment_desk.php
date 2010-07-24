@@ -44,7 +44,6 @@ include_once('php/install.php');
 include_once('php/index-controller.php');
 include_once('php/assignment-controller.php');
 include_once('php/contributor-controller.php');
-include_once('php/pitch-controller.php');
 
 // Widgets
 include_once('php/dashboard-widgets.php');
@@ -91,11 +90,6 @@ if (!class_exists('assignment_desk')) {
 	    /** @var assignment_desk_index_controller $index_controller serves the activity feed views. */
 	    public $index_controller;
 
-	    /**
-        * @var assignment_desk_pitch_controller $index_controller serves the editor's pitch management views.
-        */
-        public $pitch_controller;
-
         /**
         * @var assignment_desk_assignment_controller $assignment_controller serves the editor's assignment-management views.
         */
@@ -140,7 +134,6 @@ if (!class_exists('assignment_desk')) {
             // Controllers for WP Admin views.
             $this->index_controller       = new assignment_desk_index_controller();
             $this->assignment_controller  = new assignment_desk_assignment_controller();
-            $this->pitch_controller       = new assignment_desk_pitch_controller();
             $this->contributor_controller = new assignment_desk_contributor_controller();
 
 	        // Widgets
@@ -294,14 +287,6 @@ if (!class_exists('assignment_desk')) {
                             'edit_posts', 
                             'assignment_desk-contributor',
                             array(&$this->contributor_controller, 'dispatch'));
-
-    		// Add Pitches sub-menu for Editors.
-            $pitches_page = add_submenu_page('assignment_desk-menu', 'Pitches', 'Pitches', 
-                            5, 
-                            'assignment_desk-pitch',
-                            array(&$this->pitch_controller, 'dispatch'));
-            /* Using registered $pitches_page handle to hook script load */
-            add_action('admin_print_scripts-' . $pitches_page, array(&$this, 'add_admin_js'));
 		
     		// Add Assignments sub-menu for Editors
             $assignments_page = add_submenu_page('assignment_desk-menu', 'Assignments', 
