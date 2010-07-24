@@ -189,13 +189,13 @@ if (!class_exists('assignment_desk')) {
         }
         
         /**
-            Load a template from the public templates directory.
-            
-            This is a very simple dispatcher. It only works one-level "deep".
-            
-            'foo/        => $this->templates_path . '/public/foo/index.php'
-            'pitches/foo/ => $this->templates_path . '/public/foo/bar.php'
-            'pitches/foo/bar/ => ERROR
+        *    Load a template from the public templates directory.
+        *    
+        *    This is a very simple dispatcher. It only works one-level "deep".
+        *    
+        *    'foo/        => $this->templates_path . '/public/foo/index.php'
+        *    'pitches/foo/ => $this->templates_path . '/public/foo/bar.php'
+        *    'pitches/foo/bar/ => ERROR
         */
         function load_public_template() {
             global $wp_query;
@@ -219,6 +219,7 @@ if (!class_exists('assignment_desk')) {
                 die();
             }            
         }
+
         /**
         *    Flush the rewrite rules. Only do this when you activate the plugin.
         *    http://codex.wordpress.org/Function_Reference/WP_Rewrite
@@ -227,7 +228,7 @@ if (!class_exists('assignment_desk')) {
             global $wp_rewrite;
             $wp_rewrite->flush_rules();
         }  
-        
+
         /**
         * Retrieves the plugin options from the database.
         * @return array
@@ -296,7 +297,7 @@ if (!class_exists('assignment_desk')) {
 
     		// Add Pitches sub-menu for Editors.
             $pitches_page = add_submenu_page('assignment_desk-menu', 'Pitches', 'Pitches', 
-                            'editor', 
+                            5, 
                             'assignment_desk-pitch',
                             array(&$this->pitch_controller, 'dispatch'));
             /* Using registered $pitches_page handle to hook script load */
@@ -305,7 +306,7 @@ if (!class_exists('assignment_desk')) {
     		// Add Assignments sub-menu for Editors
             $assignments_page = add_submenu_page('assignment_desk-menu', 'Assignments', 
                             'Assignments', 
-                            'editor', 
+                            5, 
                             'assignment_desk-assignments',
                             array(&$this->assignment_controller, 'dispatch'));
                             
@@ -314,7 +315,7 @@ if (!class_exists('assignment_desk')) {
                             
             // Add Settings sub-menu page for Editors
 		    add_submenu_page('assignment_desk-menu', 'Settings', 'Settings', 
-		                    'editor',
+		                    5,
 		                    'assignment_desk-settings', 
 		                    array(&$this, 'admin_settings_page'));
     	}
