@@ -12,12 +12,12 @@
 
 <div id="breadcrumbs">
     <a href="admin.php?page=assignment_desk-pitch">Pitches</a> &gt;
-    <a href="admin.php?page=assignment_desk-pitch&action=detail&pitch_id<?php echo $pitch->pitch_id; ?>">
-        <?php echo shorten_ellipses($pitch->headline, 25) ?> </a> &gt;
+    <a href="admin.php?page=assignment_desk-pitch&action=detail&post_id<?php echo $post->ID; ?>">
+        <?php echo shorten_ellipses($post->post_title, 25) ?> </a> &gt;
     Assign to <?php echo $user_login; ?>
 </div>
 
-<?php if($pitch): ?>
+<?php if($post): ?>
 <div "form-container">
 
     <form method="POST">
@@ -29,10 +29,10 @@
             </script>
         </div>
         
-        <h2>Pitch: <?php echo $pitch->headline; ?></h2>
+        <h2>Pitch: <?php echo $post->post_title; ?></h2>
         <h3>Assigning to <?php echo ($user->user_nicename)? $user->user_nicename: $user->user_login; ?></h3>
 
-        <input type="hidden" name="post_id" value="<?php echo $pitch->post_id; ?>">
+        <input type="hidden" name="post_id" value="<?php echo $post->ID; ?>">
 	
         <?php if($user_login): ?>
             <h3>Email to send to <?php echo $user_login; ?></h3>
@@ -45,11 +45,8 @@
         
         <!-- The action for the assignments controller. -->
         <input type="hidden" name="action" value="editor_assign">
-        
-        <!-- The pitch for this assignment -->
-        <input type="hidden" name="pitch_id" value="<?php echo $pitch->pitch_id; ?>">
-        
-<!-- The user assigned to this pitch -->
+                
+		<!-- The user assigned to this pitch -->
         <input type="hidden" name="user_login" value="<?php echo $user_login; ?>">
         
         <textarea class="wysiwyg-editor" name="email_body" rows="20" cols="80">

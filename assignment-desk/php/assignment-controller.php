@@ -76,8 +76,8 @@ class assignment_desk_assignment_controller {
          return $user;
 	}
 	/**
-	    Lookup assignees for a post
-	    $meta_key is either  _coauthor or _ad_witing_for_reply
+	*   Lookup assignees for a post
+	*   $meta_key is either  _coauthor or _ad_witing_for_reply
 	*/
     public function get_assignees($post_id, $meta_key){
 	    global $wpdb;
@@ -99,10 +99,10 @@ class assignment_desk_assignment_controller {
 	}
 	
 	/** 
-	    Look for a user to assign a story in three places:
-	    1. The $wpdb->users table
-	    2. The $assignment_desk->tables['pitch_volunteer'] table to see if they volunteered for this pitch
-	    3. The $assignment_desk->tables['pitch_volunteer'] table to see if they signed up to be a contirbutor
+	*   Look for a user to assign a story in three places:
+	*   1. The $wpdb->users table
+	*   2. The $assignment_desk->tables['pitch_volunteer'] table to see if they volunteered for this pitch
+	*   3. The $assignment_desk->tables['pitch_volunteer'] table to see if they signed up to be a contirbutor
 	*/
 	private function lookup_user($user_login, $pitch_id, &$volunteer){
 	    global $wpdb, $assignment_desk;
@@ -163,7 +163,7 @@ class assignment_desk_assignment_controller {
 			return false;
 		}
 		add_post_meta($post_id, "_ad_waiting_for_reply", array($user_id, $role_id));
-		$post['post_status'] = __('Waiting for Reply')
+		$post['post_status'] = __('Waiting for Reply');
 		return true;
 	}
 
@@ -185,10 +185,7 @@ class assignment_desk_assignment_controller {
 	        $statuses[$status->name] = $status->pitchstatus_id;
 	    }
 	
-	    $pitch_id = 0;
-	    $post_id = 0;
-	    
-	    $pitch = 0;
+	    $post_id = 0;    
 	    $post = 0;
 	    
 	    $disable_form = False;
@@ -197,18 +194,17 @@ class assignment_desk_assignment_controller {
 	    // This is the initial page load FROM the pitch/editor-detail.php page.
 	    // They select a user to assign to and click continue.
 	    if (!empty($_GET)) {
-	        $pitch_id = intval($_GET['pitch_id']);
+	        $post_id = intval($_GET['post_id']);
 	        
 	        // Fetch the pitch from the DB
-	        $pitch = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$assignment_desk->tables['pitch']}
-	                                                WHERE pitch_id=%d", $pitch_id));
+	        $post = wp_get_post($post_id);
 	        $user_login = $_GET['user_login_select'];
 	        if(!empty($_GET['user_login_text'])){
 	            $user_login = $_GET['user_login_text'];
 	        }
             
             $volunteer = False;
-            $user = $this->lookup_user($user_login, $pitch_id, $volunteer);
+            $user = $this->lookup_user($user_login, $post->ID, $volunteer);
             
 	        if (!$user){
 	            $messages['errors'][] = '$user_login is not a valid user.';
@@ -218,9 +214,9 @@ class assignment_desk_assignment_controller {
 	                                                
 
 	        // See if this has already been assigned to this user.
-	        if ($pitch->post_id && $user){
-                $pending = get_post_meta($pitch->post_id, '_ad_waiting_for_reply');
-                $coauthor = get_post_meta($pitch->post_id, '_coauthor');
+	        if ($post->ID && $user){
+                $pending = get_post_meta($post->ID, '_ad_waiting_for_reply');
+                $coauthor = get_post_meta($post->ID, '_coauthor');
                 
                 // This user is already assigned to the post associated with this pitch.
                 if(in_array($user->ID, $pending) || in_array($user->ID, $coauthor)){
@@ -235,9 +231,8 @@ class assignment_desk_assignment_controller {
         
         // When the editor clicks the assign button on the assignment/assign.php page.
         if(!empty($_POST)) { 
-            $_POST      = array_map( 'stripslashes_deep', $_POST );
+            $_POST      = array_map('stripslashes_deep', $_POST);
 
-	        $pitch_id   = intval($_POST['pitch_id']);
 	        $post_id    = intval($_POST['post_id']);
 	        $user_login = $_POST['user_login'];
 	        
@@ -246,18 +241,9 @@ class assignment_desk_assignment_controller {
 	        $volunteer = False;
 
 	        // Save the pitch.
-	        $values = array();
-            $values['pitchstatus_id'] = $statuses['Assigned'];
-            $values['updated']        = date('Y-m-d H:i:s'); // Update the timestamp
-
-	        // Update the Pitch
-	        $where = array('pitch_id' => $pitch_id);
-	        $wpdb->update($assignment_desk->tables['pitch'], $values, $where);
-
-	        // Fetch the pitch from the DB
-	        $pitch = $wpdb->get_row($wpdb->prepare("SELECT * 
-	                                                FROM {$assignment_desk->tables['pitch']}
-	                                                WHERE pitch_id=%d", $pitch_id));
+			$post = wp_get_post($post_id);
+            $post['post_status'] = 'Assigned';
+			wp_update_post($post);
 
             $user = $this->lookup_user($user_login, $pitch_id, &$volunteer);
             // User not found the DB, create one.
@@ -285,15 +271,6 @@ class assignment_desk_assignment_controller {
                 );
                 $post_id = wp_insert_post($new_post);
 
-                // Attach the post to the pitch.
-                $wpdb->update($assignment_desk->tables['pitch'],        // table
-                                array('post_id' => $post_id),           // values 
-                                array('pitch_id' => $pitch->pitch_id)); // where
-                $pitch->post_id = $post_id;
-
-                // Make the post aware of what pitch it came from.
-                update_post_meta($post_id, ASSIGNMENT_DESK_META_PREFIX . 'pitch_id', $pitch->pitch_id);
-
                 // Mark the assignment with the user's origin (Either staff or community)
                 update_post_meta($post_id, ASSIGNMENT_DESK_META_PREFIX . 'origin', $user_origin);
 
@@ -304,7 +281,7 @@ class assignment_desk_assignment_controller {
                 $messages["info"][] = "The pitch assignment was assigned to $user_login.";
                 
                 // Throw an event that a user was assigned a draft.
-                create_event('assignment', $post_id, 'assigned', 'Asigned a story', $user->user_login);
+                create_event('assignment', $post_id, 'assigned', 'Assigned a story', $user->user_login);
 
     			$email_body = $_POST['email_body'];
 

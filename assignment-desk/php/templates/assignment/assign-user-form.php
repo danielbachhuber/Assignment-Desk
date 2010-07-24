@@ -2,7 +2,7 @@
     
     <input type="hidden" name="page" value="assignment_desk-assignments">
     <input type="hidden" name="action" value="editor_assign">
-    <input type="hidden" name="pitch_id" value="<?php echo $pitch->pitch_id; ?>">
+    <input type="hidden" name="post_id" value="<?php echo $post->ID; ?>">
     
     <h3>Assign to:</h3>
     <div id="user_login_text">
