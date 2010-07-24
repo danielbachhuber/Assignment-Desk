@@ -40,6 +40,10 @@ class ad_custom_taxonomy {
 	function insert_term($term, $args=array()){
 		$ret = wp_insert_term( $term, $this->taxonomy, $args );
 	} // END: insert_term
+	
+	function get_taxonomy_id(){
+		return $this->taxonomy_id;
+	}
 }
     
 }
