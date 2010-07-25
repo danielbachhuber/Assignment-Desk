@@ -122,9 +122,6 @@ if (!class_exists('assignment_desk')) {
             
             // Database table names.
             $this->tables = array(
-                'pitchstatus'       => $wpdb->prefix . $this->table_prefix . "pitchstatus",
-                'pitch'             => $wpdb->prefix . $this->table_prefix . "pitch",
-                'pitch_volunteer'   => $wpdb->prefix . $this->table_prefix . "pitch_volunteer",
 				'pitch_votes'		=> $wpdb->prefix . $this->table_prefix . 'pitch_votes',
                 'event'             => $wpdb->prefix . $this->table_prefix . "event"
             );
@@ -148,7 +145,10 @@ if (!class_exists('assignment_desk')) {
                                                             );
             $this->custom_pitch_statuses = new ad_custom_taxonomy('pitch_status', 'post', 
                                                                 array('label' => __('Pitch Statuses'),)
-                                                                );        
+                                                                );
+			add_action('admin_menu', array(&$this, 'add_admin_menu_items'));
+			
+			add_action('admin_menu', array(&$this, 'edit_pitch_submenu_page'));
         }
         
         // Actions that happen only on activate.
@@ -158,11 +158,10 @@ if (!class_exists('assignment_desk')) {
         }
         
         /**
-            Assignment Desk public pages.
-            
-            Define new rewrite rules.
-            Merge them into the wordpress set.
-            
+        * Assignment Desk public pages.
+        *   
+        * Define new rewrite rules.
+        * Merge them into the wordpress set.   
         */
         function add_public_facing_pages() {
             // echo 'RULES';
@@ -182,13 +181,12 @@ if (!class_exists('assignment_desk')) {
         }
         
         /**
-        *    Load a template from the public templates directory.
+        * Load a template from the public templates directory.
+        * This is a very simple dispatcher. It only works one-level "deep".
         *    
-        *    This is a very simple dispatcher. It only works one-level "deep".
-        *    
-        *    'foo/        => $this->templates_path . '/public/foo/index.php'
-        *    'pitches/foo/ => $this->templates_path . '/public/foo/bar.php'
-        *    'pitches/foo/bar/ => ERROR
+        * 'foo/        => $this->templates_path . '/public/foo/index.php'
+        * 'pitches/foo/ => $this->templates_path . '/public/foo/bar.php'
+        * 'pitches/foo/bar/ => ERROR
         */
         function load_public_template() {
             global $wp_query;
@@ -214,8 +212,8 @@ if (!class_exists('assignment_desk')) {
         }
 
         /**
-        *    Flush the rewrite rules. Only do this when you activate the plugin.
-        *    http://codex.wordpress.org/Function_Reference/WP_Rewrite
+        * Flush the rewrite rules. Only do this when you activate the plugin.
+        * http://codex.wordpress.org/Function_Reference/WP_Rewrite
         */
         function flush_rewrite_rules(){
             global $wp_rewrite;
@@ -239,14 +237,14 @@ if (!class_exists('assignment_desk')) {
             //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         }
         /**
-        * @desc Saves the admin options to the database.
+        * Saves the admin options to the database.
         */
         function save_admin_options(){
             return update_option($this->optionsName, $this->options);
         }
         
         /**
-	    * @desc Adds our CSS to the admin pages
+	    * Adds our CSS to the admin pages
 	    */
     	function add_admin_css() {
     	    echo "<link rel='stylesheet' id='ad-admin-css'  
@@ -254,7 +252,7 @@ if (!class_exists('assignment_desk')) {
 	    }
 	    
 	    /**
-	    * @desc Adds our JS to the admin pages
+	    * Adds our JS to the admin pages
 	    */
     	function add_admin_js() {
     	    wp_enqueue_script('tiny_mce');
@@ -268,7 +266,7 @@ if (!class_exists('assignment_desk')) {
 	    }
         
         /**
-	    * @desc Adds menu items for the plugin
+	    * Adds menu items for the plugin
 	    */
     	function add_admin_menu_items() {
     	    // This is the button in the admin menu.
@@ -281,6 +279,11 @@ if (!class_exists('assignment_desk')) {
     		                'edit_posts', 
     		                'assignment_desk-index',
     		                array(&$this->index_controller, 'dispatch'));
+
+			$pitches_page = add_submenu_page('edit.php', __('Pitches'), __('Pitches'),
+							5, 
+							'assignment_desk-pitches', 
+							array(&$this, 'link_to_pitches'));
 
             // Add "Your Content" for contributors and higher.
     		add_submenu_page('assignment_desk-menu', 'Your Content', 'Your Content', 
@@ -304,23 +307,16 @@ if (!class_exists('assignment_desk')) {
 		                    'assignment_desk-settings', 
 		                    array(&$this, 'admin_settings_page'));
     	}
-        
-        /**
-        * @desc Adds the Settings link to the plugin activate/deactivate page
-        */
-        function filter_plugin_actions($links, $file) {
-           // If your plugin is under a different top-level menu than Settiongs 
-           // (IE - you changed the function above to something other than add_options_page)
-           // Then you're going to want to change options-general.php below to the name of your 
-           // top-level page
-           $settings_link = '<a href="options-general.php?page=';
-           $settings_link .= basename(__FILE__) . '">' . __('Settings') . '</a>';
-           array_unshift( $links, $settings_link ); // before other links
 
-           return $links;
-        }
-
-        
+		/**
+		* This function currently doesn't work. We need to figure out how to link into the edit.php
+		* page and pass the post_status=pitch flag.
+		*/
+		function link_to_pitches(){
+			$_GET['post_status'] = 'pitch';
+			include(ABSPATH . 'wp-admin/edit.php');
+		}
+		
         /**
         * Adds settings/options page
         */
@@ -372,7 +368,7 @@ $assignment_desk = new assignment_desk();
 // Hook to perform action when plugin activated
 register_activation_hook(ASSIGNMENT_DESK_FILE_PATH, array(&$assignment_desk, 'activate_plugin'));
 
-add_action('admin_menu', array(&$assignment_desk, 'add_admin_menu_items'));
+
 add_action('admin_print_styles', array(&$assignment_desk, 'add_admin_css'));
 
 // Public-facing pages
