@@ -19,7 +19,7 @@ define(ASSIGNMENT_DESK_META_PREFIX, '_ad_');
 class assignment_desk_assignment_controller {
     	
 	/**	
-	    Dispatch to the view specified by action HTTP parameter.
+	* Dispatch to the view specified by action HTTP parameter.
 	*/
 	function dispatch(){
 	    // Default action
@@ -76,8 +76,10 @@ class assignment_desk_assignment_controller {
          return $user;
 	}
 	/**
-	*   Lookup assignees for a post
-	*   $meta_key is either  _coauthor or _ad_witing_for_reply
+	* Lookup assignees for a post
+	* @param $post_id the post.
+	* @param $meta_key The meta key that determines which kind of assignee we're looking for.
+	* 
 	*/
     public function get_assignees($post_id, $meta_key){
 	    global $wpdb;
@@ -136,14 +138,15 @@ class assignment_desk_assignment_controller {
 	}
 	
 	/** 
-	    Extract the Edit-Flow due date post meta_key-data from a POST 
-	    and save it in the post_metadata table 
+	* Extract the Edit-Flow due date post meta_key-data from a POST 
+	* and save it in the post_metadata table 
+	* @param $post_d The id of the post.
 	*/
-	private function update_due_date($http_post, $post_id){
+	private function update_due_date($post_id){
 	    // Get the assignment due date and save it to the Edit-Flow custom field
-		$duedate_month  = esc_html($http_post['ef_duedate_month']);
-		$duedate_day    = (int)$http_post['ef_duedate_day'];
-		$duedate_year   = (int)$http_post['ef_duedate_year'];
+		$duedate_month  = esc_html($_POST['ef_duedate_month']);
+		$duedate_day    = (int)$_POST['ef_duedate_day'];
+		$duedate_year   = (int)$_POST['ef_duedate_year'];
 		$duedate        = strtotime($duedate_month . ' ' . $duedate_day . ', ' . $duedate_year);
 		update_post_meta($post_id, '_ef_duedate', $duedate);
 	}
@@ -168,7 +171,7 @@ class assignment_desk_assignment_controller {
 	}
 
 	/**
-	    Assign a pitch to a user. 
+	* Assign a pitch to a user. 
 	*/
 	function editor_assign(){
 	    global $wpdb, $assignment_desk;
@@ -274,7 +277,7 @@ class assignment_desk_assignment_controller {
                 // Mark the assignment with the user's origin (Either staff or community)
                 update_post_meta($post_id, ASSIGNMENT_DESK_META_PREFIX . 'origin', $user_origin);
 
-                $this->update_due_date($_POST, $post_id);
+                $this->update_due_date($post_id);
 
                 // Indicate that we are waiting for the reply.
                 update_post_meta($post_id, ASSIGNMENT_DESK_META_PREFIX . 'waiting_for_reply', $user->ID);
@@ -312,9 +315,9 @@ class assignment_desk_assignment_controller {
         include_once($assignment_desk->templates_path . '/assignment/assign.php');
 	}
 	
-	/*
-	    Return a list of user_logins to the ajax-enabled text field on the assign view.
-	        TODO - Use a plugin that can handle more data with the full name as a "preview"
+	/**
+	* Return a list of user_logins to the ajax-enabled text field on the assign view.
+	* TODO - Use a plugin that can handle more data with the full name as a "preview"
 	*/
 	function ajax_user_search(){
         global $wpdb;

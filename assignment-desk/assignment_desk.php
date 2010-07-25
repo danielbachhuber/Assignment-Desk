@@ -147,8 +147,6 @@ if (!class_exists('assignment_desk')) {
                                                                 array('label' => __('Pitch Statuses'),)
                                                                 );
 			add_action('admin_menu', array(&$this, 'add_admin_menu_items'));
-			
-			add_action('admin_menu', array(&$this, 'edit_pitch_submenu_page'));
         }
         
         // Actions that happen only on activate.
