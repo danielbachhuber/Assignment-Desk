@@ -8,11 +8,7 @@ get_header();
 global $wpdb, $assignment_desk;
 
 function get_pitch($pitch_id){
-    global $wpdb, $assignment_desk;
-    return $wpdb->get_row($wpdb->prepare(
-                    "SELECT * 
-                     FROM {$assignment_desk->tables['pitch']}
-                     WHERE pitch_id=%d", $pitch_id));
+    return wp_get_post($pitch_id);
 }
 
 $messages = array(  'errors'      => array(),
@@ -113,7 +109,7 @@ if(!empty($_POST)){
     </div>
     
     <form method="POST">
-        <input name="pitch_id" type="hidden" value="<?php echo $pitch->pitch_id; ?>">
+        <input name="pitch_id" type="hidden" value="<?php echo $pitch->ID; ?>">
 		<p>
 			<h3><label for="full_name">Full Name</label><?php echo $messages['form_errors']['user_nicename']; ?></h3>
 			<input name="user_nicename" type="text" value="<?php echo $current_user->display_name; ?>">
