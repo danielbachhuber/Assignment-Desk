@@ -55,6 +55,8 @@ require_once('php/post.php');
 // Custom taxonomies
 require_once('php/custom_taxonomies.php');
 
+require_once('php/public-controller.php');
+
 if (!class_exists('assignment_desk')) {
     
     class assignment_desk {
@@ -146,77 +148,16 @@ if (!class_exists('assignment_desk')) {
             $this->custom_pitch_statuses = new ad_custom_taxonomy('pitch_status', 'post', 
                                                                 array('label' => __('Pitch Statuses'),)
                                                                 );
+			$this->public_controller = new ad_public_controller();
+			
 			add_action('admin_menu', array(&$this, 'add_admin_menu_items'));
         }
         
         // Actions that happen only on activate.
         function activate_plugin() {
             $this->installer->setup_db();
-            $this->flush_rewrite_rules();
+			$this->public_controller->flush_rewrite_rules();
         }
-        
-        /**
-        * Assignment Desk public pages.
-        *   
-        * Define new rewrite rules.
-        * Merge them into the wordpress set.   
-        */
-        function add_public_facing_pages() {
-            // echo 'RULES';
-            global $wp_rewrite;
-            $url_bases = array("pitches", "community", );
-            $new_rules = array();
-            
-            foreach($url_bases as $base){
-                $new_rules["/$base/*$"] = "index.php?";
-            }
-            if(!$wp_rewrite->rules){
-                $wp_rewrite->rules = $new_rules;
-            }
-            else {
-                $wp_rewrite->rules = array_merge($new_rules, $wp_rewrite->rules); 
-            }
-        }
-        
-        /**
-        * Load a template from the public templates directory.
-        * This is a very simple dispatcher. It only works one-level "deep".
-        *    
-        * 'foo/        => $this->templates_path . '/public/foo/index.php'
-        * 'pitches/foo/ => $this->templates_path . '/public/foo/bar.php'
-        * 'pitches/foo/bar/ => ERROR
-        */
-        function load_public_template() {
-            global $wp_query;
-            
-            // Add to here to define other top-level directories.
-            $static_base_urls = array('pitches', 'community');
-            $pagename = get_query_var("pagename");
-            // Extract the base and subpage.
-            $pagename_modules = explode('/', $pagename);
-            $pagename_base = $pagename_modules[0];
-            
-            // No sub-page specified.
-            if(count($pagename_modules) == 1){
-                $pagename .= '/index';
-            }
-            
-            // If its in the $static_base_urls load the template.
-            if(in_array($pagename_base, $static_base_urls)){
-                include_once($this->templates_path . '/public/' . $pagename . '.php');
-                // TODO - Get the user back to the home page.
-                die();
-            }            
-        }
-
-        /**
-        * Flush the rewrite rules. Only do this when you activate the plugin.
-        * http://codex.wordpress.org/Function_Reference/WP_Rewrite
-        */
-        function flush_rewrite_rules(){
-            global $wp_rewrite;
-            $wp_rewrite->flush_rules();
-        }  
 
         /**
         * Retrieves the plugin options from the database.
@@ -366,12 +307,7 @@ $assignment_desk = new assignment_desk();
 // Hook to perform action when plugin activated
 register_activation_hook(ASSIGNMENT_DESK_FILE_PATH, array(&$assignment_desk, 'activate_plugin'));
 
-
 add_action('admin_print_styles', array(&$assignment_desk, 'add_admin_css'));
-
-// Public-facing pages
-add_action('parse_query', array(&$assignment_desk, 'load_public_template')); 
-add_action('generate_rewrite_rules', array(&$assignment_desk, 'add_public_facing_pages')); 
 
 // AJAX
 add_action('wp_ajax_user_search', array(&$assignment_desk->assignment_controller, 'ajax_user_search'));
