@@ -146,8 +146,9 @@ if (!class_exists('assignment_desk')) {
                                                                 array( 'label' => __('User Post Role'),)
                                                             );
             $this->custom_pitch_statuses = new ad_custom_taxonomy('pitch_status', 'post', 
-                                                                array('label' => __('Pitch Statuses'),)
-                                                                );
+                                                                	array('label' => __('Pitch Statuses'),
+																	  	'show_meta_box' => false,
+																));
 			$this->public_controller = new ad_public_controller();
 			
 			add_action('admin_menu', array(&$this, 'add_admin_menu_items'));

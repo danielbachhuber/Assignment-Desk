@@ -2,6 +2,7 @@
 
 if(!class_exists('ad_custom_taxonomy')){
     
+require_once(ABSPATH . 'wp-admin/includes/template.php');
 /**
 * Base class for operations on custom taxonomies
 */
@@ -18,6 +19,9 @@ class ad_custom_taxonomy {
         if(!is_taxonomy($this->taxonomy)){
             register_taxonomy($taxonomy_id, $object, $args); 
         }
+		if($args['show_meta_box'] == false){
+			remove_meta_box("tagsdiv-$taxonomy_id", 'post', 'side');
+		}
     }
     
     /**
