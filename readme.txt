@@ -1,15 +1,17 @@
 === Plugin Name ===
-Contributors: efroese,  
+Contributors: efroese, danielbachhuber
 Donate link: 
-Tags: news, editorial
+Tags: news, editorial, journalism, crowdsourcing
 Requires at least: 2.9.2
-Tested up to: 2.9.2
+Tested up to: 3.0
 Stable tag: 0.1
 
 The goal of the Assignment Desk is to empower the community to participate in the editorial process and guide them along the way.
 Community members can submit story pitches, vote on them, and volunteer for them. Editors can moderate pitches and assign them to staff or interested community journalists. 
 
 == Description ==
+
+NOTICE: THIS PLUGIN IS PRE-PRE-RELEASE AND SHOULD NOT BE USED IN PRODUCTION
 
 Much longer description.
 
