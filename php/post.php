@@ -1,4 +1,33 @@
 <?php
+
+if (!function_exists(_ad_create_user)){
+	function _ad_create_user($user_login, $user_nicename, $user_email){
+	    global $wpdb;
+
+	    $userdata = array();
+	    $userdata['user_login'] = $user_login;
+	    $userdata['user_nicename'] = $user_nicename;
+	    $userdata['user_email'] = $user_email;
+	    // TODO - Talk to the NYTimes people about whether or not a password has to be set
+	    // in order to work with their authentication.
+	    $userdata['user_pass'] = strrev($user_login);
+	    // TODO - Add a setting for the default user role
+	    $userdata['role'] = 'contributor';
+	    $user_id = wp_insert_user($userdata);
+
+	    $user = $wpdb->get_row($wpdb->prepare("SELECT * FROM $wpdb->users
+	                                           WHERE ID=%d", $user_id));
+	    // Add usermeta marking them as community member
+	    update_usermeta($user_id, "_ad_origin", 'community');
+
+	    /* 
+	     TODO - Ask the times if we can get email addresses for nytimes 
+	     logins. Users may volunteer with their nytimes id but we wont have 
+	     an email unless nytimes id is email
+	     */
+	     return $user;
+	}
+}
 if (!class_exists('assignment_desk_post_meta')) {
 	
 require_once(ABSPATH . 'wp-includes/pluggable.php');
@@ -93,8 +122,6 @@ class ad_contributor_meta_box extends ad_post_meta_box {
 	function meta_box($pitch = null){
 	    global $post, $edit_flow, $assignment_desk;
 	    
-	    // Show the due date
-	    
 	    // Link to contact the editor
 	    $this->print_editor_link();
 	    
@@ -150,9 +177,9 @@ class ad_editor_post_meta_box extends ad_post_meta_box {
 		
 		// Try to resolve the user email to a user
 		if (is_email($pitched_by)){
-			$user = $wpdb->get_row("SELECT ID, user_nicename 
-									FROM $wpdb->users 
-									WHERE user_email = %s", $pitched_by);
+			$user = $wpdb->get_row($wpdb->prepare("SELECT ID, user_nicename 
+													FROM $wpdb->users 
+													WHERE user_email = %s", $pitched_by));
 			if ($user){
 				$pitched_by = $user->ID;
 			}
@@ -216,8 +243,24 @@ class ad_editor_post_meta_box extends ad_post_meta_box {
 	
 	/**
 	* Print a form to choose the user.
+	* This is shown when the co-authors plugin is NOT active.
 	*/
 	function author(){
+		global $wpdb, $post;
+		
+		$users = $wpdb->get_results("SELECT ID, user_nicename FROM $wpdb->users");
+		echo "<div class='ad-module misc-pub-section'>";
+		echo "<label>Author:</label>";
+		echo "<select name='_ad_author'>";
+		foreach($users as $user){
+			echo "<option value='{$user->ID}' ";
+			if($user->ID == $post->post_author){
+				echo "selected";
+			}
+			echo ">{$user->user_nicename}</option>";
+		}
+		echo "</select>";
+		echo "</div>";
 		
 	}
 	
@@ -296,7 +339,10 @@ class ad_editor_post_meta_box extends ad_post_meta_box {
 	* Launch the Assignment Desk post meta_box.
 	*/
 	function meta_box(){
-	    global $post, $wpdb, $edit_flow, $assignment_desk;
+	    global $post;
+	
+		echo '<input type="hidden" name="_ad_noncename" id="_ad_noncename" value="' . 
+				    wp_create_nonce( plugin_basename(__FILE__) ) . '" />';
 	    
 		echo '<div id="ad-pitch-info" class="ad-module misc-pub-section">';
 	    $this->pitch_info();
@@ -320,16 +366,60 @@ class ad_editor_post_meta_box extends ad_post_meta_box {
 	*/
 	function save_post_meta_box($post_id) {
 		global $wpdb, $assignment_desk;
-
+		
+		if (!wp_verify_nonce($_POST['_ad_noncename'], plugin_basename(__FILE__))){
+			return $post_id;
+		}
+		if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+		    return $post_id;
+		}
+		
+		$post = query_posts('p=' . $post_id);
+		
+		// The user who pitched this story.
 		if($_POST['_ad_pitched_by']){
 			update_post_meta($post_id, '_ad_pitched_by', (int)$_POST['_ad_pitched_by']);
 		}
 		
-		if($_POST['_ad_pitch_status']){
-			wp_set_object_terms($post_id, 
+		// The status of the story if it is still a pitch
+		if($_POST['_ad_pitch_status'] && $post->status == __('pitch')){
+			wp_set_object_terms($post_id,
 								(int)$_POST['_ad_pitch_status'],
 								$assignment_desk->custom_pitch_statuses->taxonomy);
 		}
+		
+		// Single post author
+		if($_POST['_ad_author']){
+			$author_id = $_POST['_ad_author'];
+			if(is_email($author_id)){
+				// New User from the community.
+				// TODO - Add a setting to enable/disable community membership.
+				$author = _ad_create_user($author_id, $author_id, $_POST['_ad_author_nicename']);
+				$author_id = $author->id;
+			}
+			// Current user id
+			else {
+				$author = $wpdb->get_row(
+							$wpdb->prepare("SELECT * FROM $wpdb->users WHERE ID=%d", (int)$author_id));
+				$author_id = $author->ID;
+			}
+			// Check if the user is not already the author
+			if ($post['post_author'] != $author_id){
+				// Make them the author, change the post status, and fire off the email
+				$wpdb->update($wpdb->posts,
+						array('post_author' => $author_id, 'post_status' => __('waiting for reply')),
+						array('ID' => $post_id),
+						array('%d', '%s'),
+						array('%d'));
+				$this->send_assignment_email($post_id, $author_id);
+			}
+		}
+	}
+	
+	function send_assignment_email($post_id, $author_id){
+		// Get the template from the settings
+		// Fill it out
+		// Send it off
 	}
 }
 
