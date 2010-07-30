@@ -48,33 +48,6 @@ class assignment_desk_assignment_controller {
 	
 	/* ========================== Utility functions ======================== */
 	
-	function create_user($user_login, $user_nicename, $user_email){
-	    global $wpdb;
-	    
-	    $userdata = array();
-        $userdata['user_login'] = $user_login;
-        $userdata['user_nicename'] = $user_nicename;
-        $userdata['user_email'] = $user_email;
-        // TODO - Talk to the NYTimes people about whether or not a password has to be set
-        // in order to work with their authentication.
-        $userdata['user_pass'] = strrev($user_login);
-        // TODO - Add a setting for the default user role
-        $userdata['role'] = 'contributor';
-        $user_id = wp_insert_user($userdata);
-        
-        $user = $wpdb->get_row($wpdb->prepare("SELECT * FROM $wpdb->users
-                                               WHERE ID=%d", $user_id));
-
-        // Add usermeta marking them as community member
-        update_usermeta($user_id, ASSIGNMENT_DESK_META_PREFIX . "origin", 'community');
-        
-        /* 
-         TODO - Ask the times if we can get email addresses for nytimes 
-         logins. Users may volunteer with their nytimes id but we wont have 
-         an email unless nytimes id is email
-         */
-         return $user;
-	}
 	/**
 	* Lookup assignees for a post
 	* @param $post_id the post.
