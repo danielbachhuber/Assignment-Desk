@@ -426,7 +426,7 @@ class ad_editor_post_meta_box extends ad_post_meta_box {
 $user = wp_get_current_user();
 $assignment_desk_post_meta = null;
 
-if(current_user_can(5)){
+if(current_user_can('edit_posts')){
 	$assignment_desk_post_meta = new ad_editor_post_meta_box();
 }
 else {
