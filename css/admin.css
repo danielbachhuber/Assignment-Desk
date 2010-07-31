@@ -40,7 +40,7 @@ br { clear: both; }
 /* User messages. */
 li.ad-message-success {
 	border:solid 1px #90ac13; 
-	background:#eef4d3 url(/wp-content/plugins/assignment-desk/img/success.png) 8px 6px no-repeat;
+	background:#eef4d3 url(../images/success.png) 8px 6px no-repeat;
 	color:#6b800d;
 	font-weight:bold;
 	padding:4px;
@@ -49,7 +49,7 @@ li.ad-message-success {
 
 li.ad-message-info {
 	border:solid 1px #90ac13; 
-	background:#eef4d3 url(/wp-content/plugins/assignment-desk/img/success.png) 8px 6px no-repeat;
+	background:#eef4d3 url(../images/success.png) 8px 6px no-repeat;
 	color:#6b800d;
 	font-weight:bold;
 	padding:4px;
@@ -58,14 +58,12 @@ li.ad-message-info {
 
 li.ad-message-error {
     border:solid 1px #CC0000;
-	background:#F7CBCA url(/wp-content/plugins/assignment-desk/img/error.png) 8px 6px no-repeat;
+	background:#F7CBCA url(../images/error.png) 8px 6px no-repeat;
 	color:#CC0000;
 	font-weight:bold;
 	padding:4px;
 	text-align:center;
 }
-
-li.wp-first-item { display:none; }
 
 .avatar {
     float:left;
