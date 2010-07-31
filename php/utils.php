@@ -15,8 +15,8 @@ function shorten_ellipses($str, $length){
 }
 
 /**
-    Display the categories associated with a pitch.
-    Utility method for the templates.
+  *  Display the categories associated with a pitch.
+  *  Utility method for the templates.
 */
 function display_pitch_categories($pitch){
     if( $pitch->term_id ){

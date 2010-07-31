@@ -1,6 +1,6 @@
 <?php
 
-if (!function_exists(_ad_create_user)){
+if (!function_exists('_ad_create_user')){
 	function _ad_create_user($user_login, $user_nicename, $user_email){
 	    global $wpdb;
 

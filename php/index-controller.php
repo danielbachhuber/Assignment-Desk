@@ -39,7 +39,7 @@ class assignment_desk_index_controller {
 	                                AND event_type='assigned'", $current_user->user_login)
 	              );
 	    
-	    include_once($assignment_desk->templates_path . '/index/contributor.php');
+	    //include_once($assignment_desk->templates_path . '/index/contributor.php');
 	}
 	
 	/*
@@ -90,7 +90,7 @@ class assignment_desk_index_controller {
             $event_count = $wpdb->get_results($event_count_sql);
 	    }
 	    
-	    include_once($assignment_desk->templates_path . '/index/editor.php');
+	    //include_once($assignment_desk->templates_path . '/index/editor.php');
     }
 }
 ?>

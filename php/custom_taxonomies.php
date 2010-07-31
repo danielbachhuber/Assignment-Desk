@@ -6,7 +6,12 @@ require_once(ABSPATH . 'wp-admin/includes/template.php');
 /**
 * Base class for operations on custom taxonomies
 */
-class ad_custom_taxonomy {
+class ad_custom_taxonomies {
+  
+  
+    var $pitch_taxonomy = 'pitch_status';
+    var $user_role_taxonomy = 'user_role';
+    var $user_type_taxonomy = 'user_type';
     
     /**
     * Pass the same arguments as you would to the register_taxonomy function.

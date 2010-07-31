@@ -25,13 +25,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-define(ASSIGNMENT_DESK_FILE_PATH, __FILE__);
-define(ASSIGNMENT_DESK_URL, plugins_url(plugin_basename(dirname(__FILE__)) .'/'));
+define('ASSIGNMENT_DESK_FILE_PATH', __FILE__);
+define('ASSIGNMENT_DESK_URL', plugins_url(plugin_basename(dirname(__FILE__)) .'/'));
+define('ASSIGMENT_DESK_VERSION', '0.1');
 
-define(ASSIGNMENT_DESK_DIR_PATH, dirname(__FILE__));
-define(ASSIGNMENT_DESK_TEMPLATES_PATH, ASSIGNMENT_DESK_DIR_PATH . '/php/templates');
-
-define(EDIT_FLOW_URL, plugins_url(plugin_basename('edit-flow') .'/'));
+define('ASSIGNMENT_DESK_DIR_PATH', dirname(__FILE__));
+define('ASSIGNMENT_DESK_TEMPLATES_PATH', ASSIGNMENT_DESK_DIR_PATH . '/php/templates');
 
 // Pitch Statuses
 // These should be pulled from the DB.
@@ -44,13 +43,13 @@ include_once('php/install.php');
 include_once('php/index-controller.php');
 include_once('php/contributor-controller.php');
 
-// Widgets
+// Various admin views
 include_once('php/dashboard-widgets.php');
+include_once('php/post.php');
+include_once('php/settings.php');
 
 // Customize the Manage Posts page
 require_once('php/manage_posts.php');
-// Customize the Post edit page
-require_once('php/post.php');
 // AJAX function for searching users
 require_once('php/ajax_user_search.php');
 // Custom taxonomies
@@ -102,12 +101,18 @@ if (!class_exists('assignment_desk')) {
 	    /**
         * @var assignment_desk_dashboard_widgets $dashboard_widgets provides the widget.
         */
-	    public $dashboard_widgets;
+        public $dashboard_widgets;
+        
+        /**
+         * @var ad_settings provides all of the settings views
+         */
+        public $settings;
         
         /**
         *  Constructor
         */        
         function __construct(){
+          
             global $wpdb;
             
             // Language Setup
@@ -120,39 +125,38 @@ if (!class_exists('assignment_desk')) {
             
             // Database table names.
             $this->tables = array(
-				'pitch_votes'		=> $wpdb->prefix . $this->table_prefix . 'pitch_votes',
-                'event'             => $wpdb->prefix . $this->table_prefix . "event"
+                'event' => $wpdb->prefix . $this->table_prefix . "event"
             );
 
             $this->installer = new assignment_desk_install();
-            
-            // Controllers for WP Admin views.
-            $this->index_controller       = new assignment_desk_index_controller();
-            $this->contributor_controller = new assignment_desk_contributor_controller();
 
-	        // Widgets
-            $this->dashboard_widgets     = new assignment_desk_dashboard_widgets();
+            // Build the various admin views and add them to the admin
+            $this->build_admin_views();
+            add_action('admin_init', array(&$this, 'add_admin_assets'));
+            add_action('admin_menu', array(&$this, 'add_admin_menu_items'));
             
-            $this->custom_user_types = new ad_custom_taxonomy('user_type', 'user', 
+            // @todo This should probably be migrated to the taxonomies controller
+            $this->custom_user_types = new ad_custom_taxonomies('user_type', 'user', 
                                                                 array( 'hierarchical' => false, 
                                                                         'label' => __('User Contributor Level'))
                                                             );
-            $this->custom_user_roles = new ad_custom_taxonomy('user_post_role', 'user', 
+            $this->custom_user_roles = new ad_custom_taxonomies('user_post_role', 'user', 
                                                                 array( 'label' => __('User Post Role'),)
                                                             );
-            $this->custom_pitch_statuses = new ad_custom_taxonomy('pitch_status', 'post', 
+            $this->custom_pitch_statuses = new ad_custom_taxonomies('pitch_status', 'post', 
                                                                 	array('label' => __('Pitch Statuses'),
 																	  	'show_meta_box' => false,
 																));
-			$this->public_controller = new ad_public_controller();
+            
+            
+            $this->public_controller = new ad_public_controller();
 			
-			add_action('admin_menu', array(&$this, 'add_admin_menu_items'));
         }
         
         // Actions that happen only on activate.
         function activate_plugin() {
             $this->installer->setup_db();
-			$this->public_controller->flush_rewrite_rules();
+            $this->public_controller->flush_rewrite_rules();
         }
 
         /**
@@ -181,36 +185,53 @@ if (!class_exists('assignment_desk')) {
         /**
 	    * Adds our CSS to the admin pages
 	    */
-    	function add_admin_css() {
-    	    echo "<link rel='stylesheet' id='ad-admin-css'  
-    	            href='" . ASSIGNMENT_DESK_URL . "css/admin.css' type='text/css' media='all' />";
+    	function add_admin_assets() {
+    	  
+        // Enqueue stylesheets
+        wp_enqueue_style('ad-admin-css', ASSIGNMENT_DESK_URL.'css/admin.css', null, ASSIGMENT_DESK_VERSION, 'all');
+        
+        // Enqueue necessary scripts
+        wp_enqueue_script('tiny_mce');
+        wp_enqueue_script('wp-ajax-response');
+        wp_enqueue_script('jquery-truncator-js', ASSIGNMENT_DESK_URL .'js/jquery.truncator.js', 
+                              array('jquery'));
+        wp_enqueue_script('jquery-autocomplete-js', ASSIGNMENT_DESK_URL .'js/jquery.autocomplete.min.js', 
+                              array('jquery'));
+        
 	    }
 	    
 	    /**
-	    * Adds our JS to the admin pages
-	    */
-    	function add_admin_js() {
-    	    wp_enqueue_script('tiny_mce');
-            wp_enqueue_script('wp-ajax-response');
-            wp_enqueue_script('jquery-truncator-js', ASSIGNMENT_DESK_URL .'js/jquery.truncator.js', 
-                                array('jquery'));
-            wp_enqueue_script('jquery-autocomplete-js', ASSIGNMENT_DESK_URL .'js/jquery.autocomplete.min.js', 
-                                array('jquery'));
-            wp_enqueue_script('edit_flow-post_comments-js', EDIT_FLOW_URL.'js/post_comment.js', 
-                                array('jquery'));
+	     * Builds the various WordPress admin views we need
+	     */
+	    function build_admin_views() {
+	      
+	      // Various views we want to instantiate
+        $this->dashboard_widgets = new assignment_desk_dashboard_widgets();
+        $this->manage_posts = new assignment_desk_manage_posts();
+        $this->settings = new ad_settings();
+        
+        // We should deprecate these views in favor of more explicit views
+        $this->index_controller = new assignment_desk_index_controller();
+        $this->contributor_controller = new assignment_desk_contributor_controller();
+        
 	    }
         
+      /**
+	     * Adds menu items for the plugin
+	     */
+      function add_admin_menu_items() {
+      
         /**
-	    * Adds menu items for the plugin
-	    */
-    	function add_admin_menu_items() {
-    	    // This is the button in the admin menu.
+         * Top-level Assignment Desk menu goes to Settings
+         * @permissions Edit posts or higher
+         */
     		add_menu_page('Assignment Desk', 'Assignment Desk', 
-                            'edit_posts', 
-                            'assignment_desk-menu', array(&$this->index_controller, 'dispatch'));
+                        'edit_posts', 'assignment_desk-settings', 
+                        array(&$this->settings, 'general_settings'));
+        
 
-            // Add "Activity" for contributors and higher.
-    		$activity_page = add_submenu_page('assignment_desk-menu', 'Activity', 'Activity', 
+         /*   // Add "Activity" for contributors and higher.
+    		 $activity_page = add_submenu_page('assignment_desk-menu', 'Activity', 'Activity', 
     		                'edit_posts', 
     		                'assignment_desk-index',
     		                array(&$this->index_controller, 'dispatch'));
@@ -233,14 +254,7 @@ if (!class_exists('assignment_desk')) {
                             'assignment_desk-assignments',
                             array(&$this->assignment_controller, 'dispatch'));
                             
-            /* Using registered $assignments_page handle to hook script load */
-            add_action('admin_print_scripts-' . $assignments_page, array(&$this, 'add_admin_js'));
-                            
-            // Add Settings sub-menu page for Editors
-		    add_submenu_page('assignment_desk-menu', 'Settings', 'Settings', 
-		                    5,
-		                    'assignment_desk-settings', 
-		                    array(&$this, 'admin_settings_page'));
+           */
     	}
 
 		/**
@@ -249,52 +263,11 @@ if (!class_exists('assignment_desk')) {
 		*/
 		function link_to_pitches(){
 			$_GET['post_status'] = 'pitch';
-			include(ABSPATH . 'wp-admin/edit.php');
+			//include(ABSPATH . 'wp-admin/edit.php');
 		}
 		
-        /**
-        * Adds settings/options page
-        */
-        function admin_settings_page() { 
-            if($_POST['assignment_desk_save']){
-                if (! wp_verify_nonce($_POST['_wpnonce'], 'assignment_desk-update-options') ) {
-                    die('Whoops! There was a problem with the data you posted. Please go back and try again.'); 
-                }
-                $this->options['google_api_key'] = wp_kses($_POST['google_api_key'], $allowedtags);
-                $this->options['assignment_desk_twitter_hash']   = wp_kses($_POST['assignment_desk_twitter_hash'], $allowedtags);
-
-                if(substr($this->options['assignment_desk_twitter_hash'], 0, 1) != "#"){
-                    echo '<div class="">Please enter a valid twitter hash.</div>';
-                }
-                else {
-                    $this->save_admin_options();
-                    echo '<div class="updated"><p>Success! Your changes were sucessfully saved!</p></div>';
-                }
-            }
-?>                                   
-            <div class="wrap">
-            <h2>Assignment Desk Settings</h2>
-
-            <form method="post" id="assignment_desk_options">
-            <?php wp_nonce_field('assignment_desk-update-options'); ?>
-                <table width="100%" cellspacing="2" cellpadding="5" class="form-table"> 
-                    <tr valign="top"> 
-                        <th scope="row"><?php _e('Google API Key:', $this->localizationDomain); ?></th> 
-                        <td><input name="google_api_key" type="text" size="100" 
-                            value="<?php echo $this->options['google_api_key'] ;?>"></td>
-                    </tr>
-                    <tr valign="top"> 
-                        <th scope="row"><?php _e('Twitter Hash:', $this->localizationDomain); ?></th> 
-                        <td><input name="assignment_desk_twitter_hash" type="text" size="25" 
-                            value="<?php echo $this->options['assignment_desk_twitter_hash'] ;?>"></td>
-                    </tr>                    <tr>
-                        <th colspan=2><input type="submit" name="assignment_desk_save" value="Save" /></th>
-                    </tr>
-                </table>
-            </form>
-<?php
-        }
   } //End Class
+  
 } //End if class exists statement
 
 global $assignment_desk;
@@ -302,5 +275,3 @@ $assignment_desk = new assignment_desk();
 
 // Hook to perform action when plugin activated
 register_activation_hook(ASSIGNMENT_DESK_FILE_PATH, array(&$assignment_desk, 'activate_plugin'));
-
-add_action('admin_print_styles', array(&$assignment_desk, 'add_admin_css'));

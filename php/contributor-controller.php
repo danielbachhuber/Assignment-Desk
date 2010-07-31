@@ -8,7 +8,7 @@ require_once('utils.php');
 class assignment_desk_contributor_controller {
 
     /**	
-	    Dispatch to the view specified by "action"
+	   * Dispatch to the view specified by "action"
 	*/
 	function dispatch(){
 	    // Default actions
@@ -48,7 +48,7 @@ class assignment_desk_contributor_controller {
 	}
 
     /**
-        Show the user's index page. This is all of their content.
+      *  Show the user's index page. This is all of their content.
     */
     function index() {
         

@@ -26,7 +26,7 @@ class assignment_desk_install {
 	        $this->init_db();
         }
         
-        $this->init_taxonomies();
+      $this->init_taxonomies();
     }
     
 	function init_db(){

@@ -12,8 +12,8 @@ class assignment_desk_manage_posts {
     }
     
     /**
-        Add columns to the manage posts listing.
-        Wordpress calls this and passes the list of columns.
+     *   Add columns to the manage posts listing.
+     *   Wordpress calls this and passes the list of columns.
     */ 
     function add_manage_post_columns($posts_columns){
         // TODO - Specify the column order
@@ -29,8 +29,8 @@ class assignment_desk_manage_posts {
     }
     
     /**
-        Remove columns from the manage posts listing.
-        Wordpress calls this and passes the list of columns.
+     *  Remove columns from the manage posts listing.
+     *  Wordpress calls this and passes the list of columns.
     */
     function remove_manage_post_columns($posts_columns){
         unset($posts_columns['date']);
@@ -40,8 +40,8 @@ class assignment_desk_manage_posts {
     }
     
     /**
-        Wordpress doens't know how to resolve the column name to a post attribute 
-        so this function is called with the column name and the id of the post.
+      *  Wordpress doens't know how to resolve the column name to a post attribute 
+      *  so this function is called with the column name and the id of the post.
     */
     function handle_ef_due_date_column($column_name, $id){
         if($column_name == __('_ef_duedate')){
@@ -67,6 +67,5 @@ class assignment_desk_manage_posts {
     }
 }
 
-$manage_posts = new assignment_desk_manage_posts();
 } // end if(!class_exists)
 ?>
