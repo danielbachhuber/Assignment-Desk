@@ -32,21 +32,11 @@ class assignment_desk_install {
 	function init_db(){
 	    global $wpdb, $assignment_desk;
 	    
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-        
-		// Pitch Votes Table
-		$pitch_votes_table = $assignment_desk->tables['pitch_votes'];
-		if($wpdb->get_var("SHOW TABLES LIKE '$pitch_votes_table'") != $pitch_votes_table) {
-			$sql = "CREATE TABLE $pitch_votes_table (
-				pitch_id INT NOT NULL,
-				user_id INT NOT NULL,
-				vote INT NOT NULL,
-				updated DATETIME NOT NULL,
-				PRIMARY KEY (pitch_id, user_id))";
-			dbDelta($sql);
-		}
+      require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+      
 		
 		// Events Table
+		// @todo Deprecate this. Don't you wish we could use custom post types?
 		$event_table = $assignment_desk->tables["event"];
 		if($wpdb->get_var("SHOW TABLES LIKE '$event_table'") != $event_table) {
 			$sql = "CREATE TABLE $event_table (
@@ -62,7 +52,7 @@ class assignment_desk_install {
                 ) DEFAULT CHARSET=latin1;";
 			dbDelta($sql);
 		}
-		update_option("assignment_desk_db_version", "1.0"); 
+		update_option("assignment_desk_db_version", "0.1"); 
 	}
 	
 	function init_taxonomies(){
