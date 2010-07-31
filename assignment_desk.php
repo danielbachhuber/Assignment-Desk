@@ -42,7 +42,6 @@ include_once('php/install.php');
 
 // Controllers
 include_once('php/index-controller.php');
-include_once('php/assignment-controller.php');
 include_once('php/contributor-controller.php');
 
 // Widgets
@@ -52,9 +51,11 @@ include_once('php/dashboard-widgets.php');
 require_once('php/manage_posts.php');
 // Customize the Post edit page
 require_once('php/post.php');
+// AJAX function for searching users
+require_once('php/ajax_user_search.php');
 // Custom taxonomies
 require_once('php/custom_taxonomies.php');
-
+// Serve public 
 require_once('php/public-controller.php');
 
 if (!class_exists('assignment_desk')) {
@@ -91,11 +92,6 @@ if (!class_exists('assignment_desk')) {
 	    // Controllers
 	    /** @var assignment_desk_index_controller $index_controller serves the activity feed views. */
 	    public $index_controller;
-
-        /**
-        * @var assignment_desk_assignment_controller $assignment_controller serves the editor's assignment-management views.
-        */
-        public $assignment_controller;
         
         /**
         * @var assignment_desk_contributor_controller $contributor_controller serves the contributor profile and assignment views.
@@ -132,7 +128,6 @@ if (!class_exists('assignment_desk')) {
             
             // Controllers for WP Admin views.
             $this->index_controller       = new assignment_desk_index_controller();
-            $this->assignment_controller  = new assignment_desk_assignment_controller();
             $this->contributor_controller = new assignment_desk_contributor_controller();
 
 	        // Widgets
@@ -309,6 +304,3 @@ $assignment_desk = new assignment_desk();
 register_activation_hook(ASSIGNMENT_DESK_FILE_PATH, array(&$assignment_desk, 'activate_plugin'));
 
 add_action('admin_print_styles', array(&$assignment_desk, 'add_admin_css'));
-
-// AJAX
-add_action('wp_ajax_user_search', array(&$assignment_desk->assignment_controller, 'ajax_user_search'));
