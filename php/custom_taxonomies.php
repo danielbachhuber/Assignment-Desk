@@ -9,7 +9,7 @@ require_once(ABSPATH . 'wp-admin/includes/template.php');
 class ad_custom_taxonomies {
   
   
-    var $pitch_label = 'pitch_status';
+    var $pitch_status_label = 'pitch_status';
     var $user_role_label = 'user_role';
     var $user_type_label = 'user_type';
     
@@ -26,18 +26,18 @@ class ad_custom_taxonomies {
     function init_taxonomies() {
       
       // Register $pitch_taxonomy if it doesn't exist, else generate an object								
-			if (!is_taxonomy($this->pitch_label)) {
-			  // @todo Need to label the different text on the view
+		if (!is_taxonomy($this->pitch_status_label)) {
+			// @todo Need to label the different text on the view
 			  $args = array('label' => 'Pitch Statuses',
 			                'public' => true,
 			                'show_ui' => false,
 			                'show_tagcloud' => false,
 			                );
-			  $this->pitch_taxonomy = register_taxonomy($this->pitch_label, array('post'), $args);
+			  $this->pitch_taxonomy = register_taxonomy($this->pitch_status_label, array('post'), $args);
 			  // @todo check whether this use of remove_meta_box is appropriate
-			  remove_meta_box("tagsdiv-$this->pitch_label", 'post', 'side');
+			  remove_meta_box("tagsdiv-$this->pitch_status_label", 'post', 'side');
 			} else {
-			  $this->pitch_taxonomy = get_taxonomies(array( 'name' => $this->pitch_label ), 'objects');
+			  $this->pitch_taxonomy = get_taxonomies(array( 'name' => $this->pitch_status_label ), 'objects');
 			}
 			
 			$default_pitch_labels = array(
