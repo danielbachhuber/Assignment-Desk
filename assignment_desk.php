@@ -124,13 +124,16 @@ if (!class_exists('assignment_desk')) {
             load_textdomain($this->localizationDomain, $mo);
             
             /**
-             * Initialize all of our classes
+             * Instantiate all of our classes before running initialization on each!
+             * @todo All initialization should be abstracted to an 'init' function instead of in the constructor
              */
             $this->custom_taxonomies = new ad_custom_taxonomies(); 
             
-            // Initialize the options
+            /**
+             * Initialize various bits and pieces of functionality
+             * @todo Should these be interchangeable and not have internal dependencies?
+             */
             $this->getOptions();
-            
             $this->custom_taxonomies->init_taxonomies();
             
             // @todo Make all public views just a template tag

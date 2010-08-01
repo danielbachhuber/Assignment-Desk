@@ -27,7 +27,7 @@ class ad_custom_taxonomies {
       
       // Register $pitch_taxonomy if it doesn't exist, else generate an object								
 			if (!is_taxonomy($this->pitch_label)) {
-			  // @todo Need to label everything
+			  // @todo Need to label the different text on the view
 			  $args = array('label' => 'Pitch Statuses',
 			                'public' => true,
 			                'show_ui' => false,
@@ -72,6 +72,7 @@ class ad_custom_taxonomies {
 			
 			// Register $user_role_taxonomy if it doesn't exist									
 			if (!is_taxonomy($this->user_role_label)) {
+			  // @todo Need to label the different text on the view
 			  $args = array('label' => 'User Roles',
 			                'public' => true,
 			                'show_ui' => false,
@@ -82,6 +83,7 @@ class ad_custom_taxonomies {
 			
 			// Register $user_type_taxonomy if it doesn't exist									
 			if (!is_taxonomy($this->user_type_label)) {
+			  // @todo Need to label the different text on the view
 			  $args = array('label' => 'User Types',
 			                'public' => true,
 			                'show_ui' => false,
