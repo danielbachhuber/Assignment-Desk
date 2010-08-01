@@ -34,7 +34,7 @@ define('ASSIGNMENT_DESK_TEMPLATES_PATH', ASSIGNMENT_DESK_DIR_PATH . '/php/templa
 
 // Pitch Statuses
 // These should be pulled from the DB.
-define(P_APPROVED, 2);
+define('P_APPROVED', 2);
 
 // Install-time functions (DB setup).
 include_once('php/install.php');
@@ -60,9 +60,10 @@ require_once('php/public-controller.php');
 if (!class_exists('assignment_desk')) {
     
     class assignment_desk {
+      
         //This is where the class variables go, don't forget to use @var to tell what they're for
         /** @var string The options string name for this plugin */
-        private $optionsName = 'assignment_desk_options';
+        private $options_name = 'assignment_desk_options';
         
         /** @var string $localizationDomain Domain used for localization */
         private $localizationDomain = "assignment_desk";
@@ -88,19 +89,21 @@ if (!class_exists('assignment_desk')) {
         /** @var assignment_desk_install $installer handles install-time tasks. */
         public $installer;
 
-	    // Controllers
-	    /** @var assignment_desk_index_controller $index_controller serves the activity feed views. */
-	    public $index_controller;
+	    
+	      /** 
+	       * @var assignment_desk_index_controller $index_controller serves the activity feed views.
+	       */
+	      public $index_controller;
         
         /**
-        * @var assignment_desk_contributor_controller $contributor_controller serves the contributor profile and assignment views.
-        */
+         * @var assignment_desk_contributor_controller $contributor_controller serves 
+         * the contributor profile and assignment views.
+         */
         public $contributor_controller;
 
-	    // Widgets
-	    /**
-        * @var assignment_desk_dashboard_widgets $dashboard_widgets provides the widget.
-        */
+	      /**
+         * @var assignment_desk_dashboard_widgets $dashboard_widgets provides the widget.
+         */
         public $dashboard_widgets;
         
         /**
@@ -109,8 +112,8 @@ if (!class_exists('assignment_desk')) {
         public $settings;
         
         /**
-        *  Constructor
-        */        
+         * Assignment Desk Constructor
+         */        
         function __construct(){
           
             global $wpdb;
@@ -120,36 +123,27 @@ if (!class_exists('assignment_desk')) {
             $mo = dirname(__FILE__) . "/languages/" . $this->localizationDomain . "-".$locale.".mo";
             load_textdomain($this->localizationDomain, $mo);
             
+            /**
+             * Initialize all of our classes
+             */
+            $this->custom_taxonomies = new ad_custom_taxonomies(); 
+            
             // Initialize the options
             $this->getOptions();
             
-            // Database table names.
-            $this->tables = array(
-                'event' => $wpdb->prefix . $this->table_prefix . "event"
-            );
+            $this->custom_taxonomies->init_taxonomies();
+            
+            // @todo Make all public views just a template tag
+            $this->public_controller = new ad_public_controller();
 
             $this->installer = new assignment_desk_install();
+            
 
             // Build the various admin views and add them to the admin
             $this->build_admin_views();
             add_action('admin_init', array(&$this, 'add_admin_assets'));
             add_action('admin_menu', array(&$this, 'add_admin_menu_items'));
             
-            // @todo This should probably be migrated to the taxonomies controller
-            $this->custom_user_types = new ad_custom_taxonomies('user_type', 'user', 
-                                                                array( 'hierarchical' => false, 
-                                                                        'label' => __('User Contributor Level'))
-                                                            );
-            $this->custom_user_roles = new ad_custom_taxonomies('user_post_role', 'user', 
-                                                                array( 'label' => __('User Post Role'),)
-                                                            );
-            $this->custom_pitch_statuses = new ad_custom_taxonomies('pitch_status', 'post', 
-                                                                	array('label' => __('Pitch Statuses'),
-																	  	'show_meta_box' => false,
-																));
-            
-            
-            $this->public_controller = new ad_public_controller();
 			
         }
         
@@ -160,14 +154,14 @@ if (!class_exists('assignment_desk')) {
         }
 
         /**
-        * Retrieves the plugin options from the database.
-        * @return array
-        */
+         * Retrieves the plugin options from the database.
+         * @return array
+         */
         function getOptions() {
             //Don't forget to set up the default options
-            if (!$theOptions = get_option($this->optionsName)) {
+            if (!$theOptions = get_option($this->options_name)) {
                 $theOptions = array('default'=>'options');
-                update_option($this->optionsName, $theOptions);
+                update_option($this->options_name, $theOptions);
             }
             $this->options = $theOptions;
             
@@ -179,7 +173,7 @@ if (!class_exists('assignment_desk')) {
         * Saves the admin options to the database.
         */
         function save_admin_options(){
-            return update_option($this->optionsName, $this->options);
+            return update_option($this->options_name, $this->options);
         }
         
         /**
@@ -196,8 +190,7 @@ if (!class_exists('assignment_desk')) {
         wp_enqueue_script('jquery-truncator-js', ASSIGNMENT_DESK_URL .'js/jquery.truncator.js', 
                               array('jquery'));
         wp_enqueue_script('jquery-autocomplete-js', ASSIGNMENT_DESK_URL .'js/jquery.autocomplete.min.js', 
-                              array('jquery'));
-        
+                              array('jquery'));        
 	    }
 	    
 	    /**
@@ -206,7 +199,8 @@ if (!class_exists('assignment_desk')) {
 	    function build_admin_views() {
 	      
 	      // Various views we want to instantiate
-        $this->dashboard_widgets = new assignment_desk_dashboard_widgets();
+	      // @todo Refactor dashboard widgets
+        // $this->dashboard_widgets = new assignment_desk_dashboard_widgets();
         $this->manage_posts = new assignment_desk_manage_posts();
         $this->settings = new ad_settings();
         
@@ -229,6 +223,18 @@ if (!class_exists('assignment_desk')) {
                         'edit_posts', 'assignment_desk-settings', 
                         array(&$this->settings, 'general_settings'));
         
+        // @todo It would be nice if this lived under the Assignment Desk menu
+        // but it's not possible in WordPress 3.0
+        add_submenu_page('users.php', 'User Types',
+                        'User Types', 'edit_posts',
+                        'assignment_desk-user_types', 'edit-tags.php?taxonomy=user_types');
+        
+        // @todo It would be nice if this lived under the Assignment Desk menu
+        // but it's not possible in WordPress 3.0
+        add_submenu_page('users.php', 'User Roles',
+                        'User Roles', 'edit_posts',
+                        'assignment_desk-user_roles', 'edit-tags.php?taxonomy=user_roles');
+
 
          /*   // Add "Activity" for contributors and higher.
     		 $activity_page = add_submenu_page('assignment_desk-menu', 'Activity', 'Activity', 
@@ -236,12 +242,7 @@ if (!class_exists('assignment_desk')) {
     		                'assignment_desk-index',
     		                array(&$this->index_controller, 'dispatch'));
 
-			$pitches_page = add_submenu_page('edit.php', __('Pitches'), __('Pitches'),
-							5, 
-							'assignment_desk-pitches', 
-							array(&$this, 'link_to_pitches'));
-
-            // Add "Your Content" for contributors and higher.
+        // Add "Your Content" for contributors and higher.
     		add_submenu_page('assignment_desk-menu', 'Your Content', 'Your Content', 
                             'edit_posts', 
                             'assignment_desk-contributor',

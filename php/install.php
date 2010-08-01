@@ -22,11 +22,11 @@ class assignment_desk_install {
 	    global $wpdb;
 	    $db_version = get_option("assignment_desk_db_version", "0");
 	    
-	    if(!$db_version || $db_version == "0"){
-	        $this->init_db();
-        }
-        
-      $this->init_taxonomies();
+	    if (!$db_version || $db_version == "0"){
+        $this->init_db();
+        $this->init_taxonomies();
+      }
+      
     }
     
 	function init_db(){
@@ -37,7 +37,7 @@ class assignment_desk_install {
 		
 		// Events Table
 		// @todo Deprecate this. Don't you wish we could use custom post types?
-		$event_table = $assignment_desk->tables["event"];
+		/* $event_table = $assignment_desk->tables["event"];
 		if($wpdb->get_var("SHOW TABLES LIKE '$event_table'") != $event_table) {
 			$sql = "CREATE TABLE $event_table (
                 event_id bigint(20) unsigned NOT NULL auto_increment,
@@ -51,7 +51,7 @@ class assignment_desk_install {
                 PRIMARY KEY  (event_id)
                 ) DEFAULT CHARSET=latin1;";
 			dbDelta($sql);
-		}
+		} */
 		update_option("assignment_desk_db_version", "0.1"); 
 	}
 	
@@ -98,30 +98,6 @@ class assignment_desk_install {
             }
 	    }
 	    
-	    $default_pitch_statuses = array(
-	        array( 'term' => 'New',
-				   'args' => array( 'slug' => 'new',
-									'description' => 'A new pitch that has not been edited.',)
-			),
-			array( 'term' => 'Approved',
-				   'args' => array( 'slug' => 'approved',
-									'description' => 'An editor has approved the pitch.',)
-			),
-			array( 'term' => 'Rejected',
-				   'args' => array( 'slug' => 'rejected',
-									'description' => 'The pitch was no accepted for development.',)
-			),
-			array( 'term' => 'On hold',
-				   'args' => array( 'slug' => 'onhold',
-									'description' => 'Work on the pitch is on hold.',)
-			),
-	    );
-	    
-	    foreach($default_pitch_statuses as $term){
-	        if(!is_term($term['term'])){
-	            $assignment_desk->custom_pitch_statuses->insert_term( $term['term'], $term['args'] );
-            }
-	    }
 	}
 }
 ?>

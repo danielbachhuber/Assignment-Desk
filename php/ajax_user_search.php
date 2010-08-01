@@ -6,7 +6,7 @@
 
 require_once('utils.php');
 
-define(ASSIGNMENT_DESK_META_PREFIX, '_ad_');
+define('ASSIGNMENT_DESK_META_PREFIX', '_ad_');
 
 /**
 * Return a list of user_logins to the ajax-enabled text field on the assign view.
@@ -46,5 +46,5 @@ function ajax_user_search(){
    }
 
 // AJAX
-add_action('wp_ajax_user_search', ajax_user_search);
+add_action('wp_ajax_user_search', 'ajax_user_search');
 ?>

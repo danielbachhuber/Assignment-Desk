@@ -9,24 +9,98 @@ require_once(ABSPATH . 'wp-admin/includes/template.php');
 class ad_custom_taxonomies {
   
   
-    var $pitch_taxonomy = 'pitch_status';
-    var $user_role_taxonomy = 'user_role';
-    var $user_type_taxonomy = 'user_type';
+    var $pitch_label = 'pitch_status';
+    var $user_role_label = 'user_role';
+    var $user_type_label = 'user_type';
     
-    /**
-    * Pass the same arguments as you would to the register_taxonomy function.
-    * @param string $taxonomy_id The id of the taxonomy
-    * @param string $object The object this taxonomy applies to
-	* @param array $args Standard arguments for the register_taxonomy function
-    */
-    function __construct($taxonomy_id, $object, $args){
-        $this->taxonomy = $taxonomy_id;
-        if(!is_taxonomy($this->taxonomy)){
-            register_taxonomy($taxonomy_id, $object, $args); 
-        }
-		if($args['show_meta_box'] == false){
-			remove_meta_box("tagsdiv-$taxonomy_id", 'post', 'side');
-		}
+    var $pitch_taxonomy;
+    var $user_role_taxonomy;
+    var $user_type_taxonomy;
+
+    function __construct() {
+        
+        // Do nothing yet
+        
+    }
+    
+    function init_taxonomies() {
+      
+      // Register $pitch_taxonomy if it doesn't exist, else generate an object								
+			if (!is_taxonomy($this->pitch_label)) {
+			  // @todo Need to label everything
+			  $args = array('label' => 'Pitch Statuses',
+			                'public' => true,
+			                'show_ui' => true,
+			                'show_tagcloud' => false,
+			                );
+			  $this->pitch_taxonomy = register_taxonomy($this->pitch_label, array('post'), $args);
+			  // @todo check whether this use of remove_meta_box is appropriate
+			  remove_meta_box("tagsdiv-$this->pitch_label", 'post', 'side');
+			} else {
+			  $this->pitch_taxonomy = get_taxonomies(array( 'name' => $this->pitch_label ), 'objects');
+			}
+			
+			$default_pitch_labels = array(
+	        array(  'term' => 'New',
+                  'args' => array( 
+                        'slug' => 'new',
+                        'description' => 'A new pitch that has not been edited.',)
+			          ),
+			    array(  'term' => 'Approved',
+				          'args' => array( 
+				                'slug' => 'approved',
+                        'description' => 'An editor has approved the pitch.',)
+			          ),
+			    array(  'term' => 'Rejected',
+				          'args' => array( 
+				                'slug' => 'rejected',
+									      'description' => 'The pitch was no accepted for development.',)
+			          ),
+			    array(  'term' => 'On hold',
+                  'args' => array( 
+                        'slug' => 'on-hold',
+                        'description' => 'Work on the pitch is on hold.',)
+			          ),
+	    );
+	    
+	    // @todo Ensure these are getting added on initialization
+	    foreach ( $default_pitch_labels as $term ){
+	        if (!is_term( $term['term'] ) ) {
+              wp_insert_term( $term['term'], $this->pitch_taxonomy, $term['args'] );
+          }
+	    }
+			
+			// Register $user_role_taxonomy if it doesn't exist									
+			if (!is_taxonomy($this->user_role_label)) {
+			  $args = array('label' => 'User Roles',
+			                'public' => true,
+			                'show_ui' => false,
+			                'show_tagcloud' => false,
+			                );
+			  register_taxonomy($this->user_role_label, array('user'), $args);
+			}
+			
+			// Register $user_type_taxonomy if it doesn't exist									
+			if (!is_taxonomy($this->user_type_label)) {
+			  $args = array('label' => 'User Types',
+			                'public' => true,
+			                'show_ui' => false,
+			                'show_tagcloud' => false,
+			                );
+			  register_taxonomy($this->user_type_label, array('user'), $args);
+			}
+      
+    }
+    
+    function edit_taxonomy_page() {
+      
+      ?>
+      
+      Hello world
+      
+      <?php
+      
+      
     }
     
     /**
