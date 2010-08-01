@@ -30,7 +30,7 @@ class ad_custom_taxonomies {
 			  // @todo Need to label everything
 			  $args = array('label' => 'Pitch Statuses',
 			                'public' => true,
-			                'show_ui' => true,
+			                'show_ui' => false,
 			                'show_tagcloud' => false,
 			                );
 			  $this->pitch_taxonomy = register_taxonomy($this->pitch_label, array('post'), $args);

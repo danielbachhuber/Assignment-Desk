@@ -220,20 +220,29 @@ if (!class_exists('assignment_desk')) {
          * @permissions Edit posts or higher
          */
     		add_menu_page('Assignment Desk', 'Assignment Desk', 
-                        'edit_posts', 'assignment_desk-settings', 
+                        'edit_posts', 'assignment_desk', 
                         array(&$this->settings, 'general_settings'));
         
-        // @todo It would be nice if this lived under the Assignment Desk menu
-        // but it's not possible in WordPress 3.0
-        add_submenu_page('users.php', 'User Types',
-                        'User Types', 'edit_posts',
-                        'edit-tags.php?taxonomy='.$this->custom_taxonomies->user_role_label);
+        /**
+         * WordPress taxonomy view for editing Pitch Statuses
+         */
+        add_submenu_page('assignment_desk', 'Pitch Statuses',
+                        'Pitch Statuses', 'edit_posts',
+                        'edit-tags.php?taxonomy='.$this->custom_taxonomies->pitch_status_label);
         
-        // @todo It would be nice if this lived under the Assignment Desk menu
-        // but it's not possible in WordPress 3.0
-        add_submenu_page('users.php', 'User Roles',
-                        'User Roles', 'edit_posts',
+        /**
+         * WordPress taxonomy view for editing User Types
+         */
+        add_submenu_page('assignment_desk', 'User Types',
+                        'User Types', 'edit_posts',
                         'edit-tags.php?taxonomy='.$this->custom_taxonomies->user_type_label);
+        
+        /**
+         * WordPress taxonomy view for editing User Roles
+         */
+        add_submenu_page('assignment_desk', 'User Roles',
+                        'User Roles', 'edit_posts',
+                        'edit-tags.php?taxonomy='.$this->custom_taxonomies->user_role_label);
 
 
          /*   // Add "Activity" for contributors and higher.
