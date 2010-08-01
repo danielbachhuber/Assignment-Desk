@@ -227,13 +227,13 @@ if (!class_exists('assignment_desk')) {
         // but it's not possible in WordPress 3.0
         add_submenu_page('users.php', 'User Types',
                         'User Types', 'edit_posts',
-                        'assignment_desk-user_types', 'edit-tags.php?taxonomy=user_types');
+                        'edit-tags.php?taxonomy='.$this->custom_taxonomies->user_role_label);
         
         // @todo It would be nice if this lived under the Assignment Desk menu
         // but it's not possible in WordPress 3.0
         add_submenu_page('users.php', 'User Roles',
                         'User Roles', 'edit_posts',
-                        'assignment_desk-user_roles', 'edit-tags.php?taxonomy=user_roles');
+                        'edit-tags.php?taxonomy='.$this->custom_taxonomies->user_type_label);
 
 
          /*   // Add "Activity" for contributors and higher.
