@@ -40,9 +40,11 @@ class ad_post_meta_box {
    function __construct() {
 		// Set up metabox and related actions
 		add_action('admin_menu', array(&$this, 'add_post_meta_box'));
-		add_action('save_post', array(&$this, 'save_post_meta_box'));
-		add_action('edit_post', array(&$this, 'save_post_meta_box'));
-		add_action('publish_post', array(&$this, 'save_post_meta_box'));
+		// 20, 2 = execute our method very late (10 is default) and send 2 args,
+		// the second being the post object
+		add_action('save_post', array(&$this, 'save_post_meta_box'), 20, 2);
+		add_action('edit_post', array(&$this, 'save_post_meta_box'), 20, 2);
+		add_action('publish_post', array(&$this, 'save_post_meta_box'), 20, 2);
 	}
 	
 	/**
@@ -80,6 +82,16 @@ class ad_post_meta_box {
                     array('jquery'));
         wp_enqueue_script('ad-post-js', ASSIGNMENT_DESK_URL .'js/post.js', array('jquery'));
 	}
+	
+	/**
+	* Print out some global JS variables that we need to compose from PHPH variables so we can use them later.
+	*/
+	function js_vars(){
+	    // AJAX link used for the autosuggest
+	    echo '<script type="text/javascript">';
+		echo "var coauthor_ajax_suggest_link ='{admin_url()}admin-ajax.php?action=coauthors_ajax_suggest'";
+		echo '</script>';
+	}	
 }
 
 /**
@@ -87,6 +99,9 @@ class ad_post_meta_box {
 */
 class ad_contributor_meta_box extends ad_post_meta_box {
 	
+	/**
+	* Print basic pitch information.
+	*/
 	function print_pitch_info(){
 	    global $post;
 	    echo '<div id="ad-pitch-info" class="ad-module misc-pub-section">';
@@ -105,8 +120,12 @@ class ad_contributor_meta_box extends ad_post_meta_box {
         echo '</div>';
 	}
 	
+	/**
+	* Print the editor link for the user.
+	*/
 	function print_editor_link(){
 	    global $post;
+	    // @todo - Pull this from the taxonomy?
 	    $editor_id = get_post_meta($post->ID, '_ad_editor', true);
 	    if($editor_id){
 	        $editor = get_userdata($editor_id);
@@ -119,6 +138,9 @@ class ad_contributor_meta_box extends ad_post_meta_box {
 	    }
 	}
 	
+	/**
+	* Main method to print out the box on the post.php page.
+	*/
 	function meta_box($pitch = null){
 	    global $post, $edit_flow, $assignment_desk;
 	    
@@ -200,7 +222,7 @@ class ad_editor_post_meta_box extends ad_post_meta_box {
 			echo "</select>";
 		}
 
-	    // TODO - Origin? (community or staff)
+	    // @todo - Origin? (community or staff)
 	    echo '</div>';
 	}
 	
@@ -215,11 +237,11 @@ class ad_editor_post_meta_box extends ad_post_meta_box {
 		echo '<label>Pitch Status:</label>';
 		// What is the status of this Pitch?
 		$current_status = wp_get_object_terms($post->ID,
-											  $assignment_desk->custom_pitch_statuses->taxonomy);
+											  $assignment_desk->custom_taxonomies->pitch_status_label);
 		// Default status is new
-		// TODO - Use a default setting.
+		// @todo Use a default setting.
 		if(!$current_status){
-			$current_status = get_term_by("name", "New", $assignment_desk->custom_pitch_statuses->taxonomy);
+			$current_status = get_term_by("name", "New", $assignment_desk->custom_taxonomies->pitch_status_label);
 		}
 		else {
 			$current_status = $current_status[0];
@@ -227,7 +249,7 @@ class ad_editor_post_meta_box extends ad_post_meta_box {
 		
 		if($post->post_status == 'pitch'){
 			// List all of the pitch statuses
-			$pitch_statuses = get_terms($assignment_desk->custom_pitch_statuses->taxonomy,
+			$pitch_statuses = get_terms($assignment_desk->custom_taxonomies->pitch_status_label,
 										array( 'get' => 'all'));
 			echo "<select name='_ad_pitch_status'>";
 			foreach($pitch_statuses as $status){
@@ -243,7 +265,7 @@ class ad_editor_post_meta_box extends ad_post_meta_box {
 	
 	/**
 	* Print a form to choose the user.
-	* This is shown when the co-authors plugin is NOT active.
+	* This is shown when the co-authors-plus plugin is NOT active.
 	*/
 	function author(){
 		global $wpdb, $post;
@@ -269,30 +291,60 @@ class ad_editor_post_meta_box extends ad_post_meta_box {
 	* Print the current lists of assignees.
 	*/
 	function multiple_assignees() {
+		global $assignment_desk, $post, $wpdb;
+		
+		$user_roles = get_terms($assignment_desk->custom_taxonomies->user_role_label,
+									array( 'get' => 'all', 'order' => "-name"));
 		?>
 		<div class="ad-module misc-pub-section">
 		    <h4>Assign this post to:</h4>
 		    <form>
-		        <label for="ad_user_search_text">User</label>
-		        <input type="text" name="_ad_user_search" id="ad_user_search_text" size="30" maxlength="50" value="Search...">
+		        <label>User</label>
+		        <input type="text" id="_ad-assignee-search" size="30" maxlength="50">
 		        <br>
 		        
-		        <label for="ad_assigned_role_select">Role</label>
-		        <select name="_ad_assigned_role" id="ad_assigned_role_select">
-		            <option value="writer">Writer</option>
-		            <option value="photographer">Photographer</option>
+		        <label>Role</label>
+		        <select id="_ad-assigned-role-select">
+		            <?php foreach($user_roles as $user_role): ?>
+						<option value="<?php echo $user_role->term_id; ?>">
+						<?php echo $user_role->name; ?></option>";
+					<?php endforeach; ?>
 		        </select>
-		        <button class="button" value="submit">Assign</button>
+		        <a id="ad-assign-button" class="button">Add</a>
 		    </form>
 		</div>
 		
-		<div class="ad-module misc-pub-section">
-			<h4>Users assigned to this post </h4>
-			<ul class="user-list">
-			    <li>Tommy Tester (Writer)</li>
-			    <li>Wendy Writer (Photographer)</li>
-			</ul>
-		</div>
+	    <?php
+	    foreach($user_roles as $user_role){
+	        $num_users = 0;
+	        // Lookup all users assigned to this post with this role.
+	        $user_logins = get_post_meta($post->ID, "_ad_assignees_role_{$user_role->name}", true);
+	        // @todo - HACK HACK HACK. get_post_meta should return either an array or an empty string
+	        if(!is_array($user_logins) && count($user_logins) == 1){
+	            $user_logins = array();
+	        }
+	        $num_users = count($user_logins);         
+	        // Only show the div if there are assignees for that role
+	        echo "<div class='ad-module misc-pub-section' id='_ad_assignees_role_{$user_role->name}'";
+	        echo ($num_users)? ">" : "style='display:none'>";
+	        echo "<h4>{$user_role->name}s</h4>";
+   		    echo "<ul id='_ad_assignees_role_{$user_role->name}'>";
+	        if($num_users){
+   		        $users = $wpdb->get_results($wpdb->prepare("SELECT ID, user_nicename 
+   		                                                    FROM $wpdb->users 
+   		                                                    WHERE user_login IN (%s)", 
+   		                                                    implode(',', $user_logins)));
+   		        if(!is_array($users)){
+   		            $users = array($users);
+   		        }
+   		        foreach($users as $user){
+   		            echo "<li><input type='hidden' name='_ad-assignees[]' value='{$user->user_login}'>
+							  {$user->user_nicename}</li>";
+   		        }
+	        }
+	        echo "</ul></div>";
+	    }
+	    ?>
 <?php
 	}
 	
@@ -351,7 +403,7 @@ class ad_editor_post_meta_box extends ad_post_meta_box {
 		}
 		echo '</div>';
 	
-		if (is_plugin_active('co-authors/co-authors.php')){
+		if (is_plugin_active('co-authors-plus/co-authors.php')){
 		 	$this->multiple_assignees();
 		}
 		else {
@@ -364,18 +416,20 @@ class ad_editor_post_meta_box extends ad_post_meta_box {
 	/**
 	* Save Assignment Desk post meta data
 	*/
-	function save_post_meta_box($post_id) {
-		global $wpdb, $assignment_desk;
+	function save_post_meta_box($post_id, $post) {
+		
+		global $executed_already, $wpdb, $assignment_desk;
+		
+		// if ($executed_already){ return; } else { $executed_already = true; }
+	  	if ($post->post_type == 'revision') { return;}
+		if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) { return; }
+		
+		if ($executed_already) { return; }
 		
 		if (!wp_verify_nonce($_POST['_ad_noncename'], plugin_basename(__FILE__))){
 			return $post_id;
 		}
-		if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
-		    return $post_id;
-		}
-		
-		$post = query_posts('p=' . $post_id);
-		
+
 		// The user who pitched this story.
 		if($_POST['_ad_pitched_by']){
 			update_post_meta($post_id, '_ad_pitched_by', (int)$_POST['_ad_pitched_by']);
@@ -385,10 +439,10 @@ class ad_editor_post_meta_box extends ad_post_meta_box {
 		if($_POST['_ad_pitch_status'] && $post->status == __('pitch')){
 			wp_set_object_terms($post_id,
 								(int)$_POST['_ad_pitch_status'],
-								$assignment_desk->custom_pitch_statuses->taxonomy);
+								$assignment_desk->custom_taxonomies->pitch_status_label);
 		}
-		
-		// Single post author
+
+		// Single post author. Change the author.
 		if($_POST['_ad_author']){
 			$author_id = $_POST['_ad_author'];
 			if(is_email($author_id)){
@@ -397,7 +451,7 @@ class ad_editor_post_meta_box extends ad_post_meta_box {
 				$author = _ad_create_user($author_id, $author_id, $_POST['_ad_author_nicename']);
 				$author_id = $author->id;
 			}
-			// Current user id
+			// Assigned author is currently a WP User.
 			else {
 				$author = $wpdb->get_row(
 							$wpdb->prepare("SELECT * FROM $wpdb->users WHERE ID=%d", (int)$author_id));
@@ -414,9 +468,53 @@ class ad_editor_post_meta_box extends ad_post_meta_box {
 				$this->send_assignment_email($post_id, $author_id);
 			}
 		}
+
+		// Multiple post authors using co-authors-plus
+		if($_POST['_ad-assignees']){
+		    global $coauthors_plus;
+		
+		    $assignees = array();
+		    $role_users = array();
+			// Users and their associated roles are sent over as username|rolename    
+			// Split into an associative array.
+		    foreach($_POST['_ad-assignees'] as $user_and_role){
+		        $split = explode('|', $user_and_role);
+		        $assignees[] = $split[0];
+		        $role_users[$split[1]][] = $split[0];
+		    }
+			// Save the list of coauthors
+		    $coauthors_plus->add_coauthors($post_id, $assignees);
+		    
+		    // Store each role as an array of usernames in the postmeta
+			$post_is_waiting = false;
+		    foreach(array_keys($role_users) as $role){
+		        // check if the user is already in this role for this post.
+		        $previous_role_users = get_post_meta($post_id, "_ad_assignees_role_$role", true);
+		        if(!is_array($previous_role_users)){
+		            $previous_role_users = array($previous_role_users, );
+		        }
+		        foreach($role_users[$role] as $username){
+					// Never assigned before. Send email and record that we're waiting for their reply/
+		            if(!in_array($username, $previous_role_users)){
+						$post_is_waiting = true;
+		                $this->send_assignment_email($post_id, $username);
+						update_post_meta($post_id, '_ad_waiting_for_reply', $username);
+		            }
+	            }
+		        update_post_meta($post_id, "_ad_assignees_role_$role", $role_users[$role]);
+		    }
+		    if($post_is_waiting){
+				$wpdb->update($wpdb->posts,
+						array('post_status' => __('waiting for reply')),
+						array('ID' => $post_id),
+						array('%s'),
+						array('%d'));
+			}
+		}
+		$executed_already = 1;
 	}
 	
-	function send_assignment_email($post_id, $author_id){
+	function send_assignment_email($post_id, $username){
 		// Get the template from the settings
 		// Fill it out
 		// Send it off
@@ -432,6 +530,9 @@ if(current_user_can('edit_posts')){
 else {
 	$assignment_desk_post_meta = new ad_contributor_meta_box();
 }
+
+// Add necessary JS variables
+add_action('admin_print_scripts', array(&$assignment_desk_post_meta, 'js_vars') );
 
 } // end if(!class_exists)
 ?>
