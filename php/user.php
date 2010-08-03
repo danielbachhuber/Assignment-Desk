@@ -31,7 +31,7 @@ if ( !class_exists( 'ad_user' ) ) {
       
       $user_type = (int)get_usermeta($user_id, $assignment_desk->option_prefix.'user_type', true);
       
-      // Need to have 
+      // Need to have 'get'=>'all' so that it will retrieve a custom taxonomy
       $user_type_taxonomy = get_terms($assignment_desk->custom_taxonomies->user_type_label, array('get'=>'all'));
       
       ?>
