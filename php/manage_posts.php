@@ -6,7 +6,6 @@ class assignment_desk_manage_posts {
     function __construct(){
         // Add Filters
         add_filter('manage_posts_columns', array(&$this, 'add_manage_post_columns'));
-        add_filter('manage_posts_columns', array(&$this, 'remove_manage_post_columns'));
         add_action('manage_posts_custom_column', array(&$this, 'handle_ef_due_date_column'), 10, 2);
         add_action('manage_posts_custom_column', array(&$this, 'handle_ad_assignment_column'), 10, 2);
     }
@@ -25,17 +24,6 @@ class assignment_desk_manage_posts {
         foreach ($custom_fields_to_add as $field => $title) {
             $posts_columns["$field"] = $title;
         } 
-        return $posts_columns;
-    }
-    
-    /**
-     *  Remove columns from the manage posts listing.
-     *  Wordpress calls this and passes the list of columns.
-    */
-    function remove_manage_post_columns($posts_columns){
-        unset($posts_columns['date']);
-        unset($posts_columns['tags']);
-    
         return $posts_columns;
     }
     
