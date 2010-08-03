@@ -18,9 +18,45 @@ if ( !class_exists( 'ad_user' ) ) {
       
       add_action('profile_update', array(&$this, 'save_profile_options'));
     
+      add_filter('manage_users_columns', array(&$this, 'add_manage_user_columns'));
+      add_action('manage_users_custom_column', array(&$this, 'handle_ad_user_type_column'), 10, 3);
+    
     }
     
-    function add_edit_user_column() {
+    function add_manage_user_columns($user_columns) {
+      
+      $custom_fields_to_add = array(
+                                  _('_ad_user_type') => __('User Type'),
+                              );
+      
+      foreach ($custom_fields_to_add as $field => $title) {
+          $user_columns["$field"] = $title;
+      } 
+      return $user_columns;
+      
+    }
+    
+    function handle_ad_user_type_column( $empty, $column_name, $user_id ) {
+      global $assignment_desk;
+      
+      if ( $column_name == __( '_ad_user_type' ) ) {
+        
+        $user_type = (int)get_usermeta($user_id, $assignment_desk->option_prefix.'user_type', true);
+        
+        $user_type_taxonomy = get_terms($assignment_desk->custom_taxonomies->user_type_label, array('get'=>'all'));
+        
+        foreach ( $user_type_taxonomy as $user_type_term ) {
+          if ( $user_type == $user_type_term->term_id ) {
+            $user_type_term_name = $user_type_term->name;
+            break;
+          } else {
+            $user_type_term_name = 'None assigned';
+          }
+        }
+          
+        return $user_type_term_name;
+          
+      }
       
     }
     
