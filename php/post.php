@@ -80,7 +80,7 @@ class ad_post_meta_box {
 	function add_javascript(){
 	    wp_enqueue_script('jquery-fancybox-js', ASSIGNMENT_DESK_URL .'js/fancybox/jquery.fancybox-1.3.1.pack.js', 
                     array('jquery'));
-        wp_enqueue_script('ad-post-js', ASSIGNMENT_DESK_URL .'js/post.js', array('jquery'));
+        wp_enqueue_script('ad-post-js', ASSIGNMENT_DESK_URL .'js/post.js', array('jquery', 'suggest'));
 	}
 	
 	/**
