@@ -33,11 +33,9 @@ class ad_custom_taxonomies {
 			                'show_ui' => false,
 			                'show_tagcloud' => false,
 			                );
-			  $this->pitch_taxonomy = register_taxonomy($this->pitch_status_label, array('post'), $args);
+			  register_taxonomy($this->pitch_status_label, array('post'), $args);
 			  // @todo check whether this use of remove_meta_box is appropriate
 			  remove_meta_box("tagsdiv-$this->pitch_status_label", 'post', 'side');
-			} else {
-			  $this->pitch_taxonomy = get_taxonomies(array( 'name' => $this->pitch_status_label ), 'objects');
 			}
 			
 			$default_pitch_labels = array(
