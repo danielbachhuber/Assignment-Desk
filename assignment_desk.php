@@ -43,6 +43,8 @@ include_once('php/install.php');
 include_once('php/index-controller.php');
 include_once('php/contributor-controller.php');
 
+include_once('php/user.php');
+
 // Various admin views
 include_once('php/dashboard-widgets.php');
 include_once('php/post.php');
@@ -79,6 +81,8 @@ if (!class_exists('assignment_desk')) {
 
         /** @var string $table_prefix The prefix for this plugin's DB tables. */
         public $table_prefix = 'ad_';
+        
+        public $option_prefix = 'ad_';
 
         /** @var array $options Stores the options for this plugin. */
         public $options = array();
@@ -129,12 +133,15 @@ if (!class_exists('assignment_desk')) {
              */
             $this->custom_taxonomies = new ad_custom_taxonomies(); 
             
+            $this->user = new ad_user();
+            
             /**
              * Initialize various bits and pieces of functionality
              * @todo Should these be interchangeable and not have internal dependencies?
              */
             $this->getOptions();
             $this->custom_taxonomies->init_taxonomies();
+            $this->user->init_user();
             
             // @todo Make all public views just a template tag
             $this->public_controller = new ad_public_controller();
