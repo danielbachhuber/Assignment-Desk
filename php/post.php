@@ -304,13 +304,20 @@ class ad_editor_post_meta_box extends ad_post_meta_box {
 		        <br>
 		        
 		        <label>Role</label>
+		        <?php if(count($user_roles)): ?>
 		        <select id="_ad-assigned-role-select">
 		            <?php foreach($user_roles as $user_role): ?>
 						<option value="<?php echo $user_role->term_id; ?>">
 						<?php echo $user_role->name; ?></option>";
 					<?php endforeach; ?>
 		        </select>
-		        <a id="ad-assign-button" class="button">Add</a>
+		        <?php else: ?>
+		            You don't have any user roles defined. Go
+		            <a href="<?php echo admin_url() . 'edit-tags.php?taxonomy=user_role'; ?>">here</a>
+		            to create some.
+		        <?php endif; ?>
+		        
+		        <a id="ad-assign-button" class="button" <?php echo (count($user_roles)? '': 'disabled'); ?>>Add</a>
 		    </form>
 		</div>
 		
