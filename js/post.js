@@ -7,32 +7,53 @@ if(typeof(String.prototype.trim) === "undefined") {
     };
 }
 
+/** 
+* Get the user search input and selected role and add to the assign.
+*/
+function add_user_to_assignees(){
+	// get the form data
+	return add_user_to_assignees(jQuery("#ad-assignee-search").val().trim(), 
+	                             jQuery("#ad-assign-form .ad-user-role-select :selected").val());
+	
+}
+
+/** 
+* Get the user volunteer user_login and selected role and add to the assign.
+*/
+function add_volunteer_to_assignees(user_login){
+    // Get the role from the assignee form
+    var role_id = jQuery('#ad_volunteer_' + user_login + ' .ad-user-role-select :selected').val();
+    add_to_assignees(user_login, role_id);
+    jQuery('#ad_volunteer_' + user_login).remove();
+}
+
 /**
-* Take the user search input and the selected role and add that user to the list 
+* Take the user input and the selected role and add that user to the list 
 * of users assigned to a post with that role.
-*
 * Take care to show the div that surrounds the role list of the div was initially hidden.
 */
-function add_to_assignees(){
-	// get the form data
-	var user_login = jQuery("#_ad-assignee-search").val().trim();
-	var role_name = jQuery("#_ad-assigned-role-select :selected").text().trim();
+function add_to_assignees(user_login, role_id){	
+    user_login.trim();
+    
+	if(!user_login.length || !role_id){
+	    return false;
+	}
 	
 	// create a new list item that hold a hidden form element.
-	var field_html = '<li><input type="hidden" name="_ad-assignees[]" value="'+ user_login + '|' + role_name + '"/>' + user_login + '</li>';
+	var field_html = '<li><input type="hidden" name="_ad-assignees[]" value="'+ user_login + '|' + role_id + '"/>' + user_login + '</li>';
 	// Append it to the list
-	jQuery("ul#_ad_assignees_role_" + role_name).append(field_html);
+	jQuery("ul#ad_assignees_role_" + role_id).append(field_html);
 
 	// Show if initially empty (length now == 1)
-	if(jQuery("ul#_ad_assignees_role_" + role_name + ' > li').length == 1){
-		jQuery('div#_ad_assignees_role_' + role_name).slideToggle();
+	if(jQuery("ul#ad_assignees_role_" + role_id + ' > li').length == 1){
+		jQuery('div#ad_assignees_role_' + role_id).slideToggle();
 	}
 	return false;
 }
 
 function setup_ajax_user_search(){
 	// Get the search ket from the assignment desk box
-	jQuery('#_ad-assignee-search').suggest(coauthor_ajax_suggest_link,
+	jQuery('#ad-assignee-search').suggest(coauthor_ajax_suggest_link,
 									{ onSelect: 
 										function() {
 											var vals = this.value.split("|");				
@@ -40,7 +61,7 @@ function setup_ajax_user_search(){
 											author.id = jQuery.trim(vals[0]);										
 											author.login = jQuery.trim(vals[1]);
 											author.name = jQuery.trim(vals[2]);
-											jQuery('#_ad-assignee-search').val(author.name)
+											jQuery('#ad-assignee-search').val(author.name)
 										}
 								    })
     	                            .keydown(function(e) {
@@ -49,6 +70,17 @@ function setup_ajax_user_search(){
     	                            })
 }
 
+/**
+* When a user clicks the "Assign" button for a volunteer, show them a form to select the role.
+*/
+function show_volunteer_assign_form(user_login){
+    user_login.trim()
+    var volunteer_assign_form = "<label>User: </label>" + user_login;
+    volunteer_assign_form += jQuery('div#ad-hidden-user-role-select').html();
+    volunteer_assign_form += '<a class="button" onclick="javascript: return add_volunteer_to_assignees(\'' + user_login + '\');">Assign</a>';
+    jQuery('#ad_volunteer_' + user_login).html(volunteer_assign_form);
+    return false;  
+}
 
 jQuery(document).ready(    
     function(){

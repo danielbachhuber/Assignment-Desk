@@ -283,9 +283,17 @@ class ad_editor_post_meta_box extends ad_post_meta_box {
 		}
 		echo "</select>";
 		echo "</div>";
-		
 	}
 	
+	function user_role_select($user_roles){
+		echo "<label>Role</label>";
+        echo "<select class='ad-user-role-select'>";
+            foreach($user_roles as $user_role) {
+				echo "<option value='{$user_role->term_id}'>{$user_role->name}</option>";
+			}
+        echo "</select>";
+	}
+
 	/**
 	* Print a form to choose multiple users.
 	* Print the current lists of assignees.
@@ -294,32 +302,29 @@ class ad_editor_post_meta_box extends ad_post_meta_box {
 		global $assignment_desk, $post, $wpdb;
 		
 		$user_roles = get_terms($assignment_desk->custom_taxonomies->user_role_label,
-									array( 'get' => 'all', 'order' => "-name"));
-		?>
-		<div class="ad-module misc-pub-section">
+									array( 'get' => 'all', 'order' => "-name")); 
+	    ?>
+		<div id="ad-assign-form" class="ad-module misc-pub-section">
 		    <h4>Assign this post to:</h4>
-		    <form>
-		        <label>User</label>
-		        <input type="text" id="_ad-assignee-search" size="30" maxlength="50">
-		        <br>
-		        
-		        <label>Role</label>
-		        <?php if(count($user_roles)): ?>
-		        <select id="_ad-assigned-role-select">
-		            <?php foreach($user_roles as $user_role): ?>
-						<option value="<?php echo $user_role->term_id; ?>">
-						<?php echo $user_role->name; ?></option>";
-					<?php endforeach; ?>
-		        </select>
-		        <?php else: ?>
-		            You don't have any user roles defined. Go
-		            <a href="<?php echo admin_url() . 'edit-tags.php?taxonomy=user_role'; ?>">here</a>
-		            to create some.
-		        <?php endif; ?>
-		        
-		        <a id="ad-assign-button" class="button" <?php echo (count($user_roles)? '': 'disabled'); ?>>Add</a>
-		    </form>
+	        <label>User</label>
+	        <input type="text" id="ad-assignee-search" size="30" maxlength="50">
+	        <br>
+	    <?php
+	        if(count($user_roles)) {
+	            echo $this->user_role_select($user_roles);
+            }
+            else {
+                echo "You don't have any user roles defined. Go";
+                echo "<a href='{admin_url()}edit-tags.php?taxonomy=user_role'>here</a>to create some.";
+            }
+        ?>
+	        <a id="ad-assign-button" class="button" <?php echo (count($user_roles)? '': 'disabled'); ?>>Add</a>
 		</div>
+		
+		<div style="display:none" id="ad-hidden-user-role-select">
+		    <?php $this->user_role_select($user_roles); ?>
+		</div>
+		    
 		
 	    <?php
 	    foreach($user_roles as $user_role){
@@ -330,12 +335,13 @@ class ad_editor_post_meta_box extends ad_post_meta_box {
 	        if(!is_array($user_logins) && count($user_logins) == 1){
 	            $user_logins = array();
 	        }
-	        $num_users = count($user_logins);         
+	        $num_users = count($user_logins);
+	        
 	        // Only show the div if there are assignees for that role
-	        echo "<div class='ad-module misc-pub-section' id='_ad_assignees_role_{$user_role->name}'";
+	        echo "<div class='ad-module misc-pub-section' id='ad_assignees_role_{$user_role->term_id}'";
 	        echo ($num_users)? ">" : "style='display:none'>";
 	        echo "<h4>{$user_role->name}s</h4>";
-   		    echo "<ul id='_ad_assignees_role_{$user_role->name}'>";
+   		    echo "<ul id='ad_assignees_role_{$user_role->term_id}'>";
 	        if($num_users){
    		        $users = $wpdb->get_results($wpdb->prepare("SELECT ID, user_nicename 
    		                                                    FROM $wpdb->users 
@@ -367,20 +373,17 @@ class ad_editor_post_meta_box extends ad_post_meta_box {
 	    <div class="ad-module misc-pub-section">
             <h4>Volunteers (<?php echo count($volunteers); ?>)</h4>
             <ul>
-            <?php foreach($volunteers as $user_id):
-					$user = get_userdata((int)$user_id);
+            <?php foreach($volunteers as $user_login):
+					$user = get_userdatabylogin($user_login);
 				?>
                 <li>
                 <?php if (!empty($user->user_login)): ?>
-                    <a href="?page=assignment_desk-contributor&user_login=<?php echo $user->user_login; ?>">
-                    <?php echo $user->user_login; ?></a>
-                    <form method="GET" style="display:inline">
-                        <input type="hidden" name="page" value="assignment_desk-assignments">
-                        <input type="hidden" name="action" value="editor_assign">
-                        <input type="hidden" name="pitch_id" value="<?php echo $pitch->pitch_id; ?>">
-                        <input type="hidden" name="user_login_text" value="<?php echo $user->user_login ?>">
-                        <button>Assign</button>
-                    </form>
+                    <div id="ad_volunteer_<?php echo $user->user_login; ?>">
+                        <a href="?page=assignment_desk-contributor&user_login=<?php echo $user->user_login; ?>">
+                        <?php echo $user->user_login; ?></a>
+                        <a class="button"
+                                onclick="javascript:return show_volunteer_assign_form('<?php echo $user->user_login; ?>');">Assign</a>
+                    </div>
                 <?php else: ?>
                     <?php echo $user->user_nicename; ?> 
                 <?php endif; ?>
