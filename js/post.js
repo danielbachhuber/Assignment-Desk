@@ -12,7 +12,7 @@ if(typeof(String.prototype.trim) === "undefined") {
 */
 function add_user_to_assignees(){
 	// get the form data
-	return add_user_to_assignees(jQuery("#ad-assignee-search").val().trim(), 
+	return add_to_assignees(jQuery("#ad-assignee-search").val().trim(), 
 	                             jQuery("#ad-assign-form .ad-user-role-select :selected").val());
 	
 }
@@ -23,8 +23,16 @@ function add_user_to_assignees(){
 function add_volunteer_to_assignees(user_login){
     // Get the role from the assignee form
     var role_id = jQuery('#ad_volunteer_' + user_login + ' .ad-user-role-select :selected').val();
-    add_to_assignees(user_login, role_id);
+    add_to_assignees(user_login.toString().trim(), role_id);
     jQuery('#ad_volunteer_' + user_login).remove();
+	var volunteer_count = parseInt(jQuery('#ad-volunteer-count').html());
+	volunteer_count -= 1;
+	if(volunteer_count == 1){
+		jQuery('#ad-volunteer-count-wrap').html('Volunteer (1)');
+	}
+	else {
+		jQuery('#ad-volunteer-count-wrap').html('Volunteers (' + volunteer_count + ')');
+	}
 }
 
 /**
@@ -32,9 +40,7 @@ function add_volunteer_to_assignees(user_login){
 * of users assigned to a post with that role.
 * Take care to show the div that surrounds the role list of the div was initially hidden.
 */
-function add_to_assignees(user_login, role_id){	
-    user_login.trim();
-    
+function add_to_assignees(user_login, role_id){	    
 	if(!user_login.length || !role_id){
 	    return false;
 	}
@@ -101,7 +107,7 @@ jQuery(document).ready(
         );
 		
 		// Add the add_to_assignees function as a hook on the assign button
-		jQuery("#ad-assign-button").click(add_to_assignees);
+		jQuery("#ad-assign-button").click(add_user_to_assignees);
 		
 		setup_ajax_user_search();
     }
