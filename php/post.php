@@ -407,6 +407,8 @@ class ad_editor_post_meta_box extends ad_post_meta_box {
     */
     function meta_box(){
         global $post;
+        
+        echo '<div id="ad-error-messages" class="error"></div>';
     
         echo '<input type="hidden" name="_ad_noncename" id="_ad_noncename" value="' . 
                     wp_create_nonce( plugin_basename(__FILE__) ) . '" />';
