@@ -42,9 +42,9 @@ class ad_post_meta_box {
         add_action('admin_menu', array(&$this, 'add_post_meta_box'));
         // 20, 2 = execute our method very late (10 is default) and send 2 args,
         // the second being the post object
-        add_action('save_post', array(&$this, 'save_post_meta_box'), 20, 2);
-        add_action('edit_post', array(&$this, 'save_post_meta_box'), 20, 2);
-        add_action('publish_post', array(&$this, 'save_post_meta_box'), 20, 2);
+        add_action('save_post', array(&$this, 'save_post_meta_box'), 9, 2);
+        add_action('edit_post', array(&$this, 'save_post_meta_box'), 9, 2);
+        add_action('publish_post', array(&$this, 'save_post_meta_box'), 9, 2);
     }
     
     /**
@@ -503,7 +503,8 @@ class ad_editor_post_meta_box extends ad_post_meta_box {
             }
             //print_r($assignees);
             // Save the list of coauthors
-            $coauthors_plus->add_coauthors($post_id, $assignees);
+            // $coauthors_plus->add_coauthors($post_id, $assignees);
+            $_POST['coauthors'] = $assignees;
                     
             // Store each role as an array of usernames in the postmeta
             $post_is_waiting = false;
