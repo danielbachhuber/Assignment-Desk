@@ -7,9 +7,11 @@ class ad_public_controller {
 	
 	function init(){
 	    add_filter("the_content", array($this, "filter_show_public_pages") );
-	    
 	}
 	
+	/*
+	* Replace an html comment <!-- assignment-desk-public --> with ad public pages.
+	*/
 	function filter_show_public_pages($the_content){
 	    $tag = '<!-- assignment-desk-public -->';
         $start = strpos($the_content, $tag);
@@ -19,7 +21,6 @@ class ad_public_controller {
             $after_ad = substr($the_content, $start + strlen($tag), strlen($the_content));
             $ad = $this->public_content();
             $my_content = $before_ad . $ad . $after_ad;
-            // $my_content = 'EHHHH';
         }
         
         return $my_content;
