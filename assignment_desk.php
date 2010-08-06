@@ -145,6 +145,7 @@ if (!class_exists('assignment_desk')) {
             
             // @todo Make all public views just a template tag
             $this->public_controller = new ad_public_controller();
+            $this->public_controller->init();
 
             $this->installer = new assignment_desk_install();
             
@@ -160,7 +161,6 @@ if (!class_exists('assignment_desk')) {
         // Actions that happen only on activate.
         function activate_plugin() {
             $this->installer->setup_db();
-            $this->public_controller->flush_rewrite_rules();
         }
 
         /**
