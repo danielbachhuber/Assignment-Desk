@@ -357,7 +357,7 @@ class ad_editor_post_meta_box extends ad_post_meta_box {
                     $users = array($users);
                 }
                 foreach($users as $user){
-                    echo "<li><input type='hidden' name='_ad-assignees[]' value='{$user->user_login}|{$user_role->term_id}'>{$user->user_nicename}</li>";
+                    echo "<li><input type='hidden' name='ad-assignees[]' value='{$user->user_login}|{$user_role->term_id}'>{$user->user_nicename}</li>";
                 }
             }
             echo "</ul></div>";
@@ -487,7 +487,7 @@ class ad_editor_post_meta_box extends ad_post_meta_box {
         }
 
         // Multiple post authors using co-authors-plus
-        if($_POST['_ad-assignees']){
+        if($_POST['ad-assignees']){
             global $coauthors_plus;
         
             $volunteers = get_post_meta($post_id, '_ad_volunteer', false);
@@ -495,7 +495,7 @@ class ad_editor_post_meta_box extends ad_post_meta_box {
             $role_users = array();
             // Users and their associated roles are sent over as username|rolename    
             // Split into an associative array.
-            foreach($_POST['_ad-assignees'] as $user_and_role){
+            foreach($_POST['ad-assignees'] as $user_and_role){
                 $split = explode('|', $user_and_role);
                 $user = $split[0];
                 $role = $split[1];

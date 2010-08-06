@@ -47,7 +47,7 @@ function add_to_assignees(user_login, role_id){
 	var already_assigned = false;
 	
 	// Check to see if this user was already assigned to this story.
-	jQuery("input[name='_ad-assignees[]']").each(function(){
+	jQuery("input[name='ad-assignees[]']").each(function(){
 		var split = jQuery(this).val().split('|');
 		if (user_login == split[0]){
 			already_assigned = true;
@@ -60,7 +60,7 @@ function add_to_assignees(user_login, role_id){
 	}
 	
 	// create a new list item that hold a hidden form element.
-	var field_html = '<li><input type="hidden" name="_ad-assignees[]" value="'+ user_login + '|' + role_id + '"/>' + user_login + '</li>';
+	var field_html = '<li><input type="hidden" name="ad-assignees[]" value="'+ user_login + '|' + role_id + '"/>' + user_login + '</li>';
 	// Append it to the list
 	jQuery("ul#ad_assignees_role_" + role_id).append(field_html);
 
