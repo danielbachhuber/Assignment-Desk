@@ -52,8 +52,6 @@ include_once('php/settings.php');
 
 // Customize the Manage Posts page
 require_once('php/manage_posts.php');
-// AJAX function for searching users
-require_once('php/ajax_user_search.php');
 // Custom taxonomies
 require_once('php/custom_taxonomies.php');
 // Serve public 
