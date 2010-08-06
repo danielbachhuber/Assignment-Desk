@@ -410,7 +410,7 @@ class ad_editor_post_meta_box extends ad_post_meta_box {
         
         echo '<div id="ad-error-messages" style="display:none" class="error"></div>';
     
-        echo '<input type="hidden" name="_ad_noncename" id="_ad_noncename" value="' . 
+        echo '<input type="hidden" name="ad-noncename" id="ad-noncename" value="' . 
                     wp_create_nonce( plugin_basename(__FILE__) ) . '" />';
         
         echo '<div id="ad-pitch-info" class="ad-module misc-pub-section">';
@@ -443,7 +443,7 @@ class ad_editor_post_meta_box extends ad_post_meta_box {
         
         if ($executed_already) { return; }
         
-        if (!wp_verify_nonce($_POST['_ad_noncename'], plugin_basename(__FILE__))){
+        if (!wp_verify_nonce($_POST['ad-noncename'], plugin_basename(__FILE__))){
             return $post_id;
         }
 
