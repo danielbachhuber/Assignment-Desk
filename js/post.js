@@ -55,7 +55,7 @@ function add_to_assignees(user_login, role_id){
 	})
 	
 	if (already_assigned){
-		jQuery('div#ad-error-messages').html(user_login + ' is already assigned to this story.');
+		jQuery('div#ad-error-messages').html(user_login + ' is already assigned to this story.').show();
 		return false;
 	}
 	
