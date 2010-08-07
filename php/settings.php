@@ -18,7 +18,7 @@ if ( !class_exists( 'ad_settings' ) ){
 		register_setting( $assignment_desk->options_group, $assignment_desk->get_plugin_option_fullname('general'), array(&$this, 'assignment_desk_validate') );
 		
 		add_settings_section( 'story_pitches', 'Story Pitches', array(&$this, 'story_pitches_setting_section'), $assignment_desk->top_level_page );
-		add_settings_field( 'default_new_pitch_status', 'Default pitch status', array(&$this, 'default_new_pitch_status_option'), $assignment_desk->top_level_page, 'story_pitches' );
+		add_settings_field( 'default_new_assignment_status', 'Default assignment status', array(&$this, 'default_new_assignment_status_option'), $assignment_desk->top_level_page, 'story_pitches' );
 		add_settings_field( 'default_workflow_status', 'Default workflow status', array(&$this, 'default_workflow_status_option'), $assignment_desk->top_level_page, 'story_pitches' );
 		add_settings_field( 'pitch_form_elements', 'Pitch form elements', array(&$this, 'pitch_form_elements_option'), $assignment_desk->top_level_page, 'story_pitches' );
 				
@@ -31,20 +31,20 @@ if ( !class_exists( 'ad_settings' ) ){
 	
 	function story_pitches_setting_section() {
 		global $assignment_desk;
-		echo "Add an Assignment Desk pitch form to any page or post by adding &#60;!--$assignment_desk->pitch_form_key--&#62; where you'd like the text.";
+		echo "Add an Assignment Desk pitch form to any page or post by adding <code>&#60;!--$assignment_desk->pitch_form_key--&#62;</code> where you'd like the text.";
 	}
 	
-	function default_new_pitch_status_option() {
+	function default_new_assignment_status_option() {
 		global $assignment_desk;
-		$options = get_option($assignment_desk->get_plugin_option_fullname('general'));
-		$pitch_statuses = $assignment_desk->custom_taxonomies->get_pitch_statuses();
-		echo '<select id="default_new_pitch_status" name="assignment_desk_general[default_new_pitch_status]">';
-		foreach ($pitch_statuses as $pitch_status) {
-			echo "<option value='$pitch_status->term_id'";
-			if ($options['default_new_pitch_status'] == $pitch_status->term_id) {
+		$options = $assignment_desk->general_options;
+		$assignment_statuses = $assignment_desk->custom_taxonomies->get_assignment_statuses();
+		echo '<select id="default_new_assignment_status" name="assignment_desk_general[default_new_assignment_status]">';
+		foreach ($assignment_statuses as $assignment_status) {
+			echo "<option value='$assignment_status->term_id'";
+			if ($options['default_new_assignment_status'] == $assignment_status->term_id) {
 				echo ' selected="selected"';
 			}
-			echo ">$pitch_status->name</option>";
+			echo ">$assignment_status->name</option>";
  		}
 		echo '</select>';
 	}
@@ -57,7 +57,7 @@ if ( !class_exists( 'ad_settings' ) ){
 		global $assignment_desk;
 		if (class_exists('edit_flow')) {
 			global $edit_flow;
-			$options = get_option($assignment_desk->get_plugin_option_fullname('general'));
+			$options = $assignment_desk->general_options;
 			$post_statuses = $edit_flow->custom_status->get_custom_statuses();
 			echo '<select id="default_workflow_status" name="assignment_desk_general[default_workflow_status]">';
 			foreach ($post_statuses as $post_status) {
@@ -80,15 +80,13 @@ if ( !class_exists( 'ad_settings' ) ){
 	 */
 	function pitch_form_elements_option() {
 		global $assignment_desk;
-		$edit_flow_exists = false;
-		if (class_exists('edit_flow')) {
+		if ($assignment_desk->edit_flow_exists()) {
 			global $edit_flow;
-			$edit_flow_exists = true;
 		}
 	}
 	
 	function public_facing_views_setting_section() {
-		echo "Enable public access to pitches and stories in progress by dropping &#60;!--assignment-desk-all-stories--&#62; in a page.";
+		echo "Enable public access to pitches and stories in progress by dropping <code>&#60;!--assignment-desk-all-stories--&#62;</code> in a page.";
 	}
 	
 	/**
@@ -98,7 +96,7 @@ if ( !class_exists( 'ad_settings' ) ){
 		
 		// @todo Should we validate all elements?
 		
-		$input['default_new_pitch_status'] = (int)$input['default_new_pitch_status'];
+		$input['default_new_assignment_status'] = (int)$input['default_new_assignment_status'];
 		$input['google_api_key'] = wp_kses($input['google_api_key'], $allowedtags);
 		$input['twitter_hash'] = wp_kses($input['twitter_hash'], $allowedtags);
 		return $input;
@@ -111,12 +109,6 @@ if ( !class_exists( 'ad_settings' ) ){
 		if ( array_key_exists( 'updated', $_GET ) && $_GET['updated']=='true' ) { 
 			$msg = __('Settings Saved', 'assignment-desk');
 		}
-      
-       
-    
-          $this->options['display_approved_pitches']     = $_POST['display_approved_pitches'];
-          $this->options['public_pitch_voting']          = $_POST['public_pitch_voting'];
-          $this->options['public_pitch_comments']        = $_POST['public_pitch_comments'];
 
     
 ?>                                   

@@ -23,10 +23,8 @@ class ad_public_views {
 	function show_pitch_form($the_content) {
 		global $assignment_desk;
 		
-		$edit_flow_exists = false;
-		if (class_exists('edit_flow')) {
+		if ($assignment_desk->edit_flow_exists()) {
 			global $edit_flow;
-			$edit_flow_exists = true;
 		}
 		$options = get_option($assignment_desk->get_plugin_option_fullname('general'));
 		
@@ -52,11 +50,10 @@ class ad_public_views {
 	
 	function save_pitch_form() {
 		global $assignment_desk;
+		$message = array();
 
-		$edit_flow_exists = false;
-		if (class_exists('edit_flow')) {
+		if ($assignment_desk->edit_flow_exists()) {
 			global $edit_flow;
-			$edit_flow_exists = true;
 		}
 		
 		$options = get_option($assignment_desk->get_plugin_option_fullname('general'));
@@ -69,7 +66,7 @@ class ad_public_views {
 			$new_pitch = array();
 			$new_pitch['post_title'] = $_POST['assignment_desk_title'];
 			$new_pitch['post_content'] = '';
-			if ($edit_flow_exists) {
+			if ( $assignment_desk->edit_flow_exists() ) {
 				//$status_name = $edit_flow->custom_status->ef_get_status_name('id', $options['default_workflow_status']);
 				$default_status = get_term_by('term_id', $options['default_workflow_status'], 'post_status');
 				$new_pitch['post_status'] = $default_status->slug;
@@ -77,7 +74,14 @@ class ad_public_views {
 				$new_pitch['post_status'] = 'draft';
 			}
 			$post_id = wp_insert_post($new_pitch);
-			var_dump($post_id);
+			
+			if ( $post_id ) {
+				
+			} else {
+				return 'error';
+			}
+			
+			return 'message';
 		}
 		
 		return null;

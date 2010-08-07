@@ -137,10 +137,14 @@ if (!class_exists('assignment_desk')) {
              */
             $this->custom_taxonomies = new ad_custom_taxonomies(); 
             $this->user = new ad_user();
+			$this->post = new ad_post();
         	$this->manage_posts = new ad_manage_posts();
 			$this->settings = new ad_settings();
             $this->public_views = new ad_public_views();			
             
+
+			$this->general_options = get_option($this->get_plugin_option_fullname('general'));
+
             /**
              * Initialize various bits and pieces of functionality
              * @todo Should these be interchangeable and not have internal dependencies?
@@ -197,6 +201,18 @@ if (!class_exists('assignment_desk')) {
 				return false;
 			}
 		}
+		
+		/**
+		 * Check to see if Co-Authors Plus is activated
+		 */
+		function coauthors_plus_exists() {
+			if (class_exists('coauthors_plus')) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+		
         
         /**
 	    * Adds our CSS to the admin pages
@@ -247,7 +263,7 @@ if (!class_exists('assignment_desk')) {
          * WordPress taxonomy view for editing Pitch Statuses
          */
         add_submenu_page($this->top_level_page, 'Pitch Statuses',
-                        'Pitch Statuses', 'edit_posts', 'edit-tags.php?taxonomy='.$this->custom_taxonomies->pitch_status_label);
+                        'Pitch Statuses', 'edit_posts', 'edit-tags.php?taxonomy='.$this->custom_taxonomies->assignment_status_label);
         
         /**
          * WordPress taxonomy view for editing User Types
