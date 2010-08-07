@@ -13,7 +13,8 @@ class ad_manage_posts {
 		add_filter('manage_posts_columns', array(&$this, 'add_manage_post_columns'));
         add_action('manage_posts_custom_column', array(&$this, 'handle_ad_user_type_column'), 10, 2);
 		if ($assignment_desk->edit_flow_exists()) {
-        	add_action('manage_posts_custom_column', array(&$this, 'handle_ef_due_date_column'), 10, 2);
+        	add_action('manage_posts_custom_column', array(&$this, 'handle_ef_duedate_column'), 10, 2);
+			add_action('manage_posts_custom_column', array(&$this, 'handle_ef_location_column'), 10, 2);
 		}
         add_action('manage_posts_custom_column', array(&$this, 'handle_ad_assignment_column'), 10, 2);
 	}
@@ -31,6 +32,7 @@ class ad_manage_posts {
                                 );
 		if ($assignment_desk->edit_flow_exists()) {
 			$custom_fields_to_add[_('_ef_duedate')] = __('Due Date');
+			$custom_fields_to_add[_('_ef_location')] = __('Location');
 		}
         
         foreach ($custom_fields_to_add as $field => $title) {
@@ -68,7 +70,7 @@ class ad_manage_posts {
       *  Wordpress doens't know how to resolve the column name to a post attribute 
       *  so this function is called with the column name and the id of the post.
     */
-    function handle_ef_due_date_column($column_name, $post_id){
+    function handle_ef_duedate_column($column_name, $post_id){
         if ( $column_name == __('_ef_duedate') ){
             // Get the due date, format it and echo.
             $due_date = get_post_meta($post_id, '_ef_duedate', true);
@@ -76,7 +78,20 @@ class ad_manage_posts {
                 echo strftime("%b %d, %Y", $due_date);
             }
             else {
-                echo 'None';
+                echo 'None listed';
+            }
+        }
+    }
+
+	function handle_ef_location_column($column_name, $post_id){
+        if ( $column_name == __('_ef_location') ){
+            // Get the due date, format it and echo.
+            $location = get_post_meta($post_id, '_ef_location', true);
+            if($location){
+             	echo $location;
+            }
+            else {
+                echo 'None listed';
             }
         }
     }
