@@ -82,6 +82,10 @@ if (!class_exists('assignment_desk')) {
         
         public $option_prefix = 'ad_';
 
+		var $options_group = 'assignment_desk_';
+		
+		var $top_level_page = 'assignment_desk';
+
         /** @var array $options Stores the options for this plugin. */
         public $options = array();
 
@@ -130,74 +134,69 @@ if (!class_exists('assignment_desk')) {
              * @todo All initialization should be abstracted to an 'init' function instead of in the constructor
              */
             $this->custom_taxonomies = new ad_custom_taxonomies(); 
-            
             $this->user = new ad_user();
+			$this->settings = new ad_settings();
+            $this->public_views = new ad_public_views();			
             
             /**
              * Initialize various bits and pieces of functionality
              * @todo Should these be interchangeable and not have internal dependencies?
              */
-            $this->getOptions();
-            $this->custom_taxonomies->init_taxonomies();
+            $this->custom_taxonomies->init();
             $this->user->init_user();
             
             // @todo Make all public views just a template tag
-            $this->public_views = new ad_public_views();
             $this->public_views->init();
 
             $this->installer = new assignment_desk_install();
-            
 
-            // Build the various admin views and add them to the admin
-            $this->build_admin_views();
-            add_action('admin_init', array(&$this, 'add_admin_assets'));
-            add_action('admin_menu', array(&$this, 'add_admin_menu_items'));
-            
-			
         }
+
+		function init() {
+			
+			if ( is_admin() ) {
+				add_action('admin_menu', array(&$this, 'add_admin_menu_items'));
+				$this->build_admin_views();
+			}
+			
+		}
+
+		/**
+		 * Initialize the plugin for the admin 
+		 */
+		function admin_init() {
+			
+			$this->add_admin_assets();			
+			$this->settings->init();			
+			
+		}
         
         // Actions that happen only on activate.
         function activate_plugin() {
             $this->installer->setup_db();
         }
 
-        /**
-         * Retrieves the plugin options from the database.
-         * @return array
-         */
-        function getOptions() {
-            //Don't forget to set up the default options
-            if (!$theOptions = get_option($this->options_name)) {
-                $theOptions = array('default'=>'options');
-                update_option($this->options_name, $theOptions);
-            }
-            $this->options = $theOptions;
-            
-            //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            //There is no return here, because you should use the $this->options variable!!!
-            //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        }
-        /**
-        * Saves the admin options to the database.
-        */
-        function save_admin_options(){
-            return update_option($this->options_name, $this->options);
-        }
+		/**
+		 * Utility function
+		 */
+		function get_plugin_option_fullname( $name ) {
+			return $this->options_group . $name;
+		}
         
         /**
 	    * Adds our CSS to the admin pages
 	    */
     	function add_admin_assets() {
     	  
-        // Enqueue stylesheets
-        wp_enqueue_style('ad-admin-css', ASSIGNMENT_DESK_URL.'css/admin.css', null, ASSIGMENT_DESK_VERSION, 'all');
+			// Enqueue stylesheets
+			wp_enqueue_style('ad-admin-css', ASSIGNMENT_DESK_URL.'css/admin.css', null, ASSIGMENT_DESK_VERSION, 'all');
         
-        // Enqueue necessary scripts
-        wp_enqueue_script('tiny_mce');
-        wp_enqueue_script('wp-ajax-response');
-        wp_enqueue_script('jquery-truncator-js', ASSIGNMENT_DESK_URL .'js/jquery.truncator.js', 
+			// Enqueue necessary scripts
+			wp_enqueue_script('tiny_mce');
+			wp_enqueue_script('wp-ajax-response');
+			wp_enqueue_script('jquery-truncator-js', ASSIGNMENT_DESK_URL .'js/jquery.truncator.js', 
                               array('jquery'));
-        wp_enqueue_script('jquery-autocomplete-js', ASSIGNMENT_DESK_URL .'js/jquery.autocomplete.min.js', 
+			wp_enqueue_script('jquery-autocomplete-js', ASSIGNMENT_DESK_URL .'js/jquery.autocomplete.min.js', 
                               array('jquery'));        
 	    }
 	    
@@ -210,7 +209,6 @@ if (!class_exists('assignment_desk')) {
 	      // @todo Refactor dashboard widgets
         // $this->dashboard_widgets = new assignment_desk_dashboard_widgets();
         $this->manage_posts = new assignment_desk_manage_posts();
-        $this->settings = new ad_settings();
         
         // We should deprecate these views in favor of more explicit views
         $this->index_controller = new assignment_desk_index_controller();
@@ -227,28 +225,27 @@ if (!class_exists('assignment_desk')) {
          * Top-level Assignment Desk menu goes to Settings
          * @permissions Edit posts or higher
          */
-    		add_menu_page('Assignment Desk', 'Assignment Desk', 
-                        'edit_posts', 'assignment_desk', 
+		add_menu_page('Assignment Desk', 'Assignment Desk', 
+                        'edit_posts', $this->top_level_page, 
                         array(&$this->settings, 'general_settings'));
         
         /**
          * WordPress taxonomy view for editing Pitch Statuses
          */
-        add_submenu_page('assignment_desk', 'Pitch Statuses',
-                        'Pitch Statuses', 'edit_posts',
-                        'edit-tags.php?taxonomy='.$this->custom_taxonomies->pitch_status_label);
+        add_submenu_page($this->top_level_page, 'Pitch Statuses',
+                        'Pitch Statuses', 'edit_posts', 'edit-tags.php?taxonomy='.$this->custom_taxonomies->pitch_status_label);
         
         /**
          * WordPress taxonomy view for editing User Types
          */
-        add_submenu_page('assignment_desk', 'User Types',
+        add_submenu_page($this->top_level_page, 'User Types',
                         'User Types', 'edit_posts',
                         'edit-tags.php?taxonomy='.$this->custom_taxonomies->user_type_label);
         
         /**
          * WordPress taxonomy view for editing User Roles
          */
-        add_submenu_page('assignment_desk', 'User Roles',
+        add_submenu_page($this->top_level_page, 'User Roles',
                         'User Roles', 'edit_posts',
                         'edit-tags.php?taxonomy='.$this->custom_taxonomies->user_role_label);
 
@@ -290,6 +287,10 @@ if (!class_exists('assignment_desk')) {
 
 global $assignment_desk;
 $assignment_desk = new assignment_desk();
+
+// Core hooks to initialize the plugin
+add_action('init', array(&$assignment_desk,'init'));
+add_action('admin_init', array(&$assignment_desk,'admin_init'));
 
 // Hook to perform action when plugin activated
 register_activation_hook(ASSIGNMENT_DESK_FILE_PATH, array(&$assignment_desk, 'activate_plugin'));

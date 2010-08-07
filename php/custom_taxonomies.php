@@ -23,7 +23,7 @@ class ad_custom_taxonomies {
         
     }
     
-    function init_taxonomies() {
+    function init() {
       
       // Register $pitch_taxonomy if it doesn't exist, else generate an object								
 		if (!is_taxonomy($this->pitch_status_label)) {
@@ -91,17 +91,18 @@ class ad_custom_taxonomies {
 			}
       
     }
-    
-    function edit_taxonomy_page() {
-      
-      ?>
-      
-      Hello world
-      
-      <?php
-      
-      
-    }
+
+	/**
+	 * Wrapper for the get_terms method
+	 * @param array|string $args Standard set of get_term() parameters
+	 *
+ 	 */
+	function get_pitch_statuses( $args = null ) {
+		// Ensure our custom statuses get the respect they deserve
+		$args['get'] = 'all';
+		return get_terms($this->pitch_status_label, $args);
+	}
+   
     
     /**
 	 * Adds a new custom status as a term in the wp_terms table.
