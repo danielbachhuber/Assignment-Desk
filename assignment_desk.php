@@ -55,7 +55,7 @@ require_once('php/manage_posts.php');
 // Custom taxonomies
 require_once('php/custom_taxonomies.php');
 // Serve public 
-require_once('php/public-controller.php');
+require_once('php/public_views.php');
 
 if (!class_exists('assignment_desk')) {
     
@@ -142,8 +142,8 @@ if (!class_exists('assignment_desk')) {
             $this->user->init_user();
             
             // @todo Make all public views just a template tag
-            $this->public_controller = new ad_public_controller();
-            $this->public_controller->init();
+            $this->public_views = new ad_public_views();
+            $this->public_views->init();
 
             $this->installer = new assignment_desk_install();
             
