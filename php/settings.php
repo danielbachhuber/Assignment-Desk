@@ -19,10 +19,7 @@ if ( !class_exists( 'ad_settings' ) ){
 		
 		add_settings_section( 'story_pitches', 'Story Pitches', array(&$this, 'story_pitches_setting_section'), $assignment_desk->top_level_page );
 		add_settings_field( 'default_new_pitch_status', 'Default pitch status', array(&$this, 'default_new_pitch_status_option'), $assignment_desk->top_level_page, 'story_pitches' );
-		// Only add workflow option if Edit Flow exists
-		if (class_exists('edit_flow')) {
-			add_settings_field( 'default_workflow_status', 'Default workflow status', array(&$this, 'default_workflow_status_option'), $assignment_desk->top_level_page, 'story_pitches' );
-		}
+		add_settings_field( 'default_workflow_status', 'Default workflow status', array(&$this, 'default_workflow_status_option'), $assignment_desk->top_level_page, 'story_pitches' );
 				
 		
 		add_settings_section( 'public_facing_views', 'Public-Facing Views', array(&$this, 'public_facing_views_setting_section'), $assignment_desk->top_level_page );
@@ -32,7 +29,8 @@ if ( !class_exists( 'ad_settings' ) ){
 	}
 	
 	function story_pitches_setting_section() {
-		echo "Add an Assignment Desk pitch form to any page or post by adding &#60;!--assignment-desk-pitch-form--&#62; where you'd like the text.";
+		global $assignment_desk;
+		echo "Add an Assignment Desk pitch form to any page or post by adding &#60;!--$assignment_desk->pitch_form_key--&#62; where you'd like the text.";
 	}
 	
 	function default_new_pitch_status_option() {
@@ -55,19 +53,24 @@ if ( !class_exists( 'ad_settings' ) ){
 	 * @requires Edit Flow
 	 */
 	function default_workflow_status_option() {
-		global $assignment_desk, $edit_flow;
-		$options = get_option($assignment_desk->get_plugin_option_fullname('general'));
-		$post_statuses = $edit_flow->custom_status->get_custom_statuses();
-		echo '<select id="default_workflow_status" name="assignment_desk_general[default_workflow_status]">';
-		foreach ($post_statuses as $post_status) {
-			echo "<option value='$post_status->term_id'";
-			if ($options['default_workflow_status'] == $post_status->term_id) {
-				echo ' selected="selected"';
-			}
-			echo ">$post_status->name</option>";
- 		}
-		echo '</select><br />';
-		echo '<span class="description">Indicate the status in your workflow a new story pitch should be given.';
+		global $assignment_desk;
+		if (class_exists('edit_flow')) {
+			global $edit_flow;
+			$options = get_option($assignment_desk->get_plugin_option_fullname('general'));
+			$post_statuses = $edit_flow->custom_status->get_custom_statuses();
+			echo '<select id="default_workflow_status" name="assignment_desk_general[default_workflow_status]">';
+			foreach ($post_statuses as $post_status) {
+				echo "<option value='$post_status->term_id'";
+				if ($options['default_workflow_status'] == $post_status->term_id) {
+					echo ' selected="selected"';
+				}
+				echo ">$post_status->name</option>";
+ 			}
+			echo '</select><br />';
+			echo '<span class="description">Indicate the status in your workflow a new story pitch should be given.';
+		} else {
+			echo 'Please enable Edit Flow to define custom workflow statuses. Without Edit Flow, new pitches will be saved with a post status of "draft"';
+		}
 		
 	}
 	

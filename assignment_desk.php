@@ -85,6 +85,8 @@ if (!class_exists('assignment_desk')) {
 		var $options_group = 'assignment_desk_';
 		
 		var $top_level_page = 'assignment_desk';
+		
+		public $pitch_form_key = 'assignment-desk-pitch-form';
 
         /** @var array $options Stores the options for this plugin. */
         public $options = array();
@@ -145,8 +147,6 @@ if (!class_exists('assignment_desk')) {
             $this->custom_taxonomies->init();
             $this->user->init_user();
             
-            // @todo Make all public views just a template tag
-            $this->public_views->init();
 
             $this->installer = new assignment_desk_install();
 
@@ -157,6 +157,8 @@ if (!class_exists('assignment_desk')) {
 			if ( is_admin() ) {
 				add_action('admin_menu', array(&$this, 'add_admin_menu_items'));
 				$this->build_admin_views();
+			} else if (!is_admin()) {
+				$this->public_views->init();
 			}
 			
 		}
