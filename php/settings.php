@@ -20,6 +20,7 @@ if ( !class_exists( 'ad_settings' ) ){
 		add_settings_section( 'story_pitches', 'Story Pitches', array(&$this, 'story_pitches_setting_section'), $assignment_desk->top_level_page );
 		add_settings_field( 'default_new_pitch_status', 'Default pitch status', array(&$this, 'default_new_pitch_status_option'), $assignment_desk->top_level_page, 'story_pitches' );
 		add_settings_field( 'default_workflow_status', 'Default workflow status', array(&$this, 'default_workflow_status_option'), $assignment_desk->top_level_page, 'story_pitches' );
+		add_settings_field( 'pitch_form_elements', 'Pitch form elements', array(&$this, 'pitch_form_elements_option'), $assignment_desk->top_level_page, 'story_pitches' );
 				
 		
 		add_settings_section( 'public_facing_views', 'Public-Facing Views', array(&$this, 'public_facing_views_setting_section'), $assignment_desk->top_level_page );
@@ -74,6 +75,18 @@ if ( !class_exists( 'ad_settings' ) ){
 		
 	}
 	
+	/**
+	 * Enable/disable data elements on pitch form
+	 */
+	function pitch_form_elements_option() {
+		global $assignment_desk;
+		$edit_flow_exists = false;
+		if (class_exists('edit_flow')) {
+			global $edit_flow;
+			$edit_flow_exists = true;
+		}
+	}
+	
 	function public_facing_views_setting_section() {
 		echo "Enable public access to pitches and stories in progress by dropping &#60;!--assignment-desk-all-stories--&#62; in a page.";
 	}
@@ -82,6 +95,9 @@ if ( !class_exists( 'ad_settings' ) ){
 	 * Validation for all of our form elements
 	 */
 	function assignment_desk_validate($input) {
+		
+		// @todo Should we validate all elements?
+		
 		$input['default_new_pitch_status'] = (int)$input['default_new_pitch_status'];
 		$input['google_api_key'] = wp_kses($input['google_api_key'], $allowedtags);
 		$input['twitter_hash'] = wp_kses($input['twitter_hash'], $allowedtags);

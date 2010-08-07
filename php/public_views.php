@@ -21,13 +21,14 @@ class ad_public_views {
 	}
 	
 	function show_pitch_form($the_content) {
-		global $assigment_desk;
+		global $assignment_desk;
 		
 		$edit_flow_exists = false;
 		if (class_exists('edit_flow')) {
 			global $edit_flow;
 			$edit_flow_exists = true;
 		}
+		$options = get_option($assignment_desk->get_plugin_option_fullname('general'));
 		
 		$template_tag = '<!--assignment-desk-pitch-form-->';
 

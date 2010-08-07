@@ -137,6 +137,7 @@ if (!class_exists('assignment_desk')) {
              */
             $this->custom_taxonomies = new ad_custom_taxonomies(); 
             $this->user = new ad_user();
+        	$this->manage_posts = new ad_manage_posts();
 			$this->settings = new ad_settings();
             $this->public_views = new ad_public_views();			
             
@@ -156,6 +157,7 @@ if (!class_exists('assignment_desk')) {
 			
 			if ( is_admin() ) {
 				add_action('admin_menu', array(&$this, 'add_admin_menu_items'));
+				$this->manage_posts->init();
 				$this->build_admin_views();
 			} else if (!is_admin()) {
 				$this->public_views->init();
@@ -184,6 +186,17 @@ if (!class_exists('assignment_desk')) {
 		function get_plugin_option_fullname( $name ) {
 			return $this->options_group . $name;
 		}
+		
+		/**
+		 * Check to see if Edit Flow is activated
+		 */
+		function edit_flow_exists() {
+			if (class_exists('edit_flow')) {
+				return true;
+			} else {
+				return false;
+			}
+		}
         
         /**
 	    * Adds our CSS to the admin pages
@@ -210,7 +223,6 @@ if (!class_exists('assignment_desk')) {
 	      // Various views we want to instantiate
 	      // @todo Refactor dashboard widgets
         // $this->dashboard_widgets = new assignment_desk_dashboard_widgets();
-        $this->manage_posts = new assignment_desk_manage_posts();
         
         // We should deprecate these views in favor of more explicit views
         $this->index_controller = new assignment_desk_index_controller();
