@@ -187,13 +187,12 @@ class ad_post {
 		if ($all_participant_types == '' || !in_array('off', $participant_types)) {
 			$all_participant_types = 'All';
 		}
-		$all_participant_types = rtrim($all_participant_types, ', ');
 		
 		?>
 		<div class="misc-pub-section">
 			<label for="ad-participant-types">Contributor types:</label>
 		<?php if (count($user_types)) : ?>
-			<span id="ad-participant-types-display"><?php echo $all_participant_types; ?></span> 
+			<span id="ad-participant-types-display"><?php echo rtrim($all_participant_types, ', '); ?></span> 
 			<a id="ad-edit-participant-types" class='hide-if-no-js' href='#participant-types'>Edit</a>
 			<div id="ad-participant-types-select" class="hide-if-js">
 				<ul>

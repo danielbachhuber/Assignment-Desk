@@ -27,7 +27,7 @@ class ad_manage_posts {
 		global $assignment_desk;
         // TODO - Specify the column order
         $custom_fields_to_add = array(
-                                    _('_ad_user_type') => __('User Type'),
+                                    _('_ad_user_type') => __('Contributor Types'),
                                     _('_ad_assignment') => __('Assignment'),
                                 );
 		if ($assignment_desk->edit_flow_exists()) {
@@ -46,28 +46,31 @@ class ad_manage_posts {
       
       if ( $column_name == __( '_ad_user_type' ) ) {
         
-        $post = get_post($post_id);
-        $user_type = (int)get_usermeta($post->post_author, $assignment_desk->option_prefix.'user_type', true);
-        
-        $user_type_taxonomy = get_terms($assignment_desk->custom_taxonomies->user_type_label, array('get'=>'all'));
-        
-        foreach ( $user_type_taxonomy as $user_type_term ) {
-          if ( $user_type == $user_type_term->term_id ) {
-            $user_type_term_name = $user_type_term->name;
-            break;
-          } else {
-            $user_type_term_name = 'None assigned';
-          }
-        }
-          
-        echo $user_type_term_name;
+		$participant_types = array();
+        $user_types = $assignment_desk->custom_taxonomies->get_user_types();
+		foreach ( $user_types as $user_type ) {
+			$participant_types[$user_type->term_id] = get_post_meta($post_id, "_ad_participant_type_$user_type->term_id", true);
+			// If it's been set before, build the string of permitted types
+			// Else, set all of the participant types to 'on'
+			if ( $participant_types[$user_type->term_id] == 'on' ) {
+				$all_participant_types .= $user_type->name . ', ';
+			} else if ($participant_types[$user_type->term_id] == '') {
+				$participant_types[$user_type->term_id] = 'on';
+			}
+
+		}
+		if ($all_participant_types == '' || !in_array('off', $participant_types)) {
+			$all_participant_types = 'All';
+		}
+		
+		echo rtrim($all_participant_types, ', ');
           
       }
       
     }
     
     /**
-      *  Wordpress doens't know how to resolve the column name to a post attribute 
+      *  Wordpress doesn't know how to resolve the column name to a post attribute 
       *  so this function is called with the column name and the id of the post.
     */
     function handle_ef_duedate_column($column_name, $post_id){
