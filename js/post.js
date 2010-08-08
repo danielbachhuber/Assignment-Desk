@@ -13,25 +13,25 @@ if(typeof(String.prototype.trim) === "undefined") {
 function add_user_to_assignees(){
 	// get the form data
 	return add_to_assignees(jQuery("#ad-assignee-search").val().trim(), 
-	                             jQuery("#ad-assign-form .ad-user-role-select :selected").val());
+	                             jQuery("#ad-assign-form #ad-user-role-select :selected").val());
 	
 }
 
 /** 
-* Get the user volunteer user_login and selected role and add to the assign.
+* Get the user contributor user_login and selected role and add to the assign.
 */
-function add_volunteer_to_assignees(user_login){
+function add_participants_to_assignees(user_login){
     // Get the role from the assignee form
-    var role_id = jQuery('#ad_volunteer_' + user_login + ' .ad-user-role-select :selected').val();
+    var role_id = jQuery('#ad_participants_' + user_login + ' #ad-user-role-select :selected').val();
     add_to_assignees(user_login.toString().trim(), role_id);
-    jQuery('#ad_volunteer_' + user_login).remove();
-	var volunteer_count = parseInt(jQuery('#ad-volunteer-count').html());
-	volunteer_count -= 1;
-	if(volunteer_count == 1){
-		jQuery('#ad-volunteer-count-wrap').html('Volunteer (1)');
+    jQuery('#ad_participants_' + user_login).remove();
+	var participants_count = parseInt(jQuery('#ad-participants-count').html());
+	participants_count -= 1;
+	if(participants_count == 1){
+		jQuery('#ad-participants-count-wrap').html('Contributors (1)');
 	}
 	else {
-		jQuery('#ad-volunteer-count-wrap').html('Volunteers (' + volunteer_count + ')');
+		jQuery('#ad-participants-count-wrap').html('Contributors (' + participants_count + ')');
 	}
 }
 
@@ -72,14 +72,14 @@ function add_to_assignees(user_login, role_id){
 }
 
 /**
-* When a user clicks the "Assign" button for a volunteer, show them a form to select the role.
+* When a user clicks the "Assign" button for a contributor, show them a form to select the role.
 */
-function show_volunteer_assign_form(user_login){
+function show_participant_assign_form(user_login){
     user_login.trim()
-    var volunteer_assign_form = "<label>User: </label>" + user_login;
-    volunteer_assign_form += jQuery('div#ad-hidden-user-role-select').html();
-    volunteer_assign_form += '<a class="button" onclick="javascript: return add_volunteer_to_assignees(\'' + user_login + '\');">Assign</a>';
-    jQuery('#ad_volunteer_' + user_login).html(volunteer_assign_form);
+    var participant_assign_form = "<label>User: </label>" + user_login;
+    participant_assign_form += jQuery('div#ad-hidden-user-role-select').html();
+    participant_assign_form += '<a class="button" onclick="javascript: return add_participant_to_assignees(\'' + user_login + '\');">Assign</a>';
+    jQuery('#ad_participant_' + user_login).html(participant_assign_form);
     return false;  
 }
 

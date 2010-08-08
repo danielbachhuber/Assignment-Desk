@@ -1,13 +1,11 @@
 <?php
 
-if(!class_exists('ad_custom_taxonomy')){
+if(!class_exists('ad_custom_taxonomies')){
     
-require_once(ABSPATH . 'wp-admin/includes/template.php');
 /**
 * Base class for operations on custom taxonomies
 */
 class ad_custom_taxonomies {
-  
   
     var $assignment_status_label = 'assignment_status';
     var $user_role_label = 'user_role';
@@ -25,41 +23,47 @@ class ad_custom_taxonomies {
     
     function init() {
       
-      // Register $pitch_taxonomy if it doesn't exist, else generate an object								
-		if (!is_taxonomy($this->assignment_status_label)) {
+		$args = array();
+		$labels = array();
+		// Register $assignment_taxonomy if it doesn't exist, else generate an object								
+		if (!$this->ad_taxonomy_exists($this->assignment_status_label)) {
 			// @todo Need to label the different text on the view
-			  $args = array('label' => 'Assignment Statuses',
-			                'public' => true,
-			                'show_ui' => false,
+			$labels = array('name' => 'Assignment Statuses',
+							'singular_name' => 'Assignment Status',
+							'search_items' => 'Search Assignment Statuses',
+							'add_new_item' => 'Add New Assignment Status',													
+							);
+			$args = array(	'label' => false,
+							'labels' => $labels,
+							'public' => false,
+			                'show_ui' => true,
 			                'show_tagcloud' => false,
-			                );
-			  register_taxonomy($this->assignment_status_label, array('post'), $args);
-			  // @todo check whether this use of remove_meta_box is appropriate
-			  remove_meta_box("tagsdiv-$this->assignment_status_label", 'post', 'side');
-			}
+							);
+			register_taxonomy($this->assignment_status_label, array('post'), $args);
+		}
 			
-			$default_assignment_labels = array(
-	        array(  'term' => 'New',
-                  'args' => array( 
-                        'slug' => 'new',
-                        'description' => 'A new pitch that has not been edited.',)
-			          ),
-			    array(  'term' => 'Approved',
-				          'args' => array( 
-				                'slug' => 'approved',
-                        'description' => 'An editor has approved the pitch.',)
-			          ),
-			    array(  'term' => 'Rejected',
-				          'args' => array( 
-				                'slug' => 'rejected',
-									      'description' => 'The pitch was no accepted for development.',)
-			          ),
-			    array(  'term' => 'On hold',
-                  'args' => array( 
-                        'slug' => 'on-hold',
-                        'description' => 'Work on the pitch is on hold.',)
-			          ),
-	    );
+		$default_assignment_labels = array(
+        array(  'term' => 'New',
+                 'args' => array( 
+                       'slug' => 'new',
+                       'description' => 'A new pitch that has not been edited.',)
+		          ),
+		    array(  'term' => 'Approved',
+			          'args' => array( 
+			                'slug' => 'approved',
+                       'description' => 'An editor has approved the pitch.',)
+		          ),
+		    array(  'term' => 'Rejected',
+			          'args' => array( 
+			                'slug' => 'rejected',
+								      'description' => 'The pitch was no accepted for development.',)
+		          ),
+		    array(  'term' => 'On hold',
+                 'args' => array( 
+                       'slug' => 'on-hold',
+                       'description' => 'Work on the pitch is on hold.',)
+		          ),
+    );
 	    
 	    // @todo Ensure these are getting added on initialization
 	    foreach ( $default_assignment_labels as $term ){
@@ -68,29 +72,33 @@ class ad_custom_taxonomies {
           }
 	    }
 			
-			// Register $user_role_taxonomy if it doesn't exist									
-			if (!is_taxonomy($this->user_role_label)) {
-			  // @todo Need to label the different text on the view
-			  $args = array('label' => 'User Roles',
-			                'public' => true,
-			                'show_ui' => false,
-			                'show_tagcloud' => false,
-			                );
-			  register_taxonomy($this->user_role_label, array('user'), $args);
-			}
+		// Register $user_role_taxonomy if it doesn't exist									
+		if (!$this->ad_taxonomy_exists($this->user_role_label)) {
+		  // @todo Need to label the different text on the view
+		  $args = array('label' => 'User Roles',
+		                'public' => true,
+		                'show_ui' => false,
+		                'show_tagcloud' => false,
+		                );
+		  register_taxonomy($this->user_role_label, array('user'), $args);
+		}
 			
-			// Register $user_type_taxonomy if it doesn't exist									
-			if (!is_taxonomy($this->user_type_label)) {
-			  // @todo Need to label the different text on the view
-			  $args = array('label' => 'User Types',
-			                'public' => true,
-			                'show_ui' => false,
-			                'show_tagcloud' => false,
-			                );
-			  register_taxonomy($this->user_type_label, array('user'), $args);
-			}
+		// Register $user_type_taxonomy if it doesn't exist									
+		if (!$this->ad_taxonomy_exists($this->user_type_label)) {
+		  // @todo Need to label the different text on the view
+		  $args = array('label' => 'User Types',
+		                'public' => true,
+		                'show_ui' => false,
+		                'show_tagcloud' => false,
+		                );
+		  register_taxonomy($this->user_type_label, array('user'), $args);
+		}
       
     }
+
+	function remove_assignment_status_post_meta_box() {
+		remove_meta_box("tagsdiv-$this->assignment_status_label", 'post', 'side');
+	}
 
 	/**
 	 * Wrapper for the get_terms method
@@ -101,6 +109,29 @@ class ad_custom_taxonomies {
 		// Ensure our custom statuses get the respect they deserve
 		$args['get'] = 'all';
 		return get_terms($this->assignment_status_label, $args);
+	}
+	
+	/**
+	 * Wrapper for the get_terms method
+	 * @param array|string $args Standard set of get_term() parameters
+	 *
+ 	 */
+	function get_user_types( $args = null ) {
+		// Ensure our custom statuses get the respect they deserve
+		$args['get'] = 'all';
+		return get_terms($this->user_type_label, $args);
+	}
+	
+	/**
+	 * Wrapper for determining whether taxonomy exists
+	 * @param string $taxonomy
+	 */
+	function ad_taxonomy_exists($taxonomy) {
+		if ( function_exists( 'taxonomy_exists' ) ) {
+			return taxonomy_exists( $taxonomy );
+		} else {
+			return is_taxonomy( $taxonomy );
+		}
 	}
 	
 	/**

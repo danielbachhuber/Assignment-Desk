@@ -166,6 +166,40 @@ class ad_post {
 		
     }
 
+	function display_participant_types() {
+		global $post, $wpdb, $assignment_desk;
+		
+		$participant_types = array();
+		$all_participant_types = '';
+		
+		$user_types = $assignment_desk->custom_taxonomies->get_user_types();
+		foreach ( $user_types as $user_type ) {
+			$participant_types[$user_type->term_id] = (int)get_post_meta($post_id, "_ad_participant_type_$user_type->term_id", true);
+			if ( $participant_types[$user_type->term_id] == 'on' ) {
+				$all_participant_types .= $user_type->name . ', ';
+			}
+			
+		}
+		if ($all_participant_types == '') {
+			$all_participant_types = 'All';
+		}
+		rtrim($all_participant_types, ',');
+		
+		?>
+		<div class="misc-pub-section">
+			<label for="ad-participant-types">Contributor types:</label>
+		<?php if (count($user_types)) : ?>
+			<span id="ad-participant-types-display"><?php echo $all_participant_types; ?></span> 
+			<a class='hide-if-no-js ad-edit-participant-types' href='#participant-types'>Edit</a>
+		<?php else : ?>
+			<span id="ad-participant-types-display">None defined</span> 
+			<a href='<?php echo admin_url(); ?>edit-tags.php?taxonomy=<?php echo $assignment_desk->custom_taxonomies->user_role_label; ?>' target='_blank'>Create</a>
+		<?php endif; ?>
+		</div>
+		<?php 
+	
+	}
+
 	/**
      * Print a form to choose the user.
      * This is shown when the co-authors-plus plugin is NOT active.
@@ -187,10 +221,13 @@ class ad_post {
         echo "</select>";
         echo "</div>";
     }
-    
+
+	/**
+     * Loren ipsum bitches
+	 */ 
     function user_role_select($user_roles){
-        echo "<label>Role</label>&nbsp;";
-        echo "<select class='ad-user-role-select'>";
+        echo "<label for='ad-user-role-select'>Role</label>&nbsp;";
+        echo "<select id='ad-user-role-select'>";
             foreach($user_roles as $user_role) {
                 echo "<option value='{$user_role->term_id}'>{$user_role->name}</option>";
             }
@@ -228,7 +265,7 @@ class ad_post {
 	            // Only show the div if there are assignees for that role
 	            echo "<div id='ad_assignees_role_{$user_role->term_id}'";
 	            echo ($num_users)? ">" : "style='display:none'>";
-	            echo "<h4>{$user_role->name}s</h4>";
+	            echo "<h5>{$user_role->name}s</h5>";
 	            echo "<ul id='ad_assignees_role_{$user_role->term_id}'>";
 	            if($num_users){
 	                $user_sql = "SELECT ID, user_login, user_nicename
@@ -245,7 +282,7 @@ class ad_post {
 	                    $users = array($users);
 	                }
 	                foreach($users as $user){
-	                    echo "<li><input type='hidden' name='ad-assignees[]' value='{$user->user_login}|{$user_role->term_id}'>{$user->user_nicename}</li>";
+	                    echo "<li><input type='hidden' id='ad-assignees' name='ad-assignees[]' value='{$user->user_login}|{$user_role->term_id}' />{$user->user_nicename}</li>";
 	                }
 	            }
 	            echo "</ul></div>";
@@ -260,26 +297,26 @@ class ad_post {
     }
 
 	/**
-    * Print the list of volunteers.
+    * Print the list of participants.
     */
-    function display_volunteers() {
+    function display_participants() {
         global $assignment_desk, $post;
-        // Print the volunteers (if any and came from a pitch)
-        $volunteers = get_post_meta($post->ID, '_ad_volunteer', false);
+        // Print the participants (if any and came from a pitch)
+        $participants = get_post_meta($post->ID, '_ad_participants', false);
 
-        if(count($volunteers)): ?>      
+        if(count($participants)): ?>      
         <div class="ad-module misc-pub-section">
-            <h4 id="ad-volunteer-count-wrap">Volunteers (<span id="ad-volunteer-count"><?php echo count($volunteers); ?></span>)</h4>
+            <h4 id="ad-participants-count-wrap">Contributors (<span id="ad-participants-count"><?php echo count($participants); ?></span>)</h4>
             <ul>
-            <?php foreach($volunteers as $user_login):
+            <?php foreach($participants as $user_login):
                     $user = get_userdatabylogin($user_login);
                 ?>
                 <li>
                 <?php if (!empty($user->user_login)): ?>
-                    <div id="ad_volunteer_<?php echo $user->user_login; ?>">
+                    <div id="ad_participants_<?php echo $user->user_login; ?>">
                         <?php echo $user->user_login; ?>
                         <a class="button"
-                                onclick="javascript:return show_volunteer_assign_form('<?php echo $user->user_login; ?>');">Assign</a>
+                                onclick="javascript:return show_participant_assign_form('<?php echo $user->user_login; ?>');">Assign</a>
                     </div>
                 <?php else: ?>
                     <?php echo $user->user_nicename; ?> 
@@ -290,7 +327,7 @@ class ad_post {
         </div>
         <?php else: ?>
 			<div class="message info">
-				No volunteers have been assigned to this post.
+				No contributors have been assigned to this post.
 			</div>
         <?php endif; ?>
 <?php
@@ -308,6 +345,7 @@ class ad_post {
 		echo '<h4 class="toggle">Details</h4><div class="inner">';
         $this->display_assignment_info();
 		$this->display_assignment_status();
+		$this->display_participant_types();
         echo '</div></div>';
 
 		echo '<div class="ad-module">';
@@ -321,8 +359,8 @@ class ad_post {
 		echo '</div></div>';
 		
 		echo '<div class="ad-module">';
-		echo '<h4 class="toggle">Volunteers</h4><div class="inner">';
-        $this->display_volunteers();
+		echo '<h4 class="toggle">Contributors</h4><div class="inner">';
+        $this->display_participants();
 		echo '</div></div>';
     }
 
@@ -339,9 +377,9 @@ class ad_post {
         
         if ($executed_already) { return; }
         
-        if (!wp_verify_nonce($_POST['ad-noncename'], plugin_basename(__FILE__))){
-            return $post_id;
-        }
+        //if (!wp_verify_nonce($_POST['ad-noncename'], plugin_basename(__FILE__))){
+         //   return $post_id;
+       // }
 
         // The user who pitched this story.
         if($_POST['_ad_pitched_by']){
@@ -382,21 +420,21 @@ class ad_post {
         }
 
         // Multiple post authors using co-authors-plus
-        if($_POST['ad-assignees']){
+        if ( $_POST['ad-assignees'] ) {
             global $coauthors_plus;
         
-            $volunteers = get_post_meta($post_id, '_ad_volunteer', false);
+            $participants = get_post_meta($post_id, '_ad_participants', false);
             $assignees = array();
             $role_users = array();
             // Users and their associated roles are sent over as username|rolename    
             // Split into an associative array.
-            foreach($_POST['ad-assignees'] as $user_and_role){
+            foreach ($_POST['ad-assignees'] as $user_and_role){
                 $split = explode('|', $user_and_role);
                 $user = $split[0];
                 $role = $split[1];
                 $assignees[] = $user;
                 $role_users[$role][] = $user;
-                delete_post_meta($post_id, '_ad_volunteer', $user);
+                delete_post_meta($post_id, '_ad_participants', $user);
             }
             //print_r($assignees);
             // Save the list of coauthors
@@ -420,13 +458,6 @@ class ad_post {
                     }
                 }
                 update_post_meta($post_id, "_ad_assignees_role_$role", $role_users[$role]);
-            }
-            if($post_is_waiting){
-                $wpdb->update($wpdb->posts,
-                        array('post_status' => __('waiting for reply')),
-                        array('ID' => $post_id),
-                        array('%s'),
-                        array('%d'));
             }
         }
         $executed_already = 1;

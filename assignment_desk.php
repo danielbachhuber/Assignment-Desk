@@ -160,9 +160,12 @@ if (!class_exists('assignment_desk')) {
 		function init() {
 			
 			if ( is_admin() ) {
-				add_action('admin_menu', array(&$this, 'add_admin_menu_items'));
+				add_action( 'admin_menu', array(&$this, 'add_admin_menu_items'));
+				add_action( 'admin_menu', array(&$this->custom_taxonomies, 'remove_assignment_status_post_meta_box') );
 				$this->manage_posts->init();
+				
 				$this->build_admin_views();
+				
 			} else if (!is_admin()) {
 				$this->public_views->init();
 			}
@@ -262,8 +265,8 @@ if (!class_exists('assignment_desk')) {
         /**
          * WordPress taxonomy view for editing Pitch Statuses
          */
-        add_submenu_page($this->top_level_page, 'Pitch Statuses',
-                        'Pitch Statuses', 'edit_posts', 'edit-tags.php?taxonomy='.$this->custom_taxonomies->assignment_status_label);
+        add_submenu_page($this->top_level_page, 'Assignment Statuses',
+                        'Assignment Statuses', 'edit_posts', 'edit-tags.php?taxonomy='.$this->custom_taxonomies->assignment_status_label);
         
         /**
          * WordPress taxonomy view for editing User Types
