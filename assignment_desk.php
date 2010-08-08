@@ -90,6 +90,7 @@ if (!class_exists('assignment_desk')) {
 		
 		// Only WP Editor and above can edit pages
 		public $define_editor_permissions = 'edit_pages';
+		public $define_admin_permissions = 'manage_options';
 
         /** @var array $options Stores the options for this plugin. */
         public $options = array();
@@ -249,27 +250,27 @@ if (!class_exists('assignment_desk')) {
 	         * @permissions Edit posts or higher
 	         */
 			add_menu_page('Assignment Desk', 'Assignment Desk', 
-	                        'edit_posts', $this->top_level_page, 
+	                        $this->define_admin_permissions, $this->top_level_page, 
 	                        array(&$this->settings, 'general_settings'));
         
 	        /**
 	         * WordPress taxonomy view for editing Pitch Statuses
 	         */
 	        add_submenu_page($this->top_level_page, 'Assignment Statuses',
-	                        'Assignment Statuses', 'edit_posts', 'edit-tags.php?taxonomy='.$this->custom_taxonomies->assignment_status_label);
+	                        'Assignment Statuses', $this->define_editor_permissions, 'edit-tags.php?taxonomy='.$this->custom_taxonomies->assignment_status_label);
         
 	        /**
 	         * WordPress taxonomy view for editing User Types
 	         */
 	        add_submenu_page($this->top_level_page, 'User Types',
-	                        'User Types', 'edit_posts',
+	                        'User Types', $this->define_editor_permissions,
 	                        'edit-tags.php?taxonomy='.$this->custom_taxonomies->user_type_label);
         
 	        /**
 	         * WordPress taxonomy view for editing User Roles
 	         */
 	        add_submenu_page($this->top_level_page, 'User Roles',
-	                        'User Roles', 'edit_posts',
+	                        'User Roles', $this->define_editor_permissions,
 	                        'edit-tags.php?taxonomy='.$this->custom_taxonomies->user_role_label);
 
 
