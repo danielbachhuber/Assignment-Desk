@@ -16,7 +16,7 @@ class ad_manage_posts {
         	add_action('manage_posts_custom_column', array(&$this, 'handle_ef_duedate_column'), 10, 2);
 			add_action('manage_posts_custom_column', array(&$this, 'handle_ef_location_column'), 10, 2);
 		}
-        add_action('manage_posts_custom_column', array(&$this, 'handle_ad_assignment_column'), 10, 2);
+        add_action('manage_posts_custom_column', array(&$this, 'handle_ad_assignment_status_column'), 10, 2);
 	}
     
     /**
@@ -28,7 +28,7 @@ class ad_manage_posts {
         // TODO - Specify the column order
         $custom_fields_to_add = array(
                                     _('_ad_user_type') => __('Contributor Types'),
-                                    _('_ad_assignment') => __('Assignment'),
+                                    _('_ad_assignment_status') => __('Assignment Status'),
                                 );
 		if ($assignment_desk->edit_flow_exists()) {
 			$custom_fields_to_add[_('_ef_duedate')] = __('Due Date');
@@ -84,13 +84,13 @@ class ad_manage_posts {
         }
     }
     
-    function handle_ad_assignment_column($column_name, $post_id){
-        if($column_name == __('_ad_assignment')){
-            echo 'Placeholder';
-            /* Print out Assignment Metadata
-               - Editor 
-               - Authors
-            */
+    function handle_ad_assignment_status_column($column_name, $post_id){
+		global $assignment_desk;
+        if ( $column_name == __('_ad_assignment_status') ) {
+            $current_status = wp_get_object_terms($post_id, $assignment_desk->custom_taxonomies->assignment_status_label);
+			if ($current_status) {
+				echo $current_status[0]->name;
+			}
         }
     }
 }
