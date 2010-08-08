@@ -122,7 +122,16 @@ class ad_custom_taxonomies {
 		return get_terms($this->user_type_label, $args);
 	}
 	
-	
+	/**
+	 * Wrapper for the get_terms method
+	 * @param array|string $args Standard set of get_term() parameters
+	 *
+ 	 */
+	function get_user_roles( $args = null ) {
+		// Ensure our custom statuses get the respect they deserve
+		$args['get'] = 'all';
+		return get_terms($this->user_role_label, $args);
+	}
 	
 	function get_user_types_for_post( $post_id = null ) {
 		

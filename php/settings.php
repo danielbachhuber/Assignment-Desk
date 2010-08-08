@@ -18,6 +18,7 @@ if ( !class_exists( 'ad_settings' ) ){
 		register_setting( $assignment_desk->options_group, $assignment_desk->get_plugin_option_fullname('general'), array(&$this, 'assignment_desk_validate') );
 		
 		add_settings_section( 'story_pitches', 'Story Pitches', array(&$this, 'story_pitches_setting_section'), $assignment_desk->top_level_page );
+		add_settings_field( 'pitch_form_enabled', 'Pitch forms enabled', array(&$this, 'pitch_form_enabled_option'), $assignment_desk->top_level_page, 'story_pitches' );
 		add_settings_field( 'default_new_assignment_status', 'Default assignment status', array(&$this, 'default_new_assignment_status_option'), $assignment_desk->top_level_page, 'story_pitches' );
 		add_settings_field( 'default_workflow_status', 'Default workflow status', array(&$this, 'default_workflow_status_option'), $assignment_desk->top_level_page, 'story_pitches' );
 		add_settings_field( 'pitch_form_elements', 'Pitch form elements', array(&$this, 'pitch_form_elements_option'), $assignment_desk->top_level_page, 'story_pitches' );
@@ -26,12 +27,24 @@ if ( !class_exists( 'ad_settings' ) ){
 		add_settings_section( 'public_facing_views', 'Public-Facing Views', array(&$this, 'public_facing_views_setting_section'), $assignment_desk->top_level_page );
 		
 		add_settings_section( 'miscellaneous', 'Miscellaneous', array(&$this, 'miscellaneous_setting_section'), $assignment_desk->top_level_page );
+		add_settings_field( 'google_maps_api_key', 'Google Maps API key', array(&$this, 'google_maps_api_key_option'), $assignment_desk->top_level_page, 'miscellaneous' );
 		
 	}
 	
 	function story_pitches_setting_section() {
 		global $assignment_desk;
-		echo "Add an Assignment Desk pitch form to any page or post by adding <code>&#60;!--$assignment_desk->pitch_form_key--&#62;</code> where you'd like the text.";
+		echo "Add an Assignment Desk pitch form to any page or post by adding <code>&#60;!--$assignment_desk->pitch_form_key--&#62;</code> where you'd it to appear.";
+	}
+	
+	function pitch_form_enabled_option() {
+		global $assignment_desk;
+		$options = $assignment_desk->general_options;
+		
+		echo '<input id="pitch_form_enabled" name="assignment_desk_general[pitch_form_enabled]" type="checkbox"';
+		if ($options['pitch_form_enabled']) {
+			echo ' checked="checked"';
+		}
+		echo ' />';
 	}
 	
 	function default_new_assignment_status_option() {
@@ -83,10 +96,73 @@ if ( !class_exists( 'ad_settings' ) ){
 		if ($assignment_desk->edit_flow_exists()) {
 			global $edit_flow;
 		}
+		$options = $assignment_desk->general_options;
+		echo '<ul>';
+		// Title
+		echo '<li><input type="checkbox" disabled="disabled" checked="checked" />&nbsp;<label for="pitch_form_title">Title</label></li>';
+		// Description
+		if ($assignment_desk->edit_flow_exists()) {
+			echo '<li><input id="pitch_form_description_enabled" name="assignment_desk_general[pitch_form_description_enabled]" type="checkbox"';
+			if ($options['pitch_form_description_enabled']) {
+				echo ' checked="checked"';
+			}
+			echo ' />&nbsp;<label for="pitch_form_description_enabled">Description</label></li>';
+		} else {
+				echo '<li>Please enable Edit Flow to allow description field.</li>';
+		}
+		// Categories
+		echo '<li><input id="pitch_form_categories_enabled" name="assignment_desk_general[pitch_form_categories_enabled]" type="checkbox"';
+		if ($options['pitch_form_categories_enabled']) {
+			echo ' checked="checked"';
+		}
+		echo ' />&nbsp;<label for="pitch_form_categories_enabled">Categories</label></li>';
+		// Tags
+		echo '<li><input id="pitch_form_tags_enabled" name="assignment_desk_general[pitch_form_tags_enabled]" type="checkbox"';
+		if ($options['pitch_form_tags_enabled']) {
+			echo ' checked="checked"';
+		}
+		echo ' />&nbsp;<label for="pitch_form_tags_enabled">Tags</label></li>';
+		// Volunteer
+		echo '<li><input id="pitch_form_volunteer_enabled" name="assignment_desk_general[pitch_form_volunteer_enabled]" type="checkbox"';
+		if ($options['pitch_form_volunteer_enabled']) {
+			echo ' checked="checked"';
+		}
+		echo ' />&nbsp;<label for="pitch_form_volunteer_enabled">Volunteer</label></li>';
+		// Due date
+		if ($assignment_desk->edit_flow_exists()) {
+			echo '<li><input id="pitch_form_duedate_enabled" name="assignment_desk_general[pitch_form_duedate_enabled]" type="checkbox"';
+			if ($options['pitch_form_duedate_enabled']) {
+				echo ' checked="checked"';
+			}
+			echo ' />&nbsp;<label for="pitch_form_duedate_enabled">Due Date</label></li>';
+		} else {
+				echo '<li>Please enable Edit Flow to allow due date field.</li>';
+		}
+		// Location
+		if ($assignment_desk->edit_flow_exists()) {
+			echo '<li><input id="pitch_form_location_enabled" name="assignment_desk_general[pitch_form_location_enabled]" type="checkbox"';
+			if ($options['pitch_form_location_enabled']) {
+				echo ' checked="checked"';
+			}
+			echo ' />&nbsp;<label for="pitch_form_location_enabled">Location</label></li>';
+			
+		} else {
+			echo '<li>Please enable Edit Flow to allow location field.</li>';
+		}
+		echo '</ul>';
 	}
 	
 	function public_facing_views_setting_section() {
 		echo "Enable public access to pitches and stories in progress by dropping <code>&#60;!--assignment-desk-all-stories--&#62;</code> in a page.";
+	}
+	
+	function google_maps_api_key_option() {
+		global $assignment_desk;
+		$options = $assignment_desk->general_options;
+		echo '<input type="text" id="google_maps_api_key" name="assignment_desk_general[google_maps_api_key]" value="';
+		echo $options['google_maps_api_key'];
+		echo '"/>';
+		
 	}
 	
 	/**
@@ -97,8 +173,7 @@ if ( !class_exists( 'ad_settings' ) ){
 		// @todo Should we validate all elements?
 		
 		$input['default_new_assignment_status'] = (int)$input['default_new_assignment_status'];
-		$input['google_api_key'] = wp_kses($input['google_api_key'], $allowedtags);
-		$input['twitter_hash'] = wp_kses($input['twitter_hash'], $allowedtags);
+		$input['google_maps_api_key'] = wp_kses($input['google_maps_api_key'], $allowedtags);
 		return $input;
 	}
     
@@ -124,6 +199,7 @@ if ( !class_exists( 'ad_settings' ) ){
 		<h2><?php _e('Assignment Desk Settings', 'assignment-desk') ?></h2>
 		
 			<form action="options.php" method="post">
+				
 				<?php settings_fields( $assignment_desk->options_group ); ?>
 				<?php do_settings_sections( $assignment_desk->top_level_page ); ?>
 				
@@ -131,17 +207,7 @@ if ( !class_exists( 'ad_settings' ) ){
 				
 			</form>
 	</div>
-      
-      <p>@todo Setup options:
-      <ul>
-        <li>Enable pitch statuses</li>
-        <li>Enable user types (community member, NYU student, NYT Reporter, Editor, etc.)</li>
-        <li>Enable user roles (photographer, writer, copy editor, etc.)</li>
-      </p>
-      
-      <p>
-          In order to show the posts with the status "pitch" you need to create at least one Wordpress page or post with &lt;-- assignment-desk-public --&gt; tag in it. The Assignment Desk will find this tag and display public pitch pages. See the settings below for more control of what the public can do.
-      </p>
+
 
 
 
@@ -163,20 +229,8 @@ if ( !class_exists( 'ad_settings' ) ){
           <th scope="row"><?php _e('Enable tip comments on public pitches:', $this->localizationDomain); ?></th> 
           <td><input type="checkbox" name="public_pitch_comments" val="1" checked="<?php echo ($this->options['public_pitch_comments'] == '1')? 'checked':'' ;?>"></td>
         </tr>
-        
-        <tr valign="top"> 
-          <th scope="row"><?php _e('Google API Key:', $this->localizationDomain); ?></th> 
-          <td><input name="google_api_key" type="text" size="100" 
-                      value="<?php echo $this->options['google_api_key'] ;?>"></td>
-        </tr>
-        <tr valign="top"> 
-          <th scope="row"><?php _e('Twitter Hash:', $this->localizationDomain); ?></th> 
-                  <td><input name="assignment_desk_twitter_hash" type="text" size="25" 
-                      value="<?php echo $this->options['assignment_desk_twitter_hash'] ;?>"></td>
-              </tr>                    <tr>
-        
-              </tr>
-          </table>
+
+	</table>
 
 
 <?php
