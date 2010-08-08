@@ -46,24 +46,9 @@ class ad_manage_posts {
       
       if ( $column_name == __( '_ad_user_type' ) ) {
         
-		$participant_types = array();
-        $user_types = $assignment_desk->custom_taxonomies->get_user_types();
-		foreach ( $user_types as $user_type ) {
-			$participant_types[$user_type->term_id] = get_post_meta($post_id, "_ad_participant_type_$user_type->term_id", true);
-			// If it's been set before, build the string of permitted types
-			// Else, set all of the participant types to 'on'
-			if ( $participant_types[$user_type->term_id] == 'on' ) {
-				$all_participant_types .= $user_type->name . ', ';
-			} else if ($participant_types[$user_type->term_id] == '') {
-				$participant_types[$user_type->term_id] = 'on';
-			}
-
-		}
-		if ($all_participant_types == '' || !in_array('off', $participant_types)) {
-			$all_participant_types = 'All';
-		}
+		$participant_types = $assignment_desk->custom_taxonomies->get_user_types_for_post($post_id);
 		
-		echo rtrim($all_participant_types, ', ');
+		echo $participant_types['display'];
           
       }
       
