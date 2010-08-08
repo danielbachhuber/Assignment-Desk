@@ -1,12 +1,26 @@
-div.ad-module {
-    padding: 2px;
-}
-.ad-module h4 {
+div.ad-module h4 {
     background: #F1F1F1;
     border: 1px solid #DFDFDF;
     font-weight: bold;
     margin: 0px;
     padding: 6px;
+}
+
+div.ad-module h4:hover {
+	cursor:pointer;
+}
+
+div.message {
+	border-width: 2px;
+	border-style: solid;
+	padding: 5px;
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+div.message.alert {
+	border-color: #CC0000;
+	background-color: #FFEBE8;
 }
 
 ul.plain {

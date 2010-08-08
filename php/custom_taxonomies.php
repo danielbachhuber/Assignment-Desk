@@ -9,7 +9,7 @@ require_once(ABSPATH . 'wp-admin/includes/template.php');
 class ad_custom_taxonomies {
   
   
-    var $assignment_status_label = 'pitch_status';
+    var $assignment_status_label = 'assignment_status';
     var $user_role_label = 'user_role';
     var $user_type_label = 'user_type';
     
@@ -28,7 +28,7 @@ class ad_custom_taxonomies {
       // Register $pitch_taxonomy if it doesn't exist, else generate an object								
 		if (!is_taxonomy($this->assignment_status_label)) {
 			// @todo Need to label the different text on the view
-			  $args = array('label' => 'Pitch Statuses',
+			  $args = array('label' => 'Assignment Statuses',
 			                'public' => true,
 			                'show_ui' => false,
 			                'show_tagcloud' => false,

@@ -8,14 +8,26 @@ if (!class_exists('ad_post')) {
 class ad_post {
     
    function __construct() {
-        // Set up metabox and related actions
+        
+		// @todo Move to assignment_desk class
+		$this->init();
+    }
+
+	function init() {
+		
+		// Set up metabox and related actions
         add_action('admin_menu', array(&$this, 'add_post_meta_box'));
         // 20, 2 = execute our method very late (10 is default) and send 2 args,
         // the second being the post object
         add_action('save_post', array(&$this, 'save_post_meta_box'), 9, 2);
         add_action('edit_post', array(&$this, 'save_post_meta_box'), 9, 2);
         add_action('publish_post', array(&$this, 'save_post_meta_box'), 9, 2);
-    }
+		
+		$this->enqueue_admin_css();
+		$this->enqueue_admin_javascript();	
+		add_action( 'admin_print_scripts', array(&$this, 'javascript_variables') );
+		
+	}
     
     /**
      * Adds Assignment Desk meta_box to Post/Page edit pages 
@@ -30,15 +42,13 @@ class ad_post {
                             'post', 
                             'side', 
                             'high');
-            $this->add_css();
-            $this->add_javascript();
         }
     }
     
     /**
      * Adds Assignment Desk CSS to Post/Page edit pages 
      */
-    function add_css(){
+    function enqueue_admin_css(){
         // Enqueue the ad_post_meta.css
         wp_enqueue_style('ad-post-meta-style', ASSIGNMENT_DESK_URL.'css/post.css', false, false, 'all');
         wp_enqueue_style('ad-fancybox', ASSIGNMENT_DESK_URL . 'js/fancybox/jquery.fancybox-1.3.1.css', false, false, 'all');
@@ -47,21 +57,20 @@ class ad_post {
     /**
      * Adds Assignment Desk javascript to Post/Page edit pages 
      */
-    function add_javascript(){
-        wp_enqueue_script('jquery-fancybox-js', ASSIGNMENT_DESK_URL .'js/fancybox/jquery.fancybox-1.3.1.pack.js', 
-                    array('jquery'));
+    function enqueue_admin_javascript() {
         wp_enqueue_script('ad-post-js', ASSIGNMENT_DESK_URL .'js/post.js', array('jquery', 'suggest'));
     }
     
     /**
     * Print out some global JS variables that we need to compose from PHPH variables so we can use them later.
     */
-    function js_vars(){
+    function javascript_variables(){
 		global $assignment_desk;
         // AJAX link used for the autosuggest
 		if ($assignment_desk->coauthors_plus_exists()) {
+			$admin_url = admin_url();
 			echo '<script type="text/javascript">';
-	        echo "var coauthor_ajax_suggest_link ='{admin_url()}admin-ajax.php?action=coauthors_ajax_suggest'";
+	        echo "var coauthor_ajax_suggest_link ='{$admin_url}admin-ajax.php?action=coauthors_ajax_suggest';";
 	        echo '</script>';
 		}
 
@@ -83,8 +92,7 @@ class ad_post {
     */
     function display_assignment_info(){
        	global $post, $wpdb;
-        echo '<h4><a id="toggle-ad-assignment-detail">Assignment</a></h4>';
-        echo "<div id='ad-assignment-detail'>";
+        echo "<div id='ad-assignment-detail' class='misc-pub-section'>";
         
         $pitched_by = get_post_meta($post->ID, '_ad_pitched_by', true);
         $users = $wpdb->get_results("SELECT ID, user_nicename
@@ -129,7 +137,8 @@ class ad_post {
     function display_assignment_status(){
         global $post, $wpdb, $assignment_desk;
 
-        echo '<label>Assignment Status:</label>';
+		echo '<div class="misc-pub-section">';
+        echo '<label for="ad_assignment_status">Status:</label>';
         // What is the status of this Assignment?
         $current_status = wp_get_object_terms($post->ID,
                                               $assignment_desk->custom_taxonomies->assignment_status_label);
@@ -144,7 +153,7 @@ class ad_post {
 		// List all of the assignment statuses
 		$assignment_statuses = get_terms($assignment_desk->custom_taxonomies->assignment_status_label,
                                         array( 'get' => 'all'));
-		echo "<select name='_ad_assignment_status'>";
+		echo "<select name='ad_assignment_status'>";
 		foreach ( $assignment_statuses as $assignment_status ) {
 			echo "<option value='{$assignment_status->term_id}'";
 			if ( $assignment_status->term_id == $current_status->term_id ) {
@@ -153,6 +162,7 @@ class ad_post {
 			echo ">{$assignment_status->name}</option>";
 		}
 		echo "</select>";
+		echo '</div>';
 		
     }
 
@@ -164,9 +174,9 @@ class ad_post {
         global $wpdb, $post;
         
         $users = $wpdb->get_results("SELECT ID, user_nicename FROM $wpdb->users");
-        echo "<div class='ad-module misc-pub-section'>";
-        echo "<label>Author:</label>";
-        echo "<select name='_ad_author'>";
+        echo "<div class='misc-pub-section'>";
+        echo "<label for='ad_author'>Author:</label>";
+        echo "<select id='ad_author' name='ad_author'>";
         foreach($users as $user){
             echo "<option value='{$user->ID}' ";
             if($user->ID == $post->post_author){
@@ -179,7 +189,7 @@ class ad_post {
     }
     
     function user_role_select($user_roles){
-        echo "<label>Role</label>";
+        echo "<label>Role</label>&nbsp;";
         echo "<select class='ad-user-role-select'>";
             foreach($user_roles as $user_role) {
                 echo "<option value='{$user_role->term_id}'>{$user_role->name}</option>";
@@ -197,66 +207,56 @@ class ad_post {
         $user_roles = get_terms($assignment_desk->custom_taxonomies->user_role_label,
                                     array( 'get' => 'all', 'order' => "-name")); 
         ?>
-        <div id="ad-assign-form" class="ad-module misc-pub-section">
-            <h4>Assign this post to:</h4>
-            <label>User</label>
-            <input type="text" id="ad-assignee-search" size="30" maxlength="50">
-            <br>
-        <?php
-            if(count($user_roles)) {
-                echo $this->user_role_select($user_roles);
-            }
-            else {
-                echo "You don't have any user roles defined. Go";
-                echo "<a href='{admin_url()}edit-tags.php?taxonomy=user_role'>here</a>to create some.";
-            }
-        ?>
-            <a id="ad-assign-button" class="button" <?php echo (count($user_roles)? '': 'disabled'); ?>>Add</a>
-        </div>
-        
-        <div style="display:none" id="ad-hidden-user-role-select">
-            <?php $this->user_role_select($user_roles); ?>
-        </div>
-            
-        
-        <?php
-        foreach($user_roles as $user_role){
-            $num_users = 0;
-            // Lookup all users assigned to this post with this role.
-            $user_logins = get_post_meta($post->ID, "_ad_assignees_role_{$user_role->term_id}", true);
-            // @todo - HACK HACK HACK. get_post_meta should return either an array or an empty string
-            if(!is_array($user_logins) && count($user_logins) == 1){
-                $user_logins = array();
-            }
-            $num_users = count($user_logins);
-            
-            // Only show the div if there are assignees for that role
-            echo "<div class='ad-module misc-pub-section' id='ad_assignees_role_{$user_role->term_id}'";
-            echo ($num_users)? ">" : "style='display:none'>";
-            echo "<h4>{$user_role->name}s</h4>";
-            echo "<ul id='ad_assignees_role_{$user_role->term_id}'>";
-            if($num_users){
-                $user_sql = "SELECT ID, user_login, user_nicename
-                            FROM $wpdb->users 
-                            WHERE 0 OR ";
-                for($i = 0; $i < $num_users - 1; $i++){
-                    $user_sql .= " user_login='{$user_logins[$i]}' OR ";
-                }
-                $num_users--;
-                $user_sql .= " user_login='{$user_logins[$num_users]}'";
-                            
-                $users = $wpdb->get_results($user_sql);
-                if(!is_array($users)){
-                    $users = array($users);
-                }
-                foreach($users as $user){
-                    echo "<li><input type='hidden' name='ad-assignees[]' value='{$user->user_login}|{$user_role->term_id}'>{$user->user_nicename}</li>";
-                }
-            }
-            echo "</ul></div>";
-        }
-        ?>
-<?php
+		<div id="ad-assign-form">
+			<?php if ( count($user_roles) ) : ?>
+			<div class="misc-pub-section">
+            <label for="ad-assignee-search">User</label> <input type="text" id="ad-assignee-search" name="ad-assignee-search" size="20" maxlength="50"><br />
+			<?php echo $this->user_role_select($user_roles); ?>
+			<a id="ad-assign-button" class="button">Add</a>
+			</div>
+			<?php
+	        foreach($user_roles as $user_role){
+	            $num_users = 0;
+	            // Lookup all users assigned to this post with this role.
+	            $user_logins = get_post_meta($post->ID, "_ad_assignees_role_{$user_role->term_id}", true);
+	            // @todo - HACK HACK HACK. get_post_meta should return either an array or an empty string
+	            if(!is_array($user_logins) && count($user_logins) == 1){
+	                $user_logins = array();
+	            }
+	            $num_users = count($user_logins);
+
+	            // Only show the div if there are assignees for that role
+	            echo "<div id='ad_assignees_role_{$user_role->term_id}'";
+	            echo ($num_users)? ">" : "style='display:none'>";
+	            echo "<h4>{$user_role->name}s</h4>";
+	            echo "<ul id='ad_assignees_role_{$user_role->term_id}'>";
+	            if($num_users){
+	                $user_sql = "SELECT ID, user_login, user_nicename
+	                            FROM $wpdb->users 
+	                            WHERE 0 OR ";
+	                for($i = 0; $i < $num_users - 1; $i++){
+	                    $user_sql .= " user_login='{$user_logins[$i]}' OR ";
+	                }
+	                $num_users--;
+	                $user_sql .= " user_login='{$user_logins[$num_users]}'";
+
+	                $users = $wpdb->get_results($user_sql);
+	                if(!is_array($users)){
+	                    $users = array($users);
+	                }
+	                foreach($users as $user){
+	                    echo "<li><input type='hidden' name='ad-assignees[]' value='{$user->user_login}|{$user_role->term_id}'>{$user->user_nicename}</li>";
+	                }
+	            }
+	            echo "</ul></div>";
+	        }
+	        ?>
+			
+			<?php else : ?>
+				<div class="message alert">You haven't defined any user roles yet. Get started by <a href='<?php echo admin_url(); ?>edit-tags.php?taxonomy=<?php echo $assignment_desk->custom_taxonomies->user_role_label; ?>' target='_blank'>defining one or more roles</a>.</div>
+			<?php endif; ?>
+		</div>
+	<?php
     }
 
 	/**
@@ -289,7 +289,9 @@ class ad_post {
             </ul>
         </div>
         <?php else: ?>
-            <i>No Volunteers</i>
+			<div class="message info">
+				No volunteers have been assigned to this post.
+			</div>
         <?php endif; ?>
 <?php
     }
@@ -302,19 +304,26 @@ class ad_post {
 
         echo '<div id="ad-error-messages" style="display:none" class="error"></div>';
 
-        echo '<div id="ad-assignment-info" class="ad-module misc-pub-section">';
+        echo '<div class="ad-module">';
+		echo '<h4 class="toggle">Details</h4><div class="inner">';
         $this->display_assignment_info();
 		$this->display_assignment_status();
-        echo '</div>';
+        echo '</div></div>';
 
+		echo '<div class="ad-module">';
+		echo '<h4 class="toggle">User Roles</h4><div class="inner">';
         if ($assignment_desk->coauthors_plus_exists()){
             $this->display_multiple_assignees();
         }
         else {
             $this->display_author();
         }
-
+		echo '</div></div>';
+		
+		echo '<div class="ad-module">';
+		echo '<h4 class="toggle">Volunteers</h4><div class="inner">';
         $this->display_volunteers();
+		echo '</div></div>';
     }
 
 	/**
@@ -340,14 +349,14 @@ class ad_post {
         }
         
         // The status of the story if it is still a pitch
-        if ( $_POST['_ad_assignment_status'] ){
+        if ( $_POST['ad_assignment_status'] ){
             wp_set_object_terms($post_id,
-                                (int)$_POST['_ad_assignment_status'], $assignment_desk->custom_taxonomies->assignment_status_label);
+                                (int)$_POST['ad_assignment_status'], $assignment_desk->custom_taxonomies->assignment_status_label);
         }
 
         // Single post author. Change the author.
-        if($_POST['_ad_author']){
-            $author_id = $_POST['_ad_author'];
+        if($_POST['ad_author']){
+            $author_id = $_POST['ad_author'];
             if(is_email($author_id)){
                 // New User from the community.
                 // @todo - Add a setting to enable/disable community membership.

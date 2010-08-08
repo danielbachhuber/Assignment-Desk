@@ -71,25 +71,6 @@ function add_to_assignees(user_login, role_id){
 	return false;
 }
 
-function setup_ajax_user_search(){
-	// Get the search ket from the assignment desk box
-	jQuery('#ad-assignee-search').suggest(coauthor_ajax_suggest_link,
-									{ onSelect: 
-										function() {
-											var vals = this.value.split("|");				
-											var author = {}
-											author.id = jQuery.trim(vals[0]);										
-											author.login = jQuery.trim(vals[1]);
-											author.name = jQuery.trim(vals[2]);
-											jQuery('#ad-assignee-search').val(author.name)
-										}
-								    })
-    	                            .keydown(function(e) {
-    	                                // ignore the enter key
-    		                            if(e.keyCode == 13) { return false; }
-    	                            })
-}
-
 /**
 * When a user clicks the "Assign" button for a volunteer, show them a form to select the role.
 */
@@ -102,27 +83,31 @@ function show_volunteer_assign_form(user_login){
     return false;  
 }
 
-jQuery(document).ready(    
-    function(){
-        jQuery(".fancybox").fancybox({
-            "transitionIn"	:	"elastic",
-        	"transitionOut"	:	"elastic",
-        	"speedIn"		:	200, 
-        	"speedOut"		:	200, 
-        	"overlayShow"	:	false
-        });
-        
-        // Toggle the pitch detail div with the link
-        jQuery("a#toggle-ad-pitch-detail").click(
-            function(){
-                jQuery("div#ad-pitch-detail").slideToggle();
-                return false;
-            }
-        );
+jQuery(document).ready(function(){
+    
+	/**
+     * Toggle post_meta_box subheads
+	 */
+	jQuery('h4.toggle').click(function() {
+		var inner = jQuery(this).parent().find('div.inner').slideToggle();
+	});
 		
-		// Add the add_to_assignees function as a hook on the assign button
-		jQuery("#ad-assign-button").click(add_user_to_assignees);
+	// Add the add_to_assignees function as a hook on the assign button
+	jQuery("#ad-assign-button").click(add_user_to_assignees);
 		
-		setup_ajax_user_search();
-    }
-);
+    jQuery('#ad-assignee-search').suggest(coauthor_ajax_suggest_link,
+		{ onSelect: 
+			function() {
+  			var vals = this.value.split("|");				
+			var author = {}
+			author.id = jQuery.trim(vals[0]);										
+			author.login = jQuery.trim(vals[1]);
+			author.name = jQuery.trim(vals[2]);
+			Query('#ad-assignee-search').val(author.name)
+		}
+	}).keydown(function(e) {
+		// ignore the enter key
+		if(e.keyCode == 13) { return false; }
+	});
+		
+});
