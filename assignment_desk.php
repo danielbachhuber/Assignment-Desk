@@ -87,6 +87,9 @@ if (!class_exists('assignment_desk')) {
 		var $top_level_page = 'assignment_desk';
 		
 		public $pitch_form_key = 'assignment-desk-pitch-form';
+		
+		// Only WP Editor and above can edit pages
+		public $define_editor_permissions = 'edit_pages';
 
         /** @var array $options Stores the options for this plugin. */
         public $options = array();

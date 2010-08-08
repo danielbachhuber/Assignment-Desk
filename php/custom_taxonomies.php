@@ -126,11 +126,14 @@ class ad_custom_taxonomies {
 	
 	function get_user_types_for_post( $post_id = null ) {
 		
-		if ( !$post_id ) {
-			return false;
-		}
-		
 		$user_types_for_post = array();
+		// Post hasn't been saved yet I guess...
+		if ( !$post_id ) {
+			$user_types_for_post['display'] = 'All';
+			return $user_types_for_post;
+		}
+	
+		$all_participant_types = '';
 		
 		$user_types = $this->get_user_types();
 		foreach ( $user_types as $user_type ) {

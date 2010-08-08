@@ -166,17 +166,23 @@ class ad_post {
 		
     }
 
+	/**
+	 * Print allowed participant types
+	 * @todo User edit permissions check
+	 */
 	function display_participant_types() {
-		global $post, $wpdb, $assignment_desk;
+		global $post, $wpdb, $assignment_desk, $current_user;
+		
+		wp_get_current_user();
 		
 		$participant_types = $assignment_desk->custom_taxonomies->get_user_types_for_post($post->ID);
 		$user_types = $assignment_desk->custom_taxonomies->get_user_types();
-		
 		?>
 		<div class="misc-pub-section">
 			<label for="ad-participant-types">Contributor types:</label>
 		<?php if (count($user_types)) : ?>
 			<span id="ad-participant-types-display"><?php echo $participant_types['display']; ?></span> 
+		<?php if (current_user_can($assignment_desk->define_editor_permissions)) : ?>
 			<a id="ad-edit-participant-types" class='hide-if-no-js' href='#participant-types'>Edit</a>
 			<div id="ad-participant-types-select" class="hide-if-js">
 				<ul>
@@ -187,6 +193,7 @@ class ad_post {
 				<a id="save-ad-participant-types" class="hide-if-no-js button" href="#participant-types">OK</a>
 				<a id="cancel-ad-participant-types" class="hide-if-no-js" href="#participant-types">Cancel</a>
 			</div>
+		<?php endif; ?>
 		<?php else : ?>
 			<span id="ad-participant-types-display">None defined</span> 
 			<a href='<?php echo admin_url(); ?>edit-tags.php?taxonomy=<?php echo $assignment_desk->custom_taxonomies->user_role_label; ?>' target='_blank'>Create</a>
@@ -361,8 +368,9 @@ class ad_post {
     * Save Assignment Desk post meta data
     */
     function save_post_meta_box($post_id, $post) {
-        
-        global $executed_already, $wpdb, $assignment_desk;
+        global $executed_already, $wpdb, $assignment_desk, $current_user;
+
+		wp_get_current_user();
         
         // if ($executed_already){ return; } else { $executed_already = true; }
         if ($post->post_type == 'revision') { return;}
@@ -374,20 +382,32 @@ class ad_post {
          //   return $post_id;
        // }
 
-        // The user who pitched this story.
-
-		$user_types = $assignment_desk->custom_taxonomies->get_user_types();
+        // The user who pitched this story
 
 		update_post_meta($post_id, '_ad_pitched_by', (int)$_POST['_ad_pitched_by']);
         
         // The status of the story if it is still a pitch
 		wp_set_object_terms($post_id, (int)$_POST['ad_assignment_status'], $assignment_desk->custom_taxonomies->assignment_status_label);
 		
-		foreach ($user_types as $user_type) {
-			if ( in_array($user_type->term_id, $_POST['ad-participant-types']) ) {
-				update_post_meta($post_id, "_ad_participant_type_$user_type->term_id", 'on');
-			} else {
-				update_post_meta($post_id, "_ad_participant_type_$user_type->term_id", 'off');
+		
+		// If the current user can edit participant types, allow them to do so
+		// Otherwise, set all participant types to 'on' if they're unset
+		$user_types = $assignment_desk->custom_taxonomies->get_user_types();
+		// Only editors can update the participant types on an assignment
+		if (current_user_can($assignment_desk->define_editor_permissions)) {
+			foreach ($user_types as $user_type) {
+				if ( in_array($user_type->term_id, $_POST['ad-participant-types']) ) {
+					update_post_meta($post_id, "_ad_participant_type_$user_type->term_id", 'on');
+				} else {
+					update_post_meta($post_id, "_ad_participant_type_$user_type->term_id", 'off');
+				}
+			}
+		} else {
+			foreach ($user_types as $user_type) {
+				$participant_type_state = get_post_meta($post_id, "_ad_participant_type_$user_type->term_id", true);
+				if ( $participant_type_state != 'on' && $participant_type_state != 'off' ) {
+					update_post_meta($post_id, "_ad_participant_type_$user_type->term_id", 'on');
+				}
 			}
 		}
 
