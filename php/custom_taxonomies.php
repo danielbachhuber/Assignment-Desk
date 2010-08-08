@@ -122,6 +122,41 @@ class ad_custom_taxonomies {
 		return get_terms($this->user_type_label, $args);
 	}
 	
+	
+	
+	function get_user_types_for_post( $post_id = null ) {
+		
+		if ( !$post_id ) {
+			return false;
+		}
+		
+		$user_types_for_post = array();
+		
+		$user_types = $this->get_user_types();
+		foreach ( $user_types as $user_type ) {
+			$user_types_for_post[$user_type->term_id] = get_post_meta($post_id, "_ad_participant_type_$user_type->term_id", true);
+			// If it's been set before, build the string of permitted types
+			// Else, set all of the participant types to 'on'
+			if ( $user_types_for_post[$user_type->term_id] == 'on' ) {
+				$all_participant_types .= $user_type->name . ', ';
+			} else if ($user_types_for_post[$user_type->term_id] == '') {
+				$user_types_for_post[$user_type->term_id] = 'on';
+			}
+			
+		}
+		
+		if (in_array('off', $user_types_for_post) && !in_array('on', $user_types_for_post)) {
+			$user_types_for_post['display'] = 'None';
+		} else if ($all_participant_types == '' || !in_array('off', $user_types_for_post)) {
+			$user_types_for_post['display'] = 'All';
+		} else {
+			$user_types_for_post['display'] = rtrim($all_participant_types, ', ');
+		}
+		
+		return $user_types_for_post;
+		
+	}
+	
 	/**
 	 * Wrapper for determining whether taxonomy exists
 	 * @param string $taxonomy

@@ -169,30 +169,14 @@ class ad_post {
 	function display_participant_types() {
 		global $post, $wpdb, $assignment_desk;
 		
-		$participant_types = array();
-		$all_participant_types = '';
-		
+		$participant_types = $assignment_desk->custom_taxonomies->get_user_types_for_post($post->ID);
 		$user_types = $assignment_desk->custom_taxonomies->get_user_types();
-		foreach ( $user_types as $user_type ) {
-			$participant_types[$user_type->term_id] = get_post_meta($post->ID, "_ad_participant_type_$user_type->term_id", true);
-			// If it's been set before, build the string of permitted types
-			// Else, set all of the participant types to 'on'
-			if ( $participant_types[$user_type->term_id] == 'on' ) {
-				$all_participant_types .= $user_type->name . ', ';
-			} else if ($participant_types[$user_type->term_id] == '') {
-				$participant_types[$user_type->term_id] = 'on';
-			}
-			
-		}
-		if ($all_participant_types == '' || !in_array('off', $participant_types)) {
-			$all_participant_types = 'All';
-		}
 		
 		?>
 		<div class="misc-pub-section">
 			<label for="ad-participant-types">Contributor types:</label>
 		<?php if (count($user_types)) : ?>
-			<span id="ad-participant-types-display"><?php echo rtrim($all_participant_types, ', '); ?></span> 
+			<span id="ad-participant-types-display"><?php echo $participant_types['display']; ?></span> 
 			<a id="ad-edit-participant-types" class='hide-if-no-js' href='#participant-types'>Edit</a>
 			<div id="ad-participant-types-select" class="hide-if-js">
 				<ul>
@@ -361,19 +345,16 @@ class ad_post {
         echo '</div></div>';
 
 		echo '<div class="ad-module">';
-		echo '<h4 class="toggle">User Roles</h4><div class="inner">';
+		echo '<h4 class="toggle">Contributors</h4><div class="inner">';
         if ($assignment_desk->coauthors_plus_exists()){
             $this->display_multiple_assignees();
+        	$this->display_participants();
         }
         else {
             $this->display_author();
         }
 		echo '</div></div>';
 		
-		echo '<div class="ad-module">';
-		echo '<h4 class="toggle">Contributors</h4><div class="inner">';
-        $this->display_participants();
-		echo '</div></div>';
     }
 
 	/**

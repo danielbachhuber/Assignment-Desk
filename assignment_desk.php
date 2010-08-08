@@ -160,11 +160,10 @@ if (!class_exists('assignment_desk')) {
 		function init() {
 			
 			if ( is_admin() ) {
+				
 				add_action( 'admin_menu', array(&$this, 'add_admin_menu_items'));
 				add_action( 'admin_menu', array(&$this->custom_taxonomies, 'remove_assignment_status_post_meta_box') );
-				$this->manage_posts->init();
-				
-				$this->build_admin_views();
+				$this->manage_posts->init();	
 				
 			} else if (!is_admin()) {
 				$this->public_views->init();
@@ -191,14 +190,16 @@ if (!class_exists('assignment_desk')) {
 		 * Utility function
 		 */
 		function get_plugin_option_fullname( $name ) {
+			
 			return $this->options_group . $name;
+			
 		}
 		
 		/**
 		 * Check to see if Edit Flow is activated
 		 */
 		function edit_flow_exists() {
-			if (class_exists('edit_flow')) {
+			if ( class_exists('edit_flow') ) {
 				return true;
 			} else {
 				return false;
@@ -209,7 +210,7 @@ if (!class_exists('assignment_desk')) {
 		 * Check to see if Co-Authors Plus is activated
 		 */
 		function coauthors_plus_exists() {
-			if (class_exists('coauthors_plus')) {
+			if ( class_exists('coauthors_plus') ) {
 				return true;
 			} else {
 				return false;
@@ -234,53 +235,39 @@ if (!class_exists('assignment_desk')) {
                               array('jquery'));        
 	    }
 	    
-	    /**
-	     * Builds the various WordPress admin views we need
-	     */
-	    function build_admin_views() {
-	      
-	      // Various views we want to instantiate
-	      // @todo Refactor dashboard widgets
-        // $this->dashboard_widgets = new assignment_desk_dashboard_widgets();
         
-        // We should deprecate these views in favor of more explicit views
-        $this->index_controller = new assignment_desk_index_controller();
-        $this->contributor_controller = new assignment_desk_contributor_controller();
-        
-	    }
-        
-      /**
+      	/**
 	     * Adds menu items for the plugin
 	     */
-      function add_admin_menu_items() {
+      	function add_admin_menu_items() {
       
-        /**
-         * Top-level Assignment Desk menu goes to Settings
-         * @permissions Edit posts or higher
-         */
-		add_menu_page('Assignment Desk', 'Assignment Desk', 
-                        'edit_posts', $this->top_level_page, 
-                        array(&$this->settings, 'general_settings'));
+			/**
+	         * Top-level Assignment Desk menu goes to Settings
+	         * @permissions Edit posts or higher
+	         */
+			add_menu_page('Assignment Desk', 'Assignment Desk', 
+	                        'edit_posts', $this->top_level_page, 
+	                        array(&$this->settings, 'general_settings'));
         
-        /**
-         * WordPress taxonomy view for editing Pitch Statuses
-         */
-        add_submenu_page($this->top_level_page, 'Assignment Statuses',
-                        'Assignment Statuses', 'edit_posts', 'edit-tags.php?taxonomy='.$this->custom_taxonomies->assignment_status_label);
+	        /**
+	         * WordPress taxonomy view for editing Pitch Statuses
+	         */
+	        add_submenu_page($this->top_level_page, 'Assignment Statuses',
+	                        'Assignment Statuses', 'edit_posts', 'edit-tags.php?taxonomy='.$this->custom_taxonomies->assignment_status_label);
         
-        /**
-         * WordPress taxonomy view for editing User Types
-         */
-        add_submenu_page($this->top_level_page, 'User Types',
-                        'User Types', 'edit_posts',
-                        'edit-tags.php?taxonomy='.$this->custom_taxonomies->user_type_label);
+	        /**
+	         * WordPress taxonomy view for editing User Types
+	         */
+	        add_submenu_page($this->top_level_page, 'User Types',
+	                        'User Types', 'edit_posts',
+	                        'edit-tags.php?taxonomy='.$this->custom_taxonomies->user_type_label);
         
-        /**
-         * WordPress taxonomy view for editing User Roles
-         */
-        add_submenu_page($this->top_level_page, 'User Roles',
-                        'User Roles', 'edit_posts',
-                        'edit-tags.php?taxonomy='.$this->custom_taxonomies->user_role_label);
+	        /**
+	         * WordPress taxonomy view for editing User Roles
+	         */
+	        add_submenu_page($this->top_level_page, 'User Roles',
+	                        'User Roles', 'edit_posts',
+	                        'edit-tags.php?taxonomy='.$this->custom_taxonomies->user_role_label);
 
 
          /*   // Add "Activity" for contributors and higher.
@@ -304,15 +291,6 @@ if (!class_exists('assignment_desk')) {
                             
            */
     	}
-
-		/**
-		* This function currently doesn't work. We need to figure out how to link into the edit.php
-		* page and pass the post_status=pitch flag.
-		*/
-		function link_to_pitches(){
-			$_GET['post_status'] = 'pitch';
-			//include(ABSPATH . 'wp-admin/edit.php');
-		}
 		
   } //End Class
   
