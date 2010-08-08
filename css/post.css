@@ -32,6 +32,10 @@ span#ad-participant-types-display {
 	font-weight: bold;
 }
 
+div#ad-participant-types-select {
+	margin-top: 10px;
+}
+
 ul.plain {
 	list-style: none;
 	margin: 8px 0 5px;

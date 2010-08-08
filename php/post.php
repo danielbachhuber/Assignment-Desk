@@ -174,23 +174,36 @@ class ad_post {
 		
 		$user_types = $assignment_desk->custom_taxonomies->get_user_types();
 		foreach ( $user_types as $user_type ) {
-			$participant_types[$user_type->term_id] = (int)get_post_meta($post_id, "_ad_participant_type_$user_type->term_id", true);
+			$participant_types[$user_type->term_id] = get_post_meta($post->ID, "_ad_participant_type_$user_type->term_id", true);
+			// If it's been set before, build the string of permitted types
+			// Else, set all of the participant types to 'on'
 			if ( $participant_types[$user_type->term_id] == 'on' ) {
 				$all_participant_types .= $user_type->name . ', ';
+			} else if ($participant_types[$user_type->term_id] == '') {
+				$participant_types[$user_type->term_id] = 'on';
 			}
 			
 		}
-		if ($all_participant_types == '') {
+		if ($all_participant_types == '' || !in_array('off', $participant_types)) {
 			$all_participant_types = 'All';
 		}
-		rtrim($all_participant_types, ',');
+		$all_participant_types = rtrim($all_participant_types, ', ');
 		
 		?>
 		<div class="misc-pub-section">
 			<label for="ad-participant-types">Contributor types:</label>
 		<?php if (count($user_types)) : ?>
 			<span id="ad-participant-types-display"><?php echo $all_participant_types; ?></span> 
-			<a class='hide-if-no-js ad-edit-participant-types' href='#participant-types'>Edit</a>
+			<a id="ad-edit-participant-types" class='hide-if-no-js' href='#participant-types'>Edit</a>
+			<div id="ad-participant-types-select" class="hide-if-js">
+				<ul>
+				<?php foreach( $user_types as $user_type ) : ?>
+					<li><input type="checkbox" id="ad-participant-type-<?php echo $user_type->term_id; ?>" name="ad-participant-types[]" value="<?php echo $user_type->term_id; ?>"<?php if ( $participant_types[$user_type->term_id] == 'on') { echo ' checked="checked"'; } ?> />&nbsp;<label for="ad-participant-type-<?php echo $user_type->term_id; ?>"><?php echo $user_type->name; ?></label></li> 
+				<?php endforeach; ?>
+				</ul>
+				<a id="save-ad-participant-types" class="hide-if-no-js button" href="#participant-types">OK</a>
+				<a id="cancel-ad-participant-types" class="hide-if-no-js" href="#participant-types">Cancel</a>
+			</div>
 		<?php else : ?>
 			<span id="ad-participant-types-display">None defined</span> 
 			<a href='<?php echo admin_url(); ?>edit-tags.php?taxonomy=<?php echo $assignment_desk->custom_taxonomies->user_role_label; ?>' target='_blank'>Create</a>
@@ -382,15 +395,21 @@ class ad_post {
        // }
 
         // The user who pitched this story.
-        if($_POST['_ad_pitched_by']){
-            update_post_meta($post_id, '_ad_pitched_by', (int)$_POST['_ad_pitched_by']);
-        }
+
+		$user_types = $assignment_desk->custom_taxonomies->get_user_types();
+
+		update_post_meta($post_id, '_ad_pitched_by', (int)$_POST['_ad_pitched_by']);
         
         // The status of the story if it is still a pitch
-        if ( $_POST['ad_assignment_status'] ){
-            wp_set_object_terms($post_id,
-                                (int)$_POST['ad_assignment_status'], $assignment_desk->custom_taxonomies->assignment_status_label);
-        }
+		wp_set_object_terms($post_id, (int)$_POST['ad_assignment_status'], $assignment_desk->custom_taxonomies->assignment_status_label);
+		
+		foreach ($user_types as $user_type) {
+			if ( in_array($user_type->term_id, $_POST['ad-participant-types']) ) {
+				update_post_meta($post_id, "_ad_participant_type_$user_type->term_id", 'on');
+			} else {
+				update_post_meta($post_id, "_ad_participant_type_$user_type->term_id", 'off');
+			}
+		}
 
         // Single post author. Change the author.
         if($_POST['ad_author']){
@@ -420,7 +439,7 @@ class ad_post {
         }
 
         // Multiple post authors using co-authors-plus
-        if ( $_POST['ad-assignees'] ) {
+        if ( $_POST['ad-assignees'] && $assignment_desk->coauthors_plus_exists()) {
             global $coauthors_plus;
         
             $participants = get_post_meta($post_id, '_ad_participants', false);

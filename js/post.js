@@ -94,6 +94,23 @@ jQuery(document).ready(function(){
 		
 	// Add the add_to_assignees function as a hook on the assign button
 	jQuery("#ad-assign-button").click(add_user_to_assignees);
+	
+	jQuery('#ad-edit-participant-types').click(function(){
+		jQuery(this).hide();
+		jQuery('#ad-participant-types-select').slideToggle();
+	});
+	
+	jQuery('#save-ad-participant-types').click(function(){
+		jQuery('#ad-participant-types-select').slideToggle();
+		// @todo More logic with manipulating dom
+		jQuery('#ad-edit-participant-types').show();
+	});
+	
+	jQuery('#cancel-ad-participant-types').click(function(){
+		jQuery('#ad-participant-types-select').slideToggle();
+		// @todo More logic with manipulating dom		
+		jQuery('#ad-edit-participant-types').show();
+	});
 		
     jQuery('#ad-assignee-search').suggest(coauthor_ajax_suggest_link,
 		{ onSelect: 
