@@ -397,9 +397,18 @@ class ad_post {
         // The user who pitched this story
 
 		update_post_meta($post_id, '_ad_pitched_by', (int)$_POST['_ad_pitched_by']);
-        
-        // The status of the story if it is still a pitch
-		wp_set_object_terms($post_id, (int)$_POST['ad-assignment-status'], $assignment_desk->custom_taxonomies->assignment_status_label);
+       
+ 		// If current user can edit assignment status, let them
+		// Otherwise, set to default if contributor
+		if (current_user_can($assignment_desk->define_editor_permissions)) {
+			wp_set_object_terms($post_id, (int)$_POST['ad-assignment-status'], $assignment_desk->custom_taxonomies->assignment_status_label);
+		} else {
+			$current_status = wp_get_object_terms($post_id, $assignment_desk->custom_taxonomies->assignment_status_label);
+			if (!$current_status) {
+				$new_status = $assignment_desk->custom_taxonomies->get_default_assignment_status();
+				wp_set_object_terms($post_id, (int)$new_status->term_id, $assignment_desk->custom_taxonomies->assignment_status_label);
+			}
+		}
 		
 		
 		// If the current user can edit participant types, allow them to do so
