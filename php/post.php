@@ -135,10 +135,12 @@ class ad_post {
 	 * @todo Check user editing permissions
      */
     function display_assignment_status(){
-        global $post, $wpdb, $assignment_desk;
+        global $post, $wpdb, $assignment_desk, $current_user;
+
+		wp_get_current_user();
 
 		echo '<div class="misc-pub-section">';
-        echo '<label for="ad_assignment_status">Status:</label>';
+        echo '<label for="ad-assignment-status">Status:</label>&nbsp;';
         // What is the status of this Assignment?
         $current_status = wp_get_object_terms($post->ID,
                                               $assignment_desk->custom_taxonomies->assignment_status_label);
@@ -150,25 +152,35 @@ class ad_post {
 			$current_status = $current_status[0];
         }
 
-		// List all of the assignment statuses
-		$assignment_statuses = get_terms($assignment_desk->custom_taxonomies->assignment_status_label,
-                                        array( 'get' => 'all'));
-		echo "<select name='ad_assignment_status'>";
-		foreach ( $assignment_statuses as $assignment_status ) {
-			echo "<option value='{$assignment_status->term_id}'";
-			if ( $assignment_status->term_id == $current_status->term_id ) {
-				echo " selected='selected'";
+		echo '<span id="ad-assignment-status-display">' . $current_status->name . '</span>';
+
+		if (current_user_can($assignment_desk->define_editor_permissions)) {
+			echo '&nbsp;<a id="ad-edit-assignment-status" class="hide-if-no-js" href="#assignment-status">Edit</a>';
+			// List all of the assignment statuses
+			$assignment_statuses = get_terms($assignment_desk->custom_taxonomies->assignment_status_label,
+	                                        array( 'get' => 'all'));
+			echo '<div id="ad-assignment-status-select" class="hide-if-js">';
+			echo "<select id='ad-assignment-status' name='ad-assignment-status'>";
+			foreach ( $assignment_statuses as $assignment_status ) {
+				echo "<option value='{$assignment_status->term_id}'";
+				if ( $assignment_status->term_id == $current_status->term_id ) {
+					echo " selected='selected'";
+				}
+				echo ">{$assignment_status->name}</option>";
 			}
-			echo ">{$assignment_status->name}</option>";
-		}
-		echo "</select>";
+			echo "</select>&nbsp;";
+			echo '<a id="ad-save-assignment-status" class="hide-if-no-js button" href="#assignment-status">OK</a>&nbsp;';
+			echo '<a id="ad-cancel-assignment-status" class="hide-if-no-js" href="#assignment-status">Cancel</a>';
+			echo '</div>';
+		}	
+		
 		echo '</div>';
 		
     }
 
 	/**
 	 * Print allowed participant types
-	 * @todo User edit permissions check
+	 * Editor and above can change the permitted participant types
 	 */
 	function display_participant_types() {
 		global $post, $wpdb, $assignment_desk, $current_user;
@@ -190,8 +202,8 @@ class ad_post {
 					<li><input type="checkbox" id="ad-participant-type-<?php echo $user_type->term_id; ?>" name="ad-participant-types[]" value="<?php echo $user_type->term_id; ?>"<?php if ( $participant_types[$user_type->term_id] == 'on') { echo ' checked="checked"'; } ?> />&nbsp;<label for="ad-participant-type-<?php echo $user_type->term_id; ?>"><?php echo $user_type->name; ?></label></li> 
 				<?php endforeach; ?>
 				</ul>
-				<a id="save-ad-participant-types" class="hide-if-no-js button" href="#participant-types">OK</a>
-				<a id="cancel-ad-participant-types" class="hide-if-no-js" href="#participant-types">Cancel</a>
+				<p><a id="save-ad-participant-types" class="hide-if-no-js button" href="#participant-types">OK</a>
+				<a id="cancel-ad-participant-types" class="hide-if-no-js" href="#participant-types">Cancel</a></p>
 			</div>
 		<?php endif; ?>
 		<?php else : ?>
@@ -387,7 +399,7 @@ class ad_post {
 		update_post_meta($post_id, '_ad_pitched_by', (int)$_POST['_ad_pitched_by']);
         
         // The status of the story if it is still a pitch
-		wp_set_object_terms($post_id, (int)$_POST['ad_assignment_status'], $assignment_desk->custom_taxonomies->assignment_status_label);
+		wp_set_object_terms($post_id, (int)$_POST['ad-assignment-status'], $assignment_desk->custom_taxonomies->assignment_status_label);
 		
 		
 		// If the current user can edit participant types, allow them to do so

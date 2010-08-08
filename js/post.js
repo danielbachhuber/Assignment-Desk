@@ -86,6 +86,7 @@ function show_participant_assign_form(user_login){
 
 jQuery(document).ready(function() {
 	
+	var ad_current_assignment_status = '';
 	var ad_current_participant_types = [];
     
 	/**
@@ -98,6 +99,40 @@ jQuery(document).ready(function() {
 	// Add the ad_add_to_assignees function as a hook on the assign button
 	jQuery("#ad-assign-button").click(ad_add_user_to_assignees);
 	
+	
+	/**
+	 * Manipulate the DOM when the user wants to "Edit" assignment status
+	 * In short, ...
+	 */
+	jQuery('#ad-edit-assignment-status').click(function(){
+		jQuery(this).hide();
+		ad_current_assignment_status = jQuery('select#ad-assignment-status').val();
+		jQuery('#ad-assignment-status-select').slideToggle();
+		return false;		
+	});
+	
+	/**
+	 * Manipulate the DOM when the user wants to "Save" their assignment status selection
+	 * In short, ...
+	 */
+	jQuery('#ad-save-assignment-status').click(function(){
+		jQuery('#ad-edit-assignment-status').show();
+		var text = jQuery('select#ad-assignment-status option:selected').text();
+		jQuery('#ad-assignment-status-display').html(text);
+		jQuery('#ad-assignment-status-select').slideToggle();
+		return false;		
+	});
+	
+	/**
+	 * Manipulate the DOM when the user wants to "Cancel" their assignment status selection
+	 * In short, ...
+	 */
+	jQuery('#ad-cancel-assignment-status').click(function(){
+		jQuery('#ad-edit-assignment-status').show();
+		jQuery('select#ad-assignment-status').val(ad_current_assignment_status);
+		jQuery('#ad-assignment-status-select').slideToggle();
+		return false;		
+	});
 	
 	/**
 	 * Manipulate the DOM when the user wants to "Edit" participant types
@@ -113,6 +148,7 @@ jQuery(document).ready(function() {
 			}
 		});
 		jQuery('#ad-participant-types-select').slideToggle();
+		return false;		
 	});
 	
 	/**
@@ -143,6 +179,7 @@ jQuery(document).ready(function() {
 		// Update the label for the field because we have new values
 		jQuery('#ad-participant-types-display').html(ad_display_participant_types);
 		jQuery('#ad-edit-participant-types').show();
+		return false;		
 	});
 	
 	/**
@@ -160,6 +197,7 @@ jQuery(document).ready(function() {
 			}
 		});		
 		jQuery('#ad-edit-participant-types').show();
+		return false;
 	});
 		
     jQuery('#ad-assignee-search').suggest(coauthor_ajax_suggest_link,
