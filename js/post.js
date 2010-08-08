@@ -12,8 +12,9 @@ if(typeof(String.prototype.trim) === "undefined") {
 */
 function add_user_to_assignees(){
 	// get the form data
-	return add_to_assignees(jQuery("#ad-assignee-search").val().trim(), 
+	var data = add_to_assignees(jQuery("#ad-assignee-search").val().trim().split('|')[1], 
 	                             jQuery("#ad-assign-form #ad-user-role-select :selected").val());
+	return data;
 	
 }
 

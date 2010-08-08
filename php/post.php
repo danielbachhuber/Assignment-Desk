@@ -438,7 +438,7 @@ class ad_post {
         }
 
         // Multiple post authors using co-authors-plus
-        if ( $_POST['ad-assignees'] && $assignment_desk->coauthors_plus_exists()) {
+        if ($assignment_desk->coauthors_plus_exists()) {
             global $coauthors_plus;
         
             $participants = get_post_meta($post_id, '_ad_participants', false);
