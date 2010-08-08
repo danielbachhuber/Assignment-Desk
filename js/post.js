@@ -7,69 +7,60 @@ if(typeof(String.prototype.trim) === "undefined") {
     };
 }
 
-/** 
-* Get the user search input and selected role and add to the assign.
-*/
-function ad_add_user_to_assignees(){
-	// get the form data
-	var data = ad_add_to_assignees(jQuery("#ad-assignee-search").val().trim().split('|')[1], 
-	                             jQuery("#ad-assign-form #ad-user-role-select :selected").val());
-	return data;
-	
-}
-
-/** 
-* Get the user contributor user_login and selected role and add to the assign.
-*/
-function ad_add_participants_to_assignees(user_login){
-    // Get the role from the assignee form
-    var role_id = jQuery('#ad_participants_' + user_login + ' #ad-user-role-select :selected').val();
-    ad_add_to_assignees(user_login.toString().trim(), role_id);
-    jQuery('#ad_participants_' + user_login).remove();
-	var participants_count = parseInt(jQuery('#ad-participants-count').html());
-	participants_count -= 1;
-	if(participants_count == 1){
-		jQuery('#ad-participants-count-wrap').html('Contributors (1)');
-	}
-	else {
-		jQuery('#ad-participants-count-wrap').html('Contributors (' + participants_count + ')');
-	}
-}
-
 /**
 * Take the user input and the selected role and add that user to the list 
 * of users assigned to a post with that role.
 * Take care to show the div that surrounds the role list of the div was initially hidden.
 */
-function ad_add_to_assignees(user_login, role_id){	    
-	if(!user_login.length || !role_id){
-	    return false;
-	}
-	var already_assigned = false;
+function ad_add_to_participants(user_id, user_nicename, role_id, role_name){
+	var error_message = false;
 	
-	// Check to see if this user was already assigned to this story.
-	jQuery("input[name='ad-assignees[]']").each(function(){
-		var split = jQuery(this).val().split('|');
-		if (user_login == split[0]){
-			already_assigned = true;
+	// @todo This check doesn't work all that well	    
+	if (user_id.typeOf() == 'undefined'){
+	    error_message = '<div id="ad-participant-error-message" class="message alert">'
+						+ 'No user selected'
+						+ '</div>';
+	}
+	
+	var user_role_status = 'pending';
+	jQuery("#ad-participant-error-message").remove();
+	
+	// @todo check to see whether use was already assigned in this rold
+	jQuery('input[name="ad-participant-role-'+role_id
+	+ '[]"]').each(function(){
+		if ( jQuery(this).val().indexOf(user_id) != -1 ) {
+			error_message = '<div id="ad-participant-error-message" class="message alert">'
+							+ user_nicename + ' has already been added as ' + role_name
+							+ '</div>';
 		}
 	})
 	
-	if (already_assigned){
-		jQuery('div#ad-error-messages').html(user_login + ' is already assigned to this story.').show();
-		return false;
-	}
-	
-	// create a new list item that hold a hidden form element.
-	var field_html = '<li><input type="hidden" name="ad-assignees[]" value="'+ user_login + '|' + role_id + '"/>' + user_login + '</li>';
-	// Append it to the list
-	jQuery("ul#ad_assignees_role_" + role_id).append(field_html);
-
-	// Show if initially empty (length now == 1)
-	if(jQuery("ul#ad_assignees_role_" + role_id + ' > li').length == 1){
-		jQuery('div#ad_assignees_role_' + role_id).slideToggle();
+	// Add it to the existing role wrap if that already exists
+	// Else, create a new one
+	if (jQuery("#ad-user-role-" + role_id + "-wrap").length > 0 && !error_message) {
+		// create a new list item that hold a hidden form element.
+		var field_html = '<li><input type="hidden" id="ad-participant-'
+						+ user_id +'" name="ad-participant-role-'+role_id
+						+ '[]" value="'+ user_id + '|' + user_role_status + '"/>'
+						+ user_nicename + ' | ' + user_role_status + '</li>';
+		// Append it to the list
+		jQuery("ul#ad-participants-" + role_id).append(field_html);
+	} else if (!error_message) {
+		jQuery('#ad-no-participants').remove();
+		var field_html = '<div id="ad-user-role-' + role_id + '-wrap" class="ad-role-wrap">'
+						+ '<h5>' + role_name + '</h5>'
+						+ '<ul id="ad-participants-' + role_id + '">';
+		field_html += '<li><input type="hidden" id="ad-participant-'
+						+ user_id +'" name="ad-participant-role-'+role_id
+						+ '[]" value="'+ user_id + '|' + user_role_status + '"/>'
+						+ user_nicename + ' | ' + user_role_status + '</li>';
+		field_html += '</ul></div>';				
+		jQuery("#ad-participants-wrap").append(field_html);			
+	} else {
+		jQuery("#ad-assign-form").prepend(error_message);
 	}
 	return false;
+
 }
 
 /**
@@ -88,6 +79,26 @@ jQuery(document).ready(function() {
 	
 	var ad_current_assignment_status = '';
 	var ad_current_participant_types = [];
+
+	/**
+	 * Initialize Co-Author Plus auto-suggest if it exists
+	 */
+	if (coauthor_ajax_suggest_link) {
+		jQuery('#ad-assignee-search').suggest(coauthor_ajax_suggest_link, {
+	    	onSelect: function() {
+	        	var vals = this.value.split('|');
+	        	var author = {};
+	        	author.id = jQuery.trim(vals[0]);
+	        	author.login = jQuery.trim(vals[1]);
+	        	author.name = jQuery.trim(vals[2]);
+	        	Query('#ad-assignee-search').val(author.name)
+	    	}
+		}).keydown(function(e) {
+	    	if (e.keyCode == 13) {
+	        	return false;
+	    	}
+		});
+	}
     
 	/**
      * Toggle post_meta_box subheads
@@ -96,13 +107,30 @@ jQuery(document).ready(function() {
 		var inner = jQuery(this).parent().find('div.inner').slideToggle();
 	});
 		
-	// Add the ad_add_to_assignees function as a hook on the assign button
-	jQuery("#ad-assign-button").click(ad_add_user_to_assignees);
+	/**
+	 * Add selected user and selected role to their related participant bucket
+	 */
+	jQuery("a#ad-assign-button").click(function(){
+		if ( jQuery('#ad-assignee-search').length > 0 ) {
+			var user_info = jQuery('#ad-assignee-search').val();
+			user_info = user_info.split('|');
+			var user_id = user_info[0].trim();
+			var user_nicename = user_info[1].trim();
+			jQuery('#ad-assignee-search').val('');			
+		} else {
+			var user_id = jQuery('#ad-assignee-dropdown option:selected').val();
+			var user_nicename = jQuery('#ad-assignee-dropdown option:selected').text();
+		}
+		var role_id = jQuery('#ad-user-role-dropdown option:selected').val();
+		var role_name = jQuery('#ad-user-role-dropdown option:selected').text();		
+		ad_add_to_participants(user_id, user_nicename, role_id, role_name);
+		return false;
+	});
 	
 	
 	/**
 	 * Manipulate the DOM when the user wants to "Edit" assignment status
-	 * In short, ...
+	 * In short, save the current status and show the selection tool
 	 */
 	jQuery('#ad-edit-assignment-status').click(function(){
 		jQuery(this).hide();
@@ -198,21 +226,6 @@ jQuery(document).ready(function() {
 		});		
 		jQuery('#ad-edit-participant-types').show();
 		return false;
-	});
-		
-    jQuery('#ad-assignee-search').suggest(coauthor_ajax_suggest_link,
-		{ onSelect: 
-			function() {
-  			var vals = this.value.split("|");				
-			var author = {}
-			author.id = jQuery.trim(vals[0]);										
-			author.login = jQuery.trim(vals[1]);
-			author.name = jQuery.trim(vals[2]);
-			Query('#ad-assignee-search').val(author.name)
-		}
-	}).keydown(function(e) {
-		// ignore the enter key
-		if(e.keyCode == 13) { return false; }
 	});
 		
 });

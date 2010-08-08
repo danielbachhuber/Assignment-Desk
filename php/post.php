@@ -70,8 +70,12 @@ class ad_post {
 		if ($assignment_desk->coauthors_plus_exists()) {
 			$admin_url = admin_url();
 			echo '<script type="text/javascript">';
-	        echo "var coauthor_ajax_suggest_link ='{$admin_url}admin-ajax.php?action=coauthors_ajax_suggest';";
+	        echo "var coauthor_ajax_suggest_link='{$admin_url}admin-ajax.php?action=coauthors_ajax_suggest'; ";
 	        echo '</script>';
+		} else {
+			echo '<script type="text/javascript">';
+			echo "var coauthor_ajax_suggest_link = '';";
+			echo '</script>';
 		}
 
     }
@@ -216,33 +220,11 @@ class ad_post {
 	}
 
 	/**
-     * Print a form to choose the user.
-     * This is shown when the co-authors-plus plugin is NOT active.
-     */
-    function display_author() {
-        global $wpdb, $post;
-        
-        $users = $wpdb->get_results("SELECT ID, user_nicename FROM $wpdb->users");
-        echo "<div class='misc-pub-section'>";
-        echo "<label for='ad_author'>Author:</label>";
-        echo "<select id='ad_author' name='ad_author'>";
-        foreach($users as $user){
-            echo "<option value='{$user->ID}' ";
-            if($user->ID == $post->post_author){
-                echo "selected";
-            }
-            echo ">{$user->user_nicename}</option>";
-        }
-        echo "</select>";
-        echo "</div>";
-    }
-
-	/**
      * Loren ipsum bitches
 	 */ 
     function user_role_select($user_roles){
-        echo "<label for='ad-user-role-select'>Role</label>&nbsp;";
-        echo "<select id='ad-user-role-select'>";
+        echo "<label for='ad-user-role-dropdown'>Role:</label>&nbsp;";
+        echo "<select id='ad-user-role-dropdown' name='ad-user-role-dropdown'>";
             foreach($user_roles as $user_role) {
                 echo "<option value='{$user_role->term_id}'>{$user_role->name}</option>";
             }
@@ -250,102 +232,77 @@ class ad_post {
     }
 
 	/**
-     * Print a form to choose multiple users.
-     * Print the current lists of assignees.
+     * Loren ipsum bitches
      */
-    function display_multiple_assignees() {
+    function display_participants() {
         global $assignment_desk, $post, $wpdb;
         
-        $user_roles = get_terms($assignment_desk->custom_taxonomies->user_role_label,
-                                    array( 'get' => 'all', 'order' => "-name")); 
-        ?>
-		<div id="ad-assign-form">
-			<?php if ( count($user_roles) ) : ?>
-			<div class="misc-pub-section">
-            <label for="ad-assignee-search">User</label> <input type="text" id="ad-assignee-search" name="ad-assignee-search" size="20" maxlength="50"><br />
-			<?php echo $this->user_role_select($user_roles); ?>
-			<a id="ad-assign-button" class="button">Add</a>
-			</div>
-			<?php
-	        foreach($user_roles as $user_role){
-	            $num_users = 0;
-	            // Lookup all users assigned to this post with this role.
-	            $user_logins = get_post_meta($post->ID, "_ad_assignees_role_{$user_role->term_id}", true);
-	            // @todo - HACK HACK HACK. get_post_meta should return either an array or an empty string
-	            if(!is_array($user_logins) && count($user_logins) == 1){
-	                $user_logins = array();
-	            }
-	            $num_users = count($user_logins);
+        $user_roles = $assignment_desk->custom_taxonomies->get_user_roles(array('order' => "-name"));
 
-	            // Only show the div if there are assignees for that role
-	            echo "<div id='ad_assignees_role_{$user_role->term_id}'";
-	            echo ($num_users)? ">" : "style='display:none'>";
-	            echo "<h5>{$user_role->name}s</h5>";
-	            echo "<ul id='ad_assignees_role_{$user_role->term_id}'>";
-	            if($num_users){
-	                $user_sql = "SELECT ID, user_login, user_nicename
-	                            FROM $wpdb->users 
-	                            WHERE 0 OR ";
-	                for($i = 0; $i < $num_users - 1; $i++){
-	                    $user_sql .= " user_login='{$user_logins[$i]}' OR ";
-	                }
-	                $num_users--;
-	                $user_sql .= " user_login='{$user_logins[$num_users]}'";
-
-	                $users = $wpdb->get_results($user_sql);
-	                if(!is_array($users)){
-	                    $users = array($users);
-	                }
-	                foreach($users as $user){
-	                    echo "<li><input type='hidden' id='ad-assignees' name='ad-assignees[]' value='{$user->user_login}|{$user_role->term_id}' />{$user->user_nicename}</li>";
-	                }
-	            }
-	            echo "</ul></div>";
-	        }
-	        ?>
-			
-			<?php else : ?>
+		// Load all existing participants from separate custom fields into
+		// one array so that we can list it later
+		$all_participants = array();
+		$total_participants = 0;
+		foreach ( $user_roles as $user_role ) {
+			$role_participants = get_post_meta($post->ID, "_ad_participant_role_$user_role->term_id");
+			$role_participants = $role_participants[0];
+			if (count($role_participants)) {
+				$all_participants[$user_role->term_id] = $role_participants;
+				$total_participants = $total_participants + count($role_participants);
+			}
+		}
+		
+		// Get all of the users in the database
+		$all_users = $wpdb->get_results("SELECT * FROM $wpdb->users");
+ 		
+		if ( count($user_roles) && current_user_can($assignment_desk->define_editor_permissions)) :
+			echo '<div id="ad-assign-form" class="misc-pub-section">';
+            echo '<label>Select user:</label>&nbsp;';
+			// Use auto-suggest if Co-Authors Plus exists
+			// Otherwise, use a dropdown with all users
+			if ( $assignment_desk->coauthors_plus_exists() ) {
+				echo '<input type="text" id="ad-assignee-search" name="ad-assignee-search" size="20" maxlength="50"><br />';
+			} else {
+				echo "<select id='ad-assignee-dropdown' name='ad-assignee-dropdown'>";
+				foreach ( $all_users as $user ) {
+					echo "<option value='{$user->ID}'>{$user->user_nicename}</option>";
+				}
+				echo "</select><br />";
+			}
+			echo $this->user_role_select($user_roles); ?>
+				<a id="ad-assign-button" class="button" href="#assign-participant">Add</a>
+			</div>	
+		<?php elseif (current_user_can($assignment_desk->define_editor_permissions)) : ?>
 				<div class="message alert">You haven't defined any user roles yet. Get started by <a href='<?php echo admin_url(); ?>edit-tags.php?taxonomy=<?php echo $assignment_desk->custom_taxonomies->user_role_label; ?>' target='_blank'>defining one or more roles</a>.</div>
+		<?php endif; ?>
+		
+		<div id="ad-participants-wrap">
+		<?php
+		
+        if ( count($all_participants) ): ?> 
+
+            <?php foreach ( $user_roles as $user_role ) : ?>
+			
+			<?php if (count($all_participants[$user_role->term_id])) : ?>
+			<div id="ad-user-role-<?php echo $user_role->term_id; ?>-wrap" class="ad-role-wrap">
+				<h5><?php echo $user_role->name; ?></h5>
+				<ul id="ad-participants-<?php echo $user_role->term_id; ?>">					
+					<?php foreach ($all_participants[$user_role->term_id] as $participant_id => $participant_status) : ?>
+						<?php $participant = get_userdata($participant_id); ?>						
+						<li><input type="hidden" id="ad-participant-<?php echo $participant_id; ?>" name="ad-participant-role-<?php echo $user_role->term_id; ?>[]" value="<?php echo $participant_id.'|'.$participant_status; ?>" /><?php echo $participant->user_nicename; ?> | <?php echo $participant_status; ?></li>
+					<?php endforeach; ?>
+				</ul>
+			</div>
 			<?php endif; ?>
-		</div>
-	<?php
-    }
-
-	/**
-    * Print the list of participants.
-    */
-    function display_participants() {
-        global $assignment_desk, $post;
-        // Print the participants (if any and came from a pitch)
-        $participants = get_post_meta($post->ID, '_ad_participants', false);
-
-        if(count($participants)): ?>      
-        <div class="ad-module misc-pub-section">
-            <h4 id="ad-participants-count-wrap">Contributors (<span id="ad-participants-count"><?php echo count($participants); ?></span>)</h4>
-            <ul>
-            <?php foreach($participants as $user_login):
-                    $user = get_userdatabylogin($user_login);
-                ?>
-                <li>
-                <?php if (!empty($user->user_login)): ?>
-                    <div id="ad_participants_<?php echo $user->user_login; ?>">
-                        <?php echo $user->user_login; ?>
-                        <a class="button"
-                                onclick="javascript:return show_participant_assign_form('<?php echo $user->user_login; ?>');">Assign</a>
-                    </div>
-                <?php else: ?>
-                    <?php echo $user->user_nicename; ?> 
-                <?php endif; ?>
-                </li>
-            <?php endforeach; ?>
-            </ul>
-        </div>
+			
+			<?php endforeach; ?>
         <?php else: ?>
-			<div class="message info">
-				No contributors have been assigned to this post.
+			<div id="ad-no-participants" class="message info">
+				No contributors have volunteered or been assigned to this post.
 			</div>
         <?php endif; ?>
-<?php
+		</div>
+	<?php
     }
 
 	/**
@@ -365,19 +322,14 @@ class ad_post {
 
 		echo '<div class="ad-module">';
 		echo '<h4 class="toggle">Contributors</h4><div class="inner">';
-        if ($assignment_desk->coauthors_plus_exists()){
-            $this->display_multiple_assignees();
-        	$this->display_participants();
-        }
-        else {
-            $this->display_author();
-        }
+		$this->display_participants();
 		echo '</div></div>';
 		
     }
 
 	/**
-    * Save Assignment Desk post meta data
+     * Save Assignment Desk post meta data
+	 * @todo Might need a non
     */
     function save_post_meta_box($post_id, $post) {
         global $executed_already, $wpdb, $assignment_desk, $current_user;
@@ -432,75 +384,30 @@ class ad_post {
 			}
 		}
 
-        // Single post author. Change the author.
-        if($_POST['ad_author']){
-            $author_id = $_POST['ad_author'];
-            if(is_email($author_id)){
-                // New User from the community.
-                // @todo - Add a setting to enable/disable community membership.
-                $author = _ad_create_user($author_id, $author_id, $_POST['_ad_author_nicename']);
-                $author_id = $author->id;
-            }
-            // Assigned author is currently a WP User.
-            else {
-                $author = $wpdb->get_row(
-                            $wpdb->prepare("SELECT * FROM $wpdb->users WHERE ID=%d", (int)$author_id));
-                $author_id = $author->ID;
-            }
-            // Check if the user is not already the author
-            if ($post['post_author'] != $author_id){
-                // Make them the author, change the post status, and fire off the email
-                $wpdb->update($wpdb->posts,
-                        array('post_author' => $author_id, 'post_status' => __('waiting for reply')),
-                        array('ID' => $post_id),
-                        array('%d', '%s'),
-                        array('%d'));
-                $this->send_assignment_email($post_id, $author_id);
-            }
-        }
-
-        // Multiple post authors using co-authors-plus
-        if ($assignment_desk->coauthors_plus_exists()) {
-            global $coauthors_plus;
-        
-            $participants = get_post_meta($post_id, '_ad_participants', false);
-            $assignees = array();
-            $role_users = array();
-            // Users and their associated roles are sent over as username|rolename    
-            // Split into an associative array.
-            foreach ($_POST['ad-assignees'] as $user_and_role){
-                $split = explode('|', $user_and_role);
-                $user = $split[0];
-                $role = $split[1];
-                $assignees[] = $user;
-                $role_users[$role][] = $user;
-                delete_post_meta($post_id, '_ad_participants', $user);
-            }
-            //print_r($assignees);
-            // Save the list of coauthors
-            // $coauthors_plus->add_coauthors($post_id, $assignees);
-            $_POST['coauthors'] = $assignees;
-                    
-            // Store each role as an array of usernames in the postmeta
-            $post_is_waiting = false;
-            foreach (array_keys($role_users) as $role){
-                // check if the user is already in this role for this post.
-                $previous_role_users = get_post_meta($post_id, "_ad_assignees_role_$role", true);
-                if (!is_array($previous_role_users)){
-                    $previous_role_users = array($previous_role_users, );
-                }
-                foreach ($role_users[$role] as $username){
-                    // Never assigned before. Send email and record that we're waiting for their reply/
-                    if(!in_array($username, $previous_role_users)){
-                        $post_is_waiting = true;
-                        $this->send_assignment_email($post_id, $username);
-                        update_post_meta($post_id, '_ad_waiting_for_reply', $username);
-                    }
-                }
-                update_post_meta($post_id, "_ad_assignees_role_$role", $role_users[$role]);
-            }
-        }
-        $executed_already = 1;
+		$user_roles = $assignment_desk->custom_taxonomies->get_user_roles();
+		if (current_user_can($assignment_desk->define_editor_permissions)) {
+			$all_participants = array();
+			// For each User Role, save participant ID and status
+			foreach ( $user_roles as $user_role ) {
+				$raw_role_participants = array();
+				$all_role_participants = array();				
+				$raw_role_participants = $_POST["ad-participant-role-$user_role->term_id"];
+				if ( count($raw_role_participants) ) {
+					foreach ($raw_role_participants as $raw_participant) {
+						$participant = explode('|', $raw_participant);
+						$all_role_participants[$participant[0]] = $participant[1];
+						$all_participants[$participant[0]][] = $user_role->term_id;
+					}
+				}
+				update_post_meta($post_id, "_ad_participant_role_$user_role->term_id", $all_role_participants);
+			}
+			// Also save the User Roles associated with a row for each participant
+			foreach ($all_participants as $participant_id => $user_role_ids) {
+				update_post_meta($post_id, "_ad_participant_$participant_id", $user_role_ids);
+			}
+			
+		}
+      
     }
     
     function send_assignment_email($post_id, $username){
