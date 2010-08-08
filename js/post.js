@@ -10,9 +10,9 @@ if(typeof(String.prototype.trim) === "undefined") {
 /** 
 * Get the user search input and selected role and add to the assign.
 */
-function add_user_to_assignees(){
+function ad_add_user_to_assignees(){
 	// get the form data
-	var data = add_to_assignees(jQuery("#ad-assignee-search").val().trim().split('|')[1], 
+	var data = ad_add_to_assignees(jQuery("#ad-assignee-search").val().trim().split('|')[1], 
 	                             jQuery("#ad-assign-form #ad-user-role-select :selected").val());
 	return data;
 	
@@ -21,10 +21,10 @@ function add_user_to_assignees(){
 /** 
 * Get the user contributor user_login and selected role and add to the assign.
 */
-function add_participants_to_assignees(user_login){
+function ad_add_participants_to_assignees(user_login){
     // Get the role from the assignee form
     var role_id = jQuery('#ad_participants_' + user_login + ' #ad-user-role-select :selected').val();
-    add_to_assignees(user_login.toString().trim(), role_id);
+    ad_add_to_assignees(user_login.toString().trim(), role_id);
     jQuery('#ad_participants_' + user_login).remove();
 	var participants_count = parseInt(jQuery('#ad-participants-count').html());
 	participants_count -= 1;
@@ -41,7 +41,7 @@ function add_participants_to_assignees(user_login){
 * of users assigned to a post with that role.
 * Take care to show the div that surrounds the role list of the div was initially hidden.
 */
-function add_to_assignees(user_login, role_id){	    
+function ad_add_to_assignees(user_login, role_id){	    
 	if(!user_login.length || !role_id){
 	    return false;
 	}
@@ -84,7 +84,9 @@ function show_participant_assign_form(user_login){
     return false;  
 }
 
-jQuery(document).ready(function(){
+jQuery(document).ready(function() {
+	
+	var ad_current_participant_types = [];
     
 	/**
      * Toggle post_meta_box subheads
@@ -93,23 +95,70 @@ jQuery(document).ready(function(){
 		var inner = jQuery(this).parent().find('div.inner').slideToggle();
 	});
 		
-	// Add the add_to_assignees function as a hook on the assign button
-	jQuery("#ad-assign-button").click(add_user_to_assignees);
+	// Add the ad_add_to_assignees function as a hook on the assign button
+	jQuery("#ad-assign-button").click(ad_add_user_to_assignees);
 	
+	
+	/**
+	 * Manipulate the DOM when the user wants to "Edit" participant types
+	 * In short, save current checkbox states and then show list of types
+	 */
 	jQuery('#ad-edit-participant-types').click(function(){
 		jQuery(this).hide();
+		jQuery("input[name='ad-participant-types[]']").each(function(){
+			if (jQuery(this).is(':checked')) {
+				ad_current_participant_types[jQuery(this).val()] = 'on';
+			} else {
+				ad_current_participant_types[jQuery(this).val()] = 'off';
+			}
+		});
 		jQuery('#ad-participant-types-select').slideToggle();
 	});
 	
+	/**
+	 * Manipulate the DOM when the user hits "Save" on participant types
+	 * In short, build new field label and then hide list of types
+	 */
 	jQuery('#save-ad-participant-types').click(function(){
 		jQuery('#ad-participant-types-select').slideToggle();
-		// @todo More logic with manipulating dom
+		var ad_all_participant_types = [];
+		var ad_display_participant_types = '';
+		jQuery("input[name='ad-participant-types[]']").each(function(){
+			if ( jQuery(this).is(':checked') ) {
+				ad_display_participant_types += jQuery(this).parent().find('label').html() + ', ';
+				ad_all_participant_types[jQuery(this).val()] = 'on';
+			} else {
+				ad_all_participant_types[jQuery(this).val()] = 'off';
+			}
+		});
+		// Hacky way to check if values are in array
+		var joined = '|' + ad_all_participant_types.join('|') + '|';
+		if (joined.indexOf('on') != -1 && joined.indexOf('off') == -1) {
+			ad_display_participant_types = 'All';
+		} else if (joined.indexOf('on') == -1 && joined.indexOf('off') != -1) {
+			ad_display_participant_types = 'None';
+		} else {
+			ad_display_participant_types = ad_display_participant_types.slice(0, ad_display_participant_types.length - 2);
+		}
+		// Update the label for the field because we have new values
+		jQuery('#ad-participant-types-display').html(ad_display_participant_types);
 		jQuery('#ad-edit-participant-types').show();
 	});
 	
+	/**
+	 * Manipulate the DOM when the user hits "Cancel" on participant types
+	 * In short, restore checkbox values and hide the list of options
+	 */
 	jQuery('#cancel-ad-participant-types').click(function(){
 		jQuery('#ad-participant-types-select').slideToggle();
-		// @todo More logic with manipulating dom		
+		// Restore checkbox values to what they were previously
+		jQuery("input[name='ad-participant-types[]']").each(function(){
+			if (ad_current_participant_types[jQuery(this).val()] == 'on') {
+				jQuery(this).attr('checked', 'checked');
+			} else {
+				jQuery(this).removeAttr('checked');
+			}
+		});		
 		jQuery('#ad-edit-participant-types').show();
 	});
 		
