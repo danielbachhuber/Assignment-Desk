@@ -15,8 +15,8 @@ if(typeof(String.prototype.trim) === "undefined") {
 function ad_add_to_participants(user_id, user_nicename, role_id, role_name){
 	var error_message = false;
 	
-	// @todo This check doesn't work all that well	    
-	if (user_id.typeOf() == 'undefined'){
+	// @todo This check doesn't work all that well    
+	if (user_id.length == 0){
 	    error_message = '<div id="ad-participant-error-message" class="message alert">'
 						+ 'No user selected'
 						+ '</div>';
@@ -28,7 +28,7 @@ function ad_add_to_participants(user_id, user_nicename, role_id, role_name){
 	// @todo check to see whether use was already assigned in this rold
 	jQuery('input[name="ad-participant-role-'+role_id
 	+ '[]"]').each(function(){
-		if ( jQuery(this).val().indexOf(user_id) != -1 ) {
+		if (jQuery(this).val() == (user_id) ) {
 			error_message = '<div id="ad-participant-error-message" class="message alert">'
 							+ user_nicename + ' has already been added as ' + role_name
 							+ '</div>';
@@ -91,7 +91,7 @@ jQuery(document).ready(function() {
 	        	author.id = jQuery.trim(vals[0]);
 	        	author.login = jQuery.trim(vals[1]);
 	        	author.name = jQuery.trim(vals[2]);
-	        	Query('#ad-assignee-search').val(author.name)
+	        	jQuery('#ad-assignee-search').val(author.name);
 	    	}
 		}).keydown(function(e) {
 	    	if (e.keyCode == 13) {
@@ -115,7 +115,8 @@ jQuery(document).ready(function() {
 			var user_info = jQuery('#ad-assignee-search').val();
 			user_info = user_info.split('|');
 			var user_id = user_info[0].trim();
-			var user_nicename = user_info[1].trim();
+			// only the user_id is left in the box currently.
+			var user_nicename = user_info[0].trim();
 			jQuery('#ad-assignee-search').val('');			
 		} else {
 			var user_id = jQuery('#ad-assignee-dropdown option:selected').val();

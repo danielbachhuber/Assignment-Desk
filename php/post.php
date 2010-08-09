@@ -288,7 +288,7 @@ class ad_post {
 				<h5><?php echo $user_role->name; ?></h5>
 				<ul id="ad-participants-<?php echo $user_role->term_id; ?>">					
 					<?php foreach ($all_participants[$user_role->term_id] as $participant_id => $participant_status) : ?>
-						<?php $participant = get_userdata($participant_id); ?>						
+						<?php $participant = get_userdatabylogin($participant_id); ?>						
 						<li><input type="hidden" id="ad-participant-<?php echo $participant_id; ?>" name="ad-participant-role-<?php echo $user_role->term_id; ?>[]" value="<?php echo $participant_id.'|'.$participant_status; ?>" /><?php echo $participant->user_nicename; ?> | <?php echo $participant_status; ?></li>
 					<?php endforeach; ?>
 				</ul>
