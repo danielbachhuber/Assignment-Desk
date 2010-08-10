@@ -99,37 +99,19 @@ class ad_post {
         echo "<div id='ad-assignment-detail' class='misc-pub-section'>";
         
         $pitched_by = get_post_meta($post->ID, '_ad_pitched_by', true);
-        $users = $wpdb->get_results("SELECT ID, user_nicename
-                                     FROM $wpdb->users");
-        echo "<label>Pitched by:</label>";
-        
-        // Try to resolve the user email to a user
-        if (is_email($pitched_by)){
-            $user = $wpdb->get_row($wpdb->prepare("SELECT ID, user_nicename 
-                                                    FROM $wpdb->users 
-                                                    WHERE user_email = %s", $pitched_by));
-            if ($user){
-                $pitched_by = $user->ID;
-            }
-            else {
-                echo $pitched_by;
-            }
-        }
-        // Only display a form if 
-        if(!is_email($pitched_by)){
-            echo "<select name='_ad_pitched_by'>";
-            foreach($users as $user){
-                echo "<option value='{$user->ID}'";
-                if ($user->ID == $pitched_by){
-                    echo ' selected';
-                }
-                echo ">{$user->user_nicename}</option>";
-            }
-            echo "</select>";
-        }
-
-        // @todo - Origin? (community or staff)
-        echo '</div>';
+        $users = $wpdb->get_results("SELECT ID, user_nicename FROM $wpdb->users");
+?>
+        <label>Pitched by:</label>;
+        <select name="_ad_pitched_by">
+            <option value="">---</option>
+        <?php foreach($users as $user) {
+            echo "<option value='$user->ID'";
+            if ($user->ID == $pitched_by) echo ' selected';
+            echo ">$user->user_nicename</option>";
+        } ?>
+        </select>
+        </div>
+<?php 
     }
 
 	/**
@@ -347,8 +329,9 @@ class ad_post {
        // }
 
         // The user who pitched this story
-
-		update_post_meta($post_id, '_ad_pitched_by', (int)$_POST['_ad_pitched_by']);
+        if (current_user_can($assignment_desk->define_editor_permissions)) {
+		    update_post_meta($post_id, '_ad_pitched_by', (int)$_POST['_ad_pitched_by']);
+	    }
        
  		// If current user can edit assignment status, let them
 		// Otherwise, set to default if contributor
