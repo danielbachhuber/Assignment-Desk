@@ -4,7 +4,7 @@
 * This class manages the widgets that appear in the Wordpress Administration Dashboard.
 * The assignment_desk class holds an instance of this class as a member.
 */
-class assignment_desk_dashboard_widgets {
+class ad_dashboard_widgets {
        
     /*
      * Call add_dashboard_widgets when the dashboard is being constructed.

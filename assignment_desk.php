@@ -3,7 +3,7 @@
 Plugin Name: Assignment Desk
 Plugin URI: http://code.nyu.edu/projects/show/s20
 Description: News pitch and story tools for local news blogs.
-Author: Erik Froese, Tal Safran, Daniel Bachhuber
+Author: Erik Froese, Daniel Bachhuber, Tal Safran
 Version: 0.1
 Author URI: 
 */   
@@ -32,29 +32,13 @@ define('ASSIGMENT_DESK_VERSION', '0.1');
 define('ASSIGNMENT_DESK_DIR_PATH', dirname(__FILE__));
 define('ASSIGNMENT_DESK_TEMPLATES_PATH', ASSIGNMENT_DESK_DIR_PATH . '/php/templates');
 
-// Pitch Statuses
-// These should be pulled from the DB.
-define('P_APPROVED', 2);
 
-// Install-time functions (DB setup).
-include_once('php/install.php');
-
-// Controllers
-include_once('php/index-controller.php');
-include_once('php/contributor-controller.php');
-
-include_once('php/user.php');
-
-// Various admin views
-include_once('php/dashboard-widgets.php');
-include_once('php/post.php');
-include_once('php/settings.php');
-
-// Customize the Manage Posts page
+require_once('php/user.php');
+require_once('php/dashboard_widgets.php');
+require_once('php/post.php');
+require_once('php/settings.php');
 require_once('php/manage_posts.php');
-// Custom taxonomies
 require_once('php/custom_taxonomies.php');
-// Serve public 
 require_once('php/public_views.php');
 
 if (!class_exists('assignment_desk')) {
@@ -156,8 +140,6 @@ if (!class_exists('assignment_desk')) {
             $this->custom_taxonomies->init();
             $this->user->init_user();
             
-
-            $this->installer = new assignment_desk_install();
 
         }
 
@@ -273,27 +255,6 @@ if (!class_exists('assignment_desk')) {
 	                        'User Roles', $this->define_editor_permissions,
 	                        'edit-tags.php?taxonomy='.$this->custom_taxonomies->user_role_label);
 
-
-         /*   // Add "Activity" for contributors and higher.
-    		 $activity_page = add_submenu_page('assignment_desk-menu', 'Activity', 'Activity', 
-    		                'edit_posts', 
-    		                'assignment_desk-index',
-    		                array(&$this->index_controller, 'dispatch'));
-
-        // Add "Your Content" for contributors and higher.
-    		add_submenu_page('assignment_desk-menu', 'Your Content', 'Your Content', 
-                            'edit_posts', 
-                            'assignment_desk-contributor',
-                            array(&$this->contributor_controller, 'dispatch'));
-		
-    		// Add Assignments sub-menu for Editors
-            $assignments_page = add_submenu_page('assignment_desk-menu', 'Assignments', 
-                            'Assignments', 
-                            5, 
-                            'assignment_desk-assignments',
-                            array(&$this->assignment_controller, 'dispatch'));
-                            
-           */
     	}
 		
   } //End Class
