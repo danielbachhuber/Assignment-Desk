@@ -95,23 +95,27 @@ class ad_post {
     * they became a member or were assigned a story.
     */
     function display_assignment_info(){
-       	global $post, $wpdb;
+       	global $post, $wpdb, $assignment_desk;
         echo "<div id='ad-assignment-detail' class='misc-pub-section'>";
         
         $pitched_by = get_post_meta($post->ID, '_ad_pitched_by', true);
-        $users = $wpdb->get_results("SELECT ID, user_nicename FROM $wpdb->users");
+        if(current_user_can($assignment_desk->define_editor_permissions)){
+            
+            $users = $wpdb->get_results("SELECT ID, user_nicename FROM $wpdb->users");
 ?>
-        <label>Pitched by:</label>;
-        <select name="_ad_pitched_by">
-            <option value="">---</option>
-        <?php foreach($users as $user) {
-            echo "<option value='$user->ID'";
-            if ($user->ID == $pitched_by) echo ' selected';
-            echo ">$user->user_nicename</option>";
-        } ?>
-        </select>
-        </div>
+            <label>Pitched by:</label>;
+            <select name="_ad_pitched_by">
+                <option value="">---</option>
+            <?php foreach($users as $user) {
+                echo "<option value='$user->ID'";
+                if ($user->ID == $pitched_by) echo ' selected';
+                echo ">$user->user_nicename</option>";
+            } ?>
+            </select>
+            </div>
 <?php 
+        }
+
     }
 
 	/**
@@ -199,6 +203,16 @@ class ad_post {
 		</div>
 		<?php 
 	
+	}
+	
+	function display_visibility_info(){
+	    global $post;
+	?>
+	    <div class="misc-pub-section">
+	        <label for="ad-private">Private while in progress :</label>
+	        <input type="checkbox" name="ad-private" value="1" <?php echo (get_post_meta($post->ID, '_ad_private', true) == "1")? "checked": ""; ?>>
+	    </div>
+	<?php  
 	}
 
 	/**
@@ -300,6 +314,7 @@ class ad_post {
         $this->display_assignment_info();
 		$this->display_assignment_status();
 		$this->display_participant_types();
+		$this->display_visibility_info();
         echo '</div></div>';
 
 		echo '<div class="ad-module">';
@@ -331,6 +346,7 @@ class ad_post {
         // The user who pitched this story
         if (current_user_can($assignment_desk->define_editor_permissions)) {
 		    update_post_meta($post_id, '_ad_pitched_by', (int)$_POST['_ad_pitched_by']);
+		    update_post_meta($post_id, '_ad_private', (int)$_POST['ad-private']);
 	    }
        
  		// If current user can edit assignment status, let them
