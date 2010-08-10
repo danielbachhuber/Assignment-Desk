@@ -144,23 +144,29 @@ class ad_post {
 
 		echo '<span id="ad-assignment-status-display">' . $current_status->name . '</span>';
 
-		if (current_user_can($assignment_desk->define_editor_permissions)) {
-			echo '&nbsp;<a id="ad-edit-assignment-status" class="hide-if-no-js" href="#assignment-status">Edit</a>';
-			// List all of the assignment statuses
-			$assignment_statuses = get_terms($assignment_desk->custom_taxonomies->assignment_status_label,
-	                                        array( 'get' => 'all'));
-			echo '<div id="ad-assignment-status-select" class="hide-if-js">';
-			echo "<select id='ad-assignment-status' name='ad-assignment-status'>";
-			foreach ( $assignment_statuses as $assignment_status ) {
-				echo "<option value='{$assignment_status->term_id}'";
-				if ( $assignment_status->term_id == $current_status->term_id ) {
-					echo " selected='selected'";
-				}
-				echo ">{$assignment_status->name}</option>";
-			}
-			echo "</select>&nbsp;";
-			echo '<a id="ad-save-assignment-status" class="hide-if-no-js button" href="#assignment-status">OK</a>&nbsp;';
-			echo '<a id="ad-cancel-assignment-status" class="hide-if-no-js" href="#assignment-status">Cancel</a>';
+		if (current_user_can($assignment_desk->define_editor_permissions) ) {
+		    echo '&nbsp;<a id="ad-edit-assignment-status" class="hide-if-no-js" href="#assignment-status">Edit</a>';
+		    echo '<div id="ad-assignment-status-select" class="hide-if-js">';
+		    if (count($assignment_status)) {
+    			// List all of the assignment statuses
+    			$assignment_statuses = get_terms($assignment_desk->custom_taxonomies->assignment_status_label,
+    	                                        array( 'get' => 'all'));
+    			echo "<select id='ad-assignment-status' name='ad-assignment-status'>";
+    			foreach ( $assignment_statuses as $assignment_status ) {
+    				echo "<option value='{$assignment_status->term_id}'";
+    				if ( $assignment_status->term_id == $current_status->term_id ) {
+    					echo " selected='selected'";
+    				}
+    				echo ">{$assignment_status->name}</option>";
+    			}
+    			echo "</select>&nbsp;";
+    			echo '<a id="ad-save-assignment-status" class="hide-if-no-js button" href="#assignment-status">OK</a>&nbsp;';
+    			echo '<a id="ad-cancel-assignment-status" class="hide-if-no-js" href="#assignment-status">Cancel</a>';
+    		}
+			else {
+			    echo '<span id="ad-assignment-statuses-display">None defined</span>';
+			    echo "<a href=" . admin_url() . "edit-tags.php?taxonomy=" . $assignment_desk->custom_taxonomies->assignment_status_label . " target='_blank'>Create</a>";
+		    }
 			echo '</div>';
 		}	
 		
