@@ -51,15 +51,19 @@ if ( !class_exists( 'ad_settings' ) ){
 		global $assignment_desk;
 		$options = $assignment_desk->general_options;
 		$assignment_statuses = $assignment_desk->custom_taxonomies->get_assignment_statuses();
-		echo '<select id="default_new_assignment_status" name="assignment_desk_general[default_new_assignment_status]">';
-		foreach ($assignment_statuses as $assignment_status) {
-			echo "<option value='$assignment_status->term_id'";
-			if ($options['default_new_assignment_status'] == $assignment_status->term_id) {
-				echo ' selected="selected"';
-			}
-			echo ">$assignment_status->name</option>";
- 		}
-		echo '</select>';
+		if (count($assignment_statuses)) {
+			echo '<select id="default_new_assignment_status" name="assignment_desk_general[default_new_assignment_status]">';
+			foreach ($assignment_statuses as $assignment_status) {
+				echo "<option value='$assignment_status->term_id'";
+				if ($options['default_new_assignment_status'] == $assignment_status->term_id) {
+					echo ' selected="selected"';
+				}
+				echo ">$assignment_status->name</option>";
+	 		}
+			echo '</select>';
+		} else {
+			echo "No statuses set. Please <a href='" . get_bloginfo('url') . "/wp-admin/edit-tags.php?taxonomy=".$assignment_desk->custom_taxonomies->assignment_status_label . "'>create at least one assignment status</a>.";
+		}
 	}
 	
 	/**
