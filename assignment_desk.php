@@ -4,7 +4,7 @@ Plugin Name: Assignment Desk
 Plugin URI: http://code.nyu.edu/projects/show/s20
 Description: News pitch and story tools for local news blogs.
 Author: Erik Froese, Daniel Bachhuber, Tal Safran
-Version: 0.2
+Version: 0.2.1
 Author URI: 
 */   
    
@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 define('ASSIGNMENT_DESK_FILE_PATH', __FILE__);
 define('ASSIGNMENT_DESK_URL', plugins_url(plugin_basename(dirname(__FILE__)) .'/'));
-define('ASSIGMENT_DESK_VERSION', '0.2');
+define('ASSIGMENT_DESK_VERSION', '0.2.1');
 
 define('ASSIGNMENT_DESK_DIR_PATH', dirname(__FILE__));
 define('ASSIGNMENT_DESK_TEMPLATES_PATH', ASSIGNMENT_DESK_DIR_PATH . '/php/templates');
@@ -169,7 +169,7 @@ if (!class_exists('assignment_desk')) {
         
         // Actions that happen only on activate.
         function activate_plugin() {
-            $this->installer->setup_db();
+            //$this->installer->setup_db();
         }
 
 		/**
