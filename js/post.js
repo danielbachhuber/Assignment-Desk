@@ -116,30 +116,29 @@ jQuery(document).ready(function() {
 		var valid_user = true;
 		var user_id = '';
 		var user_nicename = '';
+		
 		if (jQuery('#ad-assignee-search').length > 0 && jQuery('#ad-assignee-search').val().length > 1 ) {
-			var search = jQuery('#ad-assignee-search').val();
+			var search = jQuery('#ad-assignee-search').val().trim();
 			var data = { action: 'user_check', q: search };
 			
-			// Call another AJAX function verify the username
+			// Call another JAX function verify the username
 			jQuery.ajax({
 				url: ajaxurl, 
 				data: data,
 				async: false, 
 				success: function(response){
+					// valid username returns user->ID > 0
 					if(parseInt(response) > 0){
-						var user_info = jQuery('#ad-assignee-search').val();
-						user_info = user_info.split('|');
-						user_id = user_info[0].trim();
-						// only the user_id is left in the box currently.
-						user_nicename = user_info[0].trim();
+						user_id = search;
+						user_nicename = search;
 						jQuery('#ad-assignee-search').val('');
 					}
 					else {
 						// flag the invalid_user and display an error message
 						valid_user = false;
 						jQuery('#ad-participant-error-message').remove();
-						error_message = '<div id="ad-participant-error-message" class="message alert">'
-										+ search + ' is not a valid user </div>';
+						error_message = '<div id="ad-participant-error-message" class="message alert">'+ 
+											search + ' is not a valid user </div>';
 						jQuery("#ad-assign-form").prepend(error_message);
 					}
 				}
@@ -155,6 +154,10 @@ jQuery(document).ready(function() {
 		}
 		return false;
 	});
+	
+	
+	
+	/* ============================ Assignment Status ============================ */
 	
 	/**
 	 * Manipulate the DOM when the user wants to "Edit" assignment status
@@ -189,6 +192,8 @@ jQuery(document).ready(function() {
 		jQuery('#ad-assignment-status-select').slideToggle();
 		return false;		
 	});
+	
+	/* ============================ Participant Types ============================ */
 	
 	/**
 	 * Manipulate the DOM when the user wants to "Edit" participant types
@@ -259,8 +264,8 @@ jQuery(document).ready(function() {
 	/* ============================ Pitched By ============================ */
 	
 	/**
-	 * Manipulate the DOM when the user wants to "Edit" pitched by
-	 * In short, save the current status and show the selection tool.
+	 * Manipulate the DOM when the user wants to "Edit" the pitched by field.
+	 * In short, save the currently selected user and show the selection tool.
 	 */
 	jQuery('#ad-edit-pitched-by-participant').click(function(){
 		jQuery(this).hide();
@@ -270,7 +275,7 @@ jQuery(document).ready(function() {
 	});
 	
 	/**
-	 * Manipulate the DOM when the user wants to "Save" the pitched_by participant.
+	 * Manipulate the DOM when the user wants to "Save" the pitched by field.
 	 */
 	jQuery('#ad-save-pitched-by-participant').click(function(){
 		jQuery('#ad-edit-pitched-by-participant').show();
@@ -283,8 +288,8 @@ jQuery(document).ready(function() {
 	});
 	
 	/**
-	 * Manipulate the DOM when the user hits "Cancel" on pitched by
-	 * In short, restore checkbox value and hide the pitched_by_form
+	 * Manipulate the DOM when the user hits "Cancel" on pitched by field.
+	 * In short, restore field value and hide the pitched by form.
 	 */
 	jQuery('#ad-cancel-pitched-by-participant').click(function(){
 		jQuery('#ad-pitched-by-participant-select').slideToggle();
