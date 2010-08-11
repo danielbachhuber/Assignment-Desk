@@ -419,10 +419,31 @@ class ad_post {
       
     }
     
-    function send_assignment_email($post_id, $username){
+    /**
+    * Fill out the template for the email a user receives when they're assigned a story.
+    * Then send the email.
+    */
+    function send_assignment_email($post_id, $user){
+        if (get_option('assignment_email_notifications_enabled') != 'on'){
+            return;
+        }
+        
+        $post = get_post($post_id);
         // Get the template from the settings
+        $email_template = get_option('assignment_email_template');
+        
         // Fill it out
+        $search = array(  '%title%', 
+                          '%post_link%',
+                          '%display_name%', 
+                       );
+        $replace = array($post->ID,  
+                        get_permalink($post_id);
+                        $user->display_name,
+                    );
+        $email_template = str_replace($search, $replace, $email_template);
         // Send it off
+        wp_mail($user->user_email, 'A new assignment for you.', $email_template);
     }
 
 }
