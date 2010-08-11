@@ -107,28 +107,54 @@ jQuery(document).ready(function() {
 	jQuery('h4.toggle').click(function() {
 		var inner = jQuery(this).parent().find('div.inner').slideToggle();
 	});
-		
+	
 	/**
-	 * Add selected user and selected role to their related participant bucket
-	 */
+	 * Fires when the user hits the assign button.
+	 * Get the user search box, check if its a valid user, and add to the selected role.
+ 	 */
 	jQuery("a#ad-assign-button").click(function(){
-		if ( jQuery('#ad-assignee-search').length > 0 ) {
-			var user_info = jQuery('#ad-assignee-search').val();
-			user_info = user_info.split('|');
-			var user_id = user_info[0].trim();
-			// only the user_id is left in the box currently.
-			var user_nicename = user_info[0].trim();
-			jQuery('#ad-assignee-search').val('');			
+		var valid_user = true;
+		var user_id = '';
+		var user_nicename = '';
+		if (jQuery('#ad-assignee-search').length > 0 && jQuery('#ad-assignee-search').val().length > 1 ) {
+			var search = jQuery('#ad-assignee-search').val();
+			var data = { action: 'user_check', q: search };
+			
+			// Call another AJAX function verify the username
+			jQuery.ajax({
+				url: ajaxurl, 
+				data: data,
+				async: false, 
+				success: function(response){
+					if(parseInt(response) > 0){
+						var user_info = jQuery('#ad-assignee-search').val();
+						user_info = user_info.split('|');
+						user_id = user_info[0].trim();
+						// only the user_id is left in the box currently.
+						user_nicename = user_info[0].trim();
+						jQuery('#ad-assignee-search').val('');
+					}
+					else {
+						// flag the invalid_user and display an error message
+						valid_user = false;
+						jQuery('#ad-participant-error-message').remove();
+						error_message = '<div id="ad-participant-error-message" class="message alert">'
+										+ search + ' is not a valid user </div>';
+						jQuery("#ad-assign-form").prepend(error_message);
+					}
+				}
+			});
 		} else {
 			var user_id = jQuery('#ad-assignee-dropdown option:selected').val();
 			var user_nicename = jQuery('#ad-assignee-dropdown option:selected').text();
 		}
-		var role_id = jQuery('#ad-user-role-dropdown option:selected').val();
-		var role_name = jQuery('#ad-user-role-dropdown option:selected').text();		
-		ad_add_to_participants(user_id, user_nicename, role_id, role_name);
+		if(valid_user){
+			var role_id = jQuery('#ad-user-role-dropdown option:selected').val();
+			var role_name = jQuery('#ad-user-role-dropdown option:selected').text();
+			ad_add_to_participants(user_id, user_nicename, role_id, role_name);
+		}
 		return false;
 	});
-	
 	
 	/**
 	 * Manipulate the DOM when the user wants to "Edit" assignment status

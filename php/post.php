@@ -26,6 +26,7 @@ class ad_post {
 		$this->enqueue_admin_javascript();	
 		add_action( 'admin_print_scripts', array(&$this, 'javascript_variables') );
 		
+		add_action('wp_ajax_user_check', array(&$this, 'ajax_user_check'));
 	}
     
     /**
@@ -346,7 +347,7 @@ class ad_post {
 	 * @todo Might need a non
     */
     function save_post_meta_box($post_id, $post) {
-        global $executed_already, $wpdb, $assignment_desk, $current_user;
+        global $executed_already, $wpdb, $assignment_desk, $current_user, $ad_user_errors;
 
 		wp_get_current_user();
         
@@ -456,6 +457,29 @@ class ad_post {
         $email_template = str_replace($search, $replace, $email_template);
         // Send it off
         wp_mail($user->user_email, 'A new assignment for you.', $email_template);
+    }
+    
+    /**
+     * Very simple ajax call to validate a user by login.
+     */
+    function ajax_user_check(){
+        global $current_user, $assignment_desk;
+        
+        get_currentuserinfo();
+		
+		if(current_user_can($assignment_desk->define_editor_permissions)) {
+            if($_GET['q']){
+                $user = get_userdatabylogin($_GET['q']);
+            
+                if($user){
+                    echo $user->ID;
+                }
+                else {
+                    echo '0';
+                }
+            }
+        }
+        die();
     }
 
 }
