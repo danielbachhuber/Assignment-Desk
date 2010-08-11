@@ -18,11 +18,13 @@ if ( !class_exists( 'ad_settings' ) ){
 		register_setting( $assignment_desk->options_group, $assignment_desk->get_plugin_option_fullname('general'), array(&$this, 'assignment_desk_validate') );
 		
 		add_settings_section( 'story_pitches', 'Story Pitches', array(&$this, 'story_pitches_setting_section'), $assignment_desk->top_level_page );
-		add_settings_field( 'pitch_form_enabled', 'Pitch forms enabled', array(&$this, 'pitch_form_enabled_option'), $assignment_desk->top_level_page, 'story_pitches' );
+		add_settings_field( 'pitch_form_enabled', 'Enable pitch forms', array(&$this, 'pitch_form_enabled_option'), $assignment_desk->top_level_page, 'story_pitches' );
 		add_settings_field( 'default_new_assignment_status', 'Default assignment status', array(&$this, 'default_new_assignment_status_option'), $assignment_desk->top_level_page, 'story_pitches' );
 		add_settings_field( 'default_workflow_status', 'Default workflow status', array(&$this, 'default_workflow_status_option'), $assignment_desk->top_level_page, 'story_pitches' );
 		add_settings_field( 'pitch_form_elements', 'Pitch form elements', array(&$this, 'pitch_form_elements_option'), $assignment_desk->top_level_page, 'story_pitches' );
-				
+		
+		add_settings_section( 'assignment_management', 'Assignment Management', array(&$this, 'assignment_management_setting_section'), $assignment_desk->top_level_page );
+		add_settings_field( 'assignment_email_notifications_enabled', 'Enable assignment email notifications', array(&$this, 'assignment_email_notifications_enabled_option'), $assignment_desk->top_level_page, 'assignment_management' );	
 		
 		add_settings_section( 'public_facing_views', 'Public-Facing Views', array(&$this, 'public_facing_views_setting_section'), $assignment_desk->top_level_page );
 		
@@ -154,6 +156,22 @@ if ( !class_exists( 'ad_settings' ) ){
 			echo '<li>Please enable Edit Flow to allow location field.</li>';
 		}
 		echo '</ul>';
+	}
+	
+	function assignment_management_setting_section() {
+		global $assignment_desk;
+		echo "Tk lorem ipsum";
+	}
+	
+	function assignment_email_notifications_enabled_option() {
+		global $assignment_desk;
+		$options = $assignment_desk->general_options;
+		
+		echo '<input id="assignment_email_notifications_enabled" name="assignment_desk_general[assignment_email_notifications_enabled]" type="checkbox"';
+		if ($options['assignment_email_notifications_enabled']) {
+			echo ' checked="checked"';
+		}
+		echo ' />';
 	}
 	
 	function public_facing_views_setting_section() {
