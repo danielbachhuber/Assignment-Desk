@@ -157,7 +157,8 @@ if ( !class_exists( 'ad_settings' ) ){
 	}
 	
 	function public_facing_views_setting_section() {
-		echo "Enable public access to pitches and stories in progress by dropping <code>&#60;!--assignment-desk-all-stories--&#62;</code> in a page.";
+		global $assignment_desk;
+		echo "Enable public access to pitches and stories in progress by dropping <code>&#60;!--$assignment_desk->all_posts_key--&#62;</code> in a page.";
 	}
 	
 	function google_maps_api_key_option() {

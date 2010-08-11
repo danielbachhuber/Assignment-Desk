@@ -18,7 +18,7 @@ class ad_public_views {
 			// @todo Add a message to top of form if exists
 		}
 		
-		add_filter('the_content', array(&$this, 'filter_show_public_pages') );
+		add_filter('the_content', array(&$this, 'show_all_posts') );
 		if ($options['pitch_form_enabled']) {
 			add_filter('the_content', array(&$this, 'show_pitch_form') );
 		}
@@ -237,22 +237,54 @@ class ad_public_views {
 	
 	
 	/*
-	* Replace an html comment <!--assignment-desk-all-stories-> with ad public pages.
+	* Replace an html comment <!--assignment-desk-all-posts-> with ad public pages.
 	*/
-	function filter_show_public_pages($the_content){
+	function show_all_posts( $the_content ) {
 		global $wpdb, $assignment_desk;
 	  
-		$tag = '<!--assignment-desk-all-stories-->';
-		$start = strpos($the_content, $tag);
-		$my_content  = $the_content;
-        if ($start){
-            $before_ad = substr($the_content, 0, $start);
-            $after_ad = substr($the_content, $start + strlen($tag), strlen($the_content));
-            $ad = $this->public_content();
-            $my_content = $before_ad . $ad . $after_ad;
-        }
-        
-        return $my_content;
+		$template_tag = '<!--' . $assignment_desk->all_posts_key . '-->';
+		
+		$html = '';		
+		$args = array(	'post_status' => 'pitch,assigned' );
+		
+		$posts = new WP_Query($args);
+		//var_dump($posts);
+		
+		if ($posts->have_posts()) {
+			while ($posts->have_posts()) {
+				$posts->the_post();
+				
+				$post_id = get_the_ID();
+				
+				$description = get_post_meta($post_id, '_ef_description', true);
+				$location = get_post_meta($post_id, '_ef_location', true);
+				$duedate = get_post_meta($post_id, '_ef_duedate', true);
+				$duedate = date_i18n('M d, Y', $duedate);
+				
+				$html .= '<h3><a href="' . get_permalink($post_id) . '">' . get_the_title($post_id) . '</a></h3>';
+				if ($description || $duedate || $location) {
+				$html .= '<p class="meta">';
+				}
+				if ($description) {
+				$html .= '<label>Description:</label> ' . $description . '<br />';
+				}
+				if ($duedate) {
+				$html .= '<label>Due date:</label> ' . $duedate . '<br />';	
+				}
+				if ($location) {
+				$html .= '<label>Location:</label> ' . $location . '<br />';	
+				}
+				if ($description || $duedate || $location) {
+				$html .= '</p>';
+				}
+			
+				
+			}
+		}
+		
+		$the_content = str_replace($template_tag, $html, $the_content);
+		
+        return $the_content;
 	}
 	
 	function public_content(){
