@@ -26,9 +26,9 @@ function ad_add_to_participants(user_id, user_nicename, role_id, role_name){
 	jQuery("#ad-participant-error-message").remove();
 	
 	// @todo check to see whether use was already assigned in this rold
-	jQuery('input[name="ad-participant-role-'+role_id
+	jQuery('input[name="ad-participant-role-' + role_id
 	+ '[]"]').each(function(){
-		if (jQuery(this).val() == (user_id) ) {
+		if (jQuery(this).val().split('|')[0] == user_id ) {
 			error_message = '<div id="ad-participant-error-message" class="message alert">'
 							+ user_nicename + ' has already been added as ' + role_name
 							+ '</div>';
