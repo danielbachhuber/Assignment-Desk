@@ -438,7 +438,7 @@ class ad_post {
                           '%display_name%', 
                        );
         $replace = array($post->ID,  
-                        get_permalink($post_id);
+                        get_permalink($post_id),
                         $user->display_name,
                     );
         $email_template = str_replace($search, $replace, $email_template);
