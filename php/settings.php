@@ -28,6 +28,8 @@ if ( !class_exists( 'ad_settings' ) ){
 		add_settings_field( 'assignment_email_template', 'Template for notifications', array(&$this, 'assignment_email_template_option'), $assignment_desk->top_level_page, 'assignment_management' );
 		
 		add_settings_section( 'public_facing_views', 'Public-Facing Views', array(&$this, 'public_facing_views_setting_section'), $assignment_desk->top_level_page );
+		add_settings_field( 'public_facing_elements', 'Public-facing elements', array(&$this, 'public_facing_elements_option'), $assignment_desk->top_level_page, 'public_facing_views' );
+		add_settings_field( 'public_facing_functionality', 'Public-facing functionality', array(&$this, 'public_facing_functionality_option'), $assignment_desk->top_level_page, 'public_facing_views' );		
 		
 		add_settings_section( 'miscellaneous', 'Miscellaneous', array(&$this, 'miscellaneous_setting_section'), $assignment_desk->top_level_page );
 		add_settings_field( 'google_maps_api_key', 'Google Maps API key', array(&$this, 'google_maps_api_key_option'), $assignment_desk->top_level_page, 'miscellaneous' );
@@ -188,6 +190,89 @@ if ( !class_exists( 'ad_settings' ) ){
 	function public_facing_views_setting_section() {
 		global $assignment_desk;
 		echo "Enable public access to pitches and stories in progress by dropping <code>&#60;!--$assignment_desk->all_posts_key--&#62;</code> in a page.";
+	}
+	
+	function public_facing_elements_option() {
+		global $assignment_desk;
+		if ($assignment_desk->edit_flow_exists()) {
+			global $edit_flow;
+		}
+		$options = $assignment_desk->general_options;
+		echo '<ul>';
+		// Title
+		echo '<li><input type="checkbox" disabled="disabled" checked="checked" />&nbsp;<label for="public_facing_title">Title</label></li>';
+		// Description
+		if ($assignment_desk->edit_flow_exists()) {
+			echo '<li><input id="public_facing_description_enabled" name="assignment_desk_general[public_facing_description_enabled]" type="checkbox"';
+			if ($options['public_facing_description_enabled']) {
+				echo ' checked="checked"';
+			}
+			echo ' />&nbsp;<label for="public_facing_description_enabled">Description</label></li>';
+		} else {
+				echo '<li>Please enable Edit Flow to allow description field.</li>';
+		}
+		// Due date
+		if ($assignment_desk->edit_flow_exists()) {
+			echo '<li><input id="public_facing_duedate_enabled" name="assignment_desk_general[public_facing_duedate_enabled]" type="checkbox"';
+			if ($options['public_facing_duedate_enabled']) {
+				echo ' checked="checked"';
+			}
+			echo ' />&nbsp;<label for="public_facing_duedate_enabled">Due Date</label></li>';
+		} else {
+				echo '<li>Please enable Edit Flow to allow due date field.</li>';
+		}
+		// Location
+		if ($assignment_desk->edit_flow_exists()) {
+			echo '<li><input id="public_facing_location_enabled" name="assignment_desk_general[public_facing_location_enabled]" type="checkbox"';
+			if ($options['public_facing_location_enabled']) {
+				echo ' checked="checked"';
+			}
+			echo ' />&nbsp;<label for="public_facing_location_enabled">Location</label></li>';
+			
+		} else {
+			echo '<li>Please enable Edit Flow to allow location field.</li>';
+		}
+		// Categories
+		echo '<li><input id="public_facing_categories_enabled" name="assignment_desk_general[public_facing_categories_enabled]" type="checkbox"';
+		if ($options['public_facing_categories_enabled']) {
+			echo ' checked="checked"';
+		}
+		echo ' />&nbsp;<label for="public_facing_categories_enabled">Categories</label></li>';
+		// Tags
+		echo '<li><input id="public_facing_tags_enabled" name="assignment_desk_general[public_facing_tags_enabled]" type="checkbox"';
+		if ($options['public_facing_tags_enabled']) {
+			echo ' checked="checked"';
+		}
+		echo ' />&nbsp;<label for="public_facing_tags_enabled">Tags</label></li>';
+		echo '</ul>';
+	}
+	
+	function public_facing_functionality_option() {
+		global $assignment_desk;
+		if ($assignment_desk->edit_flow_exists()) {
+			global $edit_flow;
+		}
+		$options = $assignment_desk->general_options;
+		echo '<ul>';
+		// Volunteer
+		echo '<li><input id="public_facing_volunteering_enabled" name="assignment_desk_general[public_facing_volunteering_enabled]" type="checkbox"';
+		if ($options['public_facing_volunteering_enabled']) {
+			echo ' checked="checked"';
+		}
+		echo ' />&nbsp;<label for="public_facing_volunteering_enabled">Volunteering</label></li>';
+		// Voting
+		echo '<li><input id="public_facing_voting_enabled" name="assignment_desk_general[public_facing_voting_enabled]" type="checkbox"';
+		if ($options['public_facing_voting_enabled']) {
+			echo ' checked="checked"';
+		}
+		echo ' />&nbsp;<label for="public_facing_voting_enabled">Voting</label></li>';
+		// Commenting
+		echo '<li><input id="public_facing_commenting_enabled" name="assignment_desk_general[public_facing_commenting_enabled]" type="checkbox"';
+		if ($options['public_facing_commenting_enabled']) {
+			echo ' checked="checked"';
+		}
+		echo ' />&nbsp;<label for="public_facing_commenting_enabled">Commenting</label></li>';
+		echo '</ul>';
 	}
 	
 	function google_maps_api_key_option() {

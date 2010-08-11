@@ -241,6 +241,7 @@ class ad_public_views {
 	*/
 	function show_all_posts( $the_content ) {
 		global $wpdb, $assignment_desk;
+		$options = $assignment_desk->general_options;
 	  
 		$template_tag = '<!--' . $assignment_desk->all_posts_key . '-->';
 		
