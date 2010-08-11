@@ -79,6 +79,7 @@ jQuery(document).ready(function() {
 	
 	var ad_current_assignment_status = '';
 	var ad_current_participant_types = [];
+	var ad_current_pitched_by_participant = ''
 
 	/**
 	 * Initialize Co-Author Plus auto-suggest if it exists
@@ -226,6 +227,43 @@ jQuery(document).ready(function() {
 			}
 		});		
 		jQuery('#ad-edit-participant-types').show();
+		return false;
+	});
+	
+	/* ============================ Pitched By ============================ */
+	
+	/**
+	 * Manipulate the DOM when the user wants to "Edit" pitched by
+	 * In short, save the current status and show the selection tool.
+	 */
+	jQuery('#ad-edit-pitched-by-participant').click(function(){
+		jQuery(this).hide();
+		ad_current_pitched_by_participant = jQuery('select#ad-pitched-by-participant').val();
+		jQuery('#ad-pitched-by-participant-select').slideToggle();
+		return false;		
+	});
+	
+	/**
+	 * Manipulate the DOM when the user wants to "Save" the pitched_by participant.
+	 */
+	jQuery('#ad-save-pitched-by-participant').click(function(){
+		jQuery('#ad-edit-pitched-by-participant').show();
+		var text = jQuery('select#ad-pitched-by-participant option:selected').text();
+		var user_id = jQuery('select#ad-pitched-by-participant option:selected').val();
+		var link = '<a href="' + wp_admin_url + 'user-edit.php?user_id=' + user_id + '">' + text + "</a>";
+		jQuery('#ad-pitched-by-participant-display').html(link);
+		jQuery('#ad-pitched-by-participant-select').slideToggle();
+		return false;		
+	});
+	
+	/**
+	 * Manipulate the DOM when the user hits "Cancel" on pitched by
+	 * In short, restore checkbox value and hide the pitched_by_form
+	 */
+	jQuery('#ad-cancel-pitched-by-participant').click(function(){
+		jQuery('#ad-pitched-by-participant-select').slideToggle();
+		jQuery('select#ad-pitched-by-participant').val(ad_current_pitched_by_participant);
+		jQuery('#ad-edit-pitched-by-participant').show();
 		return false;
 	});
 		

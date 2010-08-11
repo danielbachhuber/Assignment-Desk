@@ -65,17 +65,17 @@ class ad_post {
     */
     function javascript_variables(){
 		global $assignment_desk;
+		$admin_url = admin_url();
+		
         // AJAX link used for the autosuggest
-		if ($assignment_desk->coauthors_plus_exists()) {
-			$admin_url = admin_url();
-			echo '<script type="text/javascript">';
+        echo '<script type="text/javascript">';
+		if ($assignment_desk->coauthors_plus_exists()) {	
 	        echo "var coauthor_ajax_suggest_link='{$admin_url}admin-ajax.php?action=coauthors_ajax_suggest'; ";
-	        echo '</script>';
 		} else {
-			echo '<script type="text/javascript">';
 			echo "var coauthor_ajax_suggest_link = '';";
-			echo '</script>';
 		}
+		echo "var wp_admin_url = '$admin_url';";
+		echo '</script>';
 
     }
 
@@ -85,36 +85,47 @@ class ad_post {
     * who pitched the story. 
     *
     * The ID of the person who pitched the story is saved as a
-    * custom field under the key _ad_pitched_by.
+    * custom field under the key _ad_pitched_by_participant.
     *
     * If the person who pitched the story is NOT currently a member of the
-    * WP blog we store their email address in the _ad_pitched_by field;
+    * WP blog we store their email address in the _ad_pitched_by_participant field;
     * 
     * When the post is saved we try to look up the user by email. Maybe
     * they became a member or were assigned a story.
     */
     function display_assignment_info(){
        	global $post, $wpdb, $assignment_desk;
-        echo "<div id='ad-assignment-detail' class='misc-pub-section'>";
-        
-        $pitched_by = get_post_meta($post->ID, '_ad_pitched_by', true);
-        if(current_user_can($assignment_desk->define_editor_permissions)){
-            
-            $users = $wpdb->get_results("SELECT ID, user_nicename FROM $wpdb->users");
-?>
-            <label>Pitched by:</label>;
-            <select name="_ad_pitched_by">
-                <option value="">---</option>
-            <?php foreach($users as $user) {
-                echo "<option value='$user->ID'";
-                if ($user->ID == $pitched_by) echo ' selected';
-                echo ">$user->user_nicename</option>";
-            } ?>
-            </select>
-            </div>
-<?php 
-        }
+       	
+       	if(! current_user_can($assignment_desk->define_editor_permissions)){
+       	    return;
+       	}
+       	
+       	$pitched_by = get_post_meta($post->ID, '_ad_pitched_by_participant', true);
+       	$pitched_by_user = get_userdata($pitched_by);
+     ?>
+        <div id="ad-pitched-by-participant" class="misc-pub-section">
+            <label for="ad-pitched-by-participant-select">Pitched by:</label>
+            <span id="ad-pitched-by-participant-display">
+                <a href="<?php echo admin_url(); ?>user-edit.php?user_id=<?php echo $pitched_by; ?> ">
+                <?php echo $pitched_by_user->display_name; ?></a>
+            </span>
+            <a id="ad-edit-pitched-by-participant" class="hide-if-no-js" href="#pitched-by-participant">Edit</a>
 
+            <div id="ad-pitched-by-participant-select" class="hide-if-js">        
+                <?php $users = $wpdb->get_results("SELECT ID, user_nicename FROM $wpdb->users"); ?>
+                <select name="ad-pitched-by-participant" id="ad-pitched-by-participant" class="hide-if-no-js">
+                    <option value="">---</option>
+                    <?php foreach($users as $user) {
+                        echo "<option value='$user->ID'";
+                        if ($user->ID == $pitched_by) echo ' selected';
+                        echo ">$user->user_nicename</option>";
+                    } ?>
+                </select>
+                <a id="ad-save-pitched-by-participant" class="hide-if-no-js button" href="#pitched-by-participant">OK</a>&nbsp
+        	    <a id="ad-cancel-pitched-by-participant" class="hide-if-no-js" href="#pitched-by-participant">Cancel</a>
+    	    </div>
+    	</div>
+<?php
     }
 
 	/**
@@ -129,6 +140,7 @@ class ad_post {
 		wp_get_current_user();
 
 		echo '<div class="misc-pub-section">';
+		
         echo '<label for="ad-assignment-status">Status:</label>&nbsp;';
         // What is the status of this Assignment?
         $current_status = wp_get_object_terms($post->ID,
@@ -350,7 +362,7 @@ class ad_post {
 
         // The user who pitched this story
         if (current_user_can($assignment_desk->define_editor_permissions)) {
-		    update_post_meta($post_id, '_ad_pitched_by', (int)$_POST['_ad_pitched_by']);
+		    update_post_meta($post_id, '_ad_pitched_by_participant', (int)$_POST['ad-pitched-by-participant']);
 		    update_post_meta($post_id, '_ad_private', (int)$_POST['ad-private']);
 	    }
        
