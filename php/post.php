@@ -8,7 +8,6 @@ if (!class_exists('ad_post')) {
 class ad_post {
     
    function __construct() {
-        
 		// @todo Move to assignment_desk class
 		$this->init();
     }
@@ -256,7 +255,7 @@ class ad_post {
 		
 		// Get all of the users in the database
 		$all_users = $wpdb->get_results("SELECT * FROM $wpdb->users");
- 		
+
 		if ( count($user_roles) && current_user_can($assignment_desk->define_editor_permissions)) :
 			echo '<div id="ad-assign-form" class="misc-pub-section">';
             echo '<label>Select user:</label>&nbsp;';
@@ -388,7 +387,7 @@ class ad_post {
 				}
 			}
 		}
-
+		
 		$user_roles = $assignment_desk->custom_taxonomies->get_user_roles();
 		if (current_user_can($assignment_desk->define_editor_permissions)) {
 			$all_participants = array();
@@ -400,8 +399,13 @@ class ad_post {
 				if ( count($raw_role_participants) ) {
 					foreach ($raw_role_participants as $raw_participant) {
 						$participant = explode('|', $raw_participant);
-						$all_role_participants[$participant[0]] = $participant[1];
-						$all_participants[$participant[0]][] = $user_role->term_id;
+						if(get_userdatabylogin($participant[0])){
+						    $all_role_participants[$participant[0]] = $participant[1];
+						    $all_participants[$participant[0]][] = $user_role->term_id;
+						}
+						else {
+						    // @todo - Store the error somewhere so it can be displayed
+						}
 					}
 				}
 				update_post_meta($post_id, "_ad_participant_role_$user_role->term_id", $all_role_participants);
