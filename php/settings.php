@@ -24,7 +24,8 @@ if ( !class_exists( 'ad_settings' ) ){
 		add_settings_field( 'pitch_form_elements', 'Pitch form elements', array(&$this, 'pitch_form_elements_option'), $assignment_desk->top_level_page, 'story_pitches' );
 		
 		add_settings_section( 'assignment_management', 'Assignment Management', array(&$this, 'assignment_management_setting_section'), $assignment_desk->top_level_page );
-		add_settings_field( 'assignment_email_notifications_enabled', 'Enable assignment email notifications', array(&$this, 'assignment_email_notifications_enabled_option'), $assignment_desk->top_level_page, 'assignment_management' );	
+		add_settings_field( 'assignment_email_notifications_enabled', 'Enable assignment email notifications', array(&$this, 'assignment_email_notifications_enabled_option'), $assignment_desk->top_level_page, 'assignment_management' );
+		add_settings_field( 'assignment_email_template', 'Template for notifications', array(&$this, 'assignment_email_template_option'), $assignment_desk->top_level_page, 'assignment_management' );
 		
 		add_settings_section( 'public_facing_views', 'Public-Facing Views', array(&$this, 'public_facing_views_setting_section'), $assignment_desk->top_level_page );
 		
@@ -172,6 +173,16 @@ if ( !class_exists( 'ad_settings' ) ){
 			echo ' checked="checked"';
 		}
 		echo ' />';
+	}
+	
+	function assignment_email_template_option() {
+		global $assignment_desk;
+		$options = $assignment_desk->general_options;
+		
+		echo '<textarea id="assignment_email_template" name="assignment_desk_general[assignment_email_template]" rows="8" cols="60">';
+		echo $options['assignment_email_template'];
+		echo '</textarea><br />';
+		echo '<span class="description">Use tokens like %title%, %location% and %dashboard_link%</span>';
 	}
 	
 	function public_facing_views_setting_section() {
