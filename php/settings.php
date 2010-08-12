@@ -284,6 +284,10 @@ if ( !class_exists( 'ad_settings' ) ){
 		
 	}
 	
+	function miscellaneous_setting_section() {
+	    
+	}
+	
 	/**
 	 * Validation for all of our form elements
 	 */
