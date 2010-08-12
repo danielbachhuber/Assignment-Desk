@@ -407,16 +407,33 @@ class ad_post {
 			// For each User Role, save participant ID and status
 			foreach ( $user_roles as $user_role ) {
 				$raw_role_participants = array();
-				$all_role_participants = array();				
+				$all_role_participants = array();		
 				$raw_role_participants = $_POST["ad-participant-role-$user_role->term_id"];
 				if ( count($raw_role_participants) ) {
 					foreach ($raw_role_participants as $raw_participant) {
 						$participant = explode('|', $raw_participant);
-						if(get_userdatabylogin($participant[0])){
-						    $all_role_participants[$participant[0]] = $participant[1];
-						    $all_participants[$participant[0]][] = $user_role->term_id;
+						$user_login = $participant[0];
+						$status_for_this_role = $participant[1];
+						$user = get_userdatabylogin($user_login); 
+						
+						// Check if the user_login is valid.
+						if($user){
+						    // array(user => "status", user => "status")
+						    $all_role_participants[$user_login] = $status_for_this_role;
+						    // array('user' => array(role_id, role_id, ...))
+						    $all_participants[$user_login][] = $user_role->term_id;
+						    
+						    // Existing user_roles for this user on this post
+						    $participant_record = get_post_meta($post_id, "_ad_participant_$user_login", true);
+						    if(!$participant_record){ $participant_record = array(); }
+						    // check if the user is already assigned to that role
+						    // If the term_id for the user_role is NOT in the list of term_ids for this user.
+						    if(! in_array($user_role->term_id, $participant_record)){					        
+						        $this->send_assignment_email($post_id, $user->ID, $user_role->term_id);
+						    }
 						}
 						else {
+						    // Invalid user.
 						    // @todo - Store the error somewhere so it can be displayed
 						}
 					}
@@ -427,35 +444,40 @@ class ad_post {
 			foreach ($all_participants as $participant_id => $user_role_ids) {
 				update_post_meta($post_id, "_ad_participant_$participant_id", $user_role_ids);
 			}
-			
 		}
-      
     }
     
     /**
     * Fill out the template for the email a user receives when they're assigned a story.
     * Then send the email.
     */
-    function send_assignment_email($post_id, $user){
-        if (get_option('assignment_email_notifications_enabled') != 'on'){
+    function send_assignment_email($post_id, $user_id, $role_id){
+        global $assignment_desk;
+        
+        if ($assignment_desk->general_options['assignment_email_notifications_enabled'] != 'on'){
             return;
         }
         
         $post = get_post($post_id);
+        $user = get_userdata($user_id);
+        $role = get_term($term_id, $assignment_desk->custom_taxonomies->user_role_label);
         // Get the template from the settings
         $email_template = get_option('assignment_email_template');
         
-        // Fill it out
         $search = array(  '%title%', 
                           '%post_link%',
-                          '%display_name%', 
+                          '%display_name%',
+                          '%role%',
                        );
         $replace = array($post->ID,  
                         get_permalink($post_id),
                         $user->display_name,
+                        $role->name,
                     );
+        // Fill it out
         $email_template = str_replace($search, $replace, $email_template);
         // Send it off
+        // @todo - Add a setting to edit the subject.
         wp_mail($user->user_email, 'A new assignment for you.', $email_template);
     }
     
