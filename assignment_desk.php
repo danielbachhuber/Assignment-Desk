@@ -87,10 +87,10 @@ if (!class_exists('assignment_desk')) {
         public $installer;
 
 	    
-	      /** 
-	       * @var assignment_desk_index_controller $index_controller serves the activity feed views.
-	       */
-	      public $index_controller;
+	    /** 
+	     * @var assignment_desk_index_controller $index_controller serves the activity feed views.
+	     */
+	    public $index_controller;
         
         /**
          * @var assignment_desk_contributor_controller $contributor_controller serves 
@@ -140,8 +140,6 @@ if (!class_exists('assignment_desk')) {
              */
             $this->custom_taxonomies->init();
             $this->user->init_user();
-            
-
         }
 
 		function init() {
