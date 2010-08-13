@@ -42,7 +42,17 @@ class ad_dashboard_widgets {
 
 		$new_pitches_count = $this->count_pitches('New');
 		$approved_post_count = $this->count_pitches('Approved');
+		
+		$messages = $_REQUEST['ad-dashboard-assignment-messages'];
 ?>
+
+<?php if ($messages): ?>
+<div>
+    <?php foreach($messages as $message): ?>
+        <p><?php echo $message; ?></p>
+    <?php endforeach; ?>
+</div>
+<?php endif; ?>
 <div class="table">
 <table>
     <tbody>
@@ -66,7 +76,7 @@ class ad_dashboard_widgets {
 <div class="inside">&raquo; <a href="?page=assignment_desk-index">Go to Assignment Desk landing page.</a></div>
 
 <?php
-   }
+    }
    
     function assignments_widget(){
         global $assignment_desk, $wpdb, $current_user;
@@ -88,10 +98,11 @@ class ad_dashboard_widgets {
             foreach($roles as $user_role){
                 // Get all fo the roles this user has for this post
                 $participant_record = get_post_meta($post->post_id, "_ad_participant_role_$user_role->term_id", true);
-                if(!$participant_record) { $participant_record = array(); }
-                foreach ( $participant_record as $user_login => $status ){
-                    if( $user_login == $current_user->user_login && $status == 'pending' ){
-                        $pending_posts[] = array($post->post_id, $user_role);
+                if($participant_record) {
+                    foreach ($participant_record as $user_login => $status ){
+                        if( $user_login == $current_user->user_login && $status == 'pending' ){
+                            $pending_posts[] = array($post->post_id, $user_role);
+                        }
                     }
                 }
             }
@@ -102,9 +113,11 @@ class ad_dashboard_widgets {
 <?php foreach($pending_posts as $pending): ?>
     <div>
         <?php $post = get_post($pending[0]); ?>
-        <?php echo $post->post_title ?> | <?php echo $pending[1]->name; ?>
-        <a href="?invite_response=accepted">Accept</a>
-        <a href="?invite_response=declined">Decline</a>
+        <?php 
+        echo "{$post->post_title} | {$pending[1]->name}";
+        echo " <a class='button' href='" . admin_url() . "index.php?participant_response=accepted&post_id=$post->ID&role_id={$pending[1]->term_id}'>Accept</a> ";
+        echo "<a class='button' href='" . admin_url() . "index.php?participant_response=declined&post_id=$post->ID&role_id={$pending[1]->term_id}'>Decline</a>";  
+        ?>
     </div>
 <?php endforeach; ?>
 
@@ -113,7 +126,31 @@ class ad_dashboard_widgets {
    }
    
    function respond_to_story_invite(){
+       global $current_user, $assignment_desk, $coauthors_plus;
+       get_currentuserinfo();
        
+       $response = $_GET['participant_response'];
+       $post_id = (int)$_GET['post_id'];
+       $role_id = (int)$_GET['role_id'];
+       $_REQUEST['ad-assignment-messages'] = array();
+       
+       if ($response && $post_id && $role_id){
+           $participant_record = get_post_meta($post_id, "_ad_participant_role_$role_id", true);
+           if($participant_record && $participant_record[$current_user->user_login] == 'pending'){
+               $participant_record[$current_user->user_login] = $response;
+               if($response == 'accepted'){
+                   $_REQUEST['ad-dashboard-assignment-messages'][] = _('Thank you.');
+                   // Add as a co-author
+                   if($assignment_desk->coauthors_plus_exists()){
+                       $coauthors_plus->add_coauthors($post_id, array($current_user->user_login), true);
+                   }
+               }
+               else if($response == 'declined'){
+                   $_REQUEST['ad-dashboard-assignment-messages'][] = _('Sorry!.');
+               }
+           }
+           update_post_meta($post_id, "_ad_participant_role_$role_id", $participant_record);
+       }
    }
 }
 ?>
