@@ -167,6 +167,7 @@ if (!class_exists('assignment_desk')) {
         // Actions that happen only on activate.
         function activate_plugin() {
             //$this->installer->setup_db();
+            $this->custom_taxonomies->activate();
         }
 
 		/**

@@ -16,9 +16,7 @@ class ad_custom_taxonomies {
     var $user_type_taxonomy;
 
     function __construct() {
-        
-        // Do nothing yet
-        
+        // Do nothing yet   
     }
     
     function init() {
@@ -42,36 +40,6 @@ class ad_custom_taxonomies {
 			register_taxonomy($this->assignment_status_label, array('post'), $args);
 		}
 			
-		$default_assignment_labels = array(
-        array(  'term' => 'New',
-                 'args' => array( 
-                       'slug' => 'new',
-                       'description' => 'A new pitch that has not been edited.',)
-		          ),
-		    array(  'term' => 'Approved',
-			          'args' => array( 
-			                'slug' => 'approved',
-                       'description' => 'An editor has approved the pitch.',)
-		          ),
-		    array(  'term' => 'Rejected',
-			          'args' => array( 
-			                'slug' => 'rejected',
-								      'description' => 'The pitch was no accepted for development.',)
-		          ),
-		    array(  'term' => 'On hold',
-                 'args' => array( 
-                       'slug' => 'on-hold',
-                       'description' => 'Work on the pitch is on hold.',)
-		          ),
-    );
-	    
-	    // @todo Ensure these are getting added on initialization
-	    foreach ( $default_assignment_labels as $term ){
-	        if (!is_term( $term['term'] ) ) {
-              wp_insert_term( $term['term'], $this->assignment_taxonomy, $term['args'] );
-          }
-	    }
-			
 		// Register $user_role_taxonomy if it doesn't exist									
 		if (!$this->ad_taxonomy_exists($this->user_role_label)) {
 		  // @todo Need to label the different text on the view
@@ -94,6 +62,86 @@ class ad_custom_taxonomies {
 		  register_taxonomy($this->user_type_label, array('user'), $args);
 		}
       
+    }
+    
+    function activate(){
+        $default_assignment_labels = array(
+            array(  'term' => 'New',
+                 'args' => array( 
+                       'slug' => 'new',
+                       'description' => 'A new pitch that has not been edited.',)
+		          ),
+		    array(  'term' => 'Approved',
+			          'args' => array( 
+			                'slug' => 'approved',
+                       'description' => 'An editor has approved the pitch.',)
+		          ),
+		    array(  'term' => 'Rejected',
+			          'args' => array( 
+			                'slug' => 'rejected',
+								      'description' => 'The pitch was not accepted for development.',)
+		          ),
+		    array(  'term' => 'On hold',
+                 'args' => array( 
+                       'slug' => 'on-hold',
+                       'description' => 'Work on the pitch is on hold.',)
+		          ),
+        );
+	    
+	    // @todo Ensure these are getting added on initialization
+	    foreach ( $default_assignment_labels as $term ){
+           wp_insert_term( $term['term'], $this->assignment_status_label, $term['args'] );
+	    }
+	    
+	    $default_user_roles = array(
+            array(  'term' => 'Writer',
+                 'args' => array( 
+                       'slug' => 'writer',
+                       'description' => 'Writes for this blog.',)
+		          ),
+		    array(  'term' => 'Photographer',
+			          'args' => array( 
+			                'slug' => 'photographer',
+                       'description' => 'Takes pictures for the story.',)
+		          ),
+		    array(  'term' => 'Videographer',
+			          'args' => array( 
+			                'slug' => 'videographer',
+								      'description' => 'Shoots video for the story..',)
+		          ),
+		    array(  'term' => 'Editor',
+                 'args' => array( 
+                       'slug' => 'editor',
+                       'description' => 'Manages the story production.',)
+		          ),
+        );
+	    
+	    // @todo Ensure these are getting added on initialization
+	    foreach ( $default_user_roles as $term ){
+           wp_insert_term( $term['term'], $this->user_role_label, $term['args'] );
+	    }
+	    $default_user_types = array(
+            array(  'term' => 'Community Contributor',
+                 'args' => array( 
+                       'slug' => 'communitycontributor',
+                       'description' => 'Someone from the community that writes for the blog.',)
+		          ),
+		    array(  'term' => 'Professional',
+			          'args' => array( 
+			                'slug' => 'professional',
+                       'description' => 'A professional journalist.',)
+		          ),
+		    array(  'term' => 'Student Journalist',
+			          'args' => array( 
+			                'slug' => 'studentjournalist',
+								      'description' => 'A student who writes for the blog.',)
+		          ),
+        );
+	    
+	    // @todo Ensure these are getting added on initialization
+	    foreach ( $default_user_types as $term ){
+           wp_insert_term( $term['term'], $this->user_type_label, $term['args'] );
+	    }
     }
 
 	function remove_assignment_status_post_meta_box() {
