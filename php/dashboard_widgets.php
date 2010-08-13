@@ -5,12 +5,10 @@
 * The assignment_desk class holds an instance of this class as a member.
 */
 class ad_dashboard_widgets {
-       
-    /*
-     * Call add_dashboard_widgets when the dashboard is being constructed.
-     */
-    function __construct () {
+    
+    function init(){
         add_action('wp_dashboard_setup', array(&$this, 'add_dashboard_widgets'));
+        add_action('admin_init', array(&$this, 'respond_to_story_invite'));
     }
        
     function add_dashboard_widgets () {
@@ -23,6 +21,8 @@ class ad_dashboard_widgets {
            // if ($assignment_desk->get_plugin_option('editor_overview_widget_enabled')) {
                wp_add_dashboard_widget('ad_editor_overview', 'Story Pitches', array(&$this, 'editor_overview_widget'));
            // }
+           
+           wp_add_dashboard_widget('ad_assignments', 'Assignments', array(&$this, 'assignments_widget'));
         }    
     }
 
@@ -31,7 +31,7 @@ class ad_dashboard_widgets {
 		$term_id = $wpdb->get_var("SELECT term_id FROM $wpdb->terms WHERE name=$status");
 		$count = $wpdb->get_var($wpdb->prepare("SELECT count FROM $wpdb->term_taxonomy 
 													WHERE taxonomy = %s AND term_id = %d", 
-													$assignment_desk->custom_pitch_statuses->get_taxonomy_id(),
+													$assignment_desk->custom_taxonomies->assignment_status_label,
 													$term_id));
 		$count = $count ? $count : 0;
 		return $count;
@@ -45,17 +45,16 @@ class ad_dashboard_widgets {
 ?>
 <div class="table">
 <table>
-    <thead><tr><td colspan="2">Pitches</td></tr></thead>
     <tbody>
         <tr>
-            <td class="label">
+            <td class="b">
                 <a href="admin.php?page=assignment_desk-pitch&active_status=New" class="ad-new-count">
                     <?php echo $new_pitches_count ?></a>
             </td>
             <td class="t"><a href="admin.php?page=assignment_desk-pitch&active_status=New">New</a></td>
         </tr>
         <tr>
-            <td class="label">
+            <td class="b">
                 <a href="admin.php?page=assignment_desk-pitch&active_status=New" class="ad-approved-count">
                     <?php echo $approved_post_count ?></a>
             </td>
@@ -67,6 +66,37 @@ class ad_dashboard_widgets {
 <div class="inside">&raquo; <a href="?page=assignment_desk-index">Go to Assignment Desk landing page.</a></div>
 
 <?php
+   }
+   
+   function assignments_widget(){
+       
+       // Count the number of pending posts this user has.
+       // Query the post meta table by key _ad_partitipant$user_login
+       // Iterate over those custom fields and pull (post ID => ($role_id, ...) where user has a 'pending' role record. 
+       
+       // In Progress
+       // @todo - Do we need this? Co-authors plus handles the "Right Now" widget display
+?>
+<div class="table">
+<table>
+    <tbody>
+        <tr>
+            <td class="t">0</td>
+            <td class="label">Pending</td>
+        </tr>
+        <tr>
+            <td class="t">0</td>
+            <td class="label">In Progress</td>
+        </tr>
+    </tbody>
+</table>
+</div>
+<div class="inside">&raquo; <a href="?page=assignment_desk-index">Go to Assignment Desk landing page.</a></div>
+<?php
+   }
+   
+   function respond_to_story_invite(){
+       
    }
 }
 ?>

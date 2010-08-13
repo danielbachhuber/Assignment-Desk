@@ -86,7 +86,6 @@ if (!class_exists('assignment_desk')) {
         /** @var assignment_desk_install $installer handles install-time tasks. */
         public $installer;
 
-	    
 	    /** 
 	     * @var assignment_desk_index_controller $index_controller serves the activity feed views.
 	     */
@@ -129,8 +128,8 @@ if (!class_exists('assignment_desk')) {
 			$this->post = new ad_post();
         	$this->manage_posts = new ad_manage_posts();
 			$this->settings = new ad_settings();
-            $this->public_views = new ad_public_views();			
-            
+            $this->public_views = new ad_public_views();
+            $this->dashboard_widgets = new ad_dashboard_widgets();
 
 			$this->general_options = get_option($this->get_plugin_option_fullname('general'));
 
@@ -143,12 +142,11 @@ if (!class_exists('assignment_desk')) {
         }
 
 		function init() {
-			
 			if ( is_admin() ) {
-				
 				add_action( 'admin_menu', array(&$this, 'add_admin_menu_items'));
 				add_action( 'admin_menu', array(&$this->custom_taxonomies, 'remove_assignment_status_post_meta_box') );
-				$this->manage_posts->init();	
+				$this->manage_posts->init();
+				$this->dashboard_widgets->init();
 				
 			} else if (!is_admin()) {
 				$this->public_views->init();
