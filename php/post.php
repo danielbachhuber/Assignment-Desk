@@ -386,7 +386,11 @@ class ad_post {
 		// Only editors can update the participant types on an assignment
 		if (current_user_can($assignment_desk->define_editor_permissions)) {
 			foreach ($user_types as $user_type) {
-				if ( in_array($user_type->term_id, $_POST['ad-participant-types']) ) {
+			    $participant_types = array();
+			    if($_POST['ad-participant-types']){
+			        $participant_types = $_POST['ad-participant-types'];
+			    }
+				if ( in_array($user_type->term_id, $participant_types) ) {
 					update_post_meta($post_id, "_ad_participant_type_$user_type->term_id", 'on');
 				} else {
 					update_post_meta($post_id, "_ad_participant_type_$user_type->term_id", 'off');
