@@ -137,9 +137,11 @@ class ad_manage_posts {
             $at_least_one_user = false;
             foreach($user_roles as $user_role){
                 $participants = get_post_meta($post_id, "_ad_participant_role_$user_role->term_id", true);
-                foreach($participants as $user => $status){
-                    if($status == 'volunteer'){
-                        $volunteers++;
+                if($participants){
+                    foreach($participants as $user => $status){
+                        if($status == 'volunteer'){
+                            $volunteers++;
+                        }
                     }
                 }
             }
