@@ -38,6 +38,8 @@ class ad_custom_taxonomies {
 			                'show_tagcloud' => false,
 							);
 			register_taxonomy($this->assignment_status_label, array('post'), $args);
+			
+			add_action('delete_term_taxonomy', array(&$this, 'handle_user_type_delete'));
 		}
 			
 		// Register $user_role_taxonomy if it doesn't exist									
@@ -262,6 +264,15 @@ class ad_custom_taxonomies {
 	
 	function get_taxonomy_id(){
 		return $this->taxonomy_id;
+	}
+	
+	/**
+	* When we remove a user_type delete all 'ad_user_type' user metadata for user's of that type.
+	*/
+	function handle_user_type_delete($tt_id){
+	    global $wpdb;
+	    $term_id = $wpdb->get_var("SELECT term_id FROM $wpdb->term_taxonomy WHERE term_taxonomy_id = $tt_id");
+        $wpdb->query("DELETE FROM $wpdb->usermeta WHERE meta_key='ad_user_type' and meta_value = $term_id");
 	}
 }
     
