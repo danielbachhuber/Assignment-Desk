@@ -17,8 +17,19 @@ class ad_manage_posts {
 		if ($assignment_desk->coauthors_plus_exists()) {
 		    add_action('manage_posts_custom_column', array(&$this, 'handle_ad_participants_column'), 10, 2);
 		}
+		add_action('manage_posts_custom_column', array(&$this, 'handle_ad_eligible_types_column'), 10, 2);
 		add_action('manage_posts_custom_column', array(&$this, 'handle_ad_volunteers_column'), 10, 2);
         add_action('manage_posts_custom_column', array(&$this, 'handle_ad_assignment_status_column'), 10, 2);
+        
+        // Custom post filters.
+        add_action('restrict_manage_posts', array(&$this, 'add_eligible_contributor_type_filter'));
+
+        // Add postmeta to the manage_posts query
+        add_filter('posts_join', array(&$this, 'posts_join_meta' ));
+        // Filter by eligible contributor_type
+        add_filter('posts_where', array(&$this, 'posts_contributor_type_where' ));
+        // Workaround to show posts with EF custom statuses when post_status=='all'
+        add_filter('posts_where', array(&$this, 'add_custom_statuses_where_all_filter' ), 20);
 	}
     
     /**
@@ -40,6 +51,7 @@ class ad_manage_posts {
 		    $custom_fields_to_add[_('_ad_participants')] = __('Participants');
 		}
 		$custom_fields_to_add[_('_ad_volunteers')] = __('Volunteers');
+		$custom_fields_to_add[_('_ad_eligible_contributor_types')] = __('Eligible Contributor Types');
         
         foreach ($custom_fields_to_add as $field => $title) {
             $posts_columns["$field"] = $title;
@@ -90,6 +102,9 @@ class ad_manage_posts {
         }
     }
     
+    /**
+     * Add the assignment_status to the manage_posts view.
+     */
     function handle_ad_assignment_status_column($column_name, $post_id){
 		global $assignment_desk;
         if ( $column_name == _('_ad_assignment_status') ) {
@@ -100,6 +115,9 @@ class ad_manage_posts {
         }
     }
     
+    /**
+     * Show participants who have accepted by role on the manage_posts view.
+     */
     function handle_ad_participants_column($column_name, $post_id){
         global $assignment_desk;
         
@@ -128,7 +146,10 @@ class ad_manage_posts {
             }
         }
     }
-    
+
+    /**
+     * Show users who have volunteered for this post.
+     */
     function handle_ad_volunteers_column($column_name, $post_id){
         global $assignment_desk;
         $volunteers = 0;
@@ -147,6 +168,98 @@ class ad_manage_posts {
             }
             echo "<span class='ad-volunteer-count'>$volunteers</span>";
         } 
+    }
+    
+    /**
+     * Show eligible user_types in the manage_posts view.
+     * @todo - Check the edit-flow version and enable when <= 0.5.2
+     */
+    function handle_ad_eligible_types_column($column_name, $post_id){
+        global $assignment_desk;
+        $eligible_types = array();
+        if ($column_name == _('_ad_eligible_contributor_types') ) {
+            $user_types = $assignment_desk->custom_taxonomies->get_user_types(array('order' => "-name"));
+            foreach($user_types as $user_type){
+                if(get_post_meta($post_id, "_ad_participant_type_$user_type->term_id", true) == 'on'){
+                    $eligible_types[]= $user_type->name;
+                }
+            }
+            if($eligible_types){
+                echo "<span class='ad-eligible-types'>" . implode(', ', $eligible_types). "</span>";
+            }
+            else {
+                echo 'None';
+            }
+        }
+    }
+    
+    /**
+     * Add a dropdown to filter posts by eligible user_types.
+     */
+    function add_eligible_contributor_type_filter() {
+        global $assignment_desk;
+        $user_types = $assignment_desk->custom_taxonomies->get_user_types();
+    ?>
+        <select name='ad-eligible-user-type' id='ad-user-type' class='postform'>
+            <option value="">Show all eligible types</option>
+            <?php 
+            foreach($user_types as $user_type){
+                echo "<option value='$user_type->term_id'>$user_type->name</option>";
+            }
+            ?>
+        </select>
+    <?php
+    }
+    
+    /**
+     * join the posts SQL query on the postmeta table.
+     */
+    function posts_join_meta($join){
+        global $wpdb;
+        if(is_admin()){
+            if($_GET['ad-eligible-user-type']){
+                $join .= "LEFT JOIN $wpdb->postmeta ON $wpdb->posts.ID = $wpdb->postmeta.post_id ";
+            }
+        }
+        return $join;
+    }
+    
+    /**
+     * Workaround for edit-flow (as of v0.5.2)
+     * Query for all custom post_statuses if filtering for 'all'
+     */ 
+    function add_custom_statuses_where_all_filter($where){
+        global $wpdb, $edit_flow;
+        
+        if($_GET['post_status'] == 'all' || $_POST['post_status'] == 'all') {			
+    		$custom_statuses = $edit_flow->custom_status->get_custom_statuses();
+    		//insert custom post_status where statements into the existing the post_status where statements - "post_status = publish OR"
+    		//the search string
+    		$search_string = $wpdb->posts.".post_status = 'publish' OR ";
+
+    		//build up the replacement string
+    		$replace_string = $search_string;
+    		foreach($custom_statuses as $status) {
+    			$replace_string .= $wpdb->posts.".post_status = '".$status->slug."' OR "; 
+    		}
+
+    		$where = str_replace($search_string, $replace_string, $where);
+		}
+		return $where;
+    }
+    
+    /**
+    * Modify the where clause to include posts where that type is eligible.
+    */
+    function posts_contributor_type_where( $where ){
+        global $assignment_desk, $wpdb;
+        if(is_admin()){
+            if($_GET['ad-eligible-user-type']){
+                $where .= " AND $wpdb->postmeta.meta_key = '_ad_participant_type_{$_GET['ad-eligible-user-type']}'
+                            AND $wpdb->postmeta.meta_value = 'on' ";
+            }
+        }
+        return $where;
     }
 }
 
