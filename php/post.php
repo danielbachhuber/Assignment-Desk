@@ -159,10 +159,9 @@ class ad_post {
 		if (current_user_can($assignment_desk->define_editor_permissions) ) {
 		    echo '&nbsp;<a id="ad-edit-assignment-status" class="hide-if-no-js" href="#assignment-status">Edit</a>';
 		    echo '<div id="ad-assignment-status-select" class="hide-if-js">';
-		    if (count($assignment_status)) {
+		    $assignment_statuses = $assignment_desk->custom_taxonomies->get_assignment_statuses();
+		    if (count($assignment_statuses)) {
     			// List all of the assignment statuses
-    			$assignment_statuses = get_terms($assignment_desk->custom_taxonomies->assignment_status_label,
-    	                                        array( 'get' => 'all'));
     			echo "<select id='ad-assignment-status' name='ad-assignment-status'>";
     			foreach ( $assignment_statuses as $assignment_status ) {
     				echo "<option value='{$assignment_status->term_id}'";
