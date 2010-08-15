@@ -43,16 +43,12 @@ class ad_dashboard_widgets {
 		$new_pitches_count = $this->count_pitches('New');
 		$approved_post_count = $this->count_pitches('Approved');
 		
-		$messages = $_REQUEST['ad-dashboard-assignment-messages'];
+		if($_REQUEST['ad-dashboard-editor-messages']){
+            foreach($_REQUEST['ad-dashboard-assignment-messages'] as $messages){
+                echo "<div class='message info'>$message</div>";
+            }
+        }
 ?>
-
-<?php if ($messages): ?>
-<div>
-    <?php foreach($messages as $message): ?>
-        <p><?php echo $message; ?></p>
-    <?php endforeach; ?>
-</div>
-<?php endif; ?>
 <div class="table">
 <table>
     <tbody>
@@ -84,10 +80,16 @@ class ad_dashboard_widgets {
         get_currentuserinfo();
         $pending_posts = array();
         
-        // Find all of the posts this user is a participant in.
+        if($_REQUEST['ad-dashboard-assignment-messages']){
+            foreach($_REQUEST['ad-dashboard-assignment-messages'] as $message){
+                echo "<div class='message info'>$message</div>";
+            }
+        }
+        // Find all of the posts this user participates in.
         $participant_posts = $wpdb->get_results("SELECT post_id FROM $wpdb->postmeta 
                                                   WHERE meta_key = '_ad_participant_{$current_user->user_login}'
                                                   ORDER BY post_id");
+        
         if ( ! $participant_posts ){
             $participant_posts = array();
         }
@@ -96,7 +98,7 @@ class ad_dashboard_widgets {
         
         foreach($participant_posts as $post ){
             foreach($roles as $user_role){
-                // Get all fo the roles this user has for this post
+                // Get all of the roles this user has for this post
                 $participant_record = get_post_meta($post->post_id, "_ad_participant_role_$user_role->term_id", true);
                 if($participant_record) {
                     foreach ($participant_record as $user_login => $status ){
@@ -132,7 +134,7 @@ class ad_dashboard_widgets {
        $response = $_GET['participant_response'];
        $post_id = (int)$_GET['post_id'];
        $role_id = (int)$_GET['role_id'];
-       $_REQUEST['ad-assignment-messages'] = array();
+       $_REQUEST['ad-dashboard-assignment-messages'] = array();
        
        if ($response && $post_id && $role_id){
            $participant_record = get_post_meta($post_id, "_ad_participant_role_$role_id", true);
@@ -140,6 +142,7 @@ class ad_dashboard_widgets {
                $participant_record[$current_user->user_login] = $response;
                if($response == 'accepted'){
                    $_REQUEST['ad-dashboard-assignment-messages'][] = _('Thank you.');
+                   var_dump($_REQUEST['ad-dashboard-assignment-messages']);
                    // Add as a co-author
                    if($assignment_desk->coauthors_plus_exists()){
                        $coauthors_plus->add_coauthors($post_id, array($current_user->user_login), true);
