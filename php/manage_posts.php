@@ -23,13 +23,18 @@ class ad_manage_posts {
         
         // Custom post filters.
         add_action('restrict_manage_posts', array(&$this, 'add_eligible_contributor_type_filter'));
+        add_action('restrict_manage_posts', array(&$this, 'add_assignment_status_filter'));
 
         // Add postmeta to the manage_posts query
         add_filter('posts_join', array(&$this, 'posts_join_meta' ));
+        // Add the taxonomy tables to the mange_posts query 
+        add_filter('posts_join', array(&$this, 'posts_join_taxonomy' ));
         // Filter by eligible contributor_type
         add_filter('posts_where', array(&$this, 'posts_contributor_type_where' ));
         // Workaround to show posts with EF custom statuses when post_status=='all'
-        add_filter('posts_where', array(&$this, 'add_custom_statuses_where_all_filter' ), 20);
+        add_filter('posts_where', array(&$this, 'add_ef_custom_statuses_where_all_filter' ), 20);
+        // Filter by assignment_status
+        add_filter('posts_where', array(&$this, 'add_ad_assignment_statuses_where' ), 20);
 	}
     
     /**
@@ -111,6 +116,9 @@ class ad_manage_posts {
             $current_status = wp_get_object_terms($post_id, $assignment_desk->custom_taxonomies->assignment_status_label);
 			if ($current_status) {
 				echo $current_status[0]->name;
+			}
+			else {
+			    echo 'None';
 			}
         }
     }
@@ -200,11 +208,34 @@ class ad_manage_posts {
         global $assignment_desk;
         $user_types = $assignment_desk->custom_taxonomies->get_user_types();
     ?>
-        <select name='ad-eligible-user-type' id='ad-user-type' class='postform'>
+        <select name='ad-eligible-user-type' id='ad-user-type-select' class='postform'>
             <option value="">Show all eligible types</option>
             <?php 
             foreach($user_types as $user_type){
                 echo "<option value='$user_type->term_id'>$user_type->name</option>";
+            }
+            ?>
+        </select>
+    <?php
+    }
+    
+    /**
+     * Add a dropdown to filter posts by eligible assignment_status.
+     * This function is eerily similar to add_eligible_contributor_type_filter. eer
+     */
+    function add_assignment_status_filter() {
+        global $assignment_desk;
+        $assignment_statuses = $assignment_desk->custom_taxonomies->get_assignment_statuses();
+    ?>
+        <select name='ad-assignment-status' id='ad-assignment-status-select' class='postform'>
+            <option value="">Show all AD statuses</option>
+            <?php 
+            foreach($assignment_statuses as $assignment_status){
+                echo "<option value='$assignment_status->term_id'";
+                if($_GET['ad-assignment-status'] == $assignment_status->term_id){
+                    echo ' selected ';
+                }
+                echo ">$assignment_status->name</option>";
             }
             ?>
         </select>
@@ -218,7 +249,19 @@ class ad_manage_posts {
         global $wpdb;
         if(is_admin()){
             if($_GET['ad-eligible-user-type']){
-                $join .= "LEFT JOIN $wpdb->postmeta ON $wpdb->posts.ID = $wpdb->postmeta.post_id ";
+                $join .= " LEFT JOIN $wpdb->postmeta ON($wpdb->posts.ID = $wpdb->postmeta.post_id ";
+            }
+        }
+        return $join;
+    }
+    
+    function posts_join_taxonomy($join){
+        global $wpdb;
+        if(is_admin()){
+            if($_GET['ad-assignment-status']){
+                $join .= "LEFT JOIN $wpdb->term_relationships ON($wpdb->posts.ID = $wpdb->term_relationships.object_id)
+                          LEFT JOIN $wpdb->term_taxonomy ON($wpdb->term_relationships.term_taxonomy_id = $wpdb->term_taxonomy.term_taxonomy_id)
+                          LEFT JOIN $wpdb->terms ON($wpdb->term_taxonomy.term_id = $wpdb->terms.term_id)";
             }
         }
         return $join;
@@ -228,7 +271,7 @@ class ad_manage_posts {
      * Workaround for edit-flow (as of v0.5.2)
      * Query for all custom post_statuses if filtering for 'all'
      */ 
-    function add_custom_statuses_where_all_filter($where){
+    function add_ef_custom_statuses_where_all_filter($where){
         global $wpdb, $edit_flow;
         
         if($_GET['post_status'] == 'all' || $_POST['post_status'] == 'all') {			
@@ -257,6 +300,16 @@ class ad_manage_posts {
             if($_GET['ad-eligible-user-type']){
                 $where .= " AND $wpdb->postmeta.meta_key = '_ad_participant_type_{$_GET['ad-eligible-user-type']}'
                             AND $wpdb->postmeta.meta_value = 'on' ";
+            }
+        }
+        return $where;
+    }
+    
+    function add_ad_assignment_statuses_where($where){
+        global $assignment_desk, $wpdb;
+        if(is_admin()){
+            if($_GET['ad-assignment-status']){
+                $where .= " AND $wpdb->terms.term_id = {$_GET['ad-assignment-status']}";
             }
         }
         return $where;
