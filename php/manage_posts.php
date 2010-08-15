@@ -255,6 +255,10 @@ class ad_manage_posts {
         return $join;
     }
     
+    /**
+     * Join the posts SQL quert to the term/taxonomy tables.
+     * Added in order to query by assignment status.
+     */
     function posts_join_taxonomy($join){
         global $wpdb;
         if(is_admin()){
@@ -292,7 +296,7 @@ class ad_manage_posts {
     }
     
     /**
-    * Modify the where clause to include posts where that type is eligible.
+    * Modify the SQL where clause to include posts where that type is eligible.
     */
     function posts_contributor_type_where( $where ){
         global $assignment_desk, $wpdb;
@@ -305,6 +309,9 @@ class ad_manage_posts {
         return $where;
     }
     
+    /**
+     * Modify the where SQL clause to filter by assignment_status 
+     */
     function add_ad_assignment_statuses_where($where){
         global $assignment_desk, $wpdb;
         if(is_admin()){
