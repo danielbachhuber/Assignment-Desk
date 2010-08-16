@@ -9,6 +9,7 @@ class ad_manage_posts {
 	function init() {
 		global $assignment_desk;
 		add_filter('manage_posts_columns', array(&$this, 'add_manage_post_columns'));
+		add_action('manage_posts_custom_column', array(&$this, 'handle_ad_assignment_status_column'), 10, 2);
 		
 		if ($assignment_desk->edit_flow_exists()) {
         	add_action('manage_posts_custom_column', array(&$this, 'handle_ef_duedate_column'), 10, 2);
@@ -20,24 +21,21 @@ class ad_manage_posts {
 		
 		if(current_user_can($assignment_desk->define_editor_permissions)){
 		    add_action('manage_posts_custom_column', array(&$this, 'handle_ad_user_type_column'), 10, 2);
-		    add_action('manage_posts_custom_column', array(&$this, 'handle_ad_assignment_status_column'), 10, 2);
     		add_action('manage_posts_custom_column', array(&$this, 'handle_ad_volunteers_column'), 10, 2);
-		
-            // Custom post filters.
-            add_action('restrict_manage_posts', array(&$this, 'add_eligible_contributor_type_filter'));
-            add_action('restrict_manage_posts', array(&$this, 'add_assignment_status_filter'));
-
-            // Add postmeta to the manage_posts query
-            add_filter('posts_join', array(&$this, 'posts_join_meta' ));
-            // Add the taxonomy tables to the mange_posts query 
-            add_filter('posts_join', array(&$this, 'posts_join_taxonomy' ));
-            // Filter by eligible contributor_type
-            add_filter('posts_where', array(&$this, 'posts_contributor_type_where' ));
-            // Workaround to show posts with EF custom statuses when post_status=='all'
-            add_filter('posts_where', array(&$this, 'add_ef_custom_statuses_where_all_filter' ), 20);
-            // Filter by assignment_status
-            add_filter('posts_where', array(&$this, 'add_ad_assignment_statuses_where' ), 20);
-        }
+		}
+        // Custom post filters.
+        add_action('restrict_manage_posts', array(&$this, 'add_eligible_contributor_type_filter'));
+        add_action('restrict_manage_posts', array(&$this, 'add_assignment_status_filter'));
+        // Add postmeta to the manage_posts query
+        add_filter('posts_join', array(&$this, 'posts_join_meta' ));
+        // Add the taxonomy tables to the mange_posts query 
+        add_filter('posts_join', array(&$this, 'posts_join_taxonomy' ));
+        // Filter by eligible contributor_type
+        add_filter('posts_where', array(&$this, 'posts_contributor_type_where' ));
+        // Workaround to show posts with EF custom statuses when post_status=='all'
+        add_filter('posts_where', array(&$this, 'add_ef_custom_statuses_where_all_filter' ), 20);
+        // Filter by assignment_status
+        add_filter('posts_where', array(&$this, 'add_ad_assignment_statuses_where' ), 20);
 	}
     
     /**
