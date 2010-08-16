@@ -9,7 +9,7 @@ class ad_manage_posts {
 	function init() {
 		global $assignment_desk;
 		add_filter('manage_posts_columns', array(&$this, 'add_manage_post_columns'));
-        add_action('manage_posts_custom_column', array(&$this, 'handle_ad_user_type_column'), 10, 2);
+		
 		if ($assignment_desk->edit_flow_exists()) {
         	add_action('manage_posts_custom_column', array(&$this, 'handle_ef_duedate_column'), 10, 2);
 			add_action('manage_posts_custom_column', array(&$this, 'handle_ef_location_column'), 10, 2);
@@ -17,24 +17,27 @@ class ad_manage_posts {
 		if ($assignment_desk->coauthors_plus_exists()) {
 		    add_action('manage_posts_custom_column', array(&$this, 'handle_ad_participants_column'), 10, 2);
 		}
-		add_action('manage_posts_custom_column', array(&$this, 'handle_ad_eligible_types_column'), 10, 2);
-		add_action('manage_posts_custom_column', array(&$this, 'handle_ad_volunteers_column'), 10, 2);
-        add_action('manage_posts_custom_column', array(&$this, 'handle_ad_assignment_status_column'), 10, 2);
-        
-        // Custom post filters.
-        add_action('restrict_manage_posts', array(&$this, 'add_eligible_contributor_type_filter'));
-        add_action('restrict_manage_posts', array(&$this, 'add_assignment_status_filter'));
+		
+		if(current_user_can($assignment_desk->define_editor_permissions)){
+		    add_action('manage_posts_custom_column', array(&$this, 'handle_ad_user_type_column'), 10, 2);
+		    add_action('manage_posts_custom_column', array(&$this, 'handle_ad_assignment_status_column'), 10, 2);
+    		add_action('manage_posts_custom_column', array(&$this, 'handle_ad_volunteers_column'), 10, 2);
+		
+            // Custom post filters.
+            add_action('restrict_manage_posts', array(&$this, 'add_eligible_contributor_type_filter'));
+            add_action('restrict_manage_posts', array(&$this, 'add_assignment_status_filter'));
 
-        // Add postmeta to the manage_posts query
-        add_filter('posts_join', array(&$this, 'posts_join_meta' ));
-        // Add the taxonomy tables to the mange_posts query 
-        add_filter('posts_join', array(&$this, 'posts_join_taxonomy' ));
-        // Filter by eligible contributor_type
-        add_filter('posts_where', array(&$this, 'posts_contributor_type_where' ));
-        // Workaround to show posts with EF custom statuses when post_status=='all'
-        add_filter('posts_where', array(&$this, 'add_ef_custom_statuses_where_all_filter' ), 20);
-        // Filter by assignment_status
-        add_filter('posts_where', array(&$this, 'add_ad_assignment_statuses_where' ), 20);
+            // Add postmeta to the manage_posts query
+            add_filter('posts_join', array(&$this, 'posts_join_meta' ));
+            // Add the taxonomy tables to the mange_posts query 
+            add_filter('posts_join', array(&$this, 'posts_join_taxonomy' ));
+            // Filter by eligible contributor_type
+            add_filter('posts_where', array(&$this, 'posts_contributor_type_where' ));
+            // Workaround to show posts with EF custom statuses when post_status=='all'
+            add_filter('posts_where', array(&$this, 'add_ef_custom_statuses_where_all_filter' ), 20);
+            // Filter by assignment_status
+            add_filter('posts_where', array(&$this, 'add_ad_assignment_statuses_where' ), 20);
+        }
 	}
     
     /**
@@ -45,7 +48,6 @@ class ad_manage_posts {
 		global $assignment_desk;
         // TODO - Specify the column order
         $custom_fields_to_add = array();
-        $custom_fields_to_add[_('_ad_user_type')] = _('Contributor Types');
         $custom_fields_to_add[_('_ad_assignment_status')] = _('Assignment Status');
 
 		if ($assignment_desk->edit_flow_exists()) {
@@ -55,8 +57,10 @@ class ad_manage_posts {
 		if($assignment_desk->coauthors_plus_exists()){
 		    $custom_fields_to_add[_('_ad_participants')] = __('Participants');
 		}
-		$custom_fields_to_add[_('_ad_volunteers')] = __('Volunteers');
-		$custom_fields_to_add[_('_ad_eligible_contributor_types')] = __('Eligible Contributor Types');
+		if(current_user_can($assignment_desk->define_editor_permissions)){
+		    $custom_fields_to_add[_('_ad_user_type')] = _('Contributor Types');
+		    $custom_fields_to_add[_('_ad_volunteers')] = __('Volunteers');
+	    }
         
         foreach ($custom_fields_to_add as $field => $title) {
             $posts_columns["$field"] = $title;
@@ -179,29 +183,6 @@ class ad_manage_posts {
     }
     
     /**
-     * Show eligible user_types in the manage_posts view.
-     * @todo - Check the edit-flow version and enable when <= 0.5.2
-     */
-    function handle_ad_eligible_types_column($column_name, $post_id){
-        global $assignment_desk;
-        $eligible_types = array();
-        if ($column_name == _('_ad_eligible_contributor_types') ) {
-            $user_types = $assignment_desk->custom_taxonomies->get_user_types(array('order' => "-name"));
-            foreach($user_types as $user_type){
-                if(get_post_meta($post_id, "_ad_participant_type_$user_type->term_id", true) == 'on'){
-                    $eligible_types[]= $user_type->name;
-                }
-            }
-            if($eligible_types){
-                echo "<span class='ad-eligible-types'>" . implode(', ', $eligible_types). "</span>";
-            }
-            else {
-                echo 'None';
-            }
-        }
-    }
-    
-    /**
      * Add a dropdown to filter posts by eligible user_types.
      */
     function add_eligible_contributor_type_filter() {
@@ -274,6 +255,7 @@ class ad_manage_posts {
     /**
      * Workaround for edit-flow (as of v0.5.2)
      * Query for all custom post_statuses if filtering for 'all'
+     * @todo - Check the edit-flow version and enable when <= 0.5.2
      */ 
     function add_ef_custom_statuses_where_all_filter($where){
         global $wpdb, $edit_flow;
