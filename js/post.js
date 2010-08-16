@@ -261,6 +261,18 @@ jQuery(document).ready(function() {
 		return false;
 	});
 	
+	jQuery('.ad-remove-participant').each(function(index, link){
+		jQuery(link).click(function(){
+			var pieces = this.id.split('-');
+			// Remove the user from that role.
+			jQuery('#ad-participant-' + pieces[3] + '-' + pieces[4]).remove();
+			
+			// @todo - roll up the role if no users left
+			// @todo - Call coauthors_remove_author(name) if no roles left for this pitch
+			return false
+		});
+	});
+	
 	/* ============================ Pitched By ============================ */
 	
 	/**

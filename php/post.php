@@ -299,10 +299,11 @@ class ad_post {
 			<?php if (count($all_participants[$user_role->term_id])) : ?>
 			<div id="ad-user-role-<?php echo $user_role->term_id; ?>-wrap" class="ad-role-wrap">
 				<h5><?php echo $user_role->name; ?></h5>
-				<ul id="ad-participants-<?php echo $user_role->term_id; ?>">					
+				<ul id="ad-participants-<?php echo "{$user_role->term_id}"; ?>">					
 					<?php foreach ($all_participants[$user_role->term_id] as $participant_id => $participant_status) : ?>
 						<?php $participant = get_userdatabylogin($participant_id); ?>						
-						<li><input type="hidden" id="ad-participant-<?php echo $participant_id; ?>" name="ad-participant-role-<?php echo $user_role->term_id; ?>[]" value="<?php echo $participant_id.'|'.$participant_status; ?>" /><?php echo $participant->user_nicename; ?> | <?php echo $participant_status; ?></li>
+						<li id="ad-participant-<?php echo "{$user_role->term_id}-{$participant_id}"; ?>"><input type="hidden" id="ad-participant-<?php echo $participant_id; ?>" name="ad-participant-role-<?php echo $user_role->term_id; ?>[]" value="<?php echo $participant_id.'|'.$participant_status; ?>" /><?php echo $participant->user_nicename; ?> | <?php echo $participant_status; ?> 
+						    <a href="#" class="ad-remove-participant" id="ad-remove-participant-<?php echo $user_role->term_id . '-' . $participant_id; ?>">remove</a></li>
 					<?php endforeach; ?>
 				</ul>
 			</div>
