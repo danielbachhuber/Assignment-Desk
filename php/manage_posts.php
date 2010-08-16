@@ -230,7 +230,7 @@ class ad_manage_posts {
         global $wpdb;
         if(is_admin()){
             if($_GET['ad-eligible-user-type']){
-                $join .= " LEFT JOIN $wpdb->postmeta ON($wpdb->posts.ID = $wpdb->postmeta.post_id ";
+                $join .= " LEFT JOIN $wpdb->postmeta ON($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
             }
         }
         return $join;
