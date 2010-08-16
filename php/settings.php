@@ -25,6 +25,8 @@ if ( !class_exists( 'ad_settings' ) ){
 		
 		add_settings_section( 'assignment_management', 'Assignment Management', array(&$this, 'assignment_management_setting_section'), $assignment_desk->top_level_page );
 		add_settings_field( 'assignment_email_notifications_enabled', 'Enable assignment email notifications', array(&$this, 'assignment_email_notifications_enabled_option'), $assignment_desk->top_level_page, 'assignment_management' );
+		add_settings_field( 'assignment_email_template_subject', 'Subject template for notifications', array(&$this, 'assignment_email_template_subject_option'), $assignment_desk->top_level_page, 'assignment_management' );
+
 		add_settings_field( 'assignment_email_template', 'Template for notifications', array(&$this, 'assignment_email_template_option'), $assignment_desk->top_level_page, 'assignment_management' );
 		
 		add_settings_section( 'public_facing_views', 'Public-Facing Views', array(&$this, 'public_facing_views_setting_section'), $assignment_desk->top_level_page );
@@ -163,7 +165,6 @@ if ( !class_exists( 'ad_settings' ) ){
 	
 	function assignment_management_setting_section() {
 		global $assignment_desk;
-		echo "Tk lorem ipsum";
 	}
 	
 	function assignment_email_notifications_enabled_option() {
@@ -177,6 +178,15 @@ if ( !class_exists( 'ad_settings' ) ){
 		echo ' />';
 	}
 	
+	function assignment_email_template_subject_option() {
+    		global $assignment_desk;
+    		$options = $assignment_desk->general_options;
+    		?>
+    		<input id="assignment_email_template_subject" name="assignment_desk_general[assignment_email_template_subject]" size="60" maxlength="60" 
+    		        value="<?php echo $options['assignment_email_template_subject']; ?>"><br>
+    <?php
+    }
+    	
 	function assignment_email_template_option() {
 		global $assignment_desk;
 		$options = $assignment_desk->general_options;

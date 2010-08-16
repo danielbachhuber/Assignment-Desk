@@ -223,13 +223,15 @@ class ad_post {
 	}
 	
 	function display_visibility_info(){
-	    global $post;
+	    global $post, $assignment_desk;
+	    if (current_user_can($assignment_desk->define_editor_permissions)){
 	?>
 	    <div class="misc-pub-section">
 	        <label for="ad-private">Private while in progress :</label>
 	        <input type="checkbox" name="ad-private" value="1" <?php echo (get_post_meta($post->ID, '_ad_private', true) == "1")? "checked": ""; ?>>
 	    </div>
 	<?php  
+        }
 	}
 
 	/**
@@ -466,23 +468,27 @@ class ad_post {
         $user = get_userdata($user_id);
         $role = get_term($term_id, $assignment_desk->custom_taxonomies->user_role_label);
         // Get the template from the settings
-        $email_template = get_option('assignment_email_template');
+        $email_template = $assignment_desk->general_options['assignment_email_template'];
+        $subject = $assignment_desk->general_options['assignment_email_template_subject'];
         
         $search = array(  '%title%', 
                           '%post_link%',
                           '%display_name%',
                           '%role%',
+                          '%dashboard_link%',
                        );
-        $replace = array($post->ID,  
+        $replace = array($post->post_title,  
                         get_permalink($post_id),
                         $user->display_name,
                         $role->name,
+                        admin_url(),
                     );
         // Fill it out
         $email_template = str_replace($search, $replace, $email_template);
+        $subject = str_replace($search, $replace, $subject);
         // Send it off
         // @todo - Add a setting to edit the subject.
-        wp_mail($user->user_email, 'A new assignment for you.', $email_template);
+        wp_mail($user->user_email, $subject, $email_template);
     }
     
     /**
