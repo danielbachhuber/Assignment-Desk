@@ -142,7 +142,6 @@ class ad_dashboard_widgets {
                $participant_record[$current_user->user_login] = $response;
                if($response == 'accepted'){
                    $_REQUEST['ad-dashboard-assignment-messages'][] = _('Thank you.');
-                   var_dump($_REQUEST['ad-dashboard-assignment-messages']);
                    // Add as a co-author
                    if($assignment_desk->coauthors_plus_exists()){
                        $coauthors_plus->add_coauthors($post_id, array($current_user->user_login), true);
