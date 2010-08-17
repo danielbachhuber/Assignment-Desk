@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 define('ASSIGNMENT_DESK_FILE_PATH', __FILE__);
 define('ASSIGNMENT_DESK_URL', plugins_url(plugin_basename(dirname(__FILE__)) .'/'));
-define('ASSIGMENT_DESK_VERSION', '0.2.1');
+define('ASSIGMENT_DESK_VERSION', '0.3');
 
 define('ASSIGNMENT_DESK_DIR_PATH', dirname(__FILE__));
 define('ASSIGNMENT_DESK_TEMPLATES_PATH', ASSIGNMENT_DESK_DIR_PATH . '/php/templates');
@@ -79,17 +79,6 @@ if (!class_exists('assignment_desk')) {
 
         /** @var array $options Stores the options for this plugin. */
         public $options = array();
-
-        /** @var array $tables stores DB table short name => full name. */
-        public $tables;
-
-        /** @var assignment_desk_install $installer handles install-time tasks. */
-        public $installer;
-
-	    /** 
-	     * @var assignment_desk_index_controller $index_controller serves the activity feed views.
-	     */
-	    public $index_controller;
         
         /**
          * @var assignment_desk_contributor_controller $contributor_controller serves 
@@ -166,7 +155,13 @@ if (!class_exists('assignment_desk')) {
         
         // Actions that happen only on activate.
         function activate_plugin() {
-            //$this->installer->setup_db();
+            
+            if ( get_option('ad_installed_once') == 'on' ){
+                
+            }
+            else {
+                update_option('ad_installed_once', 'on');
+            }
             $this->custom_taxonomies->activate();
         }
 
