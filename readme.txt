@@ -4,7 +4,7 @@ Donate link:
 Tags: news, editorial, journalism, crowdsourcing
 Requires at least: 2.9.2
 Tested up to: 3.0.1
-Stable tag: 0.2.1
+Stable tag: 0.3
 
 Empower the community to participate in the journalistic process and guide them along the way.
 
