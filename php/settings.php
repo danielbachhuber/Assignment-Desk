@@ -342,30 +342,6 @@ if ( !class_exists( 'ad_settings' ) ){
 	</div>
 
 
-
-
-
-	<table class="form-table">
-	
-		
-        <tr valign="top"> 
-          <th scope="row"><?php _e('Display Approved pitches to the public:', $this->localizationDomain); ?></th> 
-          <td><input type="checkbox" name="display_approved_pitches" val="1" checked="<?php echo ($this->options['display_approved_pitches'] == '1')? 'checked':'' ;?>"></td>
-        </tr>
-        
-        <tr valign="top"> 
-          <th scope="row"><?php _e('Enable public voting on pitches:', $this->localizationDomain); ?></th> 
-          <td><input type="checkbox" name="public_pitch_voting" val="1" checked="<?php echo ($this->options['public_pitch_voting'] == '1')? 'checked':'' ;?>"></td>
-        </tr>
-        
-        <tr valign="top"> 
-          <th scope="row"><?php _e('Enable tip comments on public pitches:', $this->localizationDomain); ?></th> 
-          <td><input type="checkbox" name="public_pitch_comments" val="1" checked="<?php echo ($this->options['public_pitch_comments'] == '1')? 'checked':'' ;?>"></td>
-        </tr>
-
-	</table>
-
-
 <?php
       
       
