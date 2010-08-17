@@ -34,8 +34,7 @@ if ( !class_exists( 'ad_settings' ) ){
 		add_settings_field( 'public_facing_functionality', 'Public-facing functionality', array(&$this, 'public_facing_functionality_option'), $assignment_desk->top_level_page, 'public_facing_views' );		
 		
 		add_settings_section( 'miscellaneous', 'Miscellaneous', array(&$this, 'miscellaneous_setting_section'), $assignment_desk->top_level_page );
-		add_settings_field( 'google_maps_api_key', 'Google Maps API key', array(&$this, 'google_maps_api_key_option'), $assignment_desk->top_level_page, 'miscellaneous' );
-		
+		add_settings_field( 'google_maps_api_key', 'Google Maps API key', array(&$this, 'google_maps_api_key_option'), $assignment_desk->top_level_page, 'miscellaneous' );	
 	}
 	
 	function story_pitches_setting_section() {
@@ -194,7 +193,9 @@ if ( !class_exists( 'ad_settings' ) ){
 		echo '<textarea id="assignment_email_template" name="assignment_desk_general[assignment_email_template]" rows="8" cols="60">';
 		echo $options['assignment_email_template'];
 		echo '</textarea><br />';
-		echo '<span class="description">Use tokens like %title%, %location% and %dashboard_link%</span>';
+		echo '<span class="description">' . 
+		    _('We support the following tokens') . 
+		    ': %blogname%, %title%, %role%, %display_name%, %location%, %post_link%, and %dashboard_link%.</span>';
 	}
 	
 	function public_facing_views_setting_section() {

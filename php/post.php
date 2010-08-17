@@ -471,13 +471,15 @@ class ad_post {
         $email_template = $assignment_desk->general_options['assignment_email_template'];
         $subject = $assignment_desk->general_options['assignment_email_template_subject'];
         
-        $search = array(  '%title%', 
+        $search = array(  '%blogname%',
+                          '%title%', 
                           '%post_link%',
                           '%display_name%',
                           '%role%',
                           '%dashboard_link%',
                        );
-        $replace = array($post->post_title,  
+        $replace = array(get_option('blogname'),
+                        $post->post_title,  
                         get_permalink($post_id),
                         $user->display_name,
                         $role->name,
