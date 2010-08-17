@@ -125,7 +125,7 @@ class ad_custom_taxonomies {
 	    $default_user_types = array(
             array(  'term' => 'Community Contributor',
                  'args' => array( 
-                       'slug' => 'communitycontributor',
+                       'slug' => 'community-contributor',
                        'description' => 'Someone from the community that writes for the blog.',)
 		          ),
 		    array(  'term' => 'Professional',
@@ -135,7 +135,7 @@ class ad_custom_taxonomies {
 		          ),
 		    array(  'term' => 'Student Journalist',
 			          'args' => array( 
-			                'slug' => 'studentjournalist',
+			                'slug' => 'student-journalist',
 								      'description' => 'A student who writes for the blog.',)
 		          ),
         );
