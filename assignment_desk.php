@@ -153,25 +153,29 @@ if (!class_exists('assignment_desk')) {
 			
 		}
         
-        // Actions that happen only on activate.
+        /**
+        * Check to see whether this is the first time AD has been activated.
+        * Call the activate() or activate_once() method of each component that has work to do at
+        * activation time.
+        */
         function activate_plugin() {
-            
+            // This is an upgrade or re-activation
             if ( get_option('ad_installed_once') == 'on' ){
-                
+                $this->custom_taxonomies->activate();
             }
+            // This is the first time we've ever activated the plugin.
             else {
                 update_option('ad_installed_once', 'on');
+                $this->custom_taxonomies->activate();
+                $this->custom_taxonomies->activate_once();
             }
-            $this->custom_taxonomies->activate();
         }
 
 		/**
 		 * Utility function
 		 */
 		function get_plugin_option_fullname( $name ) {
-			
 			return $this->options_group . $name;
-			
 		}
 		
 		/**

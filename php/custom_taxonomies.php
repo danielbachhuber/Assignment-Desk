@@ -66,7 +66,17 @@ class ad_custom_taxonomies {
       
     }
     
-    function activate(){
+    /** 
+     * Called every time the plugin is activated or updated.
+     */
+    function activate(){ 
+        // Nothing to see here.
+    }
+    
+    /**
+     * Called only the first time the plugin is activated.
+     */
+    function activate_once(){
         $default_assignment_labels = array(
             array(  'term' => 'New',
                  'args' => array( 
@@ -90,7 +100,6 @@ class ad_custom_taxonomies {
 		          ),
         );
 	    
-	    // @todo Ensure these are getting added on initialization
 	    foreach ( $default_assignment_labels as $term ){
            wp_insert_term( $term['term'], $this->assignment_status_label, $term['args'] );
 	    }
@@ -118,7 +127,6 @@ class ad_custom_taxonomies {
 		          ),
         );
 	    
-	    // @todo Ensure these are getting added on initialization
 	    foreach ( $default_user_roles as $term ){
            wp_insert_term( $term['term'], $this->user_role_label, $term['args'] );
 	    }
@@ -140,12 +148,15 @@ class ad_custom_taxonomies {
 		          ),
         );
 	    
-	    // @todo Ensure these are getting added on initialization
 	    foreach ( $default_user_types as $term ){
            wp_insert_term( $term['term'], $this->user_type_label, $term['args'] );
 	    }
     }
 
+    /**
+     * Don't show the post meta_box for the assignment_status taxonomy. 
+     * See post.php for the AD post meta_box.
+     */
 	function remove_assignment_status_post_meta_box() {
 		remove_meta_box("tagsdiv-$this->assignment_status_label", 'post', 'side');
 	}
@@ -184,7 +195,6 @@ class ad_custom_taxonomies {
 	}
 	
 	function get_user_types_for_post( $post_id = null ) {
-		
 		$user_types_for_post = array();
 		// Post hasn't been saved yet I guess...
 		if ( !$post_id ) {
