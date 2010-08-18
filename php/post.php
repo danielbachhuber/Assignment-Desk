@@ -6,11 +6,6 @@ if (!class_exists('ad_post')) {
 * Post meta_box base class for the assignment desk.
 */
 class ad_post {
-    
-   function __construct() {
-		// @todo Move to assignment_desk class
-		$this->init();
-    }
 
 	function init() {
 		

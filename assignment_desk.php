@@ -136,7 +136,8 @@ if (!class_exists('assignment_desk')) {
 				add_action( 'admin_menu', array(&$this->custom_taxonomies, 'remove_assignment_status_post_meta_box') );
 				$this->manage_posts->init();
 				$this->dashboard_widgets->init();
-				
+				$this->post->init();
+
 			} else if (!is_admin()) {
 				$this->public_views->init();
 			}
