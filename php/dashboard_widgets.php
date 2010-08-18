@@ -128,16 +128,22 @@ class ad_dashboard_widgets {
    }
    
    function respond_to_story_invite(){
-       global $current_user, $assignment_desk, $coauthors_plus;
-       get_currentuserinfo();
+       global $current_user, $assignment_desk, $coauthors_plus, $user_ID;
        
        $response = $_GET['participant_response'];
        $post_id = (int)$_GET['post_id'];
        $role_id = (int)$_GET['role_id'];
+          
+       get_currentuserinfo();
+       if ('' == $user_ID || $user_ID != $post_id) {
+           $_REQUEST['ad-dashboard-assignment-messages'][] = _('Unauthorized assignment response. This is fishy.');
+       }
+       
        $_REQUEST['ad-dashboard-assignment-messages'] = array();
        
        if ($response && $post_id && $role_id){
            $participant_record = get_post_meta($post_id, "_ad_participant_role_$role_id", true);
+           // This will not evaluate to true unless the user is currently pending for this role on this post.
            if($participant_record && $participant_record[$current_user->user_login] == 'pending'){
                $participant_record[$current_user->user_login] = $response;
                if($response == 'accepted'){
