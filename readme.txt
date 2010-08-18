@@ -26,7 +26,7 @@ This section describes how to install the plugin and get it working.
 2. Upload to wp-contents/plugins directory
 3. Activate and enjoy!
 4. Optionally install Coauthors-plus. Tested with 2.1.1.
-4. Optionally install Edit-Flow. Tested with 0.5.2.
+5. Optionally install Edit-Flow. Tested with 0.5.2.
 
 For full functionality, please also install and configure Edit Flow and Co-Authors Plus.
 
