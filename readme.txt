@@ -25,6 +25,8 @@ This section describes how to install the plugin and get it working.
 1. Download the plugin 
 2. Upload to wp-contents/plugins directory
 3. Activate and enjoy!
+4. Optionally install Coauthors-plus. Tested with 2.1.1.
+4. Optionally install Edit-Flow. Tested with 0.5.2.
 
 For full functionality, please also install and configure Edit Flow and Co-Authors Plus.
 
@@ -33,6 +35,15 @@ For full functionality, please also install and configure Edit Flow and Co-Autho
 == Screenshots ==
 
 == Changelog ==
+
+= 0.3 =
+* Manage Posts - Can filter by assignment_status
+* Manage Posts - Can filter by eligible contributor types
+* Manage Posts - Added an eligible contributor types column.
+* Added default terms in custom taxonomies on plugin activation.
+* Remove user_type id from all users if term is deleted.
+* Added a simple dashboard widget that shows pending assignments.
+* Users can accept or decline pending assignments.
 
 = 0.2 =
 * Enable pitch forms, add a form to any post or page, and allow the following fields: title, description, category, tags, location, volunteer for roles 
