@@ -21,6 +21,8 @@ class ad_post {
         add_action('save_post', array(&$this, 'save_post_meta_box'), 9, 2);
         add_action('edit_post', array(&$this, 'save_post_meta_box'), 9, 2);
         add_action('publish_post', array(&$this, 'save_post_meta_box'), 9, 2);
+        // Word counting for user stats
+        add_action('save_post', array(&$this, 'save_post_word_count'), 9, 2);
 		
 		$this->enqueue_admin_css();
 		$this->enqueue_admin_javascript();	
@@ -79,7 +81,6 @@ class ad_post {
 		echo '</script>';
 
     }
-
 
 	/**
     * Print a the meta_box fragment that shows a form to choose the person
@@ -454,6 +455,14 @@ class ad_post {
     }
     
     /**
+     * Store the word count as post metadata. 
+     * Avoid having to count the words when generating user stats.
+     */
+    function save_post_word_count($post_id, $post){
+        update_post_meta($post_id, '_ad_word_count', str_word_count($post->post_content));
+    }
+    
+    /**
     * Fill out the template for the email a user receives when they're assigned a story.
     * Then send the email.
     */
@@ -489,7 +498,6 @@ class ad_post {
         $email_template = str_replace($search, $replace, $email_template);
         $subject = str_replace($search, $replace, $subject);
         // Send it off
-        // @todo - Add a setting to edit the subject.
         wp_mail($user->user_email, $subject, $email_template);
     }
     
