@@ -40,22 +40,13 @@ if ( !class_exists( 'ad_user' ) ) {
       global $assignment_desk;
       
       if ( $column_name == __( '_ad_user_type' ) ) {
-        
-        $user_type = (int)get_usermeta($user_id, $assignment_desk->option_prefix.'user_type', true);
-        
-        $user_type_taxonomy = get_terms($assignment_desk->custom_taxonomies->user_type_label, array('get'=>'all'));
-        
-        foreach ( $user_type_taxonomy as $user_type_term ) {
-          if ( $user_type == $user_type_term->term_id ) {
-            $user_type_term_name = $user_type_term->name;
-            break;
-          } else {
-            $user_type_term_name = 'None assigned';
-          }
+        $user_type_term_name = 'None assigned';
+        $user_type = (int)get_usermeta($user_id, $assignment_desk->option_prefix.'user_type', true);        
+        $term = get_term($user_type, $assignment_desk->custom_taxonomies->user_type_label);
+        if($term->name){
+            $user_type_term_name = $term->name;
         }
-          
-        return $user_type_term_name;
-          
+        return $user_type_term_name; 
       }
       
     }
