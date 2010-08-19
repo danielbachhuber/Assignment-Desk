@@ -237,7 +237,7 @@ class ad_public_views {
 	
 	
 	/*
-	* Replace an html comment <!--assignment-desk-all-posts-> with ad public pages.
+	* Replace an html comment <!--assignment-desk-all-posts--> with ad public pages.
 	*/
 	function show_all_posts( $the_content ) {
 		global $wpdb, $assignment_desk;
@@ -256,6 +256,9 @@ class ad_public_views {
 				$posts->the_post();
 				
 				$post_id = get_the_ID();
+				if ( get_post_meta($post_id, '_ad_private', true) == 1){
+				    continue;
+				}
 				
 				$description = get_post_meta($post_id, '_ef_description', true);
 				$location = get_post_meta($post_id, '_ef_location', true);
