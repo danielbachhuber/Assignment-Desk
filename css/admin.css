@@ -1,0 +1,71 @@
+br { clear: both; }
+
+/* Page Layout */
+#ad-left-column { float:left; width:75%; padding-left: 5px; }
+#ad-right-column { float:left; width:20%; padding-left: 5px; }
+
+#ad-header {
+    font-size: 28px;
+    padding: 5px;
+}
+#ad-subheader {
+    float: left;
+    font-size: 22px;
+    padding: 5px;
+}
+#ad-breadcrumbs { margin-bottom: 10px; }
+
+/* Editor Activity index */
+#ad-editor-activity-feed {
+    float: left;
+    padding: 5px;
+    width: 95%;
+}
+.ad-editor-activity-item {
+    float: left;
+    padding: 5px;
+    width: 75%;
+}
+.ad-event-filters     { padding: 5px; }
+.ad-event-description { float: left; }
+.ad-event-date        { float: right;}
+.ad-pitch-summary     { float: left; width: 70%;}
+
+.ad-label { font-weight: 600; }
+
+/* Right-side */
+.ad-module { margin-bottom: 10px; }
+.ad-module h2 { margin: 2px; font-size: 16px; font-weight: 900;}
+
+/* User messages. */
+li.ad-message-success {
+	border:solid 1px #90ac13; 
+	background:#eef4d3 url(../images/success.png) 8px 6px no-repeat;
+	color:#6b800d;
+	font-weight:bold;
+	padding:4px;
+	text-align:center;
+}
+
+li.ad-message-info {
+	border:solid 1px #90ac13; 
+	background:#eef4d3 url(../images/success.png) 8px 6px no-repeat;
+	color:#6b800d;
+	font-weight:bold;
+	padding:4px;
+	text-align:center;
+}
+
+li.ad-message-error {
+    border:solid 1px #CC0000;
+	background:#F7CBCA url(../images/error.png) 8px 6px no-repeat;
+	color:#CC0000;
+	font-weight:bold;
+	padding:4px;
+	text-align:center;
+}
+
+.avatar {
+    float:left;
+    padding-right: 10px;
+}
