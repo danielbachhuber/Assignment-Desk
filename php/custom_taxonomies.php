@@ -40,6 +40,9 @@ class ad_custom_taxonomies {
 			register_taxonomy($this->assignment_status_label, array('post'), $args);
 			
 			add_action('delete_term_taxonomy', array(&$this, 'handle_user_type_delete'));
+			
+			add_filter('manage_edit-tags_columns', array(&$this, 'manage_tags_columns'));
+			add_action('manage_user_type_custom_column', array(&$this, 'handle_user_type_users_column'), 10, 3);
 		}
 			
 		// Register $user_role_taxonomy if it doesn't exist									
@@ -283,6 +286,32 @@ class ad_custom_taxonomies {
 	    global $wpdb;
 	    $term_id = $wpdb->get_var("SELECT term_id FROM $wpdb->term_taxonomy WHERE term_taxonomy_id = $tt_id");
         $wpdb->query("DELETE FROM $wpdb->usermeta WHERE meta_key='ad_user_type' and meta_value = $term_id");
+	}
+	/**
+	 * Manage the columns on the edit-tags.php page (the generated UI for custom taxonomies.)
+	 * Remove the Posts and Slug columns on the user_type and user_role taxonomies.
+	 * Add a column on the user_type UI to show the number of users of that type.
+	 */
+	function manage_tags_columns($columns){
+	    
+	    if($_GET['taxonomy'] == 'user_type' || $_GET['taxonomy'] == 'user_role'){
+	        unset($columns['posts']);
+	        unset($columns['slug']);
+        }
+	    if($_GET['taxonomy'] == 'user_type'){
+	        $columns['_ad_users'] = _('Users');
+	    }
+	    return $columns;
+	}
+	
+	/**
+	 * Count the number of users that of a certain user_type.
+	 */
+	function handle_user_type_users_column($c, $column_name, $term_id){
+	    global $wpdb;
+	    if($column_name == '_ad_users'){
+	        return $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->usermeta where meta_key='ad_user_type' and meta_value=$term_id");
+	    }
 	}
 }
     
