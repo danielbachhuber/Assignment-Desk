@@ -11,12 +11,12 @@ class ad_public_views {
 		global $assignment_desk;
 		$options = $assignment_desk->general_options;
 		
-		// Run save_pitch_form() at WordPress initialization
-		$message = $this->save_pitch_form();
+		wp_enqueue_script('ad-public-views', WP_PLUGIN_URL . '/assignment-desk/js/public_views.js', array('jquery'));
 		
-		if ( $message ) {
-			// @todo Add a message to top of form if exists
-		}
+		$_REQUEST['assignment-desk-messages'] = array();
+		// Run save_pitch_form() at WordPress initialization
+		$_REQUEST['assignment-desk-messages'][] = $this->save_pitch_form();
+		$_REQUEST['assignment-desk-messages'][] = $this->save_volunteer_form();
 		
 		add_filter('the_content', array(&$this, 'show_all_posts') );
 		if ($options['pitch_form_enabled']) {
@@ -235,6 +235,69 @@ class ad_public_views {
 		
 	}
 	
+	function volunteer_form($post_id){
+	    global $assignment_desk;
+	    $user_roles = $assignment_desk->custom_taxonomies->get_user_roles();
+	    $form = '';
+	    $form .= "<div style='display:none' id='assignment_desk_volunteer_form_$post_id'>";
+	    $form .= "<form id='assignment_desk_volunteer_$post_id' method='post'>";
+	    $form .= "<input type='hidden' name='assignment_desk_volunteer_post' value='$post_id'>";
+	    $form .= _("I'd like to participate as a: ") . "<br>";
+	    foreach($user_roles as $role){
+	        $form .= "<input type='checkbox' name='assignment_desk_volunteer_roles[]' value='$role->term_id'></input>$role->name ";
+	    }
+	    $form .= "<br>";
+	    $form .= "<textarea name='assignment_desk_volunteer_reason' cols='50' rows='4'>" . _('Why are you volunteering for this story?') . "</textarea><br>";
+	    $form .= "<button class='button' value='submit'>Volunteer</button>";
+	    $form .= "<a class='button' id='assignment_desk_volunteer_cancel_$post_id'>Cancel</a>";
+	    $form .= "</form>";
+	    $form .= "</div>";
+	    return $form;
+	}
+	
+	/**
+	 * Sanitize the user volunteer information and add them as a volunteer.
+	 */
+	function save_volunteer_form(){
+	    global $assignment_desk, $current_user;
+	    
+	    if (empty($_POST)){
+	        return;
+	    }
+	    
+	    // @todo Check for a nonce
+	    get_currentuserinfo();
+	    
+	    $post_id = (int)$_POST['assignment_desk_volunteer_post'];
+	    $roles   = $_POST['assignment_desk_volunteer_roles'];
+	    $reason  = $_POST['assignment_desk_volunteer_reason'];
+	    
+	    if(!$roles){
+	        return _('Please select at least one role.');
+	    }
+	    
+	    // Filter the roles to make sure they're valid.
+	    $user_roles = $assignment_desk->custom_taxonomies->get_user_roles();
+	    $valid_roles = array();
+	    foreach($roles as $maybe_role){
+	        $maybe_role = (int)$maybe_role;
+	        foreach($user_roles as $role){
+	            if($maybe_role == $role->term_id) { $valid_roles[] = $maybe_role; }
+	        }
+        }
+        
+        if(!$valid_roles){
+            return _('Please select at least one role.');
+        }
+	    
+	    foreach($valid_roles as $role_id){
+	        $role_meta = get_post_meta($post_id, '_ad_participant_role_' . $role_id, true);
+	        if(!$role_meta){ $role_meta = array(); }
+	        $role_meta[$current_user->user_login] = 'volunteered';
+	        update_post_meta($post_id, '_ad_participant_role_' . $role_id, $role_meta);
+	    }
+	    return _('Thanks for volunteering!');
+	}
 	
 	/*
 	* Replace an html comment <!--assignment-desk-all-posts--> with ad public pages.
@@ -245,7 +308,21 @@ class ad_public_views {
 	  
 		$template_tag = '<!--' . $assignment_desk->all_posts_key . '-->';
 		
-		$html = '';		
+		$html = '';
+		
+		if($_REQUEST['assignment-desk-messages']){
+		    echo '<div class="assignment-desk-messages">';
+		    if(is_array($_REQUEST['assignment-desk-messages'])){
+		        foreach($_REQUEST['assignment-desk-messages'] as $message){
+		            echo "<p>$message</p>";
+		        }
+		    }
+		    else {
+		        echo $_REQUEST['assignment-desk-messages'];
+		    }
+		    echo '</div>';
+		}
+		
 		$args = array(	'post_status' => 'pitch,assigned' );
 		
 		$posts = new WP_Query($args);
@@ -265,34 +342,32 @@ class ad_public_views {
 				$duedate = get_post_meta($post_id, '_ef_duedate', true);
 				$duedate = date_i18n('M d, Y', $duedate);
 				
-				$html .= '<h3><a href="' . get_permalink($post_id) . '">' . get_the_title($post_id) . '</a></h3>';
+				$html .= '<div><h3><a href="' . get_permalink($post_id) . '">' . get_the_title($post_id) . '</a></h3>';
 				if ($description || $duedate || $location) {
-				$html .= '<p class="meta">';
+				    $html .= '<p class="meta">';
 				}
 				if ($description) {
-				$html .= '<label>Description:</label> ' . $description . '<br />';
+				    $html .= '<label>Description:</label> ' . $description . '<br />';
 				}
 				if ($duedate) {
-				$html .= '<label>Due date:</label> ' . $duedate . '<br />';	
+				    $html .= '<label>Due date:</label> ' . $duedate . '<br />';	
 				}
 				if ($location) {
-				$html .= '<label>Location:</label> ' . $location . '<br />';	
+				    $html .= '<label>Location:</label> ' . $location . '<br />';	
 				}
 				if ($description || $duedate || $location) {
-				$html .= '</p>';
+				    $html .= '</p>';
 				}
-			
 				
+				$html .= "<a href='#' id='assignment_desk_volunteer_$post_id'>Volunteer for this story</a>";
+				$html .= $this->volunteer_form($post_id);
+				$html .= "</div><br>";
 			}
 		}
 		
 		$the_content = str_replace($template_tag, $html, $the_content);
 		
         return $the_content;
-	}
-	
-	function public_content(){
-	    return 'Im public yo.';
 	}
 } // END:class ad_public_controller
 
