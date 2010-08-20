@@ -20,7 +20,11 @@ class ad_custom_taxonomies {
     }
     
     function init() {
-      
+        global $wp_version;
+        if (version_compare($wp_version, '3.0', '<')) {
+            add_action('admin_print_scripts-edit-tags.php', array(&$this, 'javascript'));
+        }
+        
 		$args = array();
 		$labels = array();
 		// Register $assignment_taxonomy if it doesn't exist, else generate an object								
@@ -154,6 +158,32 @@ class ad_custom_taxonomies {
 	    foreach ( $default_user_types as $term ){
            wp_insert_term( $term['term'], $this->user_type_label, $term['args'] );
 	    }
+    }
+    
+    /**
+    * Work around to change the labels on the geenrated custom taxonomy UIs. 
+    * See js/edit_tags.js 
+    * @todo Internationalize the labels we are replacing.
+    */
+    function javascript(){
+        wp_enqueue_script('ad-edit-tags-js', ASSIGNMENT_DESK_URL .'js/edit_tags.js', array('jquery'));
+
+        $taxonomy = $_GET['taxonomy'];
+        if (!$taxonomy){ $taxonomy = $_POST['taxonomy']; }
+        
+        if($taxonomy){            
+            $title = "";
+            $singular = "";
+            $vals = array(
+                        'user_role' => array('title' => 'User Roles', 'singular' => 'User Role'),
+                        'user_type' => array('title' => 'User Types', 'singular' => 'User Type'),
+                    );
+            echo "<script type='text/javascript'>";
+            foreach( $vals[$taxonomy] as $name => $value ){
+                echo "var $name = '$value';";
+            }
+            echo "</script>";
+        }
     }
 
     /**
