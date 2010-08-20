@@ -28,7 +28,9 @@ function ad_add_to_participants(user_id, user_nicename, role_id, role_name){
 	// @todo check to see whether use was already assigned in this rold
 	jQuery('input[name="ad-participant-role-' + role_id
 	+ '[]"]').each(function(){
-		if (jQuery(this).val().split('|')[0] == user_id ) {
+		spl = jQuery(this).val().split('|');
+		
+		if (spl[0] == user_id && spl[1] != 'volunteered' ) {
 			error_message = '<div id="ad-participant-error-message" class="message alert">'
 							+ user_nicename + ' has already been added as ' + role_name
 							+ '</div>';
@@ -155,7 +157,21 @@ jQuery(document).ready(function() {
 		return false;
 	});
 	
+	// Assign a volunteer to the form
+	jQuery("a[id^=ad-volunteer-]").each(function(index, link){
+		// a#ad-volunteer-$role_id-$role_name-$user_login
+		var spl = link.id.split('-');
+		var role_id = spl[2];
+		var role_name = spl[3];
+		var user_login = spl[4];
+		var user_nicename = user_login;
 	
+		jQuery(link).click(function(){
+			ad_add_to_participants(user_login, user_nicename, role_id, role_name);
+			jQuery(link).parent().remove();
+			return false;
+		});
+	});
 	
 	/* ============================ Assignment Status ============================ */
 	

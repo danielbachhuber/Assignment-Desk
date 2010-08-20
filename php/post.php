@@ -300,7 +300,11 @@ class ad_post {
 				<ul id="ad-participants-<?php echo "{$user_role->term_id}"; ?>">					
 					<?php foreach ($all_participants[$user_role->term_id] as $participant_id => $participant_status) : ?>
 						<?php $participant = get_userdatabylogin($participant_id); ?>						
-						<li id="ad-participant-<?php echo "{$user_role->term_id}-{$participant_id}"; ?>"><input type="hidden" id="ad-participant-<?php echo $participant_id; ?>" name="ad-participant-role-<?php echo $user_role->term_id; ?>[]" value="<?php echo $participant_id.'|'.$participant_status; ?>" /><?php echo $participant->user_nicename; ?> | <?php echo $participant_status; ?> 
+						<li id="ad-participant-<?php echo "{$user_role->term_id}-{$participant_id}"; ?>"><input type="hidden" id="ad-participant-<?php echo $participant_id; ?>" name="ad-participant-role-<?php echo $user_role->term_id; ?>[]" value="<?php echo $participant_id.'|'.$participant_status; ?>" /><?php echo $participant->user_nicename; ?> | <?php _e($participant_status); ?> 
+						    
+						    <?php if($participant_status == 'volunteered'): ?>
+						        <a href="#" id="ad-volunteer-<?php echo "$user_role->term_id-$user_role->name-$participant_id"; ?>">assign</a>
+						    <?php endif; ?>
 						    <a href="#" class="ad-remove-participant" id="ad-remove-participant-<?php echo $user_role->term_id . '-' . $participant_id; ?>">remove</a></li>
 					<?php endforeach; ?>
 				</ul>
