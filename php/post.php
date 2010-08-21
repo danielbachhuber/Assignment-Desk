@@ -190,8 +190,8 @@ class ad_post {
 		
 		wp_get_current_user();
 		
+		$user_types = $assignment_desk->custom_taxonomies->get_user_types();		
 		$participant_types = $assignment_desk->custom_taxonomies->get_user_types_for_post($post->ID);
-		$user_types = $assignment_desk->custom_taxonomies->get_user_types();
 		?>
 		<div class="misc-pub-section">
 			<label for="ad-participant-types">Contributor types:</label>
@@ -364,7 +364,7 @@ class ad_post {
        // }
 
         // The user who pitched this story
-        if (current_user_can($assignment_desk->define_editor_permissions)) {
+        if ( current_user_can( $assignment_desk->define_editor_permissions ) ) {
 		    update_post_meta($post_id, '_ad_pitched_by_participant', (int)$_POST['ad-pitched-by-participant']);
 		    update_post_meta($post_id, '_ad_private', (int)$_POST['ad-private']);
 	    }
@@ -386,10 +386,10 @@ class ad_post {
 		// Otherwise, set all participant types to 'on' if they're unset
 		$user_types = $assignment_desk->custom_taxonomies->get_user_types();
 		// Only editors can update the participant types on an assignment
-		if (current_user_can($assignment_desk->define_editor_permissions)) {
+		if ( current_user_can( $assignment_desk->define_editor_permissions ) ) {
 			foreach ($user_types as $user_type) {
 			    $participant_types = array();
-			    if($_POST['ad-participant-types']){
+			    if( $_POST['ad-participant-types'] ){
 			        $participant_types = $_POST['ad-participant-types'];
 			    }
 				if ( in_array($user_type->term_id, $participant_types) ) {

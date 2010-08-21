@@ -165,7 +165,7 @@ class ad_custom_taxonomies {
     * See js/edit_tags.js 
     * @todo Internationalize the labels we are replacing.
     */
-    function javascript(){
+    function javascript() {
         wp_enqueue_script('ad-edit-tags-js', ASSIGNMENT_DESK_URL .'js/edit_tags.js', array('jquery'));
 
         $taxonomy = $_GET['taxonomy'];
@@ -227,38 +227,51 @@ class ad_custom_taxonomies {
 		return get_terms($this->user_role_label, $args);
 	}
 	
+	/**
+	 * Gets permitted user types for a given post
+	 * @param int $post_id The ID for the post
+	 * @return array $user_types_for_post Permitted user types on post
+ 	 */
 	function get_user_types_for_post( $post_id = null ) {
 		$user_types_for_post = array();
-		// Post hasn't been saved yet I guess...
-		if ( !$post_id ) {
-			$user_types_for_post['display'] = 'All';
-			return $user_types_for_post;
-		}
-	
+		$user_types = $this->get_user_types();	
 		$all_participant_types = '';
-		
-		$user_types = $this->get_user_types();
-		foreach ( $user_types as $user_type ) {
-			$user_types_for_post[$user_type->term_id] = get_post_meta($post_id, "_ad_participant_type_$user_type->term_id", true);
-			// If it's been set before, build the string of permitted types
-			// Else, set all of the participant types to 'on'
-			if ( $user_types_for_post[$user_type->term_id] == 'on' ) {
-				$all_participant_types .= $user_type->name . ', ';
-			} else if ($user_types_for_post[$user_type->term_id] == '') {
+					
+		// If the post hasn't been saved, all user types are on
+		// Otherwise, load the user types from custom fields
+		if ( !$post_id ) {
+			
+			$user_types_for_post['display'] = 'All';
+			foreach ( $user_types as $user_type ) {
 				$user_types_for_post[$user_type->term_id] = 'on';
 			}
+			return $user_types_for_post;
 			
-		}
-		
-		if (in_array('off', $user_types_for_post) && !in_array('on', $user_types_for_post)) {
-			$user_types_for_post['display'] = 'None';
-		} else if ($all_participant_types == '' || !in_array('off', $user_types_for_post)) {
-			$user_types_for_post['display'] = 'All';
 		} else {
-			$user_types_for_post['display'] = rtrim($all_participant_types, ', ');
-		}
+	
+			foreach ( $user_types as $user_type ) {
+				$user_types_for_post[$user_type->term_id] = get_post_meta($post_id, "_ad_participant_type_$user_type->term_id", true);
+				// If it's been set before, build the string of permitted types
+				// Else, set all of the participant types to 'on'
+				var_dump($user_types_for_post[$user_type->term_id]);
+				if ( $user_types_for_post[$user_type->term_id] == 'on' ) {
+					$all_participant_types .= $user_type->name . ', ';
+				} else if ($user_types_for_post[$user_type->term_id] == '' || !$user_types_for_post[$user_type->term_id]) {
+					$user_types_for_post[$user_type->term_id] = 'on';
+				}
+			
+			}
 		
-		return $user_types_for_post;
+			if (in_array('off', $user_types_for_post) && !in_array('on', $user_types_for_post)) {
+				$user_types_for_post['display'] = 'None';
+			} else if ($all_participant_types == '' || !in_array('off', $user_types_for_post)) {
+				$user_types_for_post['display'] = 'All';
+			} else {
+				$user_types_for_post['display'] = rtrim($all_participant_types, ', ');
+			}
+		
+			return $user_types_for_post;
+		}
 		
 	}
 	
