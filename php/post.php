@@ -118,7 +118,7 @@ class ad_post {
                         echo ">$user->user_nicename</option>";
                     } ?>
                 </select>
-                <a id="ad-save-pitched-by-participant" class="hide-if-no-js button" href="#pitched-by-participant">OK</a>&nbsp
+                <a id="ad-save-pitched-by-participant" class="hide-if-no-js button" href="#pitched-by-participant">OK</a>&nbsp;
         	    <a id="ad-cancel-pitched-by-participant" class="hide-if-no-js" href="#pitched-by-participant">Cancel</a>
     	    </div>
     	</div>
