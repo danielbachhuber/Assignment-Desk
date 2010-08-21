@@ -18,9 +18,10 @@ class ad_public_views {
 		$_REQUEST['assignment_desk_messages']['volunteer_form'] = $this->save_volunteer_form();
 		// @todo Save vote form
 		
-		add_filter('the_content', array(&$this, 'show_all_posts') );
+		add_filter( 'the_content', array(&$this, 'show_all_posts') );
+		add_filter( 'the_content', array(&$this, 'append_volunteering_to_post') );
 		if ( $options['pitch_form_enabled'] ) {
-			add_filter('the_content', array(&$this, 'show_pitch_form') );
+			add_filter( 'the_content', array(&$this, 'show_pitch_form') );
 		}
 	}
 	
@@ -305,8 +306,8 @@ class ad_public_views {
 		$existing_roles = $existing_roles[0];
 	
 	    $volunteer_form = '';
-	    $volunteer_form .= '<form method="post" id="assignment_desk_volunteer_form">';
-		$volunteer_form .= '<fieldset><ul id="assignment_desk_volunteer">';
+	    $volunteer_form .= '<form method="post" class="assignment_desk_volunteer_form">';
+		$volunteer_form .= '<fieldset><ul class="assignment_desk_volunteer">';
 		foreach ( $user_roles as $user_role ) {
 			$volunteer_form .= '<li><input type="checkbox" id="assignment_desk_volunteer_' . $user_role->term_id
 							. '" name="assignment_desk_volunteer_roles[]"'
@@ -324,6 +325,24 @@ class ad_public_views {
 	    $volunteer_form .= '<input type="submit" id="assignment_desk_volunteer_submit" name="assignment_desk_volunteer_submit" class="button primary" value="Submit" />';
 	    $volunteer_form .= "</form>";
 	    return $volunteer_form;
+	}
+	
+	/**
+	 *
+	 */
+	function show_all_volunteers( $post_id ) {
+	    global $assignment_desk;
+	    $user_roles = $assignment_desk->custom_taxonomies->get_user_roles();
+		
+		$show_all_volunteers = '<div class="assignment_desk_all_volunteers">';
+		foreach ( $user_roles as $user_role ) {
+			$show_all_volunteers .= '<span class="label">' . $user_role->name . 's:</span>&nbsp;';
+			$volunteers_for_role = get_post_meta( $post_id, "_ad_participant_role_$user_role->term_id" );
+			$show_all_volunteers .= count($volunteers_for_role[0]) . ', ';
+		}
+		$show_all_volunteers = rtrim( $show_all_volunteers, ', ' );
+		$show_all_volunteers .= '</div>';
+		return $show_all_volunteers;
 	}
 	
 	/**
@@ -418,8 +437,9 @@ class ad_public_views {
 				    $html .= '</p>';
 				}
 				
-				$html .= $this->volunteer_form($post_id);
-				$html .= "</div><br>";
+				$html .= $this->show_all_volunteers( $post_id );
+				$html .= $this->volunteer_form( $post_id );
+				$html .= "</div>";
 			}
 		}
 		
@@ -427,6 +447,18 @@ class ad_public_views {
 		
         return $the_content;
 	}
+	
+	function append_volunteering_to_post( $the_content ) {
+		global $assignment_desk, $post;
+		$options = $assignment_desk->general_options;
+		
+		$the_content .= $this->show_all_volunteers( $post->ID );
+		$the_content .= $this->volunteer_form( $post->ID );
+		
+		return $the_content;		
+	}
+	
+	
 } // END:class ad_public_controller
 
 } // END:if(!class_exists('ad_public_controller'))
