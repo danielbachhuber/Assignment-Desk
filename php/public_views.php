@@ -51,18 +51,34 @@ class ad_public_views {
 
 			$pitch_form = '';
 		
+			$pitch_form .= '<form method="post" id="assignment_desk_pitch_form">';
 			// Title
-			$pitch_form .= '<form method="post" id="assignment_desk_pitch_form">'
-						. '<fieldset><label for="assignment_desk_title">Title</label>'
-						. '<input type="text" id="assignment_desk_title" name="assignment_desk_title" /></fieldset>';
+			if ( $options['pitch_form_title_label'] ) {
+				$title_label = $options['pitch_form_title_label'];
+			} else {
+				$title_label = 'Title';
+			}
+			$pitch_form .= '<fieldset><label for="assignment_desk_title">' . $title_label . '</label>'
+						. '<input type="text" id="assignment_desk_title" name="assignment_desk_title" />';
+			if ( $options['pitch_form_title_description'] ) {
+			$pitch_form .= '<p class="description">'
+						. $options['pitch_form_title_description']
+						. '</p>';
+			}
+			$pitch_form	.= '</fieldset>';
 			
 			// Description
-			if ($options['pitch_form_description_enabled']) {		
-				$pitch_form .= '<fieldset><label for="assignment_desk_description">Description</label>'
+			if ( $options['pitch_form_description_enabled'] ) {
+				if ( $options['pitch_form_description_label'] ) {
+					$description_label = $options['pitch_form_description_label'];
+				} else {
+					$description_label = 'Description';
+				}
+				$pitch_form .= '<fieldset><label for="assignment_desk_description">' . $description_label . '</label>'
 							. '<textarea id="assignment_desk_description"'
 							. ' name="assignment_desk_description">';
 				$pitch_form .= '</textarea>';
-				if ($options['pitch_form_description_description']) {
+				if ( $options['pitch_form_description_description'] ) {
 				$pitch_form .= '<p class="description">'
 							. $options['pitch_form_description_description']
 							. '</p>';
@@ -71,8 +87,13 @@ class ad_public_views {
 			}
 			
 			// Categories
-			if ($options['pitch_form_categories_enabled']) {		
-				$pitch_form .= '<fieldset><label for="assignment_desk_categories">Category</label>';
+			if ( $options['pitch_form_categories_enabled'] ) {
+				if ( $options['pitch_form_category_label'] ) {
+					$category_label = $options['pitch_form_category_label'];
+				} else {
+					$category_label = 'Category';
+				}	
+				$pitch_form .= '<fieldset><label for="assignment_desk_categories">' . $category_label . '</label>';
 				$pitch_form .= '<select id="assignment_desk_categories" name="assignment_desk_categories">';
 				foreach ( $categories as $category ) {
 					$pitch_form .= '<option value="' . $category->term_id . '">'
@@ -89,8 +110,13 @@ class ad_public_views {
 			}		
 						
 			// Tags
-			if ($options['pitch_form_tags_enabled']) {		
-				$pitch_form .= '<fieldset><label for="assignment_desk_tags">Tags</label>'
+			if ( $options['pitch_form_tags_enabled'] ) {
+				if ( $options['pitch_form_tags_label'] ) {
+					$tags_label = $options['pitch_form_tags_label'];
+				} else {
+					$tags_label = 'Tags';
+				}	
+				$pitch_form .= '<fieldset><label for="assignment_desk_tags">' . $tags_label . '</label>'
 							. '<input type="text" id="assignment_desk_tags"'
 							. ' name="assignment_desk_tags" />';
 				if ($options['pitch_form_tags_description']) {
@@ -102,11 +128,16 @@ class ad_public_views {
 			}
 			
 			// Location
-			if ($options['pitch_form_location_enabled']) {		
-				$pitch_form .= '<fieldset><label for="assignment_desk_location">Location</label>'
+			if ( $options['pitch_form_location_enabled'] ) {
+				if ( $options['pitch_form_location_label'] ) {
+					$location_label = $options['pitch_form_location_label'];
+				} else {
+					$location_label = 'Location';
+				}
+				$pitch_form .= '<fieldset><label for="assignment_desk_location">' . $location_label . '</label>'
 							. '<input type="text" id="assignment_desk_location"'
 							. ' name="assignment_desk_location" />';
-				if ($options['pitch_form_location_description']) {
+				if ( $options['pitch_form_location_description'] ) {
 				$pitch_form .= '<p class="description">'
 							. $options['pitch_form_location_description']
 							. '</p>';
@@ -115,9 +146,14 @@ class ad_public_views {
 			}
 			
 			// Volunteer
-			if ($options['pitch_form_volunteer_enabled']) {		
-				$pitch_form .= '<fieldset><label for="assignment_desk_volunteer">Volunteer</label><ul id="assignment_desk_volunteer">';
-				foreach ($user_roles as $user_role) {
+			if ( $options['pitch_form_volunteer_enabled'] ) {
+				if ( $options['pitch_form_volunteer_label'] ) {
+					$volunteer_label = $options['pitch_form_volunteer_label'];
+				} else {
+					$volunteer_label = 'Volunteer';
+				}	
+				$pitch_form .= '<fieldset><label for="assignment_desk_volunteer">' . $volunteer_label . '</label><ul id="assignment_desk_volunteer">';
+				foreach ( $user_roles as $user_role ) {
 					$pitch_form .= '<li><input type="checkbox" '
 								. 'id="assignment_desk_volunteer_' . $user_role->term_id
 								. '" name="assignment_desk_volunteer[]"'
@@ -127,7 +163,7 @@ class ad_public_views {
 								. '</label>';
 				}
 				$pitch_form .= '</ul>';
-				if ($options['pitch_form_volunteer_description']) {
+				if ( $options['pitch_form_volunteer_description'] ) {
 				$pitch_form .= '<p class="description">'
 							. $options['pitch_form_volunteer_description']
 							. '</p>';
