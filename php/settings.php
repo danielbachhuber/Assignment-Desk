@@ -43,8 +43,9 @@ if ( !class_exists( 'ad_settings' ) ){
         
         if ( $assignment_desk->edit_flow_exists() ) {
             global $edit_flow;
-            $post_status = get_term_by('slug', 'pitch', $edit_flow->custom_status->post_status);
-            $options['default_workflow_status'] = $post_status->term_id;
+            $default_workflow_status = get_term_by('slug', $edit_flow->options['custom_status_default_status'],
+                                                    $edit_flow->custom_status->status_taxonomy);
+            $options['default_workflow_status'] = $default_workflow_status->term_id;
         }
         $new_status = get_term_by('slug', 'new', $assignment_desk->custom_taxonomies->assignment_status_label);
         $options['default_new_assignment_status'] = $new_status->term_id;
