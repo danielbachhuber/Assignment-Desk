@@ -37,6 +37,31 @@ if ( !class_exists( 'ad_settings' ) ){
 		add_settings_field( 'google_maps_api_key', 'Google Maps API key', array(&$this, 'google_maps_api_key_option'), $assignment_desk->top_level_page, 'miscellaneous' );	
 	}
 	
+	function setup_defaults(){
+        global $assignment_desk;
+        $options = $assignment_desk->general_options;
+        
+        if($assignment_desk->edit_flow_exists()){
+            global $edit_flow;
+            $post_status = get_term_by('slug', 'pitch', $edit_flow->custom_status->post_status);
+            $options['default_workflow_status'] = $post_status->term_id;
+        }
+        $new_status = get_term_by('slug', 'new', $assignment_desk->custom_taxonomies->assignment_status_label);
+        $options['default_new_assignment_status'] = $new_status->term_id;
+        $options['assignment_email_template_subject'] = _("[%blogname%] You've been assigned to %title%");
+        $options['assignment_email_template'] =
+_(
+"Hello %display_name%,
+ 
+You've been assigned to the story %title%.
+Please login to %dashboard_link% to accept or decline.
+
+Thanks
+Blog Editor");
+         // @todo - other defaults ?
+         update_option($assignment_desk->get_plugin_option_fullname('general'), $options);
+    }
+
 	function story_pitches_setting_section() {
 		global $assignment_desk;
 		echo "Add an Assignment Desk pitch form to any page or post by adding <code>&#60;!--$assignment_desk->pitch_form_key--&#62;</code> where you'd it to appear.";
