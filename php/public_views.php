@@ -187,7 +187,7 @@ class ad_public_views {
 			// Author information and submit
 			$pitch_form .= '<fieldset>'
 						. '<input type="hidden" id="assignment_desk_author" name="assignment_desk_author" value="' . $current_user->ID . '" />'
-						. '<input type="submit" value="Submit" id="assignment_desk_submit" name="assignment_desk_submit" /></fieldset>';					
+						. '<input type="submit" value="Submit" id="assignment_desk_pitch_submit" name="assignment_desk_pitch_submit" /></fieldset>';					
 					
 			$pitch_form .= '</form>';
 			
@@ -216,7 +216,7 @@ class ad_public_views {
 		// @todo Sanitize all of the fields
 		// @todo Validate all of the fields
 		
-		if ($_POST['assignment_desk_submit']) {
+		if ($_POST['assignment_desk_pitch_submit']) {
 			
 			$form_messages = array();
 			
@@ -291,69 +291,84 @@ class ad_public_views {
 		
 	}
 	
+	/**
+	 * Print a form with available roles and ability to volunteer
+	 * @todo Display checked boxes for roles already volunteered for
+	 */
 	function volunteer_form( $post_id ) {
-	    global $assignment_desk;
+	    global $assignment_desk, $current_user;
+		wp_get_current_user();
 	    $user_roles = $assignment_desk->custom_taxonomies->get_user_roles();
+	
+		// See whether the user has already volunteered for the story
+		$existing_roles = get_post_meta( $post_id, "_ad_participant_$current_user->ID" );
+		$existing_roles = $existing_roles[0];
+	
 	    $volunteer_form = '';
-	    $volunteer_form .= "<div style='display:none' id='assignment_desk_volunteer_form_$post_id'>";
-	    $volunteer_form .= "<form id='assignment_desk_volunteer_$post_id' method='post'>";
-	    $volunteer_form .= "<input type='hidden' name='assignment_desk_volunteer_post' value='$post_id'>";
-	    $volunteer_form .= _("I'd like to participate as a: ") . "<br>";
-	    foreach( $user_roles as $role ){
-	        $form .= "<input type='checkbox' name='assignment_desk_volunteer_roles[]' value='$role->term_id'></input>$role->name ";
-	    }
-	    $volunteer_form .= "<br>";
-		// @todo What's this textarea about?
-	    $volunteer_form .= "<textarea name='assignment_desk_volunteer_reason' cols='50' rows='4'>" . _('Why are you volunteering for this story?') . "</textarea><br>";
-	    $volunteer_form .= "<button class='button' value='submit'>Volunteer</button>";
-	    $volunteer_form .= "<a class='button' id='assignment_desk_volunteer_cancel_$post_id'>Cancel</a>";
+	    $volunteer_form .= '<form method="post" id="assignment_desk_volunteer_form">';
+		$volunteer_form .= '<fieldset><ul id="assignment_desk_volunteer">';
+		foreach ( $user_roles as $user_role ) {
+			$volunteer_form .= '<li><input type="checkbox" id="assignment_desk_volunteer_' . $user_role->term_id
+							. '" name="assignment_desk_volunteer_roles[]"'
+							. ' value="' . $user_role->term_id . '"';
+			if ( in_array($user_role->term_id, $existing_roles) ) {
+				$volunteer_form .= ' checked="checked"';
+			}
+			$volunteer_form .= ' /><label for="assignment_desk_volunteer_'
+							. $user_role->term_id .'">' . $user_role->name
+							. '</label></li>';
+		}
+		$volunteer_form .= '</ul>';
+	    $volunteer_form .= "<input type='hidden' name='assignment_desk_volunteer_user_id' value='$current_user->ID' />";	
+	    $volunteer_form .= "<input type='hidden' name='assignment_desk_volunteer_post_id' value='$post_id' />";		
+	    $volunteer_form .= '<input type="submit" id="assignment_desk_volunteer_submit" name="assignment_desk_volunteer_submit" class="button primary" value="Submit" />';
 	    $volunteer_form .= "</form>";
-	    $volunteer_form .= "</div>";
 	    return $volunteer_form;
 	}
 	
 	/**
 	 * Sanitize the user volunteer information and add them as a volunteer.
 	 */
-	function save_volunteer_form(){
+	function save_volunteer_form() {
 	    global $assignment_desk, $current_user;
 	    
-	    if (empty($_POST)){
-	        return;
-	    }
+		if ( $_POST['assignment_desk_volunteer_submit'] ) {
 	    
-	    // @todo Check for a nonce
-	    get_currentuserinfo();
+		    // @todo Check for a nonce
+			// @todo Ensure the user saving is the same user who submitted the form
+			wp_get_current_user();
 	    
-	    $post_id = (int)$_POST['assignment_desk_volunteer_post'];
-	    $roles   = $_POST['assignment_desk_volunteer_roles'];
-	    $reason  = $_POST['assignment_desk_volunteer_reason'];
+		    $post_id = (int)$_POST['assignment_desk_volunteer_post_id'];
+			$sanitized_roles = $_POST['assignment_desk_volunteer_roles'];
+			$sanitized_user_id = (int)$_POST['assignment_desk_volunteer_user_id'];
+			if ( $sanitized_user_id != $current_user->ID ) {
+				return false;
+			}
 	    
-	    if(!$roles){
-	        return _('Please select at least one role.');
-	    }
-	    
-	    // Filter the roles to make sure they're valid.
-	    $user_roles = $assignment_desk->custom_taxonomies->get_user_roles();
-	    $valid_roles = array();
-	    foreach($roles as $maybe_role){
-	        $maybe_role = (int)$maybe_role;
-	        foreach($user_roles as $role){
-	            if($maybe_role == $role->term_id) { $valid_roles[] = $maybe_role; }
+		    // Filter the roles to make sure they're valid.
+		    $user_roles = $assignment_desk->custom_taxonomies->get_user_roles();
+			// @todo abstract this to class method
+		    $valid_roles = array();
+		    foreach($sanitized_roles as $maybe_role){
+		        $maybe_role = (int)$maybe_role;
+		        foreach ( $user_roles as $role ){
+		            if ( $maybe_role == $role->term_id ) {
+						$valid_roles[] = $maybe_role;
+					}
+		        }
 	        }
-        }
-        
-        if(!$valid_roles){
-            return _('Please select at least one role.');
-        }
 	    
-	    foreach($valid_roles as $role_id){
-	        $role_meta = get_post_meta($post_id, '_ad_participant_role_' . $role_id, true);
-	        if(!$role_meta){ $role_meta = array(); }
-	        $role_meta[$current_user->user_login] = 'volunteered';
-	        update_post_meta($post_id, '_ad_participant_role_' . $role_id, $role_meta);
-	    }
-	    return _('Thanks for volunteering!');
+		    foreach ( $valid_roles as $role_id ) {
+		        $role_meta = get_post_meta($post_id, '_ad_participant_role_' . $role_id, true);
+		        if(!$role_meta){ $role_meta = array(); }
+		        $role_meta[$current_user->user_login] = 'volunteered';
+		        update_post_meta($post_id, '_ad_participant_role_' . $role_id, $role_meta);
+		    }
+			// Save the roles associated with the user id as well
+			update_post_meta( $post_id, "_ad_participant_$sanitized_user_id", $valid_roles );
+	
+		}
+	
 	}
 	
 	/*
@@ -367,25 +382,10 @@ class ad_public_views {
 		
 		$html = '';
 		
-		// @todo Update this because they're handled differently now
-		if($_REQUEST['assignment-desk-messages']){
-		    echo '<div class="assignment-desk-messages">';
-		    if(is_array($_REQUEST['assignment-desk-messages'])){
-		        foreach($_REQUEST['assignment-desk-messages'] as $message){
-		            echo "<p>$message</p>";
-		        }
-		    }
-		    else {
-		        echo $_REQUEST['assignment-desk-messages'];
-		    }
-		    echo '</div>';
-		}
-		
 		// @todo This should be customizable
 		$args = array(	'post_status' => 'pitch,assigned' );
 		
 		$posts = new WP_Query($args);
-		//var_dump($posts);
 		
 		if ($posts->have_posts()) {
 			while ($posts->have_posts()) {
@@ -418,7 +418,6 @@ class ad_public_views {
 				    $html .= '</p>';
 				}
 				
-				$html .= "<a href='#' id='assignment_desk_volunteer_$post_id'>Volunteer for this story</a>";
 				$html .= $this->volunteer_form($post_id);
 				$html .= "</div><br>";
 			}

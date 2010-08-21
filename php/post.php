@@ -381,7 +381,6 @@ class ad_post {
 			}
 		}
 		
-		
 		// If the current user can edit participant types, allow them to do so
 		// Otherwise, set all participant types to 'on' if they're unset
 		$user_types = $assignment_desk->custom_taxonomies->get_user_types();
