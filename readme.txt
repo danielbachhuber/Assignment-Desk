@@ -36,6 +36,9 @@ For full functionality, please also install and configure Edit Flow and Co-Autho
 
 == Changelog ==
 
+= 0.4 =
+* Pitch form offers customizable labels and descriptions for every field
+
 = 0.3 =
 * Manage Posts - Can filter by assignment_status
 * Manage Posts - Can filter by eligible contributor types
