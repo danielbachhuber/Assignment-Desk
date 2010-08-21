@@ -69,6 +69,7 @@ if (!class_exists('assignment_desk')) {
 		var $options_group = 'assignment_desk_';
 		
 		var $top_level_page = 'assignment_desk';
+		var $pitch_form_settings_page = 'assignment_desk_pitch_form_settings';		
 		
 		public $pitch_form_key = 'assignment-desk-pitch-form';
 		public $all_posts_key = 'assignment-desk-all-posts';
@@ -244,27 +245,34 @@ if (!class_exists('assignment_desk')) {
 	         * Top-level Assignment Desk menu goes to Settings
 	         * @permissions Edit posts or higher
 	         */
-			add_menu_page('Assignment Desk', 'Assignment Desk', 
+			add_menu_page( 'Assignment Desk', 'Assignment Desk', 
 	                        $this->define_admin_permissions, $this->top_level_page, 
 	                        array(&$this->settings, 'general_settings'));
+	
+			/**
+	         * Pitch Form settings page
+	         */
+			add_submenu_page( $this->top_level_page, 'Pitch Form',
+							'Pitch Form', $this->define_admin_permissions,
+							$this->pitch_form_settings_page, array(&$this->settings, 'pitch_form_settings'));
         
 	        /**
 	         * WordPress taxonomy view for editing Pitch Statuses
 	         */
-	        add_submenu_page($this->top_level_page, 'Assignment Statuses',
+	        add_submenu_page( $this->top_level_page, 'Assignment Statuses',
 	                        'Assignment Statuses', $this->define_editor_permissions, 'edit-tags.php?taxonomy='.$this->custom_taxonomies->assignment_status_label);
         
 	        /**
 	         * WordPress taxonomy view for editing User Types
 	         */
-	        add_submenu_page($this->top_level_page, 'User Types',
+	        add_submenu_page( $this->top_level_page, 'User Types',
 	                        'User Types', $this->define_editor_permissions,
 	                        'edit-tags.php?taxonomy='.$this->custom_taxonomies->user_type_label);
         
 	        /**
 	         * WordPress taxonomy view for editing User Roles
 	         */
-	        add_submenu_page($this->top_level_page, 'User Roles',
+	        add_submenu_page( $this->top_level_page, 'User Roles',
 	                        'User Roles', $this->define_editor_permissions,
 	                        'edit-tags.php?taxonomy='.$this->custom_taxonomies->user_role_label);
 

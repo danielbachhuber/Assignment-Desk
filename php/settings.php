@@ -17,11 +17,11 @@ if ( !class_exists( 'ad_settings' ) ){
 		
 		register_setting( $assignment_desk->options_group, $assignment_desk->get_plugin_option_fullname('general'), array(&$this, 'assignment_desk_validate') );
 		
-		add_settings_section( 'story_pitches', 'Story Pitches', array(&$this, 'story_pitches_setting_section'), $assignment_desk->top_level_page );
-		add_settings_field( 'pitch_form_enabled', 'Enable pitch forms', array(&$this, 'pitch_form_enabled_option'), $assignment_desk->top_level_page, 'story_pitches' );
-		add_settings_field( 'default_new_assignment_status', 'Default assignment status', array(&$this, 'default_new_assignment_status_option'), $assignment_desk->top_level_page, 'story_pitches' );
-		add_settings_field( 'default_workflow_status', 'Default workflow status', array(&$this, 'default_workflow_status_option'), $assignment_desk->top_level_page, 'story_pitches' );
-		add_settings_field( 'pitch_form_elements', 'Pitch form elements', array(&$this, 'pitch_form_elements_option'), $assignment_desk->top_level_page, 'story_pitches' );
+		add_settings_section( 'story_pitches', 'Story Pitches', array(&$this, 'story_pitches_setting_section'), $assignment_desk->pitch_form_settings_page );
+		add_settings_field( 'pitch_form_enabled', 'Enable pitch forms', array(&$this, 'pitch_form_enabled_option'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );
+		add_settings_field( 'default_new_assignment_status', 'Default assignment status', array(&$this, 'default_new_assignment_status_option'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );
+		add_settings_field( 'default_workflow_status', 'Default workflow status', array(&$this, 'default_workflow_status_option'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );
+		add_settings_field( 'pitch_form_elements', 'Pitch form elements', array(&$this, 'pitch_form_elements_option'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );
 		
 		add_settings_section( 'assignment_management', 'Assignment Management', array(&$this, 'assignment_management_setting_section'), $assignment_desk->top_level_page );
 		add_settings_field( 'assignment_email_notifications_enabled', 'Enable assignment email notifications', array(&$this, 'assignment_email_notifications_enabled_option'), $assignment_desk->top_level_page, 'assignment_management' );
@@ -37,11 +37,11 @@ if ( !class_exists( 'ad_settings' ) ){
 		add_settings_field( 'google_maps_api_key', 'Google Maps API key', array(&$this, 'google_maps_api_key_option'), $assignment_desk->top_level_page, 'miscellaneous' );	
 	}
 	
-	function setup_defaults(){
+	function setup_defaults() {
         global $assignment_desk;
         $options = $assignment_desk->general_options;
         
-        if($assignment_desk->edit_flow_exists()){
+        if ( $assignment_desk->edit_flow_exists() ) {
             global $edit_flow;
             $post_status = get_term_by('slug', 'pitch', $edit_flow->custom_status->post_status);
             $options['default_workflow_status'] = $post_status->term_id;
@@ -440,6 +440,39 @@ Blog Editor");
 			</form>
 	</div>
 
+<?php
+      
+	}
+	
+	function pitch_form_settings() {
+		global $wpdb, $assignment_desk;
+
+		$msg = null;
+		if ( array_key_exists( 'updated', $_GET ) && $_GET['updated']=='true' ) { 
+			$msg = __('Settings Saved', 'assignment-desk');
+		}
+    
+?>                                   
+	<div class="wrap">
+		<div class="icon32" id="icon-options-general"><br/></div>
+		
+		<?php if($msg) : ?>
+			<div class="updated fade" id="message">
+				<p><strong><?php echo $msg ?></strong></p>
+			</div>
+		<?php endif; ?>
+		
+		<h2><?php _e('Pitch Form Settings', 'assignment-desk') ?></h2>
+		
+			<form action="options.php" method="post">
+				
+				<?php settings_fields( $assignment_desk->options_group ); ?>
+				<?php do_settings_sections( $assignment_desk->pitch_form_settings_page ); ?>
+				
+				<p class="submit"><input name="submit" type="submit" class="button-primary" value="<?php esc_attr_e('Save Changes'); ?>" /></p>
+				
+			</form>
+	</div>
 
 <?php
       

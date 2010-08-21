@@ -300,6 +300,7 @@ class ad_public_views {
 		wp_get_current_user();
 	    $user_roles = $assignment_desk->custom_taxonomies->get_user_roles();
 	
+		// See whether the user has already volunteered for the story
 		$existing_roles = get_post_meta( $post_id, "_ad_participant_$current_user->ID" );
 		$existing_roles = $existing_roles[0];
 	
