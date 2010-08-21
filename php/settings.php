@@ -40,6 +40,14 @@ if ( !class_exists( 'ad_settings' ) ){
 	function setup_defaults(){
         global $assignment_desk;
         $options = $assignment_desk->general_options;
+        
+        if($assignment_desk->edit_flow_exists()){
+            global $edit_flow;
+            $post_status = get_term_by('slug', 'pitch', $edit_flow->custom_status->post_status);
+            $options['default_workflow_status'] = $post_status->term_id;
+        }
+        $new_status = get_term_by('slug', 'new', $assignment_desk->custom_taxonomies->assignment_status_label);
+        $options['default_new_assignment_status'] = $new_status->term_id;
         $options['assignment_email_template_subject'] = _("[%blogname%] You've been assigned to %title%");
         $options['assignment_email_template'] =
 _(
