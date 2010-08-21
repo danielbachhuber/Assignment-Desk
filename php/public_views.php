@@ -296,24 +296,31 @@ class ad_public_views {
 	 * @todo Display checked boxes for roles already volunteered for
 	 */
 	function volunteer_form( $post_id ) {
-	    global $assignment_desk;
+	    global $assignment_desk, $current_user;
+		wp_get_current_user();
 	    $user_roles = $assignment_desk->custom_taxonomies->get_user_roles();
+	
+		$existing_roles = get_post_meta( $post_id, "_ad_participant_$current_user->ID" );
+		$existing_roles = $existing_roles[0];
+	
 	    $volunteer_form = '';
 	    $volunteer_form .= '<form method="post" id="assignment_desk_volunteer_form">';
-	    $volunteer_form .= "<input type='hidden' name='assignment_desk_volunteer_post_id' value='$post_id'>";
-		$volunteer_form .= '<fieldset><label for="assignment_desk_volunteer">' . $volunteer_label . '</label><ul id="assignment_desk_volunteer">';
+		$volunteer_form .= '<fieldset><ul id="assignment_desk_volunteer">';
 		foreach ( $user_roles as $user_role ) {
-			$volunteer_form .= '<li><input type="checkbox" '
-							. 'id="assignment_desk_volunteer_' . $user_role->term_id
+			$volunteer_form .= '<li><input type="checkbox" id="assignment_desk_volunteer_' . $user_role->term_id
 							. '" name="assignment_desk_volunteer_roles[]"'
-							. ' value="' . $user_role->term_id . '"'
-							. ' /><label for="assignment_desk_volunteer_'
+							. ' value="' . $user_role->term_id . '"';
+			if ( in_array($user_role->term_id, $existing_roles) ) {
+				$volunteer_form .= ' checked="checked"';
+			}
+			$volunteer_form .= ' /><label for="assignment_desk_volunteer_'
 							. $user_role->term_id .'">' . $user_role->name
 							. '</label></li>';
 		}
 		$volunteer_form .= '</ul>';
-	    $volunteer_form .= '<input type="button" id="assignment_desk_volunteer_submit" name="assignment_desk_volunteer_submit" class="button primary" value="Submit" />';
-	    $volunteer_form .= "<a class='button' id='assignment_desk_volunteer_cancel_$post_id'>Cancel</a>";
+	    $volunteer_form .= "<input type='hidden' name='assignment_desk_volunteer_user_id' value='$current_user->ID' />";	
+	    $volunteer_form .= "<input type='hidden' name='assignment_desk_volunteer_post_id' value='$post_id' />";		
+	    $volunteer_form .= '<input type="submit" id="assignment_desk_volunteer_submit" name="assignment_desk_volunteer_submit" class="button primary" value="Submit" />';
 	    $volunteer_form .= "</form>";
 	    return $volunteer_form;
 	}
@@ -321,46 +328,46 @@ class ad_public_views {
 	/**
 	 * Sanitize the user volunteer information and add them as a volunteer.
 	 */
-	function save_volunteer_form(){
+	function save_volunteer_form() {
 	    global $assignment_desk, $current_user;
 	    
-	    if (empty($_POST)){
-	        return;
-	    }
+		if ( $_POST['assignment_desk_volunteer_submit'] ) {
 	    
-	    // @todo Check for a nonce
-		// @todo Ensure the user saving is the same user who submitted the form
-	    get_currentuserinfo();
+		    // @todo Check for a nonce
+			// @todo Ensure the user saving is the same user who submitted the form
+			wp_get_current_user();
 	    
-	    $post_id = (int)$_POST['assignment_desk_volunteer_post'];
-	    $roles   = $_POST['assignment_desk_volunteer_roles'];
-	    $reason  = $_POST['assignment_desk_volunteer_reason'];
+		    $post_id = (int)$_POST['assignment_desk_volunteer_post_id'];
+			$sanitized_roles = $_POST['assignment_desk_volunteer_roles'];
+			$sanitized_user_id = (int)$_POST['assignment_desk_volunteer_user_id'];
+			if ( $sanitized_user_id != $current_user->ID ) {
+				return false;
+			}
 	    
-	    if(!$roles){
-	        return _('Please select at least one role.');
-	    }
-	    
-	    // Filter the roles to make sure they're valid.
-	    $user_roles = $assignment_desk->custom_taxonomies->get_user_roles();
-	    $valid_roles = array();
-	    foreach($roles as $maybe_role){
-	        $maybe_role = (int)$maybe_role;
-	        foreach($user_roles as $role){
-	            if($maybe_role == $role->term_id) { $valid_roles[] = $maybe_role; }
+		    // Filter the roles to make sure they're valid.
+		    $user_roles = $assignment_desk->custom_taxonomies->get_user_roles();
+			// @todo abstract this to class method
+		    $valid_roles = array();
+		    foreach($sanitized_roles as $maybe_role){
+		        $maybe_role = (int)$maybe_role;
+		        foreach ( $user_roles as $role ){
+		            if ( $maybe_role == $role->term_id ) {
+						$valid_roles[] = $maybe_role;
+					}
+		        }
 	        }
-        }
-        
-        if(!$valid_roles){
-            return _('Please select at least one role.');
-        }
 	    
-	    foreach($valid_roles as $role_id){
-	        $role_meta = get_post_meta($post_id, '_ad_participant_role_' . $role_id, true);
-	        if(!$role_meta){ $role_meta = array(); }
-	        $role_meta[$current_user->user_login] = 'volunteered';
-	        update_post_meta($post_id, '_ad_participant_role_' . $role_id, $role_meta);
-	    }
-	    return _('Thanks for volunteering!');
+		    foreach ( $valid_roles as $role_id ) {
+		        $role_meta = get_post_meta($post_id, '_ad_participant_role_' . $role_id, true);
+		        if(!$role_meta){ $role_meta = array(); }
+		        $role_meta[$current_user->user_login] = 'volunteered';
+		        update_post_meta($post_id, '_ad_participant_role_' . $role_id, $role_meta);
+		    }
+			// Save the roles associated with the user id as well
+			update_post_meta( $post_id, "_ad_participant_$sanitized_user_id", $valid_roles );
+	
+		}
+	
 	}
 	
 	/*
@@ -374,25 +381,10 @@ class ad_public_views {
 		
 		$html = '';
 		
-		// @todo Update this because they're handled differently now
-		if($_REQUEST['assignment-desk-messages']){
-		    echo '<div class="assignment-desk-messages">';
-		    if(is_array($_REQUEST['assignment-desk-messages'])){
-		        foreach($_REQUEST['assignment-desk-messages'] as $message){
-		            echo "<p>$message</p>";
-		        }
-		    }
-		    else {
-		        echo $_REQUEST['assignment-desk-messages'];
-		    }
-		    echo '</div>';
-		}
-		
 		// @todo This should be customizable
 		$args = array(	'post_status' => 'pitch,assigned' );
 		
 		$posts = new WP_Query($args);
-		//var_dump($posts);
 		
 		if ($posts->have_posts()) {
 			while ($posts->have_posts()) {
