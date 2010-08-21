@@ -1,5 +1,3 @@
-br { clear: both; }
-
 /* Page Layout */
 #ad-left-column { float:left; width:75%; padding-left: 5px; }
 #ad-right-column { float:left; width:20%; padding-left: 5px; }
@@ -68,4 +66,24 @@ li.ad-message-error {
 .avatar {
     float:left;
     padding-right: 10px;
+}
+
+
+/* Settings */
+
+ul#ad_pitch_form_elements span.field {
+	width: 120px;
+	display: inline-block;
+}
+
+ul#ad_pitch_form_elements span.copy.hidden {
+	display: none;
+}
+
+ul#ad_pitch_form_elements span.copy label {
+	margin-right: 5px;
+}
+
+ul#ad_pitch_form_elements span.copy input {
+	margin-right: 10px;
 }

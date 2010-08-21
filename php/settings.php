@@ -107,54 +107,127 @@ if ( !class_exists( 'ad_settings' ) ){
 			global $edit_flow;
 		}
 		$options = $assignment_desk->general_options;
-		echo '<ul>';
+		echo '<ul id="ad_pitch_form_elements">';
 		// Title
-		echo '<li><input type="checkbox" disabled="disabled" checked="checked" />&nbsp;<label for="pitch_form_title">Title</label></li>';
+		echo '<li><span class="field"><input type="checkbox" disabled="disabled" checked="checked" />&nbsp;<label for="pitch_form_title">Title</label></span>';
+		echo '<span class="copy"><label for="pitch_form_title_label">Label</label>';
+		echo '<input id="pitch_form_title_label" name="assignment_desk_general[pitch_form_title_label]" type="text" value="'
+			. $options['pitch_form_title_label'] . '" size="15" />';
+		echo '<label for="pitch_form_title_description">Description</label>';
+		echo '<input id="pitch_form_title_description" name="assignment_desk_general[pitch_form_title_description]" type="text" value="'
+			. $options['pitch_form_title_description'] . '" size="35" />';	
+		echo '</span></li>';
 		// Description
 		if ($assignment_desk->edit_flow_exists()) {
-			echo '<li><input id="pitch_form_description_enabled" name="assignment_desk_general[pitch_form_description_enabled]" type="checkbox"';
+			echo '<li><span class="field"><input id="pitch_form_description_enabled" name="assignment_desk_general[pitch_form_description_enabled]" type="checkbox"';
 			if ($options['pitch_form_description_enabled']) {
 				echo ' checked="checked"';
 			}
-			echo ' />&nbsp;<label for="pitch_form_description_enabled">Description</label></li>';
+			echo ' />&nbsp;<label for="pitch_form_description_enabled">Description</label></span>';
+			echo '<span class="copy';
+			if ( !$options['pitch_form_description_enabled'] ) {
+				echo ' hidden';
+			}
+			echo '"><label for="pitch_form_description_label">Label</label>';
+			echo '<input id="pitch_form_description_label" name="assignment_desk_general[pitch_form_description_label]" type="text" value="'
+				. $options['pitch_form_description_label'] . '" size="15" />';
+			echo '<label for="pitch_form_description_description">Description</label>';
+			echo '<input id="pitch_form_description_description" name="assignment_desk_general[pitch_form_description_description]" type="text" value="'
+				. $options['pitch_form_description_description'] . '" size="35" />';	
+			echo '</span></li>';
 		} else {
 				echo '<li>Please enable Edit Flow to allow description field.</li>';
 		}
 		// Categories
-		echo '<li><input id="pitch_form_categories_enabled" name="assignment_desk_general[pitch_form_categories_enabled]" type="checkbox"';
+		echo '<li><span class="field"><input id="pitch_form_categories_enabled" name="assignment_desk_general[pitch_form_categories_enabled]" type="checkbox"';
 		if ($options['pitch_form_categories_enabled']) {
 			echo ' checked="checked"';
 		}
-		echo ' />&nbsp;<label for="pitch_form_categories_enabled">Categories</label></li>';
+		echo ' />&nbsp;<label for="pitch_form_categories_enabled">Categories</label></span>';
+		echo '<span class="copy';
+		if ( !$options['pitch_form_categories_enabled'] ) {
+			echo ' hidden';
+		}
+		echo '"><label for="pitch_form_categories_label">Label</label>';
+		echo '<input id="pitch_form_categories_label" name="assignment_desk_general[pitch_form_categories_label]" type="text" value="'
+			. $options['pitch_form_categories_label'] . '" size="15" />';
+		echo '<label for="pitch_form_categories_description">Description</label>';
+		echo '<input id="pitch_form_categories_description" name="assignment_desk_general[pitch_form_categories_description]" type="text" value="'
+			. $options['pitch_form_categories_description'] . '" size="35" />';	
+		echo '</span></li>';
 		// Tags
-		echo '<li><input id="pitch_form_tags_enabled" name="assignment_desk_general[pitch_form_tags_enabled]" type="checkbox"';
+		echo '<li><span class="field"<input id="pitch_form_tags_enabled" name="assignment_desk_general[pitch_form_tags_enabled]" type="checkbox"';
 		if ($options['pitch_form_tags_enabled']) {
 			echo ' checked="checked"';
 		}
-		echo ' />&nbsp;<label for="pitch_form_tags_enabled">Tags</label></li>';
+		echo ' />&nbsp;<label for="pitch_form_tags_enabled">Tags</label></span>';
+		echo '<span class="copy';
+		if ( !$options['pitch_form_tags_enabled'] ) {
+			echo ' hidden';
+		}
+		echo '"><label for="pitch_form_tags_label">Label</label>';
+		echo '<input id="pitch_form_tags_label" name="assignment_desk_general[pitch_form_tags_label]" type="text" value="'
+			. $options['pitch_form_tags_label'] . '" size="15" />';
+		echo '<label for="pitch_form_tags_description">Description</label>';
+		echo '<input id="pitch_form_tags_description" name="assignment_desk_general[pitch_form_tags_description]" type="text" value="'
+			. $options['pitch_form_tags_description'] . '" size="35" />';	
+		echo '</span></li>';
 		// Volunteer
-		echo '<li><input id="pitch_form_volunteer_enabled" name="assignment_desk_general[pitch_form_volunteer_enabled]" type="checkbox"';
+		echo '<li><span class="field"><input id="pitch_form_volunteer_enabled" name="assignment_desk_general[pitch_form_volunteer_enabled]" type="checkbox"';
 		if ($options['pitch_form_volunteer_enabled']) {
 			echo ' checked="checked"';
 		}
-		echo ' />&nbsp;<label for="pitch_form_volunteer_enabled">Volunteer</label></li>';
+		echo ' />&nbsp;<label for="pitch_form_volunteer_enabled">Volunteer</label></span>';
+		echo '<span class="copy';
+		if ( !$options['pitch_form_volunteer_enabled'] ) {
+			echo ' hidden';
+		}
+		echo '"><label for="pitch_form_volunteer_label">Label</label>';
+		echo '<input id="pitch_form_volunteer_label" name="assignment_desk_general[pitch_form_volunteer_label]" type="text" value="'
+			. $options['pitch_form_volunteer_label'] . '" size="15" />';
+		echo '<label for="pitch_form_volunteer_description">Description</label>';
+		echo '<input id="pitch_form_volunteer_description" name="assignment_desk_general[pitch_form_volunteer_description]" type="text" value="'
+			. $options['pitch_form_volunteer_description'] . '" size="35" />';	
+		echo '</span></li>';
 		// Due date
 		if ($assignment_desk->edit_flow_exists()) {
-			echo '<li><input id="pitch_form_duedate_enabled" name="assignment_desk_general[pitch_form_duedate_enabled]" type="checkbox"';
+			echo '<li><span class="field"><input id="pitch_form_duedate_enabled" name="assignment_desk_general[pitch_form_duedate_enabled]" type="checkbox"';
 			if ($options['pitch_form_duedate_enabled']) {
 				echo ' checked="checked"';
 			}
-			echo ' />&nbsp;<label for="pitch_form_duedate_enabled">Due Date</label></li>';
+			echo ' />&nbsp;<label for="pitch_form_duedate_enabled">Due Date</label></span>';
+			echo '<span class="copy';
+			if ( !$options['pitch_form_duedate_enabled'] ) {
+				echo ' hidden';
+			}
+			echo '"><label for="pitch_form_duedate_label">Label</label>';
+			echo '<input id="pitch_form_duedate_label" name="assignment_desk_general[pitch_form_duedate_label]" type="text" value="'
+				. $options['pitch_form_duedate_label'] . '" size="15" />';
+			echo '<label for="pitch_form_duedate_description">Description</label>';
+			echo '<input id="pitch_form_duedate_description" name="assignment_desk_general[pitch_form_duedate_description]" type="text" value="'
+				. $options['pitch_form_duedate_description'] . '" size="35" />';	
+			echo '</span></li>';
 		} else {
 				echo '<li>Please enable Edit Flow to allow due date field.</li>';
 		}
 		// Location
 		if ($assignment_desk->edit_flow_exists()) {
-			echo '<li><input id="pitch_form_location_enabled" name="assignment_desk_general[pitch_form_location_enabled]" type="checkbox"';
+			echo '<li><span class="field"><input id="pitch_form_location_enabled" name="assignment_desk_general[pitch_form_location_enabled]" type="checkbox"';
 			if ($options['pitch_form_location_enabled']) {
 				echo ' checked="checked"';
 			}
-			echo ' />&nbsp;<label for="pitch_form_location_enabled">Location</label></li>';
+			echo ' />&nbsp;<label for="pitch_form_location_enabled">Location</label></span>';
+			echo '<span class="copy';
+			if ( !$options['pitch_form_location_enabled'] ) {
+				echo ' hidden';
+			}
+			echo '"><label for="pitch_form_location_label">Label</label>';
+			echo '<input id="pitch_form_location_label" name="assignment_desk_general[pitch_form_location_label]" type="text" value="'
+				. $options['pitch_form_location_label'] . '" size="15" />';
+			echo '<label for="pitch_form_location_description">Description</label>';
+			echo '<input id="pitch_form_location_description" name="assignment_desk_general[pitch_form_location_description]" type="text" value="'
+				. $options['pitch_form_location_description'] . '" size="35" />';	
+			echo '</span></li>';
 			
 		} else {
 			echo '<li>Please enable Edit Flow to allow location field.</li>';
