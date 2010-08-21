@@ -135,7 +135,7 @@ if (!class_exists('assignment_desk')) {
 			/**
 			 * Provide an easy way to access Assignment Desk settings w/o querying database every time
 			 */
-			$this->general_options = get_option($this->get_plugin_option_fullname('general'));			
+			$this->general_options = get_option($this->get_plugin_option_fullname('general'));
 
         }
 
@@ -170,14 +170,18 @@ if (!class_exists('assignment_desk')) {
         */
         function activate_plugin() {
             // This is an upgrade or re-activation
-            if ( get_option('ad_installed_once') == 'on' ){
+            if ( $this->general_options['ad_installed_once'] == 'on' ){
                 $this->custom_taxonomies->activate();
             }
             // This is the first time we've ever activated the plugin.
             else {
-                update_option('ad_installed_once', 'on');
+                $this->settings->setup_defaults();
                 $this->custom_taxonomies->activate();
                 $this->custom_taxonomies->activate_once();
+                
+                $this->general_options = get_option($this->get_plugin_option_fullname('general'));
+                $this->general_options['ad_installed_once'] = 'on';
+                update_option($this->get_plugin_option_fullname('general'), $this->general_options);
             }
         }
 
