@@ -170,7 +170,7 @@ class ad_manage_posts {
                 $participants = get_post_meta($post_id, "_ad_participant_role_$user_role->term_id", true);
                 if($participants){
                     foreach($participants as $user => $status){
-                        if($status == 'volunteer'){
+                        if($status == 'volunteered'){
                             $volunteers++;
                         }
                     }
