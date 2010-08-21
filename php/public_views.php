@@ -187,7 +187,7 @@ class ad_public_views {
 			// Author information and submit
 			$pitch_form .= '<fieldset>'
 						. '<input type="hidden" id="assignment_desk_author" name="assignment_desk_author" value="' . $current_user->ID . '" />'
-						. '<input type="submit" value="Submit" id="assignment_desk_submit" name="assignment_desk_submit" /></fieldset>';					
+						. '<input type="submit" value="Submit" id="assignment_desk_pitch_submit" name="assignment_desk_pitch_submit" /></fieldset>';					
 					
 			$pitch_form .= '</form>';
 			
@@ -216,7 +216,7 @@ class ad_public_views {
 		// @todo Sanitize all of the fields
 		// @todo Validate all of the fields
 		
-		if ($_POST['assignment_desk_submit']) {
+		if ($_POST['assignment_desk_pitch_submit']) {
 			
 			$form_messages = array();
 			
@@ -291,24 +291,30 @@ class ad_public_views {
 		
 	}
 	
+	/**
+	 * Print a form with available roles and ability to volunteer
+	 * @todo Display checked boxes for roles already volunteered for
+	 */
 	function volunteer_form( $post_id ) {
 	    global $assignment_desk;
 	    $user_roles = $assignment_desk->custom_taxonomies->get_user_roles();
 	    $volunteer_form = '';
-	    $volunteer_form .= "<div style='display:none' id='assignment_desk_volunteer_form_$post_id'>";
-	    $volunteer_form .= "<form id='assignment_desk_volunteer_$post_id' method='post'>";
-	    $volunteer_form .= "<input type='hidden' name='assignment_desk_volunteer_post' value='$post_id'>";
-	    $volunteer_form .= _("I'd like to participate as a: ") . "<br>";
-	    foreach( $user_roles as $role ){
-	        $form .= "<input type='checkbox' name='assignment_desk_volunteer_roles[]' value='$role->term_id'></input>$role->name ";
-	    }
-	    $volunteer_form .= "<br>";
-		// @todo What's this textarea about?
-	    $volunteer_form .= "<textarea name='assignment_desk_volunteer_reason' cols='50' rows='4'>" . _('Why are you volunteering for this story?') . "</textarea><br>";
-	    $volunteer_form .= "<button class='button' value='submit'>Volunteer</button>";
+	    $volunteer_form .= '<form method="post" id="assignment_desk_volunteer_form">';
+	    $volunteer_form .= "<input type='hidden' name='assignment_desk_volunteer_post_id' value='$post_id'>";
+		$volunteer_form .= '<fieldset><label for="assignment_desk_volunteer">' . $volunteer_label . '</label><ul id="assignment_desk_volunteer">';
+		foreach ( $user_roles as $user_role ) {
+			$volunteer_form .= '<li><input type="checkbox" '
+							. 'id="assignment_desk_volunteer_' . $user_role->term_id
+							. '" name="assignment_desk_volunteer_roles[]"'
+							. ' value="' . $user_role->term_id . '"'
+							. ' /><label for="assignment_desk_volunteer_'
+							. $user_role->term_id .'">' . $user_role->name
+							. '</label></li>';
+		}
+		$volunteer_form .= '</ul>';
+	    $volunteer_form .= '<input type="button" id="assignment_desk_volunteer_submit" name="assignment_desk_volunteer_submit" class="button primary" value="Submit" />';
 	    $volunteer_form .= "<a class='button' id='assignment_desk_volunteer_cancel_$post_id'>Cancel</a>";
 	    $volunteer_form .= "</form>";
-	    $volunteer_form .= "</div>";
 	    return $volunteer_form;
 	}
 	
@@ -323,6 +329,7 @@ class ad_public_views {
 	    }
 	    
 	    // @todo Check for a nonce
+		// @todo Ensure the user saving is the same user who submitted the form
 	    get_currentuserinfo();
 	    
 	    $post_id = (int)$_POST['assignment_desk_volunteer_post'];
@@ -418,7 +425,6 @@ class ad_public_views {
 				    $html .= '</p>';
 				}
 				
-				$html .= "<a href='#' id='assignment_desk_volunteer_$post_id'>Volunteer for this story</a>";
 				$html .= $this->volunteer_form($post_id);
 				$html .= "</div><br>";
 			}
