@@ -13,13 +13,13 @@ class ad_public_views {
 		
 		wp_enqueue_script('ad-public-views', WP_PLUGIN_URL . '/assignment-desk/js/public_views.js', array('jquery'));
 		
-		$_REQUEST['assignment-desk-messages'] = array();
 		// Run save_pitch_form() at WordPress initialization
-		$_REQUEST['assignment-desk-messages'][] = $this->save_pitch_form();
-		$_REQUEST['assignment-desk-messages'][] = $this->save_volunteer_form();
+		$_REQUEST['assignment_desk_messages']['pitch_form'] = $this->save_pitch_form();
+		$_REQUEST['assignment_desk_messages']['volunteer_form'] = $this->save_volunteer_form();
+		// @todo Save vote form
 		
 		add_filter('the_content', array(&$this, 'show_all_posts') );
-		if ($options['pitch_form_enabled']) {
+		if ( $options['pitch_form_enabled'] ) {
 			add_filter('the_content', array(&$this, 'show_pitch_form') );
 		}
 	}
@@ -50,6 +50,12 @@ class ad_public_views {
 		if ( is_user_logged_in() ) {
 
 			$pitch_form = '';
+			
+			if ( $_REQUEST['assignment_desk_messages']['pitch_form']['success'] ) {
+				$pitch_form .= '<div class="message success"><p>Pitch submitted successfully.</p></div>';
+			} else if ( count($_REQUEST['assignment_desk_messages']['pitch_form']['errors']) ) {
+				$pitch_form .= '<div class="message error"><p>Please correct the error(s) below.</p></div>';
+			}
 		
 			$pitch_form .= '<form method="post" id="assignment_desk_pitch_form">';
 			// Title
@@ -64,6 +70,11 @@ class ad_public_views {
 			$pitch_form .= '<p class="description">'
 						. $options['pitch_form_title_description']
 						. '</p>';
+			}
+			if ( $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['title'] ) {
+				$pitch_form .= '<p class="error">'
+							. $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['title']
+							. '</p>';
 			}
 			$pitch_form	.= '</fieldset>';
 			
@@ -176,7 +187,7 @@ class ad_public_views {
 			// Author information and submit
 			$pitch_form .= '<fieldset>'
 						. '<input type="hidden" id="assignment_desk_author" name="assignment_desk_author" value="' . $current_user->ID . '" />'
-						. '<input type="submit" value="Submit Pitch" id="assignment_desk_submit" name="assignment_desk_submit" /></fieldset>';					
+						. '<input type="submit" value="Submit" id="assignment_desk_submit" name="assignment_desk_submit" /></fieldset>';					
 					
 			$pitch_form .= '</form>';
 			
@@ -207,13 +218,22 @@ class ad_public_views {
 		
 		if ($_POST['assignment_desk_submit']) {
 			
+			$form_messages = array();
+			
 			$sanitized_title = $_POST['assignment_desk_title'];
+			if ( !$sanitized_title ) {
+				$form_messages['errors']['title'] = 'Please add a title to this pitch.';
+			}
 			$sanitized_author = (int)$_POST['assignment_desk_author'];
 			$sanitized_description = $_POST['assignment_desk_description'];
 			$sanitized_tags = $_POST['assignment_desk_tags'];
 			$sanitized_categories = (int)$_POST['assignment_desk_categories'];
 			$sanitized_location = $_POST['assignment_desk_location'];
 			$sanitized_volunteer = $_POST['assignment_desk_volunteer'];
+			
+			if ( count($form_messages['errors']) ) {
+				return $form_messages;
+			}
 		
 			$new_pitch = array();
 			$new_pitch['post_title'] = $sanitized_title;
@@ -260,35 +280,36 @@ class ad_public_views {
 				}
 				update_post_meta($post_id, "_ad_participant_$sanitized_author", $sanitized_volunteer);
 				
-			} else {
-				return 'error';
 			}
 			
-			return 'message';
+			$form_messages['success']['post_id'] = $post_id;
+			
+			return $form_messages;
 		}
 		
 		return null;
 		
 	}
 	
-	function volunteer_form($post_id){
+	function volunteer_form( $post_id ) {
 	    global $assignment_desk;
 	    $user_roles = $assignment_desk->custom_taxonomies->get_user_roles();
-	    $form = '';
-	    $form .= "<div style='display:none' id='assignment_desk_volunteer_form_$post_id'>";
-	    $form .= "<form id='assignment_desk_volunteer_$post_id' method='post'>";
-	    $form .= "<input type='hidden' name='assignment_desk_volunteer_post' value='$post_id'>";
-	    $form .= _("I'd like to participate as a: ") . "<br>";
-	    foreach($user_roles as $role){
+	    $volunteer_form = '';
+	    $volunteer_form .= "<div style='display:none' id='assignment_desk_volunteer_form_$post_id'>";
+	    $volunteer_form .= "<form id='assignment_desk_volunteer_$post_id' method='post'>";
+	    $volunteer_form .= "<input type='hidden' name='assignment_desk_volunteer_post' value='$post_id'>";
+	    $volunteer_form .= _("I'd like to participate as a: ") . "<br>";
+	    foreach( $user_roles as $role ){
 	        $form .= "<input type='checkbox' name='assignment_desk_volunteer_roles[]' value='$role->term_id'></input>$role->name ";
 	    }
-	    $form .= "<br>";
-	    $form .= "<textarea name='assignment_desk_volunteer_reason' cols='50' rows='4'>" . _('Why are you volunteering for this story?') . "</textarea><br>";
-	    $form .= "<button class='button' value='submit'>Volunteer</button>";
-	    $form .= "<a class='button' id='assignment_desk_volunteer_cancel_$post_id'>Cancel</a>";
-	    $form .= "</form>";
-	    $form .= "</div>";
-	    return $form;
+	    $volunteer_form .= "<br>";
+		// @todo What's this textarea about?
+	    $volunteer_form .= "<textarea name='assignment_desk_volunteer_reason' cols='50' rows='4'>" . _('Why are you volunteering for this story?') . "</textarea><br>";
+	    $volunteer_form .= "<button class='button' value='submit'>Volunteer</button>";
+	    $volunteer_form .= "<a class='button' id='assignment_desk_volunteer_cancel_$post_id'>Cancel</a>";
+	    $volunteer_form .= "</form>";
+	    $volunteer_form .= "</div>";
+	    return $volunteer_form;
 	}
 	
 	/**
@@ -346,6 +367,7 @@ class ad_public_views {
 		
 		$html = '';
 		
+		// @todo Update this because they're handled differently now
 		if($_REQUEST['assignment-desk-messages']){
 		    echo '<div class="assignment-desk-messages">';
 		    if(is_array($_REQUEST['assignment-desk-messages'])){
@@ -359,6 +381,7 @@ class ad_public_views {
 		    echo '</div>';
 		}
 		
+		// @todo This should be customizable
 		$args = array(	'post_status' => 'pitch,assigned' );
 		
 		$posts = new WP_Query($args);

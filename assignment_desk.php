@@ -120,14 +120,23 @@ if (!class_exists('assignment_desk')) {
             $this->public_views = new ad_public_views();
             $this->dashboard_widgets = new ad_dashboard_widgets();
 
-			$this->general_options = get_option($this->get_plugin_option_fullname('general'));
-
             /**
              * Initialize various bits and pieces of functionality
              * @todo Should these be interchangeable and not have internal dependencies?
              */
             $this->custom_taxonomies->init();
             $this->user->init_user();
+
+			/**
+			 * Store form messages
+			 */
+			$_REQUEST['assignment_desk_messages'] = array();
+			
+			/**
+			 * Provide an easy way to access Assignment Desk settings w/o querying database every time
+			 */
+			$this->general_options = get_option($this->get_plugin_option_fullname('general'));			
+
         }
 
 		function init() {
