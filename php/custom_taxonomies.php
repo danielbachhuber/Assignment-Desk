@@ -253,7 +253,6 @@ class ad_custom_taxonomies {
 				$user_types_for_post[$user_type->term_id] = get_post_meta($post_id, "_ad_participant_type_$user_type->term_id", true);
 				// If it's been set before, build the string of permitted types
 				// Else, set all of the participant types to 'on'
-				var_dump($user_types_for_post[$user_type->term_id]);
 				if ( $user_types_for_post[$user_type->term_id] == 'on' ) {
 					$all_participant_types .= $user_type->name . ', ';
 				} else if ($user_types_for_post[$user_type->term_id] == '' || !$user_types_for_post[$user_type->term_id]) {
