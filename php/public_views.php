@@ -354,12 +354,12 @@ class ad_public_views {
 		if ( $_POST['assignment_desk_volunteer_submit'] ) {
 	    
 		    // @todo Check for a nonce
-			// @todo Ensure the user saving is the same user who submitted the form
 			wp_get_current_user();
 	    
 		    $post_id = (int)$_POST['assignment_desk_volunteer_post_id'];
 			$sanitized_roles = $_POST['assignment_desk_volunteer_roles'];
 			$sanitized_user_id = (int)$_POST['assignment_desk_volunteer_user_id'];
+			// Ensure the user saving is the same user who submitted the form 
 			if ( $sanitized_user_id != $current_user->ID ) {
 				return false;
 			}
@@ -376,13 +376,18 @@ class ad_public_views {
 					}
 		        }
 	        }
-	    
-		    foreach ( $valid_roles as $role_id ) {
-		        $role_meta = get_post_meta($post_id, '_ad_participant_role_' . $role_id, true);
-		        if(!$role_meta){ $role_meta = array(); }
-		        $role_meta[$current_user->user_login] = 'volunteered';
-		        update_post_meta($post_id, '_ad_participant_role_' . $role_id, $role_meta);
-		    }
+	
+			// Get previous roles, 
+			foreach ( $user_roles as $user_role ) {
+				$previous_values = get_post_meta($post_id, '_ad_participant_role_' . $user_role->term_id, true);
+				if ( in_array( $user_role->term_id, $valid_roles ) && !isset( $previous_values[$current_user->ID] ) ) {
+					$previous_values[$current_user->ID] = 'volunteered';
+				} else if ( !in_array( $user_role->term_id, $valid_roles ) && $previous_values[$current_user->ID] == 'volunteered' ) {
+					unset($previous_values[$current_user->ID]);
+				}
+				$new_values = $previous_values;
+				update_post_meta($post_id, '_ad_participant_role_' . $user_role->term_id, $new_values);
+			}
 			// Save the roles associated with the user id as well
 			update_post_meta( $post_id, "_ad_participant_$sanitized_user_id", $valid_roles );
 	
