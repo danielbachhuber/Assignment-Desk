@@ -40,6 +40,7 @@ class ad_custom_taxonomies {
 							'public' => false,
 			                'show_ui' => true,
 			                'show_tagcloud' => false,
+							'rewrite' => false
 							);
 			register_taxonomy($this->assignment_status_label, array('post'), $args);
 			
@@ -56,6 +57,7 @@ class ad_custom_taxonomies {
 		                'public' => true,
 		                'show_ui' => false,
 		                'show_tagcloud' => false,
+						'rewrite' => false
 		                );
 		  register_taxonomy($this->user_role_label, array('user'), $args);
 		}
@@ -67,6 +69,7 @@ class ad_custom_taxonomies {
 		                'public' => true,
 		                'show_ui' => false,
 		                'show_tagcloud' => false,
+						'rewrite' => false
 		                );
 		  register_taxonomy($this->user_type_label, array('user'), $args);
 		}

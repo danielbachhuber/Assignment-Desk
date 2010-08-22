@@ -113,13 +113,6 @@ if (!class_exists('assignment_desk')) {
             $this->public_views = new ad_public_views();
             $this->dashboard_widgets = new ad_dashboard_widgets();
 
-            /**
-             * Initialize various bits and pieces of functionality
-             * @todo Should these be interchangeable and not have internal dependencies?
-             */
-            $this->custom_taxonomies->init();
-            $this->user->init_user();
-
 			/**
 			 * Store form messages
 			 */
@@ -132,7 +125,14 @@ if (!class_exists('assignment_desk')) {
 
         }
 
+		/**
+         * Initialize various bits and pieces of functionality
+         */
 		function init() {
+			
+			$this->custom_taxonomies->init();
+            $this->user->init_user();
+			
 			if ( is_admin() ) {
 				add_action( 'admin_menu', array(&$this, 'add_admin_menu_items'));
 				add_action( 'admin_menu', array(&$this->custom_taxonomies, 'remove_assignment_status_post_meta_box') );
