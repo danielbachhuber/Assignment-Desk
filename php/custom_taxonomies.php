@@ -349,7 +349,7 @@ class ad_custom_taxonomies {
 	/**
 	 * Count the number of users that of a certain user_type.
 	 */
-	function handle_user_type_users_column($c, $column_name, $term_id){
+	function handle_user_type_users_column( $c, $column_name, $term_id ){
 	    global $wpdb;
 	    if($column_name == '_ad_users'){
 	        return $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->usermeta where meta_key='ad_user_type' and meta_value=$term_id");

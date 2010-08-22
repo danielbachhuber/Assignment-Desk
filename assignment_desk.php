@@ -78,14 +78,6 @@ if (!class_exists('assignment_desk')) {
 		public $define_editor_permissions = 'edit_pages';
 		public $define_admin_permissions = 'manage_options';
 
-        /** @var array $options Stores the options for this plugin. */
-        public $options = array();
-        
-        /**
-         * @var assignment_desk_contributor_controller $contributor_controller serves 
-         * the contributor profile and assignment views.
-         */
-        public $contributor_controller;
 
 	      /**
          * @var assignment_desk_dashboard_widgets $dashboard_widgets provides the widget.

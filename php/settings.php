@@ -366,7 +366,8 @@ Blog Editor");
 		echo '<ul>';
 		// Volunteer
 		echo '<li><input id="public_facing_volunteering_enabled" name="assignment_desk_general[public_facing_volunteering_enabled]" type="checkbox"';
-		if ($options['public_facing_volunteering_enabled']) {
+		if ($options['public_facing_volunt
+		eering_enabled']) {
 			echo ' checked="checked"';
 		}
 		echo ' />&nbsp;<label for="public_facing_volunteering_enabled">Volunteering</label></li>';

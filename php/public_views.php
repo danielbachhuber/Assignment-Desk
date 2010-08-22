@@ -4,8 +4,7 @@ if(!class_exists('ad_public_controller')){
 class ad_public_views {
 	
 	function __construct() { 
-		add_filter( 'the_content', array(&$this, 'show_all_posts') );
-		add_filter( 'the_content', array(&$this, 'append_volunteering_to_post') );
+
 	}
 	
 	function init() {
@@ -19,12 +18,15 @@ class ad_public_views {
 		$_REQUEST['assignment_desk_messages']['volunteer_form'] = $this->save_volunteer_form();
 		// @todo Save vote form
 		
+		add_filter( 'the_content', array(&$this, 'show_all_posts') );
+		add_filter( 'the_content', array(&$this, 'append_volunteering_to_post') );		
+		
 		if ( $options['pitch_form_enabled'] ) {
 			add_filter( 'the_content', array(&$this, 'show_pitch_form') );
 		}
 	}
 	
-	function show_pitch_form($the_content) {
+	function show_pitch_form( $the_content ) {
 		global $assignment_desk, $current_user;
 		
 		if ($assignment_desk->edit_flow_exists()) {
@@ -271,7 +273,6 @@ class ad_public_views {
 					update_post_meta($post_id, "_ad_participant_type_$user_type->term_id", 'on');
 				}
 				
-				
 				// Save the roles user volunteered for both with each role
 				// and under the user's row
 				$all_roles = array();				
@@ -339,6 +340,9 @@ class ad_public_views {
 		    return $volunteer_form;
 		
 		} else {
+			
+			$volunteer_message = '<div class="message alert">You must be logged in to volunteer.</div>';
+			return $volunteer_message;
 			
 		}
 	}
@@ -427,11 +431,15 @@ class ad_public_views {
 	  
 		$template_tag = '<!--' . $assignment_desk->all_posts_key . '-->';
 		
+		if ( !strpos( $the_content, $template_tag ) ) {
+			return $the_content;
+		}
+		
 		$html = '';
 		
 		// @todo This should be customizable
 		$args = array(	'post_status' => 'pitch,assigned' );
-		
+
 		$posts = new WP_Query($args);
 		
 		if ($posts->have_posts()) {
@@ -442,6 +450,8 @@ class ad_public_views {
 				if ( get_post_meta($post_id, '_ad_private', true) == 1 ){
 				    continue;
 				}
+				
+				var_dump($post_id);
 				
 				$description = get_post_meta( $post_id, '_ef_description', true );
 				$location = get_post_meta( $post_id, '_ef_location', true );
