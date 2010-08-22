@@ -450,6 +450,14 @@ class ad_post {
 				update_post_meta($post_id, "_ad_participant_$participant_id", $user_role_ids);
 			}
 		}
+		
+        if($post->post_status == 'publish'){
+            $completed_status = get_term_by('slug', 'completed', $assignment_desk->custom_taxonomies->assignment_status_label);
+            if($completed_status){
+                wp_set_object_terms($post_id, $completed_status->slug, $assignment_desk->custom_taxonomies->assignment_status_label);
+            }
+        }
+        
     }
     
     /**
