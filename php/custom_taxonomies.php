@@ -85,25 +85,30 @@ class ad_custom_taxonomies {
      */
     function activate_once(){
         $default_assignment_labels = array(
-            array(  'term' => 'New',
-                 'args' => array( 
+            array( 'term' => 'New',
+                   'args' => array( 
                        'slug' => 'new',
                        'description' => 'A new pitch that has not been edited.',)
 		          ),
-		    array(  'term' => 'Approved',
-			          'args' => array( 
-			                'slug' => 'approved',
+		    array( 'term' => 'Approved',
+			       'args' => array( 
+			           'slug' => 'approved',
                        'description' => 'An editor has approved the pitch.',)
 		          ),
-		    array(  'term' => 'Rejected',
-			          'args' => array( 
-			                'slug' => 'rejected',
-								      'description' => 'The pitch was not accepted for development.',)
+		    array( 'term' => 'Rejected',
+			       'args' => array( 
+			           'slug' => 'rejected',
+				       'description' => 'The pitch was not accepted for development.',)
 		          ),
-		    array(  'term' => 'On hold',
-                 'args' => array( 
+		    array( 'term' => 'On hold',
+                   'args' => array( 
                        'slug' => 'on-hold',
                        'description' => 'Work on the pitch is on hold.',)
+		          ),
+            array( 'term' => 'Completed',
+                   'args' => array( 
+                       'slug' => 'completed',
+                       'description' => 'The assignment is complete and published.',)
 		          ),
         );
 	    
@@ -112,25 +117,25 @@ class ad_custom_taxonomies {
 	    }
 	    
 	    $default_user_roles = array(
-            array(  'term' => 'Writer',
-                 'args' => array( 
+            array( 'term' => 'Writer',
+                   'args' => array( 
                        'slug' => 'writer',
                        'description' => 'Writes for this blog.',)
 		          ),
-		    array(  'term' => 'Photographer',
-			          'args' => array( 
-			                'slug' => 'photographer',
+		    array( 'term' => 'Photographer',
+			       'args' => array( 
+			           'slug' => 'photographer',
                        'description' => 'Takes pictures for the story.',)
 		          ),
 		    array(  'term' => 'Videographer',
-			          'args' => array( 
-			                'slug' => 'videographer',
-								      'description' => 'Shoots video for the story..',)
+			        'args' => array( 
+			            'slug' => 'videographer',
+						'description' => 'Shoots video for the story..',)
 		          ),
 		    array(  'term' => 'Editor',
-                 'args' => array( 
-                       'slug' => 'editor',
-                       'description' => 'Manages the story production.',)
+                    'args' => array( 
+                        'slug' => 'editor',
+                        'description' => 'Manages the story production.',)
 		          ),
         );
 	    
@@ -138,20 +143,20 @@ class ad_custom_taxonomies {
            wp_insert_term( $term['term'], $this->user_role_label, $term['args'] );
 	    }
 	    $default_user_types = array(
-            array(  'term' => 'Community Contributor',
-                 'args' => array( 
+            array( 'term' => 'Community Contributor',
+                   'args' => array( 
                        'slug' => 'community-contributor',
                        'description' => 'Someone from the community that writes for the blog.',)
 		          ),
-		    array(  'term' => 'Professional',
-			          'args' => array( 
-			                'slug' => 'professional',
+		    array( 'term' => 'Professional',
+			       'args' => array( 
+			           'slug' => 'professional',
                        'description' => 'A professional journalist.',)
 		          ),
-		    array(  'term' => 'Student Journalist',
-			          'args' => array( 
-			                'slug' => 'student-journalist',
-								      'description' => 'A student who writes for the blog.',)
+		    array( 'term' => 'Student Journalist',
+			       'args' => array( 
+			           'slug' => 'student-journalist',
+					   'description' => 'A student who writes for the blog.',)
 		          ),
         );
 	    
