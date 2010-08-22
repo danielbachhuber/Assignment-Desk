@@ -73,4 +73,20 @@ function get_unassigned_posts(){
 }
 }
 
+/**
+ * Get a list of posts that do not have assignees.
+ */
+if (!function_exists('get_inprogress_posts')){
+function get_inprogress_posts(){
+    global $assignment_desk, $wpdb;
+    $inprogress_posts = array();
+    $inprogress_status = get_term($assignment_desk->general_options['inprogress_status'], 
+                                   $assignment_desk->custom_taxonomies->assignment_status_label);
+    $args = array('meta_key' => '_ad_assignment_status', 
+                  'meta_value' => $inprogress_status->term_id);
+    $in_progress_posts = get_posts($args);
+    return $inprogress_posts;
+}
+}
+
 ?>

@@ -58,13 +58,21 @@ class ad_dashboard_widgets {
         <table>
             <tbody>
             <?php if($assignment_desk->coauthors_plus_exists()){
-                
-                echo "<tr><td class='b'>" . count(get_unassigned_posts()) . "</td> <td>" . _('Unassigned', 'assignment-desk') . "</td></tr>";
+                // @todo - Figure out how to link to the unassigned posts.
+                $unassigned_url = "#";
+                echo "<tr><td class='b'><a href='$unassigned_url'>" . count(get_unassigned_posts()) . "</a></td>";
+                echo "<td class='b'><a href='$unassigned_url'>" . _('Unassigned', 'assignment-desk') . "</a></td></tr>";
+
+                // @todo - Figure out how to link to inprogress posts.
+                $inprogress_url = "";
+                echo "<tr><td class='b'><a href='$inprogress_url'>" . count(get_inprogress_posts()) . "</a></td>";
+                echo "<td class='b'><a href='$inprogress_url'>" . _('In Progress', 'assignment-desk') . "</a></td></tr>";
             }
-            $this_month_link = admin_url() . '/edit.php?post_status=publish&monthnum=' . date('M');
+            
+            $this_month_url = admin_url() . '/edit.php?post_status=publish&monthnum=' . date('M');
             $q = new WP_Query( array('post_status' => 'publish', 'monthnum' => date('M')));
-            echo "<tr><td class='b'><a href='$this_month_link'>$q->found_posts</a></td>";
-            echo "<td><a href='$this_month_link'>" . _('Published this month', 'assignment-desk') . "</a></td></tr>";
+            echo "<tr><td class='b'><a href='$this_month_url'>$q->found_posts</a></td>";
+            echo "<td class='b'><a href='$this_month_url'>" . _('Published this month', 'assignment-desk') . "</a></td></tr>";
             ?>        
             </tbody>
         </table>
@@ -114,9 +122,10 @@ class ad_dashboard_widgets {
     <div>
         <?php $post = get_post($pending[0]); ?>
         <?php 
-        echo "{$post->post_title} | {$pending[1]->name}";
-        echo " <a class='button' href='" . admin_url() . "index.php?participant_response=accepted&post_id=$post->ID&role_id={$pending[1]->term_id}'>Accept</a> ";
-        echo "<a class='button' href='" . admin_url() . "index.php?participant_response=declined&post_id=$post->ID&role_id={$pending[1]->term_id}'>Decline</a>";  
+        echo "<p>{$post->post_title} | {$pending[1]->name}</p>";
+        
+        echo "<p><a class='button' href='" . admin_url() . "index.php?participant_response=accepted&post_id=$post->ID&role_id={$pending[1]->term_id}'>Accept</a> ";
+        echo "<a class='button' href='" . admin_url() . "index.php?participant_response=declined&post_id=$post->ID&role_id={$pending[1]->term_id}'>Decline</a></p>";  
         ?>
     </div>
 <?php endforeach; ?>
