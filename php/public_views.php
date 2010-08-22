@@ -451,8 +451,6 @@ class ad_public_views {
 				    continue;
 				}
 				
-				var_dump($post_id);
-				
 				$description = get_post_meta( $post_id, '_ef_description', true );
 				$location = get_post_meta( $post_id, '_ef_location', true );
 				$duedate = get_post_meta( $post_id, '_ef_duedate', true );
