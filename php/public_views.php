@@ -426,7 +426,7 @@ class ad_public_views {
 	* Replace an html comment <!--assignment-desk-all-posts--> with ad public pages.
 	*/
 	function show_all_posts( $the_content ) {
-		global $wpdb, $assignment_desk;
+		global $wpdb, $assignment_desk, $post;
 		$options = $assignment_desk->general_options;
 	  
 		$template_tag = '<!--' . $assignment_desk->all_posts_key . '-->';
@@ -435,16 +435,19 @@ class ad_public_views {
 			return $the_content;
 		}
 		
+		// Save the parent post so we can reset the object later
+		$parent_post = $post;		
+		
 		$html = '';
 		
 		// @todo This should be customizable
 		$args = array(	'post_status' => 'pitch,assigned' );
 
-		$posts = new WP_Query($args);
+		$all_pitches = new WP_Query($args);
 		
-		if ($posts->have_posts()) {
-			while ($posts->have_posts()) {
-				$posts->the_post();
+		if ($all_pitches->have_posts()) {
+			while ($all_pitches->have_posts()) {
+				$all_pitches->the_post();
 				
 				$post_id = get_the_ID();
 				if ( get_post_meta($post_id, '_ad_private', true) == 1 ){
@@ -480,6 +483,9 @@ class ad_public_views {
 		}
 		
 		$the_content = str_replace($template_tag, $html, $the_content);
+		
+		// Reset the $post object to its original state
+		$post = $parent_post;
 		
         return $the_content;
 	}
