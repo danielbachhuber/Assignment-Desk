@@ -4,7 +4,8 @@ if(!class_exists('ad_public_controller')){
 class ad_public_views {
 	
 	function __construct() { 
-	
+		add_filter( 'the_content', array(&$this, 'show_all_posts') );
+		add_filter( 'the_content', array(&$this, 'append_volunteering_to_post') );
 	}
 	
 	function init() {
@@ -18,8 +19,6 @@ class ad_public_views {
 		$_REQUEST['assignment_desk_messages']['volunteer_form'] = $this->save_volunteer_form();
 		// @todo Save vote form
 		
-		add_filter( 'the_content', array(&$this, 'show_all_posts') );
-		add_filter( 'the_content', array(&$this, 'append_volunteering_to_post') );
 		if ( $options['pitch_form_enabled'] ) {
 			add_filter( 'the_content', array(&$this, 'show_pitch_form') );
 		}
@@ -65,7 +64,7 @@ class ad_public_views {
 			} else {
 				$title_label = 'Title';
 			}
-			$pitch_form .= '<fieldset><label for="assignment_desk_title">' . $title_label . '</label>'
+			$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_title">' . $title_label . '</label>'
 						. '<input type="text" id="assignment_desk_title" name="assignment_desk_title" />';
 			if ( $options['pitch_form_title_description'] ) {
 			$pitch_form .= '<p class="description">'
@@ -86,7 +85,7 @@ class ad_public_views {
 				} else {
 					$description_label = 'Description';
 				}
-				$pitch_form .= '<fieldset><label for="assignment_desk_description">' . $description_label . '</label>'
+				$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_description">' . $description_label . '</label>'
 							. '<textarea id="assignment_desk_description"'
 							. ' name="assignment_desk_description">';
 				$pitch_form .= '</textarea>';
@@ -105,7 +104,7 @@ class ad_public_views {
 				} else {
 					$category_label = 'Category';
 				}	
-				$pitch_form .= '<fieldset><label for="assignment_desk_categories">' . $category_label . '</label>';
+				$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_categories">' . $category_label . '</label>';
 				$pitch_form .= '<select id="assignment_desk_categories" name="assignment_desk_categories">';
 				foreach ( $categories as $category ) {
 					$pitch_form .= '<option value="' . $category->term_id . '">'
@@ -128,7 +127,7 @@ class ad_public_views {
 				} else {
 					$tags_label = 'Tags';
 				}	
-				$pitch_form .= '<fieldset><label for="assignment_desk_tags">' . $tags_label . '</label>'
+				$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_tags">' . $tags_label . '</label>'
 							. '<input type="text" id="assignment_desk_tags"'
 							. ' name="assignment_desk_tags" />';
 				if ($options['pitch_form_tags_description']) {
@@ -146,7 +145,7 @@ class ad_public_views {
 				} else {
 					$location_label = 'Location';
 				}
-				$pitch_form .= '<fieldset><label for="assignment_desk_location">' . $location_label . '</label>'
+				$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_location">' . $location_label . '</label>'
 							. '<input type="text" id="assignment_desk_location"'
 							. ' name="assignment_desk_location" />';
 				if ( $options['pitch_form_location_description'] ) {
@@ -164,7 +163,7 @@ class ad_public_views {
 				} else {
 					$volunteer_label = 'Volunteer';
 				}	
-				$pitch_form .= '<fieldset><label for="assignment_desk_volunteer">' . $volunteer_label . '</label><ul id="assignment_desk_volunteer">';
+				$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_volunteer">' . $volunteer_label . '</label><ul id="assignment_desk_volunteer">';
 				foreach ( $user_roles as $user_role ) {
 					$pitch_form .= '<li><input type="checkbox" '
 								. 'id="assignment_desk_volunteer_' . $user_role->term_id
@@ -186,7 +185,7 @@ class ad_public_views {
 			// @todo Confirm your user information
 			
 			// Author information and submit
-			$pitch_form .= '<fieldset>'
+			$pitch_form .= '<fieldset class="submit">'
 						. '<input type="hidden" id="assignment_desk_author" name="assignment_desk_author" value="' . $current_user->ID . '" />'
 						. '<input type="submit" value="Submit" id="assignment_desk_pitch_submit" name="assignment_desk_pitch_submit" /></fieldset>';					
 					
@@ -272,9 +271,13 @@ class ad_public_views {
 					update_post_meta($post_id, "_ad_participant_type_$user_type->term_id", 'on');
 				}
 				
+				
 				// Save the roles user volunteered for both with each role
 				// and under the user's row
+				$all_roles = array();				
 				foreach ($sanitized_volunteer as $volunteered_role) {
+					$volunteered_role = (int)$volunteered_role;
+					$all_roles[] = $volunteered_role;
 					$role_data = array();
 					$role_data[$sanitized_author] = 'volunteered';
 					update_post_meta($post_id, "_ad_participant_role_$volunteered_role", $role_data);
@@ -296,47 +299,67 @@ class ad_public_views {
 	 * Print a form with available roles and ability to volunteer
 	 * @todo Display checked boxes for roles already volunteered for
 	 */
-	function volunteer_form( $post_id ) {
+	function volunteer_form( $post_id = null ) {
 	    global $assignment_desk, $current_user;
-		wp_get_current_user();
-	    $user_roles = $assignment_desk->custom_taxonomies->get_user_roles();
 	
-		// See whether the user has already volunteered for the story
-		$existing_roles = get_post_meta( $post_id, "_ad_participant_$current_user->ID" );
-		$existing_roles = $existing_roles[0];
-	
-	    $volunteer_form = '';
-	    $volunteer_form .= '<form method="post" class="assignment_desk_volunteer_form">';
-		$volunteer_form .= '<fieldset><ul class="assignment_desk_volunteer">';
-		foreach ( $user_roles as $user_role ) {
-			$volunteer_form .= '<li><input type="checkbox" id="assignment_desk_volunteer_' . $user_role->term_id
-							. '" name="assignment_desk_volunteer_roles[]"'
-							. ' value="' . $user_role->term_id . '"';
-			if ( in_array($user_role->term_id, $existing_roles) ) {
-				$volunteer_form .= ' checked="checked"';
-			}
-			$volunteer_form .= ' /><label for="assignment_desk_volunteer_'
-							. $user_role->term_id .'">' . $user_role->name
-							. '</label></li>';
+		if ( !$post_id ) {
+			global $post;
+			$post_id = $post->ID;
 		}
-		$volunteer_form .= '</ul>';
-	    $volunteer_form .= "<input type='hidden' name='assignment_desk_volunteer_user_id' value='$current_user->ID' />";	
-	    $volunteer_form .= "<input type='hidden' name='assignment_desk_volunteer_post_id' value='$post_id' />";		
-	    $volunteer_form .= '<input type="submit" id="assignment_desk_volunteer_submit" name="assignment_desk_volunteer_submit" class="button primary" value="Submit" />';
-	    $volunteer_form .= "</form>";
-	    return $volunteer_form;
+	
+		if ( is_user_logged_in() ) {
+	
+			wp_get_current_user();
+		    $user_roles = $assignment_desk->custom_taxonomies->get_user_roles();
+	
+			// See whether the user has already volunteered for the story
+			$existing_roles = get_post_meta( $post_id, "_ad_participant_$current_user->ID" );
+			$existing_roles = $existing_roles[0];
+	
+		    $volunteer_form = '';
+		    $volunteer_form .= '<form method="post" class="assignment_desk_volunteer_form">';
+			$volunteer_form .= '<fieldset class="standard"><ul class="assignment_desk_volunteer">';
+			foreach ( $user_roles as $user_role ) {
+				$volunteer_form .= '<li><input type="checkbox" id="assignment_desk_post_' . $post_id
+								. '_volunteer_' . $user_role->term_id
+								. '" name="assignment_desk_volunteer_roles[]"'
+								. ' value="' . $user_role->term_id . '"';
+				if ( in_array($user_role->term_id, $existing_roles) ) {
+					$volunteer_form .= ' checked="checked"';
+				}
+				$volunteer_form .= ' /><label for="assignment_desk_post_' . $post_id
+								. '_volunteer_' . $user_role->term_id .'">' . $user_role->name
+								. '</label></li>';
+			}
+			$volunteer_form .= '</ul></fieldset>';
+		    $volunteer_form .= "<input type='hidden' name='assignment_desk_volunteer_user_id' value='$current_user->ID' />";	
+		    $volunteer_form .= "<input type='hidden' name='assignment_desk_volunteer_post_id' value='$post_id' />";		
+		    $volunteer_form .= '<fieldset class="submit"><input type="submit" id="assignment_desk_volunteer_submit" name="assignment_desk_volunteer_submit" class="button primary" value="Submit" /></fieldset';
+		    $volunteer_form .= "</form>";
+		    return $volunteer_form;
+		
+		} else {
+			
+		}
 	}
 	
 	/**
-	 *
+	 * List total count for all volunteers
+	 * @param int $post_id The Post ID
 	 */
-	function show_all_volunteers( $post_id ) {
+	function show_all_volunteers( $post_id = null ) {
 	    global $assignment_desk;
 	    $user_roles = $assignment_desk->custom_taxonomies->get_user_roles();
+	
+		if ( !$post_id ) {
+			global $post;
+			$post_id = $post->ID;
+		}
 		
 		$show_all_volunteers = '<div class="assignment_desk_all_volunteers">';
 		foreach ( $user_roles as $user_role ) {
 			$show_all_volunteers .= '<span class="label">' . $user_role->name . 's:</span>&nbsp;';
+			$volunteers_for_role = array();
 			$volunteers_for_role = get_post_meta( $post_id, "_ad_participant_role_$user_role->term_id" );
 			$show_all_volunteers .= count($volunteers_for_role[0]) . ', ';
 		}
@@ -351,7 +374,7 @@ class ad_public_views {
 	function save_volunteer_form() {
 	    global $assignment_desk, $current_user;
 	    
-		if ( $_POST['assignment_desk_volunteer_submit'] ) {
+		if ( $_POST['assignment_desk_volunteer_submit'] && is_user_logged_in() ) {
 	    
 		    // @todo Check for a nonce
 			wp_get_current_user();
@@ -416,29 +439,29 @@ class ad_public_views {
 				$posts->the_post();
 				
 				$post_id = get_the_ID();
-				if ( get_post_meta($post_id, '_ad_private', true) == 1){
+				if ( get_post_meta($post_id, '_ad_private', true) == 1 ){
 				    continue;
 				}
 				
-				$description = get_post_meta($post_id, '_ef_description', true);
-				$location = get_post_meta($post_id, '_ef_location', true);
-				$duedate = get_post_meta($post_id, '_ef_duedate', true);
-				$duedate = date_i18n('M d, Y', $duedate);
+				$description = get_post_meta( $post_id, '_ef_description', true );
+				$location = get_post_meta( $post_id, '_ef_location', true );
+				$duedate = get_post_meta( $post_id, '_ef_duedate', true );
+				$duedate = date_i18n( 'M d, Y', $duedate );
 				
 				$html .= '<div><h3><a href="' . get_permalink($post_id) . '">' . get_the_title($post_id) . '</a></h3>';
-				if ($description || $duedate || $location) {
+				if ( $description || $duedate || $location ) {
 				    $html .= '<p class="meta">';
 				}
-				if ($description) {
+				if ( $description ) {
 				    $html .= '<label>Description:</label> ' . $description . '<br />';
 				}
-				if ($duedate) {
+				if ( $duedate ) {
 				    $html .= '<label>Due date:</label> ' . $duedate . '<br />';	
 				}
-				if ($location) {
+				if ( $location ) {
 				    $html .= '<label>Location:</label> ' . $location . '<br />';	
 				}
-				if ($description || $duedate || $location) {
+				if ( $description || $duedate || $location ) {
 				    $html .= '</p>';
 				}
 				
@@ -454,11 +477,13 @@ class ad_public_views {
 	}
 	
 	function append_volunteering_to_post( $the_content ) {
-		global $assignment_desk, $post;
+		global $post, $assignment_desk;
 		$options = $assignment_desk->general_options;
 		
-		$the_content .= $this->show_all_volunteers( $post->ID );
-		$the_content .= $this->volunteer_form( $post->ID );
+		if ( is_single() ) {
+			$the_content .= $this->show_all_volunteers( $post->ID );
+			$the_content .= $this->volunteer_form( $post->ID );
+		}
 		
 		return $the_content;		
 	}
