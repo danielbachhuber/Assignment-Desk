@@ -182,6 +182,7 @@ class ad_custom_taxonomies {
             $vals = array(
                         'user_role' => array('title' => 'User Roles', 'singular' => 'User Role'),
                         'user_type' => array('title' => 'User Types', 'singular' => 'User Type'),
+                        'assignment_status' => array('title' => 'Assignment Statuses', 'singular' => 'Assignment status'),
                     );
             echo "<script type='text/javascript'>";
             foreach( $vals[$taxonomy] as $name => $value ){
