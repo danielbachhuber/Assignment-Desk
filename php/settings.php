@@ -24,6 +24,8 @@ if ( !class_exists( 'ad_settings' ) ){
 		add_settings_field( 'pitch_form_elements', 'Pitch form elements', array(&$this, 'pitch_form_elements_option'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );
 		
 		add_settings_section( 'assignment_management', 'Assignment Management', array(&$this, 'assignment_management_setting_section'), $assignment_desk->top_level_page );
+		
+		add_settings_field( 'default_published_assignment_status', 'Default status for published posts', array(&$this, 'default_published_assignment_status_option'), $assignment_desk->top_level_page, 'assignment_management' );
 		add_settings_field( 'assignment_email_notifications_enabled', 'Enable assignment email notifications', array(&$this, 'assignment_email_notifications_enabled_option'), $assignment_desk->top_level_page, 'assignment_management' );
 		add_settings_field( 'assignment_email_template_subject', 'Subject template for notifications', array(&$this, 'assignment_email_template_subject_option'), $assignment_desk->top_level_page, 'assignment_management' );
 
@@ -264,6 +266,19 @@ Blog Editor");
 	function assignment_management_setting_section() {
 		global $assignment_desk;
 	}
+	
+	function default_published_assignment_status_option() {
+	    global $assignment_desk;
+        echo "<select name='assignment_desk_general[default_published_assignment_status]' id='assignment_default_published_status'>";
+        foreach($assignment_desk->custom_taxonomies->get_assignment_statuses() as $status){
+            echo "<option value='$status->term_id'";
+            if($assignment_desk->general_options['default_published_assignment_status'] == $status->term_id){
+                echo " selected ";
+            }
+            echo ">$status->name</option>";
+        }
+        echo "</select>";
+    }
 	
 	function assignment_email_notifications_enabled_option() {
 		global $assignment_desk;

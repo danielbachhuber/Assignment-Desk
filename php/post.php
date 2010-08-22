@@ -452,9 +452,10 @@ class ad_post {
 		}
 		
         if($post->post_status == 'publish'){
-            $completed_status = get_term_by('slug', 'completed', $assignment_desk->custom_taxonomies->assignment_status_label);
-            if($completed_status){
-                wp_set_object_terms($post_id, $completed_status->slug, $assignment_desk->custom_taxonomies->assignment_status_label);
+            $published_status = get_term($assignment_desk->general_options['default_published_assignment_status'],
+                                         $assignment_desk->custom_taxonomies->assignment_status_label);
+            if($published_status){
+                wp_set_object_terms($post->ID, $published_status->slug, $assignment_desk->custom_taxonomies->assignment_status_label);
             }
         }
         
