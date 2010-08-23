@@ -519,7 +519,7 @@ class ad_public_views {
 			foreach ( $user_roles as $user_role ) {
 				$previous_values = get_post_meta($post_id, '_ad_participant_role_' . $user_role->term_id, true);
 				if ( in_array( $user_role->term_id, $valid_roles ) && !isset( $previous_values[$current_user->ID] ) ) {
-					$previous_values[$current_user->user_login] = 'volunteered';
+					$previous_values[$current_user->ID] = 'volunteered';
 				} else if ( !in_array( $user_role->term_id, $valid_roles ) && $previous_values[$current_user->ID] == 'volunteered' ) {
 					unset($previous_values[$current_user->ID]);
 				}

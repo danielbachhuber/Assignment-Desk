@@ -15,8 +15,9 @@ if(typeof(String.prototype.trim) === "undefined") {
 function ad_add_to_participants(user_id, user_nicename, role_id, role_name){
 	var error_message = false;
 	
-	// @todo This check doesn't work all that well    
-	if (user_id.length == 0){
+	// @todo This check doesn't work all that well
+	user_id = parseInt(user_id);
+	if (!user_id){
 	    error_message = '<div id="ad-participant-error-message" class="message alert">'
 						+ 'No user selected'
 						+ '</div>';
@@ -26,8 +27,7 @@ function ad_add_to_participants(user_id, user_nicename, role_id, role_name){
 	jQuery("#ad-participant-error-message").remove();
 	
 	// @todo check to see whether use was already assigned in this rold
-	jQuery('input[name="ad-participant-role-' + role_id
-	+ '[]"]').each(function(){
+	jQuery('input[name="ad-participant-role-' + role_id + '[]"]').each(function(){
 		spl = jQuery(this).val().split('|');
 		
 		if (spl[0] == user_id && spl[1] != 'volunteered' ) {
@@ -68,11 +68,10 @@ function ad_add_to_participants(user_id, user_nicename, role_id, role_name){
 /**
 * When a user clicks the "Assign" button for a contributor, show them a form to select the role.
 */
-function show_participant_assign_form(user_login){
-    user_login.trim()
-    var participant_assign_form = "<label>User: </label>" + user_login;
+function show_participant_assign_form(user_id){
+    var participant_assign_form = "<label>User: </label>" + user_id;
     participant_assign_form += jQuery('div#ad-hidden-user-role-select').html();
-    participant_assign_form += '<a class="button" onclick="javascript: return add_participant_to_assignees(\'' + user_login + '\');">Assign</a>';
+    participant_assign_form += '<a class="button" onclick="javascript: return add_participant_to_assignees(\'' + user_id + '\');">Assign</a>';
     jQuery('#ad_participant_' + user_login).html(participant_assign_form);
     return false;  
 }
@@ -95,6 +94,7 @@ jQuery(document).ready(function() {
 	        	author.login = jQuery.trim(vals[1]);
 	        	author.name = jQuery.trim(vals[2]);
 	        	jQuery('#ad-assignee-search').val(author.name);
+				jQuery('#ad-assignee-search-user_id').val(author.id);
 	    	}
 		}).keydown(function(e) {
 	    	if (e.keyCode == 13) {
@@ -119,10 +119,10 @@ jQuery(document).ready(function() {
 		var user_id = '';
 		var user_nicename = '';
 		
-		if (jQuery('#ad-assignee-search').length > 0 && jQuery('#ad-assignee-search').val().length > 1 ) {
-			var search = jQuery('#ad-assignee-search').val().trim();
+		if (jQuery('#ad-assignee-search-user_id').val() > 0) {
+			var search = jQuery('#ad-assignee-search-user_id').val();
 			var data = { action: 'user_check', q: search };
-			
+
 			// Call another JAX function verify the username
 			jQuery.ajax({
 				url: ajaxurl, 
@@ -132,12 +132,13 @@ jQuery(document).ready(function() {
 					// valid username returns user->ID > 0
 					if(parseInt(response) > 0){
 						user_id = search;
-						user_nicename = search;
+						user_nicename = jQuery('#ad-assignee-search').val();
 						jQuery('#ad-assignee-search').val('');
 					}
 					else {
 						// flag the invalid_user and display an error message
 						valid_user = false;
+						jQuery('#ad-assignee-search-user_id').val(0);
 						jQuery('#ad-participant-error-message').remove();
 						error_message = '<div id="ad-participant-error-message" class="message alert">'+ 
 											search + ' is not a valid user </div>';
@@ -159,15 +160,15 @@ jQuery(document).ready(function() {
 	
 	// Assign a volunteer to the form
 	jQuery("a[id^=ad-volunteer-]").each(function(index, link){
-		// a#ad-volunteer-$role_id-$role_name-$user_login
+		// a#ad-volunteer-$role_id-$role_name-$user_id
 		var spl = link.id.split('-');
 		var role_id = spl[2];
 		var role_name = spl[3];
-		var user_login = spl[4];
+		var user_id = spl[4];
 		var user_nicename = user_login;
 	
 		jQuery(link).click(function(){
-			ad_add_to_participants(user_login, user_nicename, role_id, role_name);
+			ad_add_to_participants(user_id, user_nicename, role_id, role_name);
 			jQuery(link).parent().remove();
 			return false;
 		});

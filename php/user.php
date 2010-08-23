@@ -81,7 +81,7 @@ if ( !class_exists( 'ad_user' ) ) {
                                         FROM $wpdb->posts LEFT JOIN $wpdb->postmeta 
                                                                 ON ($wpdb->posts.ID = $wpdb->postmeta.post_id)
                                         WHERE $wpdb->posts.post_status = 'publish'
-                                        AND $wpdb->postmeta.meta_key = '_ad_participant_$user->user_login'", ARRAY_N);
+                                        AND $wpdb->postmeta.meta_key = '_ad_participant_$user->ID'", ARRAY_N);
         $post_ids = array();
         if(!$post_id_results){
             return  0;

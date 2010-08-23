@@ -93,7 +93,7 @@ class ad_dashboard_widgets {
         }
         // Find all of the posts this user participates in.
         $participant_posts = $wpdb->get_results("SELECT post_id FROM $wpdb->postmeta 
-                                                  WHERE meta_key = '_ad_participant_{$current_user->user_login}'
+                                                  WHERE meta_key = '_ad_participant_{$current_user->ID}'
                                                   ORDER BY post_id");
         
         if ( ! $participant_posts ){
@@ -107,8 +107,8 @@ class ad_dashboard_widgets {
                 // Get all of the roles this user has for this post
                 $participant_record = get_post_meta($post->post_id, "_ad_participant_role_$user_role->term_id", true);
                 if($participant_record) {
-                    foreach ($participant_record as $user_login => $status ){
-                        if( $user_login == $current_user->user_login && $status == 'pending' ){
+                    foreach ($participant_record as $user_id => $status ){
+                        if( $user_id == $current_user->ID && $status == 'pending' ){
                             $pending_posts[] = array($post->post_id, $user_role);
                         }
                     }
@@ -142,23 +142,28 @@ class ad_dashboard_widgets {
        $role_id = (int)$_GET['role_id'];
           
        get_currentuserinfo();
-       if ('' == $user_ID || $user_ID != $post_id) {
+       if (!$current_user->ID || $user_ID != $post_id) {
            $_REQUEST['ad-dashboard-assignment-messages'][] = _('Unauthorized assignment response. This is fishy.');
        }
-       
        $_REQUEST['ad-dashboard-assignment-messages'] = array();
        
        if ($response && $post_id && $role_id){
            $participant_record = get_post_meta($post_id, "_ad_participant_role_$role_id", true);
            // This will not evaluate to true unless the user is currently pending for this role on this post.
-           if($participant_record && $participant_record[$current_user->user_login] == 'pending'){
-               $participant_record[$current_user->user_login] = $response;
+           if($participant_record && $participant_record[$current_user->ID] == 'pending'){
+               $participant_record[$current_user->ID] = $response;
                if($response == 'accepted'){
                    $_REQUEST['ad-dashboard-assignment-messages'][] = _('Thank you.');
                    // Add as a co-author
                    if($assignment_desk->coauthors_plus_exists()){
                        $coauthors_plus->add_coauthors($post_id, array($current_user->user_login), true);
                    }
+                   $user_participant = get_post_meta($post_id, "_ad_participant_$current_user->ID", true);
+                   if(!$user_participant){
+                       $user_participant = array();
+                   }
+                   $user_participant[] = $role_id;
+                   update_post_meta($post_id, "_ad_participant_$current_user->ID", $user_participant);
                }
                else if($response == 'declined'){
                    $_REQUEST['ad-dashboard-assignment-messages'][] = _('Sorry!.');
