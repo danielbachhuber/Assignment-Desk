@@ -65,17 +65,6 @@ function ad_add_to_participants(user_id, user_nicename, role_id, role_name){
 
 }
 
-/**
-* When a user clicks the "Assign" button for a contributor, show them a form to select the role.
-*/
-function show_participant_assign_form(user_id){
-    var participant_assign_form = "<label>User: </label>" + user_id;
-    participant_assign_form += jQuery('div#ad-hidden-user-role-select').html();
-    participant_assign_form += '<a class="button" onclick="javascript: return add_participant_to_assignees(\'' + user_id + '\');">Assign</a>';
-    jQuery('#ad_participant_' + user_login).html(participant_assign_form);
-    return false;  
-}
-
 jQuery(document).ready(function() {
 	
 	var ad_current_assignment_status = '';
