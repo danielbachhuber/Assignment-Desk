@@ -49,8 +49,12 @@ if ( !class_exists( 'ad_settings' ) ){
                                                     $edit_flow->custom_status->status_taxonomy);
             $options['default_workflow_status'] = $default_workflow_status->term_id;
         }
+        // @todo - Why are terms not showing up during activation?
         $new_status = get_term_by('slug', 'new', $assignment_desk->custom_taxonomies->assignment_status_label);
         $options['default_new_assignment_status'] = $new_status->term_id;
+        $published_status = get_term_by('slug', 'completed', $assignment_desk->custom_taxonomies->assignment_status_label);
+        $options['default_published_assignment_status'] = $published_status->term_id;
+        
         $options['assignment_email_template_subject'] = _("[%blogname%] You've been assigned to %title%");
         $options['assignment_email_template'] =
 _(
