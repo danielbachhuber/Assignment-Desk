@@ -109,7 +109,7 @@ class ad_dashboard_widgets {
                 if($participant_record) {
                     foreach ($participant_record as $user_id => $status ){
                         if( $user_id == $current_user->ID && $status == 'pending' ){
-                            $pending_posts[] = array($post->post_id, $user_role);
+                           $pending_posts[] = array($post->post_id, $user_role);
                         }
                     }
                 }
