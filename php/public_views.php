@@ -16,11 +16,19 @@ class ad_public_views {
 		// Run save_pitch_form() at WordPress initialization
 		$_REQUEST['assignment_desk_messages']['pitch_form'] = $this->save_pitch_form();
 		$_REQUEST['assignment_desk_messages']['volunteer_form'] = $this->save_volunteer_form();
-		// @todo Save vote form
+		$_REQUEST['assignment_desk_messages']['voting'] = $this->save_voting_form();
 		
 		add_filter( 'the_content', array(&$this, 'show_all_posts') );
-		add_filter( 'the_content', array(&$this, 'append_volunteering_to_post') );		
 		
+		// Only add voting if its enabled
+		if ( $options['public_facing_voting_enabled'] ) {
+			add_filter( 'the_content', array(&$this, 'prepend_voting_to_post') );		
+		}
+		// Only add volunteering if its enabled
+		if ( $options['public_facing_volunteering_enabled'] ) {
+			add_filter( 'the_content', array(&$this, 'append_volunteering_to_post') );		
+		}
+		// Only show pitch forms if the functionality is enabled
 		if ( $options['pitch_form_enabled'] ) {
 			add_filter( 'the_content', array(&$this, 'show_pitch_form') );
 		}
@@ -28,13 +36,14 @@ class ad_public_views {
 	
 	function show_pitch_form( $the_content ) {
 		global $assignment_desk, $current_user;
+
+		$options = $assignment_desk->general_options;		
 		
 		if ($assignment_desk->edit_flow_exists()) {
 			global $edit_flow;
 		}
 		wp_get_current_user();
-		
-		$options = $assignment_desk->general_options;
+	
 		$user_roles = $assignment_desk->custom_taxonomies->get_user_roles();
 		
 		$category_args = array(
@@ -297,8 +306,107 @@ class ad_public_views {
 	}
 	
 	/**
+	 * Print a form giving the user the option to vote on an item
+	 */
+	function voting_form( $post_id = null ) {
+		global $assignment_desk, $current_user;
+		
+		if ( !$post_id ) {
+			global $post;
+			$post_id = $post->ID;
+		}
+		
+		if ( is_user_logged_in() ) {
+			
+			wp_get_current_user();
+			$all_votes = get_post_meta( $post_id, '_ad_votes_all' );
+			$all_votes = $all_votes[0];
+			$total_votes = (int)get_post_meta( $post_id, '_ad_votes_total', true );
+			
+			$user_id = $current_user->ID;
+			
+			// If the user hasn't voted before, show the vote button
+			if ( !in_array( $user_id, $all_votes ) ) {
+				$voting_form = '<form method="post" class="assignment_desk_voting_form">'
+							. '<input type="hidden" name="assignment_desk_voting_user_id" value="' . $user_id . '" />'
+							. '<input type="hidden" name="assignment_desk_voting_post_id" value="' . $post_id . '" />';
+				$voting_form .= '<input type="submit" class="assignment_desk_voting_submit button"'
+							. ' name="assignment_desk_voting_submit" value="Vote" />'
+							. '</form>';
+				return $voting_form;			
+			} else if ( $_REQUEST['assignment_desk_messages']['voting']['success'] ) {
+				$voting_message = '<div class="message success">'
+								. $_REQUEST['assignment_desk_messages']['voting']['success']['message']
+								. '</div>';
+				return $voting_message;
+			}
+			
+		}
+		
+	}
+	
+	function show_all_votes( $post_id = null ) {
+		global $assignment_desk, $current_user;
+		
+		if ( !$post_id ) {
+			global $post;
+			$post_id = $post->ID;
+		}
+		
+		$all_votes = get_post_meta( $post_id, '_ad_votes_all' );
+		$all_votes = $all_votes[0];
+		$total_votes = (int)get_post_meta( $post_id, '_ad_votes_total', true );
+		
+		if (!$total_votes) {
+			$votes_html = '<div class="ad_all_votes message alert">No votes yet, you could be the first!</div>';
+			return $votes_html;
+		} else {
+			$votes_html = '<div class="ad_all_votes"><span class="ad_total_votes">' . $total_votes . '</span>';
+			foreach ( $all_votes as $user_id ) {
+				$votes_html .= get_avatar( $user_id, 40 );
+			}
+			$votes_html .= '</div>';
+			return $votes_html;
+		}
+				
+		
+	}
+	
+	function save_voting_form( ) {
+		global $assignment_desk, $current_user;
+	    
+		if ( $_POST['assignment_desk_voting_submit'] && is_user_logged_in() ) {
+			$form_messages = array();
+	    
+		    // @todo Check for a nonce
+			wp_get_current_user();
+	    
+		    $post_id = (int)$_POST['assignment_desk_voting_post_id'];
+			$sanitized_user_id = (int)$_POST['assignment_desk_voting_user_id'];
+			// Ensure the user saving is the same user who submitted the form 
+			if ( $sanitized_user_id != $current_user->ID ) {
+				return false;
+			}
+			
+			$all_votes = get_post_meta( $post_id, '_ad_votes_all' );
+			$all_votes = $all_votes[0];
+			$total_votes = (int)get_post_meta( $post_id, '_ad_votes_total', true );
+			
+			if ( !in_array( $user_id, $all_votes ) ) {
+				$all_votes[] = $sanitized_user_id;
+				update_post_meta( $post_id, '_ad_votes_all', $all_votes );
+				update_post_meta( $post_id, '_ad_votes_total', count($all_votes) );
+				$form_messages['success']['message'] = 'Thanks for your vote!';
+			} else {
+				$form_messages['error']['already_voted'] = true;
+			}
+			return $form_messages;
+		}
+		
+	}
+	
+	/**
 	 * Print a form with available roles and ability to volunteer
-	 * @todo Display checked boxes for roles already volunteered for
 	 */
 	function volunteer_form( $post_id = null ) {
 	    global $assignment_desk, $current_user;
@@ -460,6 +568,11 @@ class ad_public_views {
 				$duedate = date_i18n( 'M d, Y', $duedate );
 				
 				$html .= '<div><h3><a href="' . get_permalink($post_id) . '">' . get_the_title($post_id) . '</a></h3>';
+				// Only show voting if it's enabled
+				if ( $options['public_facing_voting_enabled'] ) {
+					$html .= $this->show_all_votes();					
+					$html .= $this->voting_form();
+				}
 				if ( $description || $duedate || $location ) {
 				    $html .= '<p class="meta">';
 				}
@@ -475,9 +588,10 @@ class ad_public_views {
 				if ( $description || $duedate || $location ) {
 				    $html .= '</p>';
 				}
-				
-				$html .= $this->show_all_volunteers( $post_id );
-				$html .= $this->volunteer_form( $post_id );
+				if ( $options['public_facing_volunteering_enabled'] ) {
+					$html .= $this->show_all_volunteers( $post_id );
+					$html .= $this->volunteer_form( $post_id );
+				}
 				$html .= "</div>";
 			}
 		}
@@ -490,6 +604,25 @@ class ad_public_views {
         return $the_content;
 	}
 	
+	/**
+	 * Prepend voting functionality to the beginning of a post's content
+	 */ 
+	function prepend_voting_to_post( $the_content ) {
+		global $post, $assignment_desk;
+		$options = $assignment_desk->general_options;
+		
+		if ( is_single() ) {
+			$the_content = $this->voting_form() . $the_content;
+			$the_content = $this->show_all_votes() . $the_content;
+		}
+		
+		return $the_content;
+		
+	}
+	
+	/**
+	 * Appending volunteering functionality to the ending of a post's content
+	 */
 	function append_volunteering_to_post( $the_content ) {
 		global $post, $assignment_desk;
 		$options = $assignment_desk->general_options;
