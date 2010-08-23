@@ -69,7 +69,8 @@ if (!class_exists('assignment_desk')) {
 		var $options_group = 'assignment_desk_';
 		
 		var $top_level_page = 'assignment_desk';
-		var $pitch_form_settings_page = 'assignment_desk_pitch_form_settings';		
+		var $pitch_form_settings_page = 'assignment_desk_pitch_form_settings';
+		var $public_facing_settings_page = 'assignment_desk_public_facing_settings';
 		
 		public $pitch_form_key = 'assignment-desk-pitch-form';
 		public $all_posts_key = 'assignment-desk-all-posts';
@@ -248,6 +249,13 @@ if (!class_exists('assignment_desk')) {
 			add_submenu_page( $this->top_level_page, 'Pitch Form',
 							'Pitch Form', $this->define_admin_permissions,
 							$this->pitch_form_settings_page, array(&$this->settings, 'pitch_form_settings'));
+							
+			/**
+	         * Public-Facing settings page
+	         */
+			add_submenu_page( $this->top_level_page, 'Public-Facing',
+							'Public-Facing', $this->define_admin_permissions,
+							$this->public_facing_settings_page, array(&$this->settings, 'public_facing_settings'));
         
 	        /**
 	         * WordPress taxonomy view for editing Pitch Statuses

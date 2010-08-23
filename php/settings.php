@@ -31,9 +31,9 @@ if ( !class_exists( 'ad_settings' ) ){
 
 		add_settings_field( 'assignment_email_template', 'Template for notifications', array(&$this, 'assignment_email_template_option'), $assignment_desk->top_level_page, 'assignment_management' );
 		
-		add_settings_section( 'public_facing_views', 'Public-Facing Views', array(&$this, 'public_facing_views_setting_section'), $assignment_desk->top_level_page );
-		add_settings_field( 'public_facing_elements', 'Public-facing elements', array(&$this, 'public_facing_elements_option'), $assignment_desk->top_level_page, 'public_facing_views' );
-		add_settings_field( 'public_facing_functionality', 'Public-facing functionality', array(&$this, 'public_facing_functionality_option'), $assignment_desk->top_level_page, 'public_facing_views' );		
+		add_settings_section( 'public_facing_views', 'Public-Facing Views', array(&$this, 'public_facing_views_setting_section'), $assignment_desk->public_facing_settings_page );
+		add_settings_field( 'public_facing_elements', 'Public-facing elements', array(&$this, 'public_facing_elements_option'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );
+		add_settings_field( 'public_facing_functionality', 'Public-facing functionality', array(&$this, 'public_facing_functionality_option'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );		
 		
 		add_settings_section( 'miscellaneous', 'Miscellaneous', array(&$this, 'miscellaneous_setting_section'), $assignment_desk->top_level_page );
 		add_settings_field( 'google_maps_api_key', 'Google Maps API key', array(&$this, 'google_maps_api_key_option'), $assignment_desk->top_level_page, 'miscellaneous' );	
@@ -397,8 +397,7 @@ Blog Editor");
 		echo '<ul>';
 		// Volunteer
 		echo '<li><input id="public_facing_volunteering_enabled" name="assignment_desk_general[public_facing_volunteering_enabled]" type="checkbox"';
-		if ($options['public_facing_volunt
-		eering_enabled']) {
+		if ($options['public_facing_volunteering_enabled']) {
 			echo ' checked="checked"';
 		}
 		echo ' />&nbsp;<label for="public_facing_volunteering_enabled">Volunteering</label></li>';
@@ -501,6 +500,41 @@ Blog Editor");
 				
 				<?php settings_fields( $assignment_desk->options_group ); ?>
 				<?php do_settings_sections( $assignment_desk->pitch_form_settings_page ); ?>
+				
+				<p class="submit"><input name="submit" type="submit" class="button-primary" value="<?php esc_attr_e('Save Changes'); ?>" /></p>
+				
+			</form>
+	</div>
+
+<?php
+      
+      
+    }
+
+	function public_facing_settings() {
+		global $wpdb, $assignment_desk;
+
+		$msg = null;
+		if ( array_key_exists( 'updated', $_GET ) && $_GET['updated']=='true' ) { 
+			$msg = __('Settings Saved', 'assignment-desk');
+		}
+    
+?>                                   
+	<div class="wrap">
+		<div class="icon32" id="icon-options-general"><br/></div>
+		
+		<?php if($msg) : ?>
+			<div class="updated fade" id="message">
+				<p><strong><?php echo $msg ?></strong></p>
+			</div>
+		<?php endif; ?>
+		
+		<h2><?php _e('Public-Facing Settings', 'assignment-desk') ?></h2>
+		
+			<form action="options.php" method="post">
+				
+				<?php settings_fields( $assignment_desk->options_group ); ?>
+				<?php do_settings_sections( $assignment_desk->public_facing_settings_page ); ?>
 				
 				<p class="submit"><input name="submit" type="submit" class="button-primary" value="<?php esc_attr_e('Save Changes'); ?>" /></p>
 				
