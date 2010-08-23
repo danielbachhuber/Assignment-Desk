@@ -85,6 +85,10 @@ function get_inprogress_posts(){
     $inprogress_posts = array();
     $completed_status = get_term($assignment_desk->general_options['default_published_assignment_status'], 
                                    $assignment_desk->custom_taxonomies->assignment_status_label);
+   $exclude_status = -1;
+   if(!is_wp_error($completed_status)){
+       $exclude_status = $completed_status->term_id;
+   }
     return $wpdb->get_results("SELECT * FROM $wpdb->posts
                                 LEFT JOIN $wpdb->term_relationships ON($wpdb->posts.ID = $wpdb->term_relationships.object_id)
                                 LEFT JOIN $wpdb->term_taxonomy ON($wpdb->term_relationships.term_taxonomy_id = $wpdb->term_taxonomy.term_taxonomy_id)
@@ -93,7 +97,7 @@ function get_inprogress_posts(){
                                 AND $wpdb->posts.post_status != 'publish'
                                 AND $wpdb->posts.post_status != 'trash'
                                 AND $wpdb->term_taxonomy.taxonomy = '{$assignment_desk->custom_taxonomies->assignment_status_label}'
-                                AND $wpdb->terms.term_id != {$completed_status->term_id}
+                                AND $wpdb->terms.term_id != {$exclude_status}
                                 ORDER BY $wpdb->posts.post_date DESC");
 }
 }
@@ -108,6 +112,10 @@ function get_public_feedback_posts(){
     $inprogress_posts = array();
     $completed_status = get_term($assignment_desk->general_options['default_published_assignment_status'], 
                                    $assignment_desk->custom_taxonomies->assignment_status_label);
+    $exclude_status = -1;
+    if(!is_wp_error($completed_status)){
+        $exclude_status = $completed_status->term_id;
+    }
     $results = $wpdb->get_results("SELECT * FROM $wpdb->posts
                                 LEFT JOIN $wpdb->postmeta ON($wpdb->posts.ID = $wpdb->postmeta.post_id)
                                 LEFT JOIN $wpdb->term_relationships ON($wpdb->posts.ID = $wpdb->term_relationships.object_id)
@@ -117,7 +125,7 @@ function get_public_feedback_posts(){
                                 AND $wpdb->posts.post_status != 'publish'
                                 AND $wpdb->posts.post_status != 'trash'
                                 AND $wpdb->term_taxonomy.taxonomy = '{$assignment_desk->custom_taxonomies->assignment_status_label}'
-                                AND $wpdb->terms.term_id != {$completed_status->term_id}
+                                AND $wpdb->terms.term_id != {$exclude_status}
                                 AND $wpdb->postmeta.meta_key = '_ad_private'
                                 AND $wpdb->postmeta.meta_value = 0
                                 ORDER BY $wpdb->posts.post_date DESC");
