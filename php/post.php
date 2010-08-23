@@ -272,6 +272,7 @@ class ad_post {
 			// Use auto-suggest if Co-Authors Plus exists
 			// Otherwise, use a dropdown with all users
 			if ( $assignment_desk->coauthors_plus_exists() ) {
+			    echo '<input type="hidden" id="ad-assignee-search-user_id" name="ad-assignee-search-user_id">';
 				echo '<input type="text" id="ad-assignee-search" name="ad-assignee-search" size="20" maxlength="50"><br />';
 			} else {
 				echo "<select id='ad-assignee-dropdown' name='ad-assignee-dropdown'>";
@@ -299,8 +300,8 @@ class ad_post {
 				<h5><?php echo $user_role->name; ?></h5>
 				<ul id="ad-participants-<?php echo "{$user_role->term_id}"; ?>">					
 					<?php foreach ($all_participants[$user_role->term_id] as $participant_id => $participant_status) : ?>
-						<?php $participant = get_userdatabylogin($participant_id); ?>						
-						<li id="ad-participant-<?php echo "{$user_role->term_id}-{$participant_id}"; ?>"><input type="hidden" id="ad-participant-<?php echo $participant_id; ?>" name="ad-participant-role-<?php echo $user_role->term_id; ?>[]" value="<?php echo $participant_id.'|'.$participant_status; ?>" /><?php echo $participant->user_nicename; ?> | <?php _e($participant_status); ?> 
+						<?php $participant = get_userdata($participant_id); ?>						
+						<li id="ad-participant-<?php echo "{$user_role->term_id}-{$participant_id}"; ?>"><input type="hidden" id="ad-participant-<?php echo $participant_id; ?>" name="ad-participant-role-<?php echo $user_role->term_id; ?>[]" value="<?php echo "$participant_id | $participant_status"; ?>" /><?php echo "$participant->user_nicename |" . _($participant_status); ?> 
 						    
 						    <?php if($participant_status == 'volunteered'): ?>
 						        <a href="#" id="ad-volunteer-<?php echo "$user_role->term_id-$user_role->name-$participant_id"; ?>">assign</a>
@@ -416,20 +417,18 @@ class ad_post {
 				$raw_role_participants = $_POST["ad-participant-role-$user_role->term_id"];
 				if ( count($raw_role_participants) ) {
 					foreach ($raw_role_participants as $raw_participant) {
-						$participant = explode('|', $raw_participant);
-						$user_login = $participant[0];
-						$status_for_this_role = $participant[1];
-						$user = get_userdatabylogin($user_login); 
+						$participant = explode('|', $raw_participant);;
+						$user = get_userdata($participant[0]); 
 						
 						// Check if the user_login is valid.
 						if($user){
 						    // array(user => "status", user => "status")
-						    $all_role_participants[$user_login] = $status_for_this_role;
+						    $all_role_participants[$user->ID] = $participant[1];
 						    // array('user' => array(role_id, role_id, ...))
-						    $all_participants[$user_login][] = $user_role->term_id;
+						    $all_participants[$user->ID][] = $user_role->term_id;
 						    
 						    // Existing user_roles for this user on this post
-						    $participant_record = get_post_meta($post_id, "_ad_participant_$user_login", true);
+						    $participant_record = get_post_meta($post_id, "_ad_participant_$user_id", true);
 						    if(!$participant_record){ $participant_record = array(); }
 						    // check if the user is already assigned to that role
 						    // If the term_id for the user_role is NOT in the list of term_ids for this user.
@@ -518,7 +517,7 @@ class ad_post {
 		
 		if(current_user_can($assignment_desk->define_editor_permissions)) {
             if($_GET['q']){
-                $user = get_userdatabylogin($_GET['q']);
+                $user = get_userdata((int)$_GET['q']);
             
                 if($user){
                     echo $user->ID;

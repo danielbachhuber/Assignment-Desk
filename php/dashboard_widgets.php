@@ -93,7 +93,7 @@ class ad_dashboard_widgets {
         }
         // Find all of the posts this user participates in.
         $participant_posts = $wpdb->get_results("SELECT post_id FROM $wpdb->postmeta 
-                                                  WHERE meta_key = '_ad_participant_{$current_user->user_login}'
+                                                  WHERE meta_key = '_ad_participant_{$current_user->ID}'
                                                   ORDER BY post_id");
         
         if ( ! $participant_posts ){
@@ -108,7 +108,7 @@ class ad_dashboard_widgets {
                 $participant_record = get_post_meta($post->post_id, "_ad_participant_role_$user_role->term_id", true);
                 if($participant_record) {
                     foreach ($participant_record as $user_login => $status ){
-                        if( $user_login == $current_user->user_login && $status == 'pending' ){
+                        if( $user_login == $current_user->ID && $status == 'pending' ){
                             $pending_posts[] = array($post->post_id, $user_role);
                         }
                     }
@@ -159,6 +159,12 @@ class ad_dashboard_widgets {
                    if($assignment_desk->coauthors_plus_exists()){
                        $coauthors_plus->add_coauthors($post_id, array($current_user->user_login), true);
                    }
+                   $user_participant = _post_meta($post_id, "_ad_participant_$user_ID", true);
+                   if(!$user_participant){
+                       $user_participant = array();
+                   }
+                   $user_participant[] = $role_id;
+                   $update_post_meta($post_id, "_ad_participant_$user_ID", $user_participant);
                }
                else if($response == 'declined'){
                    $_REQUEST['ad-dashboard-assignment-messages'][] = _('Sorry!.');
