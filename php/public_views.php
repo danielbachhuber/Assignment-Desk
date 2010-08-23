@@ -569,21 +569,22 @@ class ad_public_views {
 			if ( $description || $duedate || $location ) {
 			    $html .= '<p class="meta">';
 			}
-			if ( $description ) {
+			if ( $options['public_facing_description_enabled'] && $description ) {
 			    $html .= '<label>Description:</label> ' . $description . '<br />';
 			}
-			if ( $duedate ) {
+			if ( $options['public_facing_duedate_enabled'] && $duedate ) {
 			    $html .= '<label>Due date:</label> ' . $duedate . '<br />';	
 			}
-			if ( $location ) {
+			if ( $options['public_facing_location_enabled'] && $location ) {
 			    $html .= '<label>Location:</label> ' . $location . '<br />';	
 			}
 			if ( $description || $duedate || $location ) {
 			    $html .= '</p>';
 			}
-			
-			$html .= $this->show_all_volunteers( $post_id );
-			$html .= $this->volunteer_form( $post_id );
+			if ( $options['public_facing_volunteering_enabled'] ) {
+			    $html .= $this->show_all_volunteers( $post_id );
+			    $html .= $this->volunteer_form( $post_id );
+		    }
 			$html .= "</div>";
 		}
 		
