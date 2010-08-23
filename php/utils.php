@@ -3,7 +3,7 @@
 /**
  * Fetch all of the participants for a post.
  * Optionally filter for user who's role record of a certain status.
- * valid statuses are 'pending', 'volunteer', 'accepted', 'rejected'
+ * Valid statuses are 'pending', 'volunteer', 'accepted', 'rejected'
  */
 if (!function_exists('get_participants')){
 function get_participants($post_id, $status_filter = array()){
@@ -31,6 +31,8 @@ function get_participants($post_id, $status_filter = array()){
 
 /**
  * Count all of the participants for a post
+ * Optionally filter for user who's role record of a certain status.
+ * Valid statuses are 'pending', 'volunteer', 'accepted', 'rejected'
  */
 if (!function_exists('count_participants')){
 function count_participants($post_id, $status_filter = array()){
@@ -74,7 +76,8 @@ function get_unassigned_posts(){
 }
 
 /**
- * Get a list of posts that do not have assignees.
+ * Get a list of posts that are in progress.
+ * Returns unpublished posts that do not have an assignment_status of completed 
  */
 if (!function_exists('get_inprogress_posts')){
 function get_inprogress_posts(){
@@ -82,15 +85,54 @@ function get_inprogress_posts(){
     $inprogress_posts = array();
     $completed_status = get_term($assignment_desk->general_options['default_published_assignment_status'], 
                                    $assignment_desk->custom_taxonomies->assignment_status_label);
+   $exclude_status = -1;
+   if(!is_wp_error($completed_status)){
+       $exclude_status = $completed_status->term_id;
+   }
     return $wpdb->get_results("SELECT * FROM $wpdb->posts
                                 LEFT JOIN $wpdb->term_relationships ON($wpdb->posts.ID = $wpdb->term_relationships.object_id)
                                 LEFT JOIN $wpdb->term_taxonomy ON($wpdb->term_relationships.term_taxonomy_id = $wpdb->term_taxonomy.term_taxonomy_id)
                                 LEFT JOIN $wpdb->terms ON($wpdb->term_taxonomy.term_id = $wpdb->terms.term_id)
                                 WHERE $wpdb->posts.post_type = 'post' 
-                                AND $wpdb->posts.post_status != 'publish' 
+                                AND $wpdb->posts.post_status != 'publish'
+                                AND $wpdb->posts.post_status != 'trash'
                                 AND $wpdb->term_taxonomy.taxonomy = '{$assignment_desk->custom_taxonomies->assignment_status_label}'
-                                AND $wpdb->terms.term_id != {$completed_status->term_id}
+                                AND $wpdb->terms.term_id != {$exclude_status}
                                 ORDER BY $wpdb->posts.post_date DESC");
+}
+}
+
+/**
+ * Get a list of posts that should be displayed to the public for feedback.
+ * Returns unpublished posts that do not have an assignment_status of completed and are not private.
+ */
+if (!function_exists('get_public_feedback_posts')){
+function get_public_feedback_posts(){
+    global $assignment_desk, $wpdb;
+    $inprogress_posts = array();
+    $completed_status = get_term($assignment_desk->general_options['default_published_assignment_status'], 
+                                   $assignment_desk->custom_taxonomies->assignment_status_label);
+    $exclude_status = -1;
+    if(!is_wp_error($completed_status)){
+        $exclude_status = $completed_status->term_id;
+    }
+    $results = $wpdb->get_results("SELECT * FROM $wpdb->posts
+                                LEFT JOIN $wpdb->postmeta ON($wpdb->posts.ID = $wpdb->postmeta.post_id)
+                                LEFT JOIN $wpdb->term_relationships ON($wpdb->posts.ID = $wpdb->term_relationships.object_id)
+                                LEFT JOIN $wpdb->term_taxonomy ON($wpdb->term_relationships.term_taxonomy_id = $wpdb->term_taxonomy.term_taxonomy_id)
+                                LEFT JOIN $wpdb->terms ON($wpdb->term_taxonomy.term_id = $wpdb->terms.term_id)
+                                WHERE $wpdb->posts.post_type = 'post' 
+                                AND $wpdb->posts.post_status != 'publish'
+                                AND $wpdb->posts.post_status != 'trash'
+                                AND $wpdb->term_taxonomy.taxonomy = '{$assignment_desk->custom_taxonomies->assignment_status_label}'
+                                AND $wpdb->terms.term_id != {$exclude_status}
+                                AND $wpdb->postmeta.meta_key = '_ad_private'
+                                AND $wpdb->postmeta.meta_value = 0
+                                ORDER BY $wpdb->posts.post_date DESC");
+    if(!$results){
+        $results = array();
+    }
+    return $results;
 }
 }
 
