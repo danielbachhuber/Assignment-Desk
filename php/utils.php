@@ -80,12 +80,17 @@ if (!function_exists('get_inprogress_posts')){
 function get_inprogress_posts(){
     global $assignment_desk, $wpdb;
     $inprogress_posts = array();
-    $inprogress_status = get_term($assignment_desk->general_options['inprogress_status'], 
+    $completed_status = get_term($assignment_desk->general_options['default_published_assignment_status'], 
                                    $assignment_desk->custom_taxonomies->assignment_status_label);
-    $args = array('meta_key' => '_ad_assignment_status', 
-                  'meta_value' => $inprogress_status->term_id);
-    $in_progress_posts = get_posts($args);
-    return $inprogress_posts;
+    return $wpdb->get_results("SELECT * FROM $wpdb->posts
+                                LEFT JOIN $wpdb->term_relationships ON($wpdb->posts.ID = $wpdb->term_relationships.object_id)
+                                LEFT JOIN $wpdb->term_taxonomy ON($wpdb->term_relationships.term_taxonomy_id = $wpdb->term_taxonomy.term_taxonomy_id)
+                                LEFT JOIN $wpdb->terms ON($wpdb->term_taxonomy.term_id = $wpdb->terms.term_id)
+                                WHERE $wpdb->posts.post_type = 'post' 
+                                AND $wpdb->posts.post_status != 'publish' 
+                                AND $wpdb->term_taxonomy.taxonomy = '{$assignment_desk->custom_taxonomies->assignment_status_label}'
+                                AND $wpdb->terms.term_id != {$completed_status->term_id}
+                                ORDER BY $wpdb->posts.post_date DESC");
 }
 }
 
