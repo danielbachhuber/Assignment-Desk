@@ -1,5 +1,7 @@
 <?php
 if(!class_exists('ad_public_controller')){
+
+require_once(ASSIGNMENT_DESK_DIR_PATH . '/php/utils.php');
 	
 class ad_public_views {
 	
@@ -314,8 +316,10 @@ class ad_public_views {
 		    $user_roles = $assignment_desk->custom_taxonomies->get_user_roles();
 	
 			// See whether the user has already volunteered for the story
-			$existing_roles = get_post_meta( $post_id, "_ad_participant_$current_user->ID" );
-			$existing_roles = $existing_roles[0];
+			$existing_roles = get_post_meta( $post_id, "_ad_participant_$current_user->ID", true );
+			if(!$existing_roles){
+		        $existing_roles = array();  
+			} 
 	
 		    $volunteer_form = '';
 		    $volunteer_form .= '<form method="post" class="assignment_desk_volunteer_form">';
@@ -325,7 +329,7 @@ class ad_public_views {
 								. '_volunteer_' . $user_role->term_id
 								. '" name="assignment_desk_volunteer_roles[]"'
 								. ' value="' . $user_role->term_id . '"';
-				if ( in_array($user_role->term_id, $existing_roles) ) {
+				if (in_array($user_role->term_id, $existing_roles) ) {
 					$volunteer_form .= ' checked="checked"';
 				}
 				$volunteer_form .= ' /><label for="assignment_desk_post_' . $post_id
@@ -439,47 +443,36 @@ class ad_public_views {
 		$parent_post = $post;		
 		
 		$html = '';
+		$all_pitches = get_public_feedback_posts();
 		
-		// @todo This should be customizable
-		$args = array(	'post_status' => 'pitch,assigned' );
+		foreach ($all_pitches as $pitch) {
+			$post_id = $pitch->ID;
 
-		$all_pitches = new WP_Query($args);
-		
-		if ($all_pitches->have_posts()) {
-			while ($all_pitches->have_posts()) {
-				$all_pitches->the_post();
-				
-				$post_id = get_the_ID();
-				if ( get_post_meta($post_id, '_ad_private', true) == 1 ){
-				    continue;
-				}
-				
-				$description = get_post_meta( $post_id, '_ef_description', true );
-				$location = get_post_meta( $post_id, '_ef_location', true );
-				$duedate = get_post_meta( $post_id, '_ef_duedate', true );
-				$duedate = date_i18n( 'M d, Y', $duedate );
-				
-				$html .= '<div><h3><a href="' . get_permalink($post_id) . '">' . get_the_title($post_id) . '</a></h3>';
-				if ( $description || $duedate || $location ) {
-				    $html .= '<p class="meta">';
-				}
-				if ( $description ) {
-				    $html .= '<label>Description:</label> ' . $description . '<br />';
-				}
-				if ( $duedate ) {
-				    $html .= '<label>Due date:</label> ' . $duedate . '<br />';	
-				}
-				if ( $location ) {
-				    $html .= '<label>Location:</label> ' . $location . '<br />';	
-				}
-				if ( $description || $duedate || $location ) {
-				    $html .= '</p>';
-				}
-				
-				$html .= $this->show_all_volunteers( $post_id );
-				$html .= $this->volunteer_form( $post_id );
-				$html .= "</div>";
+			$description = get_post_meta( $post_id, '_ef_description', true );
+			$location = get_post_meta( $post_id, '_ef_location', true );
+			$duedate = get_post_meta( $post_id, '_ef_duedate', true );
+			$duedate = date_i18n( 'M d, Y', $duedate );
+			
+			$html .= '<div><h3><a href="' . get_permalink($post_id) . '">' . get_the_title($post_id) . '</a></h3>';
+			if ( $description || $duedate || $location ) {
+			    $html .= '<p class="meta">';
 			}
+			if ( $description ) {
+			    $html .= '<label>Description:</label> ' . $description . '<br />';
+			}
+			if ( $duedate ) {
+			    $html .= '<label>Due date:</label> ' . $duedate . '<br />';	
+			}
+			if ( $location ) {
+			    $html .= '<label>Location:</label> ' . $location . '<br />';	
+			}
+			if ( $description || $duedate || $location ) {
+			    $html .= '</p>';
+			}
+			
+			$html .= $this->show_all_volunteers( $post_id );
+			$html .= $this->volunteer_form( $post_id );
+			$html .= "</div>";
 		}
 		
 		$the_content = str_replace($template_tag, $html, $the_content);
