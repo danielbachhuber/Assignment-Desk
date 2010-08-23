@@ -168,9 +168,10 @@ if (!class_exists('assignment_desk')) {
             }
             // This is the first time we've ever activated the plugin.
             else {
-                $this->settings->setup_defaults();
                 $this->custom_taxonomies->activate();
                 $this->custom_taxonomies->activate_once();
+                
+                $this->settings->setup_defaults();
                 
                 $this->general_options = get_option($this->get_plugin_option_fullname('general'));
                 $this->general_options['ad_installed_once'] = 'on';
