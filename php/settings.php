@@ -40,7 +40,7 @@ if ( !class_exists( 'ad_settings' ) ){
 	}
 	
 	function setup_defaults() {
-        global $assignment_desk;
+        global $assignment_desk, $wpdb;
         $options = $assignment_desk->general_options;
         
         if ( $assignment_desk->edit_flow_exists() ) {
@@ -49,10 +49,22 @@ if ( !class_exists( 'ad_settings' ) ){
                                                     $edit_flow->custom_status->status_taxonomy);
             $options['default_workflow_status'] = $default_workflow_status->term_id;
         }
-        // @todo - Why are terms not showing up during activation?
-        $new_status = get_term_by('slug', 'new', $assignment_desk->custom_taxonomies->assignment_status_label);
+        // @todo - Why does get_term_by not work during activation?
+        // $new_status = get_term_by('slug', 'new', $assignment_desk->custom_taxonomies->assignment_status_label);
+        $new_status = $wpdb->get_results("SELECT t.*, tt.* 
+                                          FROM wp_terms AS t INNER JOIN wp_term_taxonomy AS tt ON t.term_id = tt.term_id 
+                                          WHERE tt.taxonomy = '{$assignment_desk->custom_taxonomies->assignment_status_label}' 
+                                          AND t.slug = 'new' LIMIT 1");
+        $new_status = $new_status[0];
         $options['default_new_assignment_status'] = $new_status->term_id;
-        $published_status = get_term_by('slug', 'completed', $assignment_desk->custom_taxonomies->assignment_status_label);
+        
+        // @todo - Why does get_term_by not work during activation?
+        // $published_status = get_term_by('slug', 'completed', $assignment_desk->custom_taxonomies->assignment_status_label);
+        $published_status = $wpdb->get_results("SELECT t.*, tt.* 
+                                          FROM wp_terms AS t INNER JOIN wp_term_taxonomy AS tt ON t.term_id = tt.term_id 
+                                          WHERE tt.taxonomy = '{$assignment_desk->custom_taxonomies->assignment_status_label}' 
+                                          AND t.slug = 'completed' LIMIT 1");
+        $published_status = $published_status[0];
         $options['default_published_assignment_status'] = $published_status->term_id;
         
         $options['assignment_email_template_subject'] = _("[%blogname%] You've been assigned to %title%");
