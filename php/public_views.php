@@ -391,7 +391,6 @@ class ad_public_views {
 			}
 			
 			$all_votes = get_post_meta( $post_id, '_ad_votes_all' );
-			$all_votes = $all_votes[0];
 			$total_votes = (int)get_post_meta( $post_id, '_ad_votes_total', true );
 			
 			if ( !in_array( $user_id, $all_votes ) ) {
@@ -400,7 +399,7 @@ class ad_public_views {
 				update_post_meta( $post_id, '_ad_votes_total', count($all_votes) );
 				$form_messages['success']['message'] = 'Thanks for your vote!';
 			} else {
-				$form_messages['error']['already_voted'] = true;
+				$form_messages['error']['message'] = 'Whoops, you already voted.';
 			}
 			return $form_messages;
 		}
