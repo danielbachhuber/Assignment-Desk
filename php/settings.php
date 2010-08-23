@@ -25,7 +25,7 @@ if ( !class_exists( 'ad_settings' ) ){
 		
 		add_settings_section( 'assignment_management', 'Assignment Management', array(&$this, 'assignment_management_setting_section'), $assignment_desk->top_level_page );
 		
-		add_settings_field( 'default_published_assignment_status', 'Default status for published posts', array(&$this, 'default_published_assignment_status_option'), $assignment_desk->top_level_page, 'assignment_management' );
+		add_settings_field( 'default_published_assignment_status', 'Default assignment status for published posts', array(&$this, 'default_published_assignment_status_option'), $assignment_desk->top_level_page, 'assignment_management' );
 		add_settings_field( 'assignment_email_notifications_enabled', 'Enable assignment email notifications', array(&$this, 'assignment_email_notifications_enabled_option'), $assignment_desk->top_level_page, 'assignment_management' );
 		add_settings_field( 'assignment_email_template_subject', 'Subject template for notifications', array(&$this, 'assignment_email_template_subject_option'), $assignment_desk->top_level_page, 'assignment_management' );
 
