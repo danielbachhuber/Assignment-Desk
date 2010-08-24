@@ -27,11 +27,11 @@ class ad_public_views {
 		add_filter( 'the_content', array(&$this, 'show_all_posts') );
 		
 		// Only add voting if its enabled
-		if ( $options['public_facing_voting_enabled'] ) {
+		if ( $public_facing_options['public_facing_voting_enabled'] ) {
 			add_filter( 'the_content', array(&$this, 'prepend_voting_to_post') );		
 		}
 		// Only add volunteering if its enabled
-		if ( $options['public_facing_volunteering_enabled'] ) {
+		if ( $public_facing_options['public_facing_volunteering_enabled'] ) {
 			add_filter( 'the_content', array(&$this, 'append_volunteering_to_post') );		
 		}
 		// Only show pitch forms if the functionality is enabled
@@ -223,8 +223,11 @@ class ad_public_views {
 			
 			// Author information and submit
 			$pitch_form .= '<fieldset class="submit">'
-						. '<input type="hidden" id="assignment_desk_author" name="assignment_desk_author" value="' . $current_user->ID . '" />'
-						. '<input type="submit" value="Submit" id="assignment_desk_pitch_submit" name="assignment_desk_pitch_submit" /></fieldset>';					
+						. '<input type="hidden" id="assignment_desk_author" name="assignment_desk_author" value="' . $current_user->ID . '" />';
+						
+			$pitch_form .= '<input type="hidden" name="assignment_desk_pitch_nonce" value="' 
+						. wp_create_nonce('assignment_desk_pitch') . '" />';
+			$pitch_form .= '<input type="submit" value="Submit" id="assignment_desk_pitch_submit" name="assignment_desk_pitch_submit" /></fieldset>';					
 					
 			$pitch_form .= '</form>';
 			
@@ -248,14 +251,17 @@ class ad_public_views {
 			global $edit_flow;
 		}
 		
-		
-		// @todo Check for a nonce
 		// @todo Sanitize all of the fields
 		// @todo Validate all of the fields
 		
 		if ($_POST['assignment_desk_pitch_submit']) {
 			
-			$form_messages = array();
+			$form_messages = array();			
+			
+			// Ensure that it was the user who submitted the form, not a bot
+			if ( !wp_verify_nonce($_POST['assignment_desk_pitch_nonce'], 'assignment_desk_pitch') ) {
+				return $form_messages['error']['nonce'];
+			}
 			
 			$sanitized_title = $_POST['assignment_desk_title'];
 			if ( !$sanitized_title ) {
