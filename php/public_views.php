@@ -13,7 +13,10 @@ class ad_public_views {
 		global $assignment_desk;
 		$options = $assignment_desk->public_facing_options;
 		
-		wp_enqueue_script('ad-public-views', WP_PLUGIN_URL . '/assignment-desk/js/public_views.js', array('jquery'));
+		wp_enqueue_script('jquery-datepicker-js', ASSIGNMENT_DESK_URL .'js/jquery.datepicker.js', array('jquery-ui-core'));
+		wp_enqueue_script('ad-public-views', ASSIGNMENT_DESK_URL . 'js/public_views.js', array('jquery', 'jquery-datepicker-js'));
+		
+		wp_enqueue_style('ad-publix', ASSIGNMENT_DESK_URL . 'css/public.css');
 		
 		// Run save_pitch_form() at WordPress initialization
 		$_REQUEST['assignment_desk_messages']['pitch_form'] = $this->save_pitch_form();
@@ -107,6 +110,26 @@ class ad_public_views {
 							. $options['pitch_form_description_description']
 							. '</p>';
 				}
+				$pitch_form .= '</fieldset>';
+			}
+			
+			// Due Date
+			if ( $options['pitch_form_duedate_enabled'] ) {
+				if ( $options['pitch_form_dudedate_label'] ) {
+					$duedate_label = $options['pitch_form_dudedate_label'];
+				} else {
+					$duedate_label = 'Due Date';
+				}	
+				$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_duedate">' . $duedate_label . '</label>';
+				$pitch_form .= '<input type="text" size="12" name="assignment_desk_duedate" id="assignment_desk_duedate">';
+				if ( $options['pitch_form_dudedate_description'] ) {
+				    $pitch_form .= '<p class="description">' . $options['pitch_form_dudedate_description'] . '</p>';
+				}
+				if ( $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['duedate'] ) {
+    				$pitch_form .= '<p class="error">'
+    							. $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['duedate']
+    							. '</p>';
+    			}
 				$pitch_form .= '</fieldset>';
 			}
 			
@@ -238,11 +261,32 @@ class ad_public_views {
 				$form_messages['errors']['title'] = 'Please add a title to this pitch.';
 			}
 			$sanitized_author = (int)$_POST['assignment_desk_author'];
-			$sanitized_description = $_POST['assignment_desk_description'];
+			$sanitized_description = wp_kses($_POST['assignment_desk_description'], $allowedposttags);
 			$sanitized_tags = $_POST['assignment_desk_tags'];
 			$sanitized_categories = (int)$_POST['assignment_desk_categories'];
-			$sanitized_location = $_POST['assignment_desk_location'];
+			$sanitized_location = wp_kses($_POST['assignment_desk_location'], $allowedposttags);
 			$sanitized_volunteer = $_POST['assignment_desk_volunteer'];
+			
+			// Sanitize the duedate
+			$sanitized_duedate = '';
+			$duedate_split = split('/', $_POST['assignment_desk_duedate']);
+			if(!count($duedate_split) == 3){
+			    $form_messages['errors']['duedate'] = 'Please enter a valid date of the form MM/DD/YYYY';
+			}
+			else {
+			    $duedate_month = (int)$duedate_split[0];
+			    $duedate_day = (int)$duedate_split[1];
+			    $duedate_year = (int)$duedate_split[2];
+			    
+			    // Zero pad for strtime
+			    if($duedate_month < 10 ){
+			        $duedate_month = "0$duedate_month";
+			    }
+			    $sanitized_duedate = strtotime($duedate_day . '-' . $duedate_month . '-' . $duedate_year);
+			    if(!$sanitized_duedate){
+			        $form_messages['errors']['duedate'] = 'Please enter a valid date of the form MM/DD/YYYY';
+			    }
+			}
 			
 			if ( count($form_messages['errors']) ) {
 				return $form_messages;
@@ -268,6 +312,11 @@ class ad_public_views {
 				// Save description to Edit Flow metadata field
 				update_post_meta($post_id, '_ef_description', $sanitized_description);
 				
+				if($sanitized_duedate){
+				    // Save duedate to Edit Flow metadata field
+    				update_post_meta($post_id, '_ef_duedate', $sanitized_duedate);
+				}
+				
 				// Save location to Edit Flow metadata field
 				update_post_meta($post_id, '_ef_location', $sanitized_location);
 				
@@ -284,18 +333,19 @@ class ad_public_views {
 					update_post_meta($post_id, "_ad_participant_type_$user_type->term_id", 'on');
 				}
 				
-				// Save the roles user volunteered for both with each role
-				// and under the user's row
-				$all_roles = array();				
-				foreach ($sanitized_volunteer as $volunteered_role) {
-					$volunteered_role = (int)$volunteered_role;
-					$all_roles[] = $volunteered_role;
-					$role_data = array();
-					$role_data[$sanitized_author] = 'volunteered';
-					update_post_meta($post_id, "_ad_participant_role_$volunteered_role", $role_data);
+				if($sanitized_volunteer){				    
+    				// Save the roles user volunteered for both with each role
+    				// and under the user's row
+    				$all_roles = array();				
+    				foreach ($sanitized_volunteer as $volunteered_role) {
+    					$volunteered_role = (int)$volunteered_role;
+    					$all_roles[] = $volunteered_role;
+    					$role_data = array();
+    					$role_data[$sanitized_author] = 'volunteered';
+    					update_post_meta($post_id, "_ad_participant_role_$volunteered_role", $role_data);
+    				}
+    				update_post_meta($post_id, "_ad_participant_$sanitized_author", $sanitized_volunteer);
 				}
-				update_post_meta($post_id, "_ad_participant_$sanitized_author", $sanitized_volunteer);
-				
 			}
 			
 			$form_messages['success']['post_id'] = $post_id;
