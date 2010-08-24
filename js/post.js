@@ -69,7 +69,7 @@ jQuery(document).ready(function() {
 	
 	var ad_current_assignment_status = '';
 	var ad_current_participant_types = [];
-	var ad_current_pitched_by_participant = ''
+	var ad_current_pitched_by_participant = '';
 
 	/**
 	 * Initialize Co-Author Plus auto-suggest if it exists
