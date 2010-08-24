@@ -38,7 +38,13 @@ For full functionality, please also install and configure Edit Flow and Co-Autho
 
 = 0.4 =
 * Pitch form offers customizable labels and descriptions for every field
+* Pitch form supports Edit Flow due date field with jQuery datepicker
+* Voting functionality built; admin has ability to define text for vote button; avatars shown for those who have voted
+* Columns in users view calculate total words, average words, pitches, and volunteer count
+* Nonces on all the forms
+* Default settings implemented
 * Moved pitch form settings to its own view
+* Moved public-facing functionality settings to its own view
 
 = 0.3 =
 * Manage Posts - Can filter by assignment_status
