@@ -11,7 +11,7 @@ class ad_public_views {
 	
 	function init() {
 		global $assignment_desk;
-		$options = $assignment_desk->general_options;
+		$options = $assignment_desk->public_facing_options;
 		
 		wp_enqueue_script('jquery-datepicker-js', ASSIGNMENT_DESK_URL .'js/jquery.datepicker.js', array('jquery-ui-core'));
 		wp_enqueue_script('ad-public-views', ASSIGNMENT_DESK_URL . 'js/public_views.js', array('jquery', 'jquery-datepicker-js'));
@@ -42,7 +42,7 @@ class ad_public_views {
 	function show_pitch_form( $the_content ) {
 		global $assignment_desk, $current_user;
 
-		$options = $assignment_desk->general_options;		
+		$options = $assignment_desk->pitch_form_options;		
 		
 		if ($assignment_desk->edit_flow_exists()) {
 			global $edit_flow;
@@ -371,8 +371,7 @@ class ad_public_views {
 		if ( is_user_logged_in() ) {
 			
 			wp_get_current_user();
-			$all_votes = get_post_meta( $post_id, '_ad_votes_all' );
-			$all_votes = $all_votes[0];
+			$all_votes = get_post_meta( $post_id, '_ad_votes_all', true );
 			$total_votes = (int)get_post_meta( $post_id, '_ad_votes_total', true );
 			
 			$user_id = $current_user->ID;
@@ -405,8 +404,7 @@ class ad_public_views {
 			$post_id = $post->ID;
 		}
 		
-		$all_votes = get_post_meta( $post_id, '_ad_votes_all' );
-		$all_votes = $all_votes[0];
+		$all_votes = get_post_meta( $post_id, '_ad_votes_all', true );
 		$total_votes = (int)get_post_meta( $post_id, '_ad_votes_total', true );
 		
 		if (!$total_votes) {
@@ -440,7 +438,7 @@ class ad_public_views {
 				return false;
 			}
 			
-			$all_votes = get_post_meta( $post_id, '_ad_votes_all' );
+			$all_votes = get_post_meta( $post_id, '_ad_votes_all', true );
 			$total_votes = (int)get_post_meta( $post_id, '_ad_votes_total', true );
 			
 			if ( !in_array( $user_id, $all_votes ) ) {
@@ -588,7 +586,7 @@ class ad_public_views {
 	*/
 	function show_all_posts( $the_content ) {
 		global $wpdb, $assignment_desk, $post;
-		$options = $assignment_desk->general_options;
+		$options = $assignment_desk->public_facing_options;
 	  
 		$template_tag = '<!--' . $assignment_desk->all_posts_key . '-->';
 		
@@ -651,7 +649,6 @@ class ad_public_views {
 	 */ 
 	function prepend_voting_to_post( $the_content ) {
 		global $post, $assignment_desk;
-		$options = $assignment_desk->general_options;
 		
 		if ( is_single() ) {
 			$the_content = $this->voting_form() . $the_content;
@@ -667,7 +664,6 @@ class ad_public_views {
 	 */
 	function append_volunteering_to_post( $the_content ) {
 		global $post, $assignment_desk;
-		$options = $assignment_desk->general_options;
 		
 		if ( is_single() ) {
 			$the_content .= $this->show_all_volunteers( $post->ID );

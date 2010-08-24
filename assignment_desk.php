@@ -67,6 +67,8 @@ if (!class_exists('assignment_desk')) {
         public $option_prefix = 'ad_';
 
 		var $options_group = 'assignment_desk_';
+		var $pitch_form_options_group = 'assignment_desk_pitch_form';
+		var $public_facing_options_group = 'assignment_desk_public_facing';		
 		
 		var $top_level_page = 'assignment_desk';
 		var $pitch_form_settings_page = 'assignment_desk_pitch_form_settings';
@@ -123,6 +125,8 @@ if (!class_exists('assignment_desk')) {
 			 * Provide an easy way to access Assignment Desk settings w/o querying database every time
 			 */
 			$this->general_options = get_option($this->get_plugin_option_fullname('general'));
+			$this->pitch_form_options = get_option($this->get_plugin_option_fullname('pitch_form'));
+			$this->public_facing_options = get_option($this->get_plugin_option_fullname('public_facing'));
 
         }
 
