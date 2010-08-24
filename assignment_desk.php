@@ -223,8 +223,6 @@ if (!class_exists('assignment_desk')) {
 			wp_enqueue_script('wp-ajax-response');
 			wp_enqueue_script('jquery-truncator-js', ASSIGNMENT_DESK_URL .'js/jquery.truncator.js', 
                               array('jquery'));
-			wp_enqueue_script('jquery-autocomplete-js', ASSIGNMENT_DESK_URL .'js/jquery.autocomplete.min.js', 
-                              array('jquery'));
 			wp_enqueue_script('ad-admin-js', ASSIGNMENT_DESK_URL .'js/admin.js', 
 	                             array('jquery'), ASSIGMENT_DESK_VERSION);
 	    }
