@@ -68,6 +68,7 @@ if (!class_exists('assignment_desk')) {
 
 		var $options_group = 'assignment_desk_';
 		var $pitch_form_options_group = 'assignment_desk_pitch_form';
+		var $public_facing_options_group = 'assignment_desk_public_facing';		
 		
 		var $top_level_page = 'assignment_desk';
 		var $pitch_form_settings_page = 'assignment_desk_pitch_form_settings';

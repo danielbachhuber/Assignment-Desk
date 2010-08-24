@@ -29,6 +29,9 @@ if ( !class_exists( 'ad_settings' ) ){
 		add_settings_field( 'assignment_email_template_subject', 'Subject template for notifications', array(&$this, 'assignment_email_template_subject_option'), $assignment_desk->top_level_page, 'assignment_management' );
 		add_settings_field( 'assignment_email_template', 'Template for notifications', array(&$this, 'assignment_email_template_option'), $assignment_desk->top_level_page, 'assignment_management' );
 		
+		add_settings_section( 'miscellaneous', 'Miscellaneous', array(&$this, 'miscellaneous_setting_section'), $assignment_desk->top_level_page );
+		add_settings_field( 'google_maps_api_key', 'Google Maps API key', array(&$this, 'google_maps_api_key_option'), $assignment_desk->top_level_page, 'miscellaneous' );
+		
 		register_setting( $assignment_desk->pitch_form_options_group, $assignment_desk->get_plugin_option_fullname('pitch_form') );
 		
 		/* Pitch form */
@@ -36,13 +39,13 @@ if ( !class_exists( 'ad_settings' ) ){
 		add_settings_field( 'pitch_form_enabled', 'Enable pitch forms', array(&$this, 'pitch_form_enabled_option'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );
 		add_settings_field( 'pitch_form_elements', 'Pitch form elements', array(&$this, 'pitch_form_elements_option'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );
 		
+		register_setting( $assignment_desk->public_facing_options_group, $assignment_desk->get_plugin_option_fullname('public_facing') );
+		
 		/* Public-facing */
 		add_settings_section( 'public_facing_views', 'Public-Facing Views', array(&$this, 'public_facing_views_setting_section'), $assignment_desk->public_facing_settings_page );
 		add_settings_field( 'public_facing_elements', 'Public-facing elements', array(&$this, 'public_facing_elements_option'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );
 		add_settings_field( 'public_facing_functionality', 'Public-facing functionality', array(&$this, 'public_facing_functionality_option'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );		
-		
-		add_settings_section( 'miscellaneous', 'Miscellaneous', array(&$this, 'miscellaneous_setting_section'), $assignment_desk->top_level_page );
-		add_settings_field( 'google_maps_api_key', 'Google Maps API key', array(&$this, 'google_maps_api_key_option'), $assignment_desk->top_level_page, 'miscellaneous' );	
+			
 	}
 	
 	function setup_defaults() {
@@ -144,6 +147,56 @@ Blog Editor");
         }
         echo "</select>";
     }
+
+	function assignment_management_setting_section() {
+		global $assignment_desk;
+	}
+	
+	
+	function assignment_email_notifications_enabled_option() {
+		global $assignment_desk;
+		$options = $assignment_desk->general_options;
+		
+		echo '<input id="assignment_email_notifications_enabled" name="assignment_desk_general[assignment_email_notifications_enabled]" type="checkbox"';
+		if ($options['assignment_email_notifications_enabled']) {
+			echo ' checked="checked"';
+		}
+		echo ' />';
+	}
+	
+	function assignment_email_template_subject_option() {
+    		global $assignment_desk;
+    		$options = $assignment_desk->general_options;
+    		?>
+    		<input id="assignment_email_template_subject" name="assignment_desk_general[assignment_email_template_subject]" size="60" maxlength="60" 
+    		        value="<?php echo $options['assignment_email_template_subject']; ?>"><br>
+    <?php
+    }
+    	
+	function assignment_email_template_option() {
+		global $assignment_desk;
+		$options = $assignment_desk->general_options;
+		
+		echo '<textarea id="assignment_email_template" name="assignment_desk_general[assignment_email_template]" rows="8" cols="60">';
+		echo $options['assignment_email_template'];
+		echo '</textarea><br />';
+		echo '<span class="description">' . 
+		    _('We support the following tokens') . 
+		    ': %blogname%, %title%, %role%, %display_name%, %location%, %post_link%, and %dashboard_link%.</span>';
+	}
+	
+	function google_maps_api_key_option() {
+		global $assignment_desk;
+		$options = $assignment_desk->general_options;
+		echo '<input type="text" id="google_maps_api_key" name="assignment_desk_general[google_maps_api_key]" value="';
+		echo $options['google_maps_api_key'];
+		echo '"/>';
+		
+	}
+	
+	function miscellaneous_setting_section() {
+	    
+	}
 	
 	function story_pitches_setting_section() {
 		global $assignment_desk;
@@ -297,43 +350,6 @@ Blog Editor");
 		echo '</ul>';
 	}
 	
-	function assignment_management_setting_section() {
-		global $assignment_desk;
-	}
-	
-	
-	function assignment_email_notifications_enabled_option() {
-		global $assignment_desk;
-		$options = $assignment_desk->general_options;
-		
-		echo '<input id="assignment_email_notifications_enabled" name="assignment_desk_general[assignment_email_notifications_enabled]" type="checkbox"';
-		if ($options['assignment_email_notifications_enabled']) {
-			echo ' checked="checked"';
-		}
-		echo ' />';
-	}
-	
-	function assignment_email_template_subject_option() {
-    		global $assignment_desk;
-    		$options = $assignment_desk->general_options;
-    		?>
-    		<input id="assignment_email_template_subject" name="assignment_desk_general[assignment_email_template_subject]" size="60" maxlength="60" 
-    		        value="<?php echo $options['assignment_email_template_subject']; ?>"><br>
-    <?php
-    }
-    	
-	function assignment_email_template_option() {
-		global $assignment_desk;
-		$options = $assignment_desk->general_options;
-		
-		echo '<textarea id="assignment_email_template" name="assignment_desk_general[assignment_email_template]" rows="8" cols="60">';
-		echo $options['assignment_email_template'];
-		echo '</textarea><br />';
-		echo '<span class="description">' . 
-		    _('We support the following tokens') . 
-		    ': %blogname%, %title%, %role%, %display_name%, %location%, %post_link%, and %dashboard_link%.</span>';
-	}
-	
 	function public_facing_views_setting_section() {
 		global $assignment_desk;
 		echo "Enable public access to pitches and stories in progress by dropping <code>&#60;!--$assignment_desk->all_posts_key--&#62;</code> in a page.";
@@ -344,13 +360,13 @@ Blog Editor");
 		if ($assignment_desk->edit_flow_exists()) {
 			global $edit_flow;
 		}
-		$options = $assignment_desk->general_options;
+		$options = $assignment_desk->public_facing_options;
 		echo '<ul>';
 		// Title
 		echo '<li><input type="checkbox" disabled="disabled" checked="checked" />&nbsp;<label for="public_facing_title">Title</label></li>';
 		// Description
 		if ($assignment_desk->edit_flow_exists()) {
-			echo '<li><input id="public_facing_description_enabled" name="assignment_desk_general[public_facing_description_enabled]" type="checkbox"';
+			echo '<li><input id="public_facing_description_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_description_enabled]" type="checkbox"';
 			if ($options['public_facing_description_enabled']) {
 				echo ' checked="checked"';
 			}
@@ -360,7 +376,7 @@ Blog Editor");
 		}
 		// Due date
 		if ($assignment_desk->edit_flow_exists()) {
-			echo '<li><input id="public_facing_duedate_enabled" name="assignment_desk_general[public_facing_duedate_enabled]" type="checkbox"';
+			echo '<li><input id="public_facing_duedate_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_duedate_enabled]" type="checkbox"';
 			if ($options['public_facing_duedate_enabled']) {
 				echo ' checked="checked"';
 			}
@@ -370,7 +386,7 @@ Blog Editor");
 		}
 		// Location
 		if ($assignment_desk->edit_flow_exists()) {
-			echo '<li><input id="public_facing_location_enabled" name="assignment_desk_general[public_facing_location_enabled]" type="checkbox"';
+			echo '<li><input id="public_facing_location_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_location_enabled]" type="checkbox"';
 			if ($options['public_facing_location_enabled']) {
 				echo ' checked="checked"';
 			}
@@ -380,13 +396,13 @@ Blog Editor");
 			echo '<li>Please enable Edit Flow to allow location field.</li>';
 		}
 		// Categories
-		echo '<li><input id="public_facing_categories_enabled" name="assignment_desk_general[public_facing_categories_enabled]" type="checkbox"';
+		echo '<li><input id="public_facing_categories_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_categories_enabled]" type="checkbox"';
 		if ($options['public_facing_categories_enabled']) {
 			echo ' checked="checked"';
 		}
 		echo ' />&nbsp;<label for="public_facing_categories_enabled">Categories</label></li>';
 		// Tags
-		echo '<li><input id="public_facing_tags_enabled" name="assignment_desk_general[public_facing_tags_enabled]" type="checkbox"';
+		echo '<li><input id="public_facing_tags_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_tags_enabled]" type="checkbox"';
 		if ($options['public_facing_tags_enabled']) {
 			echo ' checked="checked"';
 		}
@@ -399,40 +415,27 @@ Blog Editor");
 		if ($assignment_desk->edit_flow_exists()) {
 			global $edit_flow;
 		}
-		$options = $assignment_desk->general_options;
+		$options = $assignment_desk->public_facing_options;
 		echo '<ul>';
 		// Volunteer
-		echo '<li><input id="public_facing_volunteering_enabled" name="assignment_desk_general[public_facing_volunteering_enabled]" type="checkbox"';
+		echo '<li><input id="public_facing_volunteering_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_volunteering_enabled]" type="checkbox"';
 		if ($options['public_facing_volunteering_enabled']) {
 			echo ' checked="checked"';
 		}
 		echo ' />&nbsp;<label for="public_facing_volunteering_enabled">Volunteering</label></li>';
 		// Voting
-		echo '<li><input id="public_facing_voting_enabled" name="assignment_desk_general[public_facing_voting_enabled]" type="checkbox"';
+		echo '<li><input id="public_facing_voting_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_voting_enabled]" type="checkbox"';
 		if ($options['public_facing_voting_enabled']) {
 			echo ' checked="checked"';
 		}
 		echo ' />&nbsp;<label for="public_facing_voting_enabled">Voting</label></li>';
 		// Commenting
-		echo '<li><input id="public_facing_commenting_enabled" name="assignment_desk_general[public_facing_commenting_enabled]" type="checkbox"';
+		echo '<li><input id="public_facing_commenting_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_commenting_enabled]" type="checkbox"';
 		if ($options['public_facing_commenting_enabled']) {
 			echo ' checked="checked"';
 		}
 		echo ' />&nbsp;<label for="public_facing_commenting_enabled">Commenting</label></li>';
 		echo '</ul>';
-	}
-	
-	function google_maps_api_key_option() {
-		global $assignment_desk;
-		$options = $assignment_desk->general_options;
-		echo '<input type="text" id="google_maps_api_key" name="assignment_desk_general[google_maps_api_key]" value="';
-		echo $options['google_maps_api_key'];
-		echo '"/>';
-		
-	}
-	
-	function miscellaneous_setting_section() {
-	    
 	}
 	
 	/**
@@ -539,7 +542,7 @@ Blog Editor");
 		
 			<form action="options.php" method="post">
 				
-				<?php settings_fields( $assignment_desk->options_group ); ?>
+				<?php settings_fields( $assignment_desk->public_facing_options_group ); ?>
 				<?php do_settings_sections( $assignment_desk->public_facing_settings_page ); ?>
 				
 				<p class="submit"><input name="submit" type="submit" class="button-primary" value="<?php esc_attr_e('Save Changes'); ?>" /></p>
