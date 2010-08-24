@@ -433,7 +433,7 @@ Blog Editor");
 		if ( !$options['public_facing_voting_enabled'] ) {
 			echo ' hidden';
 		}
-		echo '"><label for="public_facing_voting_button">Button</label>';
+		echo '"><label for="public_facing_voting_button">Button text</label>';
 		echo '<input id="public_facing_voting_button" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_voting_button]" type="text" value="'
 			. $options['public_facing_voting_button'] . '" size="15" />';
 		echo '</span></li>';

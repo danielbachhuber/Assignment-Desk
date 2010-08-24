@@ -127,7 +127,7 @@ if (!class_exists('assignment_desk')) {
 			$this->general_options = get_option($this->get_plugin_option_fullname('general'));
 			$this->pitch_form_options = get_option($this->get_plugin_option_fullname('pitch_form'));
 			$this->public_facing_options = get_option($this->get_plugin_option_fullname('public_facing'));
-
+			
         }
 
 		/**

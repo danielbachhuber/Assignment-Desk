@@ -362,6 +362,7 @@ class ad_public_views {
 	 */
 	function voting_form( $post_id = null ) {
 		global $assignment_desk, $current_user;
+		$options = $assignment_desk->public_facing_options;
 		
 		if ( !$post_id ) {
 			global $post;
@@ -381,8 +382,13 @@ class ad_public_views {
 				$voting_form = '<form method="post" class="assignment_desk_voting_form">'
 							. '<input type="hidden" name="assignment_desk_voting_user_id" value="' . $user_id . '" />'
 							. '<input type="hidden" name="assignment_desk_voting_post_id" value="' . $post_id . '" />';
+				if ( $options['public_facing_voting_button'] ) {
+					$voting_button = $options['public_facing_voting_button'];
+				} else {
+					$voting_button = 'Vote';
+				}
 				$voting_form .= '<input type="submit" class="assignment_desk_voting_submit button"'
-							. ' name="assignment_desk_voting_submit" value="Vote" />'
+							. ' name="assignment_desk_voting_submit" value="' . $voting_button . '" />'
 							. '</form>';
 				return $voting_form;			
 			} else if ( $_REQUEST['assignment_desk_messages']['voting']['success'] ) {
