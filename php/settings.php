@@ -416,7 +416,7 @@ Blog Editor");
 			global $edit_flow;
 		}
 		$options = $assignment_desk->public_facing_options;
-		echo '<ul>';
+		echo '<ul class="ad_elements">';
 		// Volunteer
 		echo '<li><input id="public_facing_volunteering_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_volunteering_enabled]" type="checkbox"';
 		if ($options['public_facing_volunteering_enabled']) {
@@ -424,11 +424,19 @@ Blog Editor");
 		}
 		echo ' />&nbsp;<label for="public_facing_volunteering_enabled">Volunteering</label></li>';
 		// Voting
-		echo '<li><input id="public_facing_voting_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_voting_enabled]" type="checkbox"';
-		if ($options['public_facing_voting_enabled']) {
+		echo '<li><span class="field"><input id="public_facing_voting_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_voting_enabled]" type="checkbox"';
+		if ( $options['public_facing_voting_enabled'])  {
 			echo ' checked="checked"';
 		}
-		echo ' />&nbsp;<label for="public_facing_voting_enabled">Voting</label></li>';
+		echo ' />&nbsp;<label for="public_facing_voting_enabled">Voting</label></span>';
+		echo '<span class="copy';
+		if ( !$options['public_facing_voting_enabled'] ) {
+			echo ' hidden';
+		}
+		echo '"><label for="public_facing_voting_button">Button</label>';
+		echo '<input id="public_facing_voting_button" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_voting_button]" type="text" value="'
+			. $options['public_facing_voting_button'] . '" size="15" />';
+		echo '</span></li>';
 		// Commenting
 		echo '<li><input id="public_facing_commenting_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_commenting_enabled]" type="checkbox"';
 		if ($options['public_facing_commenting_enabled']) {

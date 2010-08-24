@@ -38,20 +38,20 @@ li.ad-message-error {
 
 /* Settings */
 
-ul#ad_pitch_form_elements span.field {
+ul.ad_elements span.field {
 	width: 120px;
 	display: inline-block;
 }
 
-ul#ad_pitch_form_elements span.copy.hidden {
+ul.ad_elements span.copy.hidden {
 	display: none;
 }
 
-ul#ad_pitch_form_elements span.copy label {
+ul.ad_elements span.copy label {
 	margin-right: 5px;
 }
 
-ul#ad_pitch_form_elements span.copy input {
+ul.ad_elements span.copy input {
 	margin-right: 10px;
 }
 
