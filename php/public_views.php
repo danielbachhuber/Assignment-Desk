@@ -321,8 +321,7 @@ class ad_public_views {
 		if ( is_user_logged_in() ) {
 			
 			wp_get_current_user();
-			$all_votes = get_post_meta( $post_id, '_ad_votes_all' );
-			$all_votes = $all_votes[0];
+			$all_votes = get_post_meta( $post_id, '_ad_votes_all', true );
 			$total_votes = (int)get_post_meta( $post_id, '_ad_votes_total', true );
 			
 			$user_id = $current_user->ID;
@@ -355,8 +354,7 @@ class ad_public_views {
 			$post_id = $post->ID;
 		}
 		
-		$all_votes = get_post_meta( $post_id, '_ad_votes_all' );
-		$all_votes = $all_votes[0];
+		$all_votes = get_post_meta( $post_id, '_ad_votes_all', true );
 		$total_votes = (int)get_post_meta( $post_id, '_ad_votes_total', true );
 		
 		if (!$total_votes) {
@@ -390,7 +388,7 @@ class ad_public_views {
 				return false;
 			}
 			
-			$all_votes = get_post_meta( $post_id, '_ad_votes_all' );
+			$all_votes = get_post_meta( $post_id, '_ad_votes_all', true );
 			$total_votes = (int)get_post_meta( $post_id, '_ad_votes_total', true );
 			
 			if ( !in_array( $user_id, $all_votes ) ) {
