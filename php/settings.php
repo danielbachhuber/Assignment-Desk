@@ -222,7 +222,7 @@ Blog Editor");
 			global $edit_flow;
 		}
 		$options = $assignment_desk->pitch_form_options;
-		echo '<ul id="ad_pitch_form_elements">';
+		echo '<ul class="ad_elements">';
 		// Title
 		echo '<li><span class="field"><input type="checkbox" disabled="disabled" checked="checked" />&nbsp;<label for="pitch_form_title">Title</label></span>';
 		echo '<span class="copy"><label for="pitch_form_title_label">Label</label>';
