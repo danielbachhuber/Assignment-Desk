@@ -138,10 +138,7 @@ if ( !class_exists( 'ad_user' ) ) {
     function handle_ad_user_volunteer_count_column( $default, $column_name, $user_id ) {
         global $assignment_desk, $wpdb;
         if ( $column_name == __( '_ad_user_volunteer_count' ) ) {
-            $count = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->usermeta WHERE meta_key='_ad_volunteer' AND user_id=$user_id");
-            if(!$count){
-                $count = 0;
-            }
+            $count = count(get_usermeta($user_id, '_ad_volunteer'));
             return $count;
         }
     }
