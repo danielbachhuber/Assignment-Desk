@@ -448,7 +448,6 @@ class ad_public_views {
 				return $form_messages['error']['nonce'];
 			}
 	    
-		    // @todo Check for a nonce
 			wp_get_current_user();
 	    
 		    $post_id = (int)$_POST['assignment_desk_voting_post_id'];
@@ -513,7 +512,9 @@ class ad_public_views {
 			}
 			$volunteer_form .= '</ul></fieldset>';
 		    $volunteer_form .= "<input type='hidden' name='assignment_desk_volunteer_user_id' value='$current_user->ID' />";	
-		    $volunteer_form .= "<input type='hidden' name='assignment_desk_volunteer_post_id' value='$post_id' />";		
+		    $volunteer_form .= "<input type='hidden' name='assignment_desk_volunteer_post_id' value='$post_id' />";	
+			$volunteer_form .= '<input type="hidden" name="assignment_desk_volunteering_nonce" value="' 
+							. wp_create_nonce('assignment_desk_volunteering') . '" />';	
 		    $volunteer_form .= '<fieldset class="submit"><input type="submit" id="assignment_desk_volunteer_submit" name="assignment_desk_volunteer_submit" class="button primary" value="Submit" /></fieldset';
 		    $volunteer_form .= "</form>";
 		    return $volunteer_form;
@@ -559,7 +560,12 @@ class ad_public_views {
 	    
 		if ( $_POST['assignment_desk_volunteer_submit'] && is_user_logged_in() ) {
 	    
-		    // @todo Check for a nonce
+			$form_messages = array();
+	
+			// Ensure that it was the user who submitted the form, not a bot
+			if ( !wp_verify_nonce($_POST['assignment_desk_volunteering_nonce'], 'assignment_desk_volunteering') ) {
+				return $form_messages['error']['nonce'];
+			}
 			wp_get_current_user();
 	    
 		    $post_id = (int)$_POST['assignment_desk_volunteer_post_id'];
