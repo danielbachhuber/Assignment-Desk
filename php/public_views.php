@@ -394,6 +394,8 @@ class ad_public_views {
 				} else {
 					$voting_button = 'Vote';
 				}
+				$voting_form .= '<input type="hidden" name="assignment_desk_voting_nonce" value="' 
+							. wp_create_nonce('assignment_desk_voting') . '" />';
 				$voting_form .= '<input type="submit" class="assignment_desk_voting_submit button"'
 							. ' name="assignment_desk_voting_submit" value="' . $voting_button . '" />'
 							. '</form>';
@@ -440,6 +442,11 @@ class ad_public_views {
 	    
 		if ( $_POST['assignment_desk_voting_submit'] && is_user_logged_in() ) {
 			$form_messages = array();
+			
+			// Ensure that it was the user who submitted the form, not a bot
+			if ( !wp_verify_nonce($_POST['assignment_desk_voting_nonce'], 'assignment_desk_voting') ) {
+				return $form_messages['error']['nonce'];
+			}
 	    
 		    // @todo Check for a nonce
 			wp_get_current_user();
