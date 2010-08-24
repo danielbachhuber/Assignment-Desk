@@ -11,7 +11,8 @@ class ad_public_views {
 	
 	function init() {
 		global $assignment_desk;
-		$options = $assignment_desk->public_facing_options;
+		$pitch_form_options = $assignment_desk->pitch_form_options;		
+		$public_facing_options = $assignment_desk->public_facing_options;
 		
 		wp_enqueue_script('jquery-datepicker-js', ASSIGNMENT_DESK_URL .'js/jquery.datepicker.js', array('jquery-ui-core'));
 		wp_enqueue_script('ad-public-views', ASSIGNMENT_DESK_URL . 'js/public_views.js', array('jquery', 'jquery-datepicker-js'));
@@ -34,7 +35,7 @@ class ad_public_views {
 			add_filter( 'the_content', array(&$this, 'append_volunteering_to_post') );		
 		}
 		// Only show pitch forms if the functionality is enabled
-		if ( $options['pitch_form_enabled'] ) {
+		if ( $pitch_form_options['pitch_form_enabled'] ) {
 			add_filter( 'the_content', array(&$this, 'show_pitch_form') );
 		}
 	}
