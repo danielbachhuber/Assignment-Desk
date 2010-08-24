@@ -12,6 +12,7 @@ if ( !class_exists( 'ad_user' ) ) {
     }
     
     function init_user() {
+      global $assignment_desk;
       
       add_action('edit_user_profile', array(&$this, 'profile_options'));
       add_action('show_user_profile', array(&$this, 'profile_options'));
@@ -21,17 +22,26 @@ if ( !class_exists( 'ad_user' ) ) {
       add_filter('manage_users_columns', array(&$this, 'add_manage_user_columns'));
       add_filter('manage_users_custom_column', array(&$this, 'handle_ad_user_total_words_column'), 10, 3);
       add_filter('manage_users_custom_column', array(&$this, 'handle_ad_user_average_words_column'), 10, 3);
-      add_filter('manage_users_custom_column', array(&$this, 'handle_ad_user_type_column'), 10, 3);
+      add_filter('manage_users_custom_column', array(&$this, 'handle_ad_user_pitches_count_column'), 10, 3);
       
+      if($assignment_desk->public_facing_options['public_facing_volunteering_enabled'] == 'on'){
+        add_filter('manage_users_custom_column', array(&$this, 'handle_ad_user_volunteer_count_column'), 10, 3);
+      }
+      //@todo  this is last because of an unresolves situation where only the last column prints.
+      add_filter('manage_users_custom_column', array(&$this, 'handle_ad_user_type_column'), 10, 3);
     }
     
     function add_manage_user_columns($user_columns) {
-      
+      global $assignment_desk;
       $custom_fields_to_add = array(
                                   _('_ad_user_type') => __('User Type'),
                                   _('_ad_user_total_words') => __('Total Words'),
                                   _('_ad_user_average_words') => __('Average Words'),
+                                  _('_ad_user_pitch_count') => __('Pitches'),
                               );
+      if($assignment_desk->public_facing_options['public_facing_volunteering_enabled'] == 'on'){
+        $custom_fields_to_add[_('_ad_user_volunteer_count')] = __('Volunteer Count');
+      }
       
       foreach ($custom_fields_to_add as $field => $title) {
           $user_columns[$field] = $title;
@@ -40,7 +50,7 @@ if ( !class_exists( 'ad_user' ) ) {
       
     }
     
-    function handle_ad_user_type_column($default, $column_name, $user_id ) {
+    function handle_ad_user_type_column( $default, $column_name, $user_id ) {
       global $assignment_desk;
       
       if ( $column_name == __( '_ad_user_type' ) ) {
@@ -55,16 +65,27 @@ if ( !class_exists( 'ad_user' ) ) {
       
     }
     
-    function handle_ad_user_average_words_column($default, $column_name, $user_id){
+    function handle_ad_user_average_words_column( $default, $column_name, $user_id ) {
       if ( $column_name == __( '_ad_user_average_words' ) ) {
         return $this->average_words($user_id); 
       }
     }
     
-    function handle_ad_user_total_words_column($default, $column_name, $user_id){
+    /** 
+    * Returns the average words per post for this user
+    */
+    function average_words( $user_id ) {
+        $num_posts = get_usernumposts($user_id);
+        if($num_posts){
+            return $this->count_total_words($user_id) / $num_posts;
+        }
+        return 0;
+    }
+    
+    function handle_ad_user_total_words_column( $default, $column_name, $user_id ) {
       if ( $column_name == __( '_ad_user_total_words' ) ) {
         return $this->count_total_words($user_id);
-      }      
+      }
     }
     
     /**
@@ -114,15 +135,26 @@ if ( !class_exists( 'ad_user' ) ) {
         return $total_words;
     }
     
-    /** 
-    * Returns the average words per post for this user
-    */
-    function average_words($user_id){
-        $num_posts = get_usernumposts($user_id);
-        if($num_posts){
-            return $this->count_total_words($user_id) / $num_posts;
+    function handle_ad_user_volunteer_count_column( $default, $column_name, $user_id ) {
+        global $assignment_desk, $wpdb;
+        if ( $column_name == __( '_ad_user_volunteer_count' ) ) {
+            $count = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->usermeta WHERE meta_key='_ad_volunteer' AND user_id=$user_id");
+            if(!$count){
+                $count = 0;
+            }
+            return $count;
         }
-        return 0;
+    }
+    
+    function handle_ad_user_pitches_count_column( $default, $column_name, $user_id ) {
+        global $assignment_desk, $wpdb;
+        if ( $column_name == __( '_ad_user_pitch_count' ) ) {
+            $count = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->postmeta WHERE meta_key='_ad_pitched_by' AND meta_value='$user_id'");
+            if(!$count){
+                $count = 0;
+            }
+            return $count;
+        }
     }
     
     function profile_options() {
