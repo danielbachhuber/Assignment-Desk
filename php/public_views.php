@@ -11,7 +11,7 @@ class ad_public_views {
 	
 	function init() {
 		global $assignment_desk;
-		$options = $assignment_desk->general_options;
+		$options = $assignment_desk->public_facing_options;
 		
 		wp_enqueue_script('ad-public-views', WP_PLUGIN_URL . '/assignment-desk/js/public_views.js', array('jquery'));
 		
@@ -39,7 +39,7 @@ class ad_public_views {
 	function show_pitch_form( $the_content ) {
 		global $assignment_desk, $current_user;
 
-		$options = $assignment_desk->general_options;		
+		$options = $assignment_desk->pitch_form_options;		
 		
 		if ($assignment_desk->edit_flow_exists()) {
 			global $edit_flow;
@@ -538,7 +538,7 @@ class ad_public_views {
 	*/
 	function show_all_posts( $the_content ) {
 		global $wpdb, $assignment_desk, $post;
-		$options = $assignment_desk->general_options;
+		$options = $assignment_desk->public_facing_options;
 	  
 		$template_tag = '<!--' . $assignment_desk->all_posts_key . '-->';
 		
@@ -601,7 +601,6 @@ class ad_public_views {
 	 */ 
 	function prepend_voting_to_post( $the_content ) {
 		global $post, $assignment_desk;
-		$options = $assignment_desk->general_options;
 		
 		if ( is_single() ) {
 			$the_content = $this->voting_form() . $the_content;
@@ -617,7 +616,6 @@ class ad_public_views {
 	 */
 	function append_volunteering_to_post( $the_content ) {
 		global $post, $assignment_desk;
-		$options = $assignment_desk->general_options;
 		
 		if ( is_single() ) {
 			$the_content .= $this->show_all_volunteers( $post->ID );
