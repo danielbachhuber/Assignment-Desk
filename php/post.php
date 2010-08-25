@@ -300,9 +300,8 @@ class ad_post {
 				<h5><?php echo $user_role->name; ?></h5>
 				<ul id="ad-participants-<?php echo "{$user_role->term_id}"; ?>">					
 					<?php foreach ($all_participants[$user_role->term_id] as $participant_id => $participant_status) : ?>
-						<?php $participant = get_userdata($participant_id); ?>						
-						<li id="ad-participant-<?php echo "{$user_role->term_id}-{$participant_id}"; ?>"><input type="hidden" id="ad-participant-<?php echo $participant_id; ?>" name="ad-participant-role-<?php echo $user_role->term_id; ?>[]" value="<?php echo "$participant_id | $participant_status"; ?>" /><?php echo "$participant->user_nicename |" . _($participant_status); ?> 
-						    
+						<?php $participant = get_userdata($participant_id);	?>						
+						<li id="ad-participant-<?php echo "{$user_role->term_id}-{$participant_id}"; ?>"><input type="hidden" id="ad-participant-<?php echo $participant_id; ?>" name="ad-participant-role-<?php echo $user_role->term_id; ?>[]" value="<?php echo "$participant_id|$participant_status"; ?>" /><?php echo "$participant->user_nicename | " . _($participant_status); ?>
 						    <?php if ($participant_status == 'volunteered') : ?>
 								<?php $user = get_userdata($participant_id); ?>
 						        <a href="#" id="ad-volunteer-<?php echo "$user_role->term_id-$user_role->name-$participant_id-$user->user_nicename"; ?>">assign</a>
