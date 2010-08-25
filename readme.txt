@@ -4,7 +4,7 @@ Donate link:
 Tags: news, editorial, journalism, crowdsourcing
 Requires at least: 2.9.2
 Tested up to: 3.0.1
-Stable tag: 0.3
+Stable tag: 0.4
 
 Empower the community to participate in the journalistic process and guide them along the way.
 
@@ -14,7 +14,7 @@ The goal of the Assignment Desk is to empower the community to participate in th
 
 Community members can submit story pitches, vote on them, and volunteer for them. Editors can moderate pitches and assign them to staff or interested community journalists. 
 
-NOTICE: THIS PLUGIN IS PRE-PRE-RELEASE AND SHOULD NOT BE USED IN PRODUCTION
+NOTICE: THIS PLUGIN IS PRE-PRE-RELEASE AND SHOULD NOT BE USED IN PRODUCTION. WE WILL BREAK YOUR SETTINGS.
 
 Much longer description.
 
@@ -43,8 +43,8 @@ For full functionality, please also install and configure Edit Flow and Co-Autho
 * Columns in users view calculate total words, average words, pitches, and volunteer count
 * Nonces on all the forms
 * Default settings implemented
-* Moved pitch form settings to its own view
-* Moved public-facing functionality settings to its own view
+* Moved pitch form settings to its own view; no data migration
+* Moved public-facing functionality settings to its own view; no data migration
 
 = 0.3 =
 * Manage Posts - Can filter by assignment_status
