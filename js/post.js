@@ -17,7 +17,7 @@ function ad_add_to_participants(user_id, user_nicename, role_id, role_name){
 	
 	// @todo This check doesn't work all that well
 	user_id = parseInt(user_id);
-	if (!user_id){
+	if ( !user_id ) {
 	    error_message = '<div id="ad-participant-error-message" class="message alert">'
 						+ 'No user selected'
 						+ '</div>';
@@ -27,10 +27,10 @@ function ad_add_to_participants(user_id, user_nicename, role_id, role_name){
 	jQuery("#ad-participant-error-message").remove();
 	
 	// @todo check to see whether use was already assigned in this rold
-	jQuery('input[name="ad-participant-role-' + role_id + '[]"]').each(function(){
+	jQuery('input[name="ad-participant-role-' + role_id + '[]"]').each(function() {
 		spl = jQuery(this).val().split('|');
 		
-		if (spl[0] == user_id && spl[1] != 'volunteered' ) {
+		if ( spl[0] == user_id && spl[1] != 'volunteered' ) {
 			error_message = '<div id="ad-participant-error-message" class="message alert">'
 							+ user_nicename + ' has already been added as ' + role_name
 							+ '</div>';
@@ -154,7 +154,7 @@ jQuery(document).ready(function() {
 		var role_id = spl[2];
 		var role_name = spl[3];
 		var user_id = spl[4];
-		var user_nicename = user_login;
+		var user_nicename = spl[5];
 	
 		jQuery(link).click(function(){
 			ad_add_to_participants(user_id, user_nicename, role_id, role_name);
@@ -275,7 +275,7 @@ jQuery(document).ready(function() {
 			
 			// @todo - roll up the role if no users left
 			// @todo - Call coauthors_remove_author(name) if no roles left for this pitch
-			return false
+			return false;
 		});
 	});
 	

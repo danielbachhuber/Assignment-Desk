@@ -303,8 +303,9 @@ class ad_post {
 						<?php $participant = get_userdata($participant_id); ?>						
 						<li id="ad-participant-<?php echo "{$user_role->term_id}-{$participant_id}"; ?>"><input type="hidden" id="ad-participant-<?php echo $participant_id; ?>" name="ad-participant-role-<?php echo $user_role->term_id; ?>[]" value="<?php echo "$participant_id | $participant_status"; ?>" /><?php echo "$participant->user_nicename |" . _($participant_status); ?> 
 						    
-						    <?php if($participant_status == 'volunteered'): ?>
-						        <a href="#" id="ad-volunteer-<?php echo "$user_role->term_id-$user_role->name-$participant_id"; ?>">assign</a>
+						    <?php if ($participant_status == 'volunteered') : ?>
+								<?php $user = get_userdata($participant_id); ?>
+						        <a href="#" id="ad-volunteer-<?php echo "$user_role->term_id-$user_role->name-$participant_id-$user->user_nicename"; ?>">assign</a>
 						    <?php endif; ?>
 						    <a href="#" class="ad-remove-participant" id="ad-remove-participant-<?php echo $user_role->term_id . '-' . $participant_id; ?>">remove</a></li>
 					<?php endforeach; ?>
