@@ -40,7 +40,7 @@ if ( !class_exists( 'ad_user' ) ) {
                                   _('_ad_user_pitch_count') => __('Pitches'),
                               );
       if($assignment_desk->public_facing_options['public_facing_volunteering_enabled'] == 'on'){
-        $custom_fields_to_add[_('_ad_user_volunteer_count')] = __('Volunteer Count');
+        $custom_fields_to_add[_('_ad_user_volunteer_count')] = __('Volunteered');
       }
       
       foreach ($custom_fields_to_add as $field => $title) {
@@ -62,13 +62,14 @@ if ( !class_exists( 'ad_user' ) ) {
         }
         return $user_type_term_name; 
       }
-      
+      return $default;
     }
     
     function handle_ad_user_average_words_column( $default, $column_name, $user_id ) {
       if ( $column_name == __( '_ad_user_average_words' ) ) {
         return $this->average_words($user_id); 
       }
+      return $default;
     }
     
     /** 
@@ -86,6 +87,7 @@ if ( !class_exists( 'ad_user' ) ) {
       if ( $column_name == __( '_ad_user_total_words' ) ) {
         return $this->count_total_words($user_id);
       }
+      return $default;
     }
     
     /**
@@ -110,6 +112,8 @@ if ( !class_exists( 'ad_user' ) ) {
         foreach($post_id_results as $p){
             $post_ids[] = $p[0];
         }
+        
+        // @todo - Make this configurable.
         $writer_role = get_term_by('name', _('Writer'), $assignment_desk->custom_taxonomies->user_role_label);
         // Of all the posts where this user is a participant, which have writers associated with them?
         $participant_records = $wpdb->get_results("SELECT * FROM $wpdb->postmeta
@@ -138,9 +142,14 @@ if ( !class_exists( 'ad_user' ) ) {
     function handle_ad_user_volunteer_count_column( $default, $column_name, $user_id ) {
         global $assignment_desk, $wpdb;
         if ( $column_name == __( '_ad_user_volunteer_count' ) ) {
-            $count = count(get_usermeta($user_id, '_ad_volunteer'));
+            $count = 0;
+            $volunteered_for = get_usermeta($user_id, '_ad_volunteer');
+            if($volunteered_for){
+                $count = count($volunteered_for);
+            }
             return $count;
         }
+        return $default;
     }
     
     function handle_ad_user_pitches_count_column( $default, $column_name, $user_id ) {
@@ -152,6 +161,7 @@ if ( !class_exists( 'ad_user' ) ) {
             }
             return $count;
         }
+        return $default;
     }
     
     function profile_options() {
