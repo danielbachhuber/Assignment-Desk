@@ -3,8 +3,8 @@
 Plugin Name: Assignment Desk
 Plugin URI: http://code.nyu.edu/projects/show/s20
 Description: News pitch and story tools for local news blogs.
-Author: Erik Froese, Daniel Bachhuber, Tal Safran
-Version: 0.3
+Author: Erik Froese, Daniel Bachhuber
+Version: 0.4
 Author URI: 
 */   
    
@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 define('ASSIGNMENT_DESK_FILE_PATH', __FILE__);
 define('ASSIGNMENT_DESK_URL', plugins_url(plugin_basename(dirname(__FILE__)) .'/'));
-define('ASSIGMENT_DESK_VERSION', '0.3');
+define('ASSIGMENT_DESK_VERSION', '0.4');
 
 define('ASSIGNMENT_DESK_DIR_PATH', dirname(__FILE__));
 define('ASSIGNMENT_DESK_TEMPLATES_PATH', ASSIGNMENT_DESK_DIR_PATH . '/php/templates');
@@ -67,8 +67,12 @@ if (!class_exists('assignment_desk')) {
         public $option_prefix = 'ad_';
 
 		var $options_group = 'assignment_desk_';
+		var $pitch_form_options_group = 'assignment_desk_pitch_form';
+		var $public_facing_options_group = 'assignment_desk_public_facing';		
 		
 		var $top_level_page = 'assignment_desk';
+		var $pitch_form_settings_page = 'assignment_desk_pitch_form_settings';
+		var $public_facing_settings_page = 'assignment_desk_public_facing_settings';
 		
 		public $pitch_form_key = 'assignment-desk-pitch-form';
 		public $all_posts_key = 'assignment-desk-all-posts';
@@ -77,14 +81,6 @@ if (!class_exists('assignment_desk')) {
 		public $define_editor_permissions = 'edit_pages';
 		public $define_admin_permissions = 'manage_options';
 
-        /** @var array $options Stores the options for this plugin. */
-        public $options = array();
-        
-        /**
-         * @var assignment_desk_contributor_controller $contributor_controller serves 
-         * the contributor profile and assignment views.
-         */
-        public $contributor_controller;
 
 	      /**
          * @var assignment_desk_dashboard_widgets $dashboard_widgets provides the widget.
@@ -120,17 +116,28 @@ if (!class_exists('assignment_desk')) {
             $this->public_views = new ad_public_views();
             $this->dashboard_widgets = new ad_dashboard_widgets();
 
+			/**
+			 * Store form messages
+			 */
+			$_REQUEST['assignment_desk_messages'] = array();
+			
+			/**
+			 * Provide an easy way to access Assignment Desk settings w/o querying database every time
+			 */
 			$this->general_options = get_option($this->get_plugin_option_fullname('general'));
-
-            /**
-             * Initialize various bits and pieces of functionality
-             * @todo Should these be interchangeable and not have internal dependencies?
-             */
-            $this->custom_taxonomies->init();
-            $this->user->init_user();
+			$this->pitch_form_options = get_option($this->get_plugin_option_fullname('pitch_form'));
+			$this->public_facing_options = get_option($this->get_plugin_option_fullname('public_facing'));
+			
         }
 
+		/**
+         * Initialize various bits and pieces of functionality
+         */
 		function init() {
+			
+			$this->custom_taxonomies->init();
+            $this->user->init_user();
+			
 			if ( is_admin() ) {
 				add_action( 'admin_menu', array(&$this, 'add_admin_menu_items'));
 				add_action( 'admin_menu', array(&$this->custom_taxonomies, 'remove_assignment_status_post_meta_box') );
@@ -161,14 +168,19 @@ if (!class_exists('assignment_desk')) {
         */
         function activate_plugin() {
             // This is an upgrade or re-activation
-            if ( get_option('ad_installed_once') == 'on' ){
+            if ( $this->general_options['ad_installed_once'] == 'on' ){
                 $this->custom_taxonomies->activate();
             }
             // This is the first time we've ever activated the plugin.
             else {
-                update_option('ad_installed_once', 'on');
                 $this->custom_taxonomies->activate();
                 $this->custom_taxonomies->activate_once();
+                
+                $this->settings->setup_defaults();
+                
+                $this->general_options = get_option($this->get_plugin_option_fullname('general'));
+                $this->general_options['ad_installed_once'] = 'on';
+                update_option($this->get_plugin_option_fullname('general'), $this->general_options);
             }
         }
 
@@ -209,14 +221,13 @@ if (!class_exists('assignment_desk')) {
     	  
 			// Enqueue stylesheets
 			wp_enqueue_style('ad-admin-css', ASSIGNMENT_DESK_URL.'css/admin.css', null, ASSIGMENT_DESK_VERSION, 'all');
-        
+        	
 			// Enqueue necessary scripts
 			wp_enqueue_script('tiny_mce');
 			wp_enqueue_script('wp-ajax-response');
-			wp_enqueue_script('jquery-truncator-js', ASSIGNMENT_DESK_URL .'js/jquery.truncator.js', 
-                              array('jquery'));
-			wp_enqueue_script('jquery-autocomplete-js', ASSIGNMENT_DESK_URL .'js/jquery.autocomplete.min.js', 
-                              array('jquery'));        
+			wp_enqueue_script('jquery-truncator-js', ASSIGNMENT_DESK_URL .'js/jquery.truncator.js', array('jquery'));
+			wp_enqueue_script('ad-admin-js', ASSIGNMENT_DESK_URL .'js/admin.js', 
+	                             array('jquery'), ASSIGMENT_DESK_VERSION);
 	    }
 	    
         
@@ -229,27 +240,41 @@ if (!class_exists('assignment_desk')) {
 	         * Top-level Assignment Desk menu goes to Settings
 	         * @permissions Edit posts or higher
 	         */
-			add_menu_page('Assignment Desk', 'Assignment Desk', 
+			add_menu_page( 'Assignment Desk', 'Assignment Desk', 
 	                        $this->define_admin_permissions, $this->top_level_page, 
 	                        array(&$this->settings, 'general_settings'));
+	
+			/**
+	         * Pitch Form settings page
+	         */
+			add_submenu_page( $this->top_level_page, 'Pitch Form',
+							'Pitch Form', $this->define_admin_permissions,
+							$this->pitch_form_settings_page, array(&$this->settings, 'pitch_form_settings'));
+							
+			/**
+	         * Public-Facing settings page
+	         */
+			add_submenu_page( $this->top_level_page, 'Public-Facing',
+							'Public-Facing', $this->define_admin_permissions,
+							$this->public_facing_settings_page, array(&$this->settings, 'public_facing_settings'));
         
 	        /**
 	         * WordPress taxonomy view for editing Pitch Statuses
 	         */
-	        add_submenu_page($this->top_level_page, 'Assignment Statuses',
+	        add_submenu_page( $this->top_level_page, 'Assignment Statuses',
 	                        'Assignment Statuses', $this->define_editor_permissions, 'edit-tags.php?taxonomy='.$this->custom_taxonomies->assignment_status_label);
         
 	        /**
 	         * WordPress taxonomy view for editing User Types
 	         */
-	        add_submenu_page($this->top_level_page, 'User Types',
+	        add_submenu_page( $this->top_level_page, 'User Types',
 	                        'User Types', $this->define_editor_permissions,
 	                        'edit-tags.php?taxonomy='.$this->custom_taxonomies->user_type_label);
         
 	        /**
 	         * WordPress taxonomy view for editing User Roles
 	         */
-	        add_submenu_page($this->top_level_page, 'User Roles',
+	        add_submenu_page( $this->top_level_page, 'User Roles',
 	                        'User Roles', $this->define_editor_permissions,
 	                        'edit-tags.php?taxonomy='.$this->custom_taxonomies->user_role_label);
 

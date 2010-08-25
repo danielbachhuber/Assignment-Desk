@@ -118,7 +118,7 @@ class ad_post {
                         echo ">$user->user_nicename</option>";
                     } ?>
                 </select>
-                <a id="ad-save-pitched-by-participant" class="hide-if-no-js button" href="#pitched-by-participant">OK</a>&nbsp
+                <a id="ad-save-pitched-by-participant" class="hide-if-no-js button" href="#pitched-by-participant">OK</a>&nbsp;
         	    <a id="ad-cancel-pitched-by-participant" class="hide-if-no-js" href="#pitched-by-participant">Cancel</a>
     	    </div>
     	</div>
@@ -190,8 +190,8 @@ class ad_post {
 		
 		wp_get_current_user();
 		
+		$user_types = $assignment_desk->custom_taxonomies->get_user_types();		
 		$participant_types = $assignment_desk->custom_taxonomies->get_user_types_for_post($post->ID);
-		$user_types = $assignment_desk->custom_taxonomies->get_user_types();
 		?>
 		<div class="misc-pub-section">
 			<label for="ad-participant-types">Contributor types:</label>
@@ -272,6 +272,7 @@ class ad_post {
 			// Use auto-suggest if Co-Authors Plus exists
 			// Otherwise, use a dropdown with all users
 			if ( $assignment_desk->coauthors_plus_exists() ) {
+			    echo '<input type="hidden" id="ad-assignee-search-user_id" name="ad-assignee-search-user_id">';
 				echo '<input type="text" id="ad-assignee-search" name="ad-assignee-search" size="20" maxlength="50"><br />';
 			} else {
 				echo "<select id='ad-assignee-dropdown' name='ad-assignee-dropdown'>";
@@ -299,8 +300,12 @@ class ad_post {
 				<h5><?php echo $user_role->name; ?></h5>
 				<ul id="ad-participants-<?php echo "{$user_role->term_id}"; ?>">					
 					<?php foreach ($all_participants[$user_role->term_id] as $participant_id => $participant_status) : ?>
-						<?php $participant = get_userdatabylogin($participant_id); ?>						
-						<li id="ad-participant-<?php echo "{$user_role->term_id}-{$participant_id}"; ?>"><input type="hidden" id="ad-participant-<?php echo $participant_id; ?>" name="ad-participant-role-<?php echo $user_role->term_id; ?>[]" value="<?php echo $participant_id.'|'.$participant_status; ?>" /><?php echo $participant->user_nicename; ?> | <?php echo $participant_status; ?> 
+						<?php $participant = get_userdata($participant_id);	?>						
+						<li id="ad-participant-<?php echo "{$user_role->term_id}-{$participant_id}"; ?>"><input type="hidden" id="ad-participant-<?php echo $participant_id; ?>" name="ad-participant-role-<?php echo $user_role->term_id; ?>[]" value="<?php echo "$participant_id|$participant_status"; ?>" /><?php echo "$participant->user_nicename | " . _($participant_status); ?>
+						    <?php if ($participant_status == 'volunteered') : ?>
+								<?php $user = get_userdata($participant_id); ?>
+						        <a href="#" id="ad-volunteer-<?php echo "$user_role->term_id-$user_role->name-$participant_id-$user->user_nicename"; ?>">assign</a>
+						    <?php endif; ?>
 						    <a href="#" class="ad-remove-participant" id="ad-remove-participant-<?php echo $user_role->term_id . '-' . $participant_id; ?>">remove</a></li>
 					<?php endforeach; ?>
 				</ul>
@@ -360,7 +365,7 @@ class ad_post {
        // }
 
         // The user who pitched this story
-        if (current_user_can($assignment_desk->define_editor_permissions)) {
+        if ( current_user_can( $assignment_desk->define_editor_permissions ) ) {
 		    update_post_meta($post_id, '_ad_pitched_by_participant', (int)$_POST['ad-pitched-by-participant']);
 		    update_post_meta($post_id, '_ad_private', (int)$_POST['ad-private']);
 	    }
@@ -377,25 +382,24 @@ class ad_post {
 			}
 		}
 		
-		
 		// If the current user can edit participant types, allow them to do so
 		// Otherwise, set all participant types to 'on' if they're unset
 		$user_types = $assignment_desk->custom_taxonomies->get_user_types();
 		// Only editors can update the participant types on an assignment
-		if (current_user_can($assignment_desk->define_editor_permissions)) {
+		if ( current_user_can( $assignment_desk->define_editor_permissions ) ) {
 			foreach ($user_types as $user_type) {
 			    $participant_types = array();
-			    if($_POST['ad-participant-types']){
+			    if ( $_POST['ad-participant-types'] ) {
 			        $participant_types = $_POST['ad-participant-types'];
+					if ( in_array($user_type->term_id, $participant_types) ) {
+						update_post_meta($post_id, "_ad_participant_type_$user_type->term_id", 'on');
+					} else {
+						update_post_meta($post_id, "_ad_participant_type_$user_type->term_id", 'off');
+					}
 			    }
-				if ( in_array($user_type->term_id, $participant_types) ) {
-					update_post_meta($post_id, "_ad_participant_type_$user_type->term_id", 'on');
-				} else {
-					update_post_meta($post_id, "_ad_participant_type_$user_type->term_id", 'off');
-				}
 			}
 		} else {
-			foreach ($user_types as $user_type) {
+			foreach ( $user_types as $user_type ) {
 				$participant_type_state = get_post_meta($post_id, "_ad_participant_type_$user_type->term_id", true);
 				if ( $participant_type_state != 'on' && $participant_type_state != 'off' ) {
 					update_post_meta($post_id, "_ad_participant_type_$user_type->term_id", 'on');
@@ -413,20 +417,18 @@ class ad_post {
 				$raw_role_participants = $_POST["ad-participant-role-$user_role->term_id"];
 				if ( count($raw_role_participants) ) {
 					foreach ($raw_role_participants as $raw_participant) {
-						$participant = explode('|', $raw_participant);
-						$user_login = $participant[0];
-						$status_for_this_role = $participant[1];
-						$user = get_userdatabylogin($user_login); 
+						$participant = explode('|', $raw_participant);;
+						$user = get_userdata($participant[0]); 
 						
 						// Check if the user_login is valid.
 						if($user){
 						    // array(user => "status", user => "status")
-						    $all_role_participants[$user_login] = $status_for_this_role;
+						    $all_role_participants[$user->ID] = $participant[1];
 						    // array('user' => array(role_id, role_id, ...))
-						    $all_participants[$user_login][] = $user_role->term_id;
+						    $all_participants[$user->ID][] = $user_role->term_id;
 						    
 						    // Existing user_roles for this user on this post
-						    $participant_record = get_post_meta($post_id, "_ad_participant_$user_login", true);
+						    $participant_record = get_post_meta($post_id, "_ad_participant_$user_id", true);
 						    if(!$participant_record){ $participant_record = array(); }
 						    // check if the user is already assigned to that role
 						    // If the term_id for the user_role is NOT in the list of term_ids for this user.
@@ -447,6 +449,15 @@ class ad_post {
 				update_post_meta($post_id, "_ad_participant_$participant_id", $user_role_ids);
 			}
 		}
+		
+        if($post->post_status == 'publish'){
+            $published_status = get_term($assignment_desk->general_options['default_published_assignment_status'],
+                                         $assignment_desk->custom_taxonomies->assignment_status_label);
+            if($published_status){
+                wp_set_object_terms($post->ID, $published_status->slug, $assignment_desk->custom_taxonomies->assignment_status_label);
+            }
+        }
+        
     }
     
     /**
@@ -506,7 +517,7 @@ class ad_post {
 		
 		if(current_user_can($assignment_desk->define_editor_permissions)) {
             if($_GET['q']){
-                $user = get_userdatabylogin($_GET['q']);
+                $user = get_userdata((int)$_GET['q']);
             
                 if($user){
                     echo $user->ID;

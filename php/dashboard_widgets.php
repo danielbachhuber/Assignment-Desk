@@ -1,5 +1,7 @@
 <?php
 
+require_once(ASSIGNMENT_DESK_DIR_PATH . "/php/utils.php");
+
 /*
 * This class manages the widgets that appear in the Wordpress Administration Dashboard.
 * The assignment_desk class holds an instance of this class as a member.
@@ -19,25 +21,28 @@ class ad_dashboard_widgets {
                    
            // Add the editor_overview_widget widget, if enabled
            // if ($assignment_desk->get_plugin_option('editor_overview_widget_enabled')) {
-               wp_add_dashboard_widget('ad_editor_overview', 'Story Pitches', array(&$this, 'editor_overview_widget'));
+               wp_add_dashboard_widget('ad_editor_overview', 'Assignment Desk Overview', array(&$this, 'overview_widget'));
            // }
         }
         
         wp_add_dashboard_widget('ad_assignments', 'Assignments', array(&$this, 'assignments_widget'));
     }
 
+    /**
+     * Return the number of objects associated with this status
+     * $status is a term
+     */
 	function count_pitches($status){
 		global $assignment_desk, $wpdb;
-		$term_id = $wpdb->get_var("SELECT term_id FROM $wpdb->terms WHERE name=$status");
 		$count = $wpdb->get_var($wpdb->prepare("SELECT count FROM $wpdb->term_taxonomy 
-													WHERE taxonomy = %s AND term_id = %d", 
+													WHERE taxonomy = '%s' AND term_id = %d", 
 													$assignment_desk->custom_taxonomies->assignment_status_label,
-													$term_id));
+													$status->term_id));
 		$count = $count ? $count : 0;
 		return $count;
 	}
    
-    function editor_overview_widget() {
+    function overview_widget() {
         global $assignment_desk, $current_user, $wpdb;
 
 		$new_pitches_count = $this->count_pitches('New');
@@ -48,29 +53,30 @@ class ad_dashboard_widgets {
                 echo "<div class='message info'>$message</div>";
             }
         }
-?>
-<div class="table">
-<table>
-    <tbody>
-        <tr>
-            <td class="b">
-                <a href="admin.php?page=assignment_desk-pitch&active_status=New" class="ad-new-count">
-                    <?php echo $new_pitches_count ?></a>
-            </td>
-            <td class="t"><a href="admin.php?page=assignment_desk-pitch&active_status=New">New</a></td>
-        </tr>
-        <tr>
-            <td class="b">
-                <a href="admin.php?page=assignment_desk-pitch&active_status=New" class="ad-approved-count">
-                    <?php echo $approved_post_count ?></a>
-            </td>
-            <td class="t"><a href="admin.php?page=assignment_desk-pitch&active_status=New">Approved</a></td>
-        </tr>
-    </tbody>
-</table>
-</div>
-<div class="inside">&raquo; <a href="?page=assignment_desk-index">Go to Assignment Desk landing page.</a></div>
+        ?>
+        <div class="table">
+        <table>
+            <tbody>
+            <?php if($assignment_desk->coauthors_plus_exists()){
+                // @todo - Figure out how to link to the unassigned posts.
+                $unassigned_url = "#";
+                echo "<tr><td class='b'><a href='$unassigned_url'>" . count(get_unassigned_posts()) . "</a></td>";
+                echo "<td class='b'><a href='$unassigned_url'>" . _('Unassigned', 'assignment-desk') . "</a></td></tr>";
 
+                // @todo - Figure out how to link to inprogress posts.
+                $inprogress_url = "";
+                echo "<tr><td class='b'><a href='$inprogress_url'>" . count(get_inprogress_posts()) . "</a></td>";
+                echo "<td class='b'><a href='$inprogress_url'>" . _('In Progress', 'assignment-desk') . "</a></td></tr>";
+            }
+            
+            $this_month_url = admin_url() . '/edit.php?post_status=publish&monthnum=' . date('M');
+            $q = new WP_Query( array('post_status' => 'publish', 'monthnum' => date('M')));
+            echo "<tr><td class='b'><a href='$this_month_url'>$q->found_posts</a></td>";
+            echo "<td class='b'><a href='$this_month_url'>" . _('Published this month', 'assignment-desk') . "</a></td></tr>";
+            ?>        
+            </tbody>
+        </table>
+        </div>
 <?php
     }
    
@@ -87,7 +93,7 @@ class ad_dashboard_widgets {
         }
         // Find all of the posts this user participates in.
         $participant_posts = $wpdb->get_results("SELECT post_id FROM $wpdb->postmeta 
-                                                  WHERE meta_key = '_ad_participant_{$current_user->user_login}'
+                                                  WHERE meta_key = '_ad_participant_{$current_user->ID}'
                                                   ORDER BY post_id");
         
         if ( ! $participant_posts ){
@@ -101,9 +107,9 @@ class ad_dashboard_widgets {
                 // Get all of the roles this user has for this post
                 $participant_record = get_post_meta($post->post_id, "_ad_participant_role_$user_role->term_id", true);
                 if($participant_record) {
-                    foreach ($participant_record as $user_login => $status ){
-                        if( $user_login == $current_user->user_login && $status == 'pending' ){
-                            $pending_posts[] = array($post->post_id, $user_role);
+                    foreach ($participant_record as $user_id => $status ){
+                        if( $user_id == $current_user->ID && $status == 'pending' ){
+                           $pending_posts[] = array($post->post_id, $user_role);
                         }
                     }
                 }
@@ -116,9 +122,10 @@ class ad_dashboard_widgets {
     <div>
         <?php $post = get_post($pending[0]); ?>
         <?php 
-        echo "{$post->post_title} | {$pending[1]->name}";
-        echo " <a class='button' href='" . admin_url() . "index.php?participant_response=accepted&post_id=$post->ID&role_id={$pending[1]->term_id}'>Accept</a> ";
-        echo "<a class='button' href='" . admin_url() . "index.php?participant_response=declined&post_id=$post->ID&role_id={$pending[1]->term_id}'>Decline</a>";  
+        echo "<p>{$post->post_title} | {$pending[1]->name}</p>";
+        
+        echo "<p><a class='button' href='" . admin_url() . "index.php?participant_response=accepted&post_id=$post->ID&role_id={$pending[1]->term_id}'>Accept</a> ";
+        echo "<a class='button' href='" . admin_url() . "index.php?participant_response=declined&post_id=$post->ID&role_id={$pending[1]->term_id}'>Decline</a></p>";  
         ?>
     </div>
 <?php endforeach; ?>
@@ -135,23 +142,28 @@ class ad_dashboard_widgets {
        $role_id = (int)$_GET['role_id'];
           
        get_currentuserinfo();
-       if ('' == $user_ID || $user_ID != $post_id) {
+       if (!$current_user->ID || $user_ID != $post_id) {
            $_REQUEST['ad-dashboard-assignment-messages'][] = _('Unauthorized assignment response. This is fishy.');
        }
-       
        $_REQUEST['ad-dashboard-assignment-messages'] = array();
        
        if ($response && $post_id && $role_id){
            $participant_record = get_post_meta($post_id, "_ad_participant_role_$role_id", true);
            // This will not evaluate to true unless the user is currently pending for this role on this post.
-           if($participant_record && $participant_record[$current_user->user_login] == 'pending'){
-               $participant_record[$current_user->user_login] = $response;
+           if($participant_record && $participant_record[$current_user->ID] == 'pending'){
+               $participant_record[$current_user->ID] = $response;
                if($response == 'accepted'){
                    $_REQUEST['ad-dashboard-assignment-messages'][] = _('Thank you.');
                    // Add as a co-author
                    if($assignment_desk->coauthors_plus_exists()){
                        $coauthors_plus->add_coauthors($post_id, array($current_user->user_login), true);
                    }
+                   $user_participant = get_post_meta($post_id, "_ad_participant_$current_user->ID", true);
+                   if(!$user_participant){
+                       $user_participant = array();
+                   }
+                   $user_participant[] = $role_id;
+                   update_post_meta($post_id, "_ad_participant_$current_user->ID", $user_participant);
                }
                else if($response == 'declined'){
                    $_REQUEST['ad-dashboard-assignment-messages'][] = _('Sorry!.');

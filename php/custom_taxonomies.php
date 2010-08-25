@@ -20,7 +20,11 @@ class ad_custom_taxonomies {
     }
     
     function init() {
-      
+        global $wp_version;
+        if (version_compare($wp_version, '3.0', '<')) {
+            add_action('admin_print_scripts-edit-tags.php', array(&$this, 'javascript'));
+        }
+        
 		$args = array();
 		$labels = array();
 		// Register $assignment_taxonomy if it doesn't exist, else generate an object								
@@ -36,10 +40,14 @@ class ad_custom_taxonomies {
 							'public' => false,
 			                'show_ui' => true,
 			                'show_tagcloud' => false,
+							'rewrite' => false
 							);
 			register_taxonomy($this->assignment_status_label, array('post'), $args);
 			
 			add_action('delete_term_taxonomy', array(&$this, 'handle_user_type_delete'));
+			
+			add_filter('manage_edit-tags_columns', array(&$this, 'manage_tags_columns'));
+			add_action('manage_user_type_custom_column', array(&$this, 'handle_user_type_users_column'), 10, 3);
 		}
 			
 		// Register $user_role_taxonomy if it doesn't exist									
@@ -49,6 +57,7 @@ class ad_custom_taxonomies {
 		                'public' => true,
 		                'show_ui' => false,
 		                'show_tagcloud' => false,
+						'rewrite' => false
 		                );
 		  register_taxonomy($this->user_role_label, array('user'), $args);
 		}
@@ -60,6 +69,7 @@ class ad_custom_taxonomies {
 		                'public' => true,
 		                'show_ui' => false,
 		                'show_tagcloud' => false,
+						'rewrite' => false
 		                );
 		  register_taxonomy($this->user_type_label, array('user'), $args);
 		}
@@ -78,25 +88,30 @@ class ad_custom_taxonomies {
      */
     function activate_once(){
         $default_assignment_labels = array(
-            array(  'term' => 'New',
-                 'args' => array( 
+            array( 'term' => 'New',
+                   'args' => array( 
                        'slug' => 'new',
                        'description' => 'A new pitch that has not been edited.',)
 		          ),
-		    array(  'term' => 'Approved',
-			          'args' => array( 
-			                'slug' => 'approved',
+		    array( 'term' => 'Approved',
+			       'args' => array( 
+			           'slug' => 'approved',
                        'description' => 'An editor has approved the pitch.',)
 		          ),
-		    array(  'term' => 'Rejected',
-			          'args' => array( 
-			                'slug' => 'rejected',
-								      'description' => 'The pitch was not accepted for development.',)
+		    array( 'term' => 'Rejected',
+			       'args' => array( 
+			           'slug' => 'rejected',
+				       'description' => 'The pitch was not accepted for development.',)
 		          ),
-		    array(  'term' => 'On hold',
-                 'args' => array( 
+		    array( 'term' => 'On hold',
+                   'args' => array( 
                        'slug' => 'on-hold',
                        'description' => 'Work on the pitch is on hold.',)
+		          ),
+            array( 'term' => 'Completed',
+                   'args' => array( 
+                       'slug' => 'completed',
+                       'description' => 'The assignment is complete and published.',)
 		          ),
         );
 	    
@@ -105,25 +120,25 @@ class ad_custom_taxonomies {
 	    }
 	    
 	    $default_user_roles = array(
-            array(  'term' => 'Writer',
-                 'args' => array( 
+            array( 'term' => 'Writer',
+                   'args' => array( 
                        'slug' => 'writer',
                        'description' => 'Writes for this blog.',)
 		          ),
-		    array(  'term' => 'Photographer',
-			          'args' => array( 
-			                'slug' => 'photographer',
+		    array( 'term' => 'Photographer',
+			       'args' => array( 
+			           'slug' => 'photographer',
                        'description' => 'Takes pictures for the story.',)
 		          ),
 		    array(  'term' => 'Videographer',
-			          'args' => array( 
-			                'slug' => 'videographer',
-								      'description' => 'Shoots video for the story..',)
+			        'args' => array( 
+			            'slug' => 'videographer',
+						'description' => 'Shoots video for the story..',)
 		          ),
 		    array(  'term' => 'Editor',
-                 'args' => array( 
-                       'slug' => 'editor',
-                       'description' => 'Manages the story production.',)
+                    'args' => array( 
+                        'slug' => 'editor',
+                        'description' => 'Manages the story production.',)
 		          ),
         );
 	    
@@ -131,26 +146,53 @@ class ad_custom_taxonomies {
            wp_insert_term( $term['term'], $this->user_role_label, $term['args'] );
 	    }
 	    $default_user_types = array(
-            array(  'term' => 'Community Contributor',
-                 'args' => array( 
+            array( 'term' => 'Community Contributor',
+                   'args' => array( 
                        'slug' => 'community-contributor',
                        'description' => 'Someone from the community that writes for the blog.',)
 		          ),
-		    array(  'term' => 'Professional',
-			          'args' => array( 
-			                'slug' => 'professional',
+		    array( 'term' => 'Professional',
+			       'args' => array( 
+			           'slug' => 'professional',
                        'description' => 'A professional journalist.',)
 		          ),
-		    array(  'term' => 'Student Journalist',
-			          'args' => array( 
-			                'slug' => 'student-journalist',
-								      'description' => 'A student who writes for the blog.',)
+		    array( 'term' => 'Student Journalist',
+			       'args' => array( 
+			           'slug' => 'student-journalist',
+					   'description' => 'A student who writes for the blog.',)
 		          ),
         );
 	    
 	    foreach ( $default_user_types as $term ){
            wp_insert_term( $term['term'], $this->user_type_label, $term['args'] );
 	    }
+    }
+    
+    /**
+    * Work around to change the labels on the geenrated custom taxonomy UIs. 
+    * See js/edit_tags.js 
+    * @todo Internationalize the labels we are replacing.
+    */
+    function javascript() {
+        wp_enqueue_script('ad-edit-tags-js', ASSIGNMENT_DESK_URL .'js/edit_tags.js', array('jquery'));
+
+        $taxonomy = $_GET['taxonomy'];
+        if (!$taxonomy){ $taxonomy = $_POST['taxonomy']; }
+        
+        if($taxonomy){            
+            $title = "";
+            $singular = "";
+            $vals = array(
+                        'user_role' => array('title' => 'User Roles', 'singular' => 'User Role'),
+                        'user_type' => array('title' => 'User Types', 'singular' => 'User Type'),
+                        'assignment_status' => array('title' => 'Assignment Statuses', 'singular' => 'Assignment status'),
+                    );
+            echo "<script type='text/javascript'>";
+            foreach( $vals[$taxonomy] as $name => $value ){
+                echo "var $name = '$value';";
+            }
+            echo "</script>";
+        }
     }
 
     /**
@@ -194,38 +236,50 @@ class ad_custom_taxonomies {
 		return get_terms($this->user_role_label, $args);
 	}
 	
+	/**
+	 * Gets permitted user types for a given post
+	 * @param int $post_id The ID for the post
+	 * @return array $user_types_for_post Permitted user types on post
+ 	 */
 	function get_user_types_for_post( $post_id = null ) {
 		$user_types_for_post = array();
-		// Post hasn't been saved yet I guess...
-		if ( !$post_id ) {
-			$user_types_for_post['display'] = 'All';
-			return $user_types_for_post;
-		}
-	
+		$user_types = $this->get_user_types();	
 		$all_participant_types = '';
-		
-		$user_types = $this->get_user_types();
-		foreach ( $user_types as $user_type ) {
-			$user_types_for_post[$user_type->term_id] = get_post_meta($post_id, "_ad_participant_type_$user_type->term_id", true);
-			// If it's been set before, build the string of permitted types
-			// Else, set all of the participant types to 'on'
-			if ( $user_types_for_post[$user_type->term_id] == 'on' ) {
-				$all_participant_types .= $user_type->name . ', ';
-			} else if ($user_types_for_post[$user_type->term_id] == '') {
+					
+		// If the post hasn't been saved, all user types are on
+		// Otherwise, load the user types from custom fields
+		if ( !$post_id ) {
+			
+			$user_types_for_post['display'] = 'All';
+			foreach ( $user_types as $user_type ) {
 				$user_types_for_post[$user_type->term_id] = 'on';
 			}
+			return $user_types_for_post;
 			
-		}
-		
-		if (in_array('off', $user_types_for_post) && !in_array('on', $user_types_for_post)) {
-			$user_types_for_post['display'] = 'None';
-		} else if ($all_participant_types == '' || !in_array('off', $user_types_for_post)) {
-			$user_types_for_post['display'] = 'All';
 		} else {
-			$user_types_for_post['display'] = rtrim($all_participant_types, ', ');
-		}
+	
+			foreach ( $user_types as $user_type ) {
+				$user_types_for_post[$user_type->term_id] = get_post_meta($post_id, "_ad_participant_type_$user_type->term_id", true);
+				// If it's been set before, build the string of permitted types
+				// Else, set all of the participant types to 'on'
+				if ( $user_types_for_post[$user_type->term_id] == 'on' ) {
+					$all_participant_types .= $user_type->name . ', ';
+				} else if ($user_types_for_post[$user_type->term_id] == '' || !$user_types_for_post[$user_type->term_id]) {
+					$user_types_for_post[$user_type->term_id] = 'on';
+				}
+			
+			}
 		
-		return $user_types_for_post;
+			if (in_array('off', $user_types_for_post) && !in_array('on', $user_types_for_post)) {
+				$user_types_for_post['display'] = 'None';
+			} else if ($all_participant_types == '' || !in_array('off', $user_types_for_post)) {
+				$user_types_for_post['display'] = 'All';
+			} else {
+				$user_types_for_post['display'] = rtrim($all_participant_types, ', ');
+			}
+		
+			return $user_types_for_post;
+		}
 		
 	}
 	
@@ -283,6 +337,32 @@ class ad_custom_taxonomies {
 	    global $wpdb;
 	    $term_id = $wpdb->get_var("SELECT term_id FROM $wpdb->term_taxonomy WHERE term_taxonomy_id = $tt_id");
         $wpdb->query("DELETE FROM $wpdb->usermeta WHERE meta_key='ad_user_type' and meta_value = $term_id");
+	}
+	/**
+	 * Manage the columns on the edit-tags.php page (the generated UI for custom taxonomies.)
+	 * Remove the Posts and Slug columns on the user_type and user_role taxonomies.
+	 * Add a column on the user_type UI to show the number of users of that type.
+	 */
+	function manage_tags_columns($columns){
+	    
+	    if($_GET['taxonomy'] == 'user_type' || $_GET['taxonomy'] == 'user_role'){
+	        unset($columns['posts']);
+	        unset($columns['slug']);
+        }
+	    if($_GET['taxonomy'] == 'user_type'){
+	        $columns['_ad_users'] = _('Users');
+	    }
+	    return $columns;
+	}
+	
+	/**
+	 * Count the number of users that of a certain user_type.
+	 */
+	function handle_user_type_users_column( $c, $column_name, $term_id ){
+	    global $wpdb;
+	    if($column_name == '_ad_users'){
+	        return $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->usermeta where meta_key='ad_user_type' and meta_value=$term_id");
+	    }
 	}
 }
     
