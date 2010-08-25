@@ -96,7 +96,7 @@ jQuery(document).ready(function() {
      * Toggle post_meta_box subheads
 	 */
 	jQuery('h4.toggle').click(function() {
-		var inner = jQuery(this).parent().find('div.inner').slideToggle();
+		jQuery(this).parent().find('div.inner').slideToggle();
 	});
 	
 	/**
