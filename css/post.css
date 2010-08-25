@@ -1,0 +1,68 @@
+div.ad-module h4 {
+    background: #F1F1F1;
+    border: 1px solid #DFDFDF;
+    font-weight: bold;
+    margin: 0px;
+    padding: 6px;
+}
+
+div.ad-module h4:hover {
+	cursor:pointer;
+}
+
+div.message {
+	border-width: 1px;
+	border-style: solid;
+	padding: 5px;
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+div.message.alert {
+	border-color: #CC0000;
+	background-color: #FFEBE8;
+}
+
+div.message.info {
+	border-color: #E6DB55;
+	background-color: #FFFFE0;
+}
+
+div#assignment-desk div.misc-pub-section span {
+	font-weight: bold;
+}
+
+div#ad-participant-types-select {
+	margin-top: 10px;
+}
+
+ul.plain {
+	list-style: none;
+	margin: 8px 0 5px;
+	padding: 2;
+	white-space: nowrap;
+	font-size: 11px;
+}
+
+ul.plain a {
+	line-height: 2;
+	padding: .2em;
+	text-decoration: none;
+}
+
+.plain a .count, .plain a.current .count {
+	color: #999;
+	font-weight: normal;
+}
+
+.plain a.current {
+	font-weight: bold;
+	background: none;
+	border: none;
+}
+
+.plain li {
+	display: inline;
+	margin: 0;
+	padding: 0;
+}

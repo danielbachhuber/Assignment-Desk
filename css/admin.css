@@ -1,0 +1,65 @@
+/* Right-side */
+.ad-module { margin-bottom: 10px; }
+.ad-module h2 { margin: 2px; font-size: 16px; font-weight: 900;}
+
+/* User messages. */
+li.ad-message-success {
+	border:solid 1px #90ac13; 
+	background:#eef4d3 url(../images/success.png) 8px 6px no-repeat;
+	color:#6b800d;
+	font-weight:bold;
+	padding:4px;
+	text-align:center;
+}
+
+li.ad-message-info {
+	border:solid 1px #90ac13; 
+	background:#eef4d3 url(../images/success.png) 8px 6px no-repeat;
+	color:#6b800d;
+	font-weight:bold;
+	padding:4px;
+	text-align:center;
+}
+
+li.ad-message-error {
+    border:solid 1px #CC0000;
+	background:#F7CBCA url(../images/error.png) 8px 6px no-repeat;
+	color:#CC0000;
+	font-weight:bold;
+	padding:4px;
+	text-align:center;
+}
+
+.avatar {
+    float:left;
+    padding-right: 10px;
+}
+
+
+/* Settings */
+
+ul.ad_elements span.field {
+	width: 120px;
+	display: inline-block;
+}
+
+ul.ad_elements span.copy.hidden {
+	display: none;
+}
+
+ul.ad_elements span.copy label {
+	margin-right: 5px;
+}
+
+ul.ad_elements span.copy input {
+	margin-right: 10px;
+}
+
+#ad_editor_overview td.b a { 
+	font-size: 16px;
+}
+#ad_editor_overview table {
+	width: 100%;
+}
+#ad_editor_overview table td{border-top:#ececec 1px solid;padding:3px 0;white-space:nowrap;}
+#ad_editor_overview table tr.first td{border-top:none
