@@ -286,25 +286,17 @@ class ad_post {
                 $total_participants += count($role_participants);
                 echo "<div id='ad-participant-role-{$user_role->term_id}'-wrap class='ad-role-wrap'>";
                 echo "<h5> $user_role->name </h5>";
-                echo "<ul id='ad-participants-{$user_role->term_id}'>";
                 foreach ($role_participants as $participant_id => $participant_status) {
 				    $participant = get_userdata((int)$participant_id);
-				    error_log($participant_id);
-				    echo "$participant->user_nicename | " . _($participant_status);
-				    // This input is part of the larger page form
-					echo "<input type='hidden' name='ad-participant-role-{$user_role->term_id}[]' value='{$participant->id}|{$participant_status}'>";
+				    echo "<p>$participant->user_nicename | " . _($participant_status);
+					echo "<input type='hidden' name='ad-participant-role-{$user_role->term_id}[]' value='{$participant->ID}|{$participant_status}'>";
                     // assignment-desk specific actions
-					echo "<form name='ad-participant-role-{$user_role->term_id}-{$participant_id}' method='post'>";
-					echo "<input type='hidden' name='ad-participant-action-user_id' value='{$participant->ID}'>";
-					echo "<input type='hidden' name='ad-participant-action-user_nicename' value='{$participant->user_nicename}'>";
-					echo "<input type='hidden' name='ad-participant-action-role_id' value='{$user_role->term_id}'>";
                     if ($participant_status == 'volunteered'){
-					    echo " <button class='button' value='assign'>assign</button>";
+					    echo " <button class='button' name='ad-participant-assign' value='{$user_role->term_id}-{$participant->ID}'>assign</button>";
 					}
-                    echo " <button class='button' value='remove'>remove</button>";
-					echo "</form>";
+                    echo " <button class='button' name='ad-participant-remove' value='{$user_role->term_id}|{$participant->ID}'>remove</button>";
+                    echo "</p>";
 				}
-                echo "</ul>";
                 echo "</div>";
             }
         }			
@@ -405,44 +397,49 @@ class ad_post {
 		$user_roles = $assignment_desk->custom_taxonomies->get_user_roles();
 		if (current_user_can($assignment_desk->define_editor_permissions)) {
 			$all_participants = array();
+			$all_role_participants = array();
 			// For each User Role, save participant ID and status
 			foreach ( $user_roles as $user_role ) {
-				$raw_role_participants = array();
-				$all_role_participants = array();		
+				$role_participants = array();
 				$raw_role_participants = $_POST["ad-participant-role-$user_role->term_id"];
 				if ( count($raw_role_participants) ) {
 					foreach ($raw_role_participants as $raw_participant) {
 						$participant = explode('|', $raw_participant);;
 						$user = get_userdata((int)$participant[0]); 
-						
 						// Check if the user_login is valid.
 						if($user){
-						    // array(user => "status", user => "status")
-						    $all_role_participants[$user->ID] = $participant[1];
-						    // array('user' => array(role_id, role_id, ...))
+						    // array(user_ID => "status", user_ID => "status")
+						    $role_participants[$user->ID] = $participant[1];
+						    // array(user_ID => array(role_ID, role_ID, ...))
 						    if(!in_array($user->ID, $all_participants)){
 						        $all_participants[$user->ID] = array();
 						    }
 						    $all_participants[$user->ID][] = $user_role->term_id;
-						    
-						    // Existing user_roles for this user on this post
-						    $participant_record = get_post_meta($post_id, "_ad_participant_$user_id", true);
-						    if(!$participant_record){ $participant_record = array(); }
-						    // check if the user is already assigned to that role
-						    // If the term_id for the user_role is NOT in the list of term_ids for this user.
-						    if(! in_array($user_role->term_id, $participant_record)){					        
-						        $this->send_assignment_email($post_id, $user->ID, $user_role->term_id);
-						    }
 						}
 						else {
-						    // Invalid user.
-						    // @todo - Store the error somewhere so it can be displayed
+						    // @todo -  Invalid user. Store the error somewhere so it can be displayed
 						}
-						error_log(print_r($all_role_participants, true));
 					}
 				}
-				update_post_meta($post_id, "_ad_participant_role_$user_role->term_id", $all_role_participants);
+				$all_role_participants[$user_role->term_id] = $role_participants;
 			}
+			
+			if( $_POST['ad-participant-remove'] ){
+		        $split = explode('|', $_POST['ad-participant-remove']);
+		        $user_id = (int)$split[1];
+		        $role_id = (int)$split[0];
+		        if ( is_array($all_participants[$user_id]) && in_array($role_id, $all_participants[$user_id]) ){
+		            unset($all_participants[$user_id][$role_id]);
+		        }
+		        if ( isset($all_role_participants[$role_id][$user_id]) ) {
+		            unset($all_role_participants[$role_id][$user_id]);
+		        }
+		    }
+		    
+		    foreach ( $all_role_participants as $role_id => $role_participants ) {
+			    update_post_meta($post_id, "_ad_participant_role_$role_id", $role_participants);
+			}
+			
 			// Also save the User Roles associated with a row for each participant
 			foreach ($all_participants as $participant_id => $user_role_ids) {
 				update_post_meta($post_id, "_ad_participant_$participant_id", $user_role_ids);
