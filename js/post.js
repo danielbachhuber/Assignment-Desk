@@ -26,10 +26,9 @@ function ad_add_to_participants(user_id, user_nicename, role_id, role_name){
 	var user_role_status = 'pending';
 	jQuery("#ad-participant-error-message").remove();
 	
-	// @todo check to see whether use was already assigned in this rold
+	// @todo check to see whether use was already assigned in this role
 	jQuery('input[name="ad-participant-role-' + role_id + '[]"]').each(function() {
 		spl = jQuery(this).val().split('|');
-		
 		if ( spl[0] == user_id && spl[1] != 'volunteered' ) {
 			error_message = '<div id="ad-participant-error-message" class="message alert">'
 							+ user_nicename + ' has already been added as ' + role_name
@@ -267,16 +266,14 @@ jQuery(document).ready(function() {
 		return false;
 	});
 	
-	jQuery('.ad-remove-participant').each(function(index, link){
-		jQuery(link).click(function(){
-			var pieces = this.id.split('-');
+	jQuery('.ad-remove-participant-button').each(function(index, button){
+		jQuery(button).click(function(){
+			var pieces = jQuery(button).val().split('|');
 			// Remove the user from that role.
-			jQuery('#ad-participant-' + pieces[3] + '-' + pieces[4]).remove();
-			
+			jQuery('#ad-participant-' + pieces[0] + '-' + pieces[1]).remove();
 			// @todo - roll up the role if no users left
-			// @todo - Call coauthors_remove_author(name) if no roles left for this pitch
-			return false;
 		});
+		return false;
 	});
 	
 	/* ============================ Pitched By ============================ */
