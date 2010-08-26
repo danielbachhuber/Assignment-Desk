@@ -234,8 +234,8 @@ class ad_post {
      * Loren ipsum bitches
 	 */ 
     function user_role_select($user_roles){
-        echo "<label for='ad-user-role-dropdown'>Role:</label>&nbsp;";
-        echo "<select id='ad-user-role-dropdown' name='ad-user-role-dropdown'>";
+        echo "<label for='ad-participant-role-dropdown'>Role:</label>&nbsp;";
+        echo "<select id='ad-participant-role-dropdown' name='ad-participant-role-dropdown'>";
             foreach($user_roles as $user_role) {
                 echo "<option value='{$user_role->term_id}'>{$user_role->name}</option>";
             }
@@ -243,28 +243,15 @@ class ad_post {
     }
 
 	/**
-     * Loren ipsum bitches
+     * Show the form to add a new participant and current list of participants.
+     * If coauthors-plus is enabled show a text box with auto-completion for users.
+     * If coauthors-plus is not enabled we show a list of users in a select box.
      */
     function display_participants() {
         global $assignment_desk, $post, $wpdb;
         
         $user_roles = $assignment_desk->custom_taxonomies->get_user_roles(array('order' => "-name"));
-
-		// Load all existing participants from separate custom fields into
-		// one array so that we can list it later
-		$all_participants = array();
-		$total_participants = 0;
-		foreach ( $user_roles as $user_role ) {
-			$role_participants = get_post_meta($post->ID, "_ad_participant_role_$user_role->term_id");
-			$role_participants = $role_participants[0];
-			if (count($role_participants)) {
-				$all_participants[$user_role->term_id] = $role_participants;
-				$total_participants = $total_participants + count($role_participants);
-			}
-		}
-		
-		// Get all of the users in the database
-		$all_users = $wpdb->get_results("SELECT * FROM $wpdb->users");
+        
 
 		if ( count($user_roles) && current_user_can($assignment_desk->define_editor_permissions)) :
 			echo '<div id="ad-assign-form" class="misc-pub-section">';
@@ -276,6 +263,7 @@ class ad_post {
 				echo '<input type="text" id="ad-assignee-search" name="ad-assignee-search" size="20" maxlength="50"><br />';
 			} else {
 				echo "<select id='ad-assignee-dropdown' name='ad-assignee-dropdown'>";
+				$all_users = $wpdb->get_results("SELECT * FROM $wpdb->users");
 				foreach ( $all_users as $user ) {
 					echo "<option value='{$user->ID}'>{$user->user_nicename}</option>";
 				}
@@ -289,31 +277,38 @@ class ad_post {
 		<?php endif; ?>
 		
 		<div id="ad-participants-wrap">
-		<?php
-		
-        if ( count($all_participants) ): ?> 
-
-            <?php foreach ( $user_roles as $user_role ) : ?>
-			
-			<?php if (count($all_participants[$user_role->term_id])) : ?>
-			<div id="ad-user-role-<?php echo $user_role->term_id; ?>-wrap" class="ad-role-wrap">
-				<h5><?php echo $user_role->name; ?></h5>
-				<ul id="ad-participants-<?php echo "{$user_role->term_id}"; ?>">					
-					<?php foreach ($all_participants[$user_role->term_id] as $participant_id => $participant_status) : ?>
-						<?php $participant = get_userdata($participant_id);	?>						
-						<li id="ad-participant-<?php echo "{$user_role->term_id}-{$participant_id}"; ?>"><input type="hidden" id="ad-participant-<?php echo $participant_id; ?>" name="ad-participant-role-<?php echo $user_role->term_id; ?>[]" value="<?php echo "$participant_id|$participant_status"; ?>" /><?php echo "$participant->user_nicename | " . _($participant_status); ?>
-						    <?php if ($participant_status == 'volunteered') : ?>
-								<?php $user = get_userdata($participant_id); ?>
-						        <a href="#" id="ad-volunteer-<?php echo "$user_role->term_id-$user_role->name-$participant_id-$user->user_nicename"; ?>">assign</a>
-						    <?php endif; ?>
-						    <a href="#" class="ad-remove-participant" id="ad-remove-participant-<?php echo $user_role->term_id . '-' . $participant_id; ?>">remove</a></li>
-					<?php endforeach; ?>
-				</ul>
-			</div>
-			<?php endif; ?>
-			
-			<?php endforeach; ?>
-        <?php else: ?>
+        
+        <?php 
+        $total_participants = 0;
+        foreach ( $user_roles as $user_role ){
+            $role_participants = get_post_meta($post->ID, "_ad_participant_role_{$user_role->term_id}", true);
+            if (is_array($role_participants) && count($role_participants) ) {
+                $total_participants += count($role_participants);
+                echo "<div id='ad-participant-role-{$user_role->term_id}'-wrap class='ad-role-wrap'>";
+                echo "<h5> $user_role->name </h5>";
+                echo "<ul id='ad-participants-{$user_role->term_id}'>";
+                foreach ($role_participants as $participant_id => $participant_status) {
+				    $participant = get_userdata((int)$participant_id);
+				    error_log($participant_id);
+				    echo "$participant->user_nicename | " . _($participant_status);
+				    // This input is part of the larger page form
+					echo "<input type='hidden' name='ad-participant-role-{$user_role->term_id}[]' value='{$participant->id}|{$participant_status}'>";
+                    // assignment-desk specific actions
+					echo "<form name='ad-participant-role-{$user_role->term_id}-{$participant_id}' method='post'>";
+					echo "<input type='hidden' name='ad-participant-action-user_id' value='{$participant->ID}'>";
+					echo "<input type='hidden' name='ad-participant-action-user_nicename' value='{$participant->user_nicename}'>";
+					echo "<input type='hidden' name='ad-participant-action-role_id' value='{$user_role->term_id}'>";
+                    if ($participant_status == 'volunteered'){
+					    echo " <button class='button' value='assign'>assign</button>";
+					}
+                    echo " <button class='button' value='remove'>remove</button>";
+					echo "</form>";
+				}
+                echo "</ul>";
+                echo "</div>";
+            }
+        }			
+        if( !$total_participants ): ?>
 			<div id="ad-no-participants" class="message info">
 				No contributors have volunteered or been assigned to this post.
 			</div>
@@ -418,13 +413,16 @@ class ad_post {
 				if ( count($raw_role_participants) ) {
 					foreach ($raw_role_participants as $raw_participant) {
 						$participant = explode('|', $raw_participant);;
-						$user = get_userdata($participant[0]); 
+						$user = get_userdata((int)$participant[0]); 
 						
 						// Check if the user_login is valid.
 						if($user){
 						    // array(user => "status", user => "status")
 						    $all_role_participants[$user->ID] = $participant[1];
 						    // array('user' => array(role_id, role_id, ...))
+						    if(!in_array($user->ID, $all_participants)){
+						        $all_participants[$user->ID] = array();
+						    }
 						    $all_participants[$user->ID][] = $user_role->term_id;
 						    
 						    // Existing user_roles for this user on this post
@@ -440,6 +438,7 @@ class ad_post {
 						    // Invalid user.
 						    // @todo - Store the error somewhere so it can be displayed
 						}
+						error_log(print_r($all_role_participants, true));
 					}
 				}
 				update_post_meta($post_id, "_ad_participant_role_$user_role->term_id", $all_role_participants);

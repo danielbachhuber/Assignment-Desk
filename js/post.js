@@ -39,7 +39,7 @@ function ad_add_to_participants(user_id, user_nicename, role_id, role_name){
 	
 	// Add it to the existing role wrap if that already exists
 	// Else, create a new one
-	if (jQuery("#ad-user-role-" + role_id + "-wrap").length > 0 && !error_message) {
+	if (jQuery("#ad-participant-role-" + role_id + "-wrap").length > 0 && !error_message) {
 		// create a new list item that hold a hidden form element.
 		var field_html = '<li><input type="hidden" id="ad-participant-'
 						+ user_id +'" name="ad-participant-role-'+role_id
@@ -49,11 +49,11 @@ function ad_add_to_participants(user_id, user_nicename, role_id, role_name){
 		jQuery("ul#ad-participants-" + role_id).append(field_html);
 	} else if (!error_message) {
 		jQuery('#ad-no-participants').remove();
-		var field_html = '<div id="ad-user-role-' + role_id + '-wrap" class="ad-role-wrap">'
+		var field_html = '<div id="ad-participant-role-' + role_id + '-wrap" class="ad-role-wrap">'
 						+ '<h5>' + role_name + '</h5>'
 						+ '<ul id="ad-participants-' + role_id + '">';
-		field_html += '<li><input type="hidden" id="ad-participant-'
-						+ user_id +'" name="ad-participant-role-'+role_id
+		field_html += '<li><input type="hidden"' + user_id 
+		                + '" name="ad-participant-role-'+role_id
 						+ '[]" value="'+ user_id + '|' + user_role_status + '"/>'
 						+ user_nicename + ' | ' + user_role_status + '</li>';
 		field_html += '</ul></div>';				
@@ -140,8 +140,8 @@ jQuery(document).ready(function() {
 			var user_nicename = jQuery('#ad-assignee-dropdown option:selected').text();
 		}
 		if(valid_user){
-			var role_id = jQuery('#ad-user-role-dropdown option:selected').val();
-			var role_name = jQuery('#ad-user-role-dropdown option:selected').text();
+			var role_id = jQuery('#ad-participant-role-dropdown option:selected').val();
+			var role_name = jQuery('#ad-participant-role-dropdown option:selected').text();
 			ad_add_to_participants(user_id, user_nicename, role_id, role_name);
 		}
 		return false;
