@@ -91,7 +91,7 @@ class ad_manage_posts {
                 echo strftime("%b %d, %Y", $due_date);
             }
             else {
-                echo 'None listed';
+                _e('None listed');
             }
         }
     }
@@ -104,7 +104,7 @@ class ad_manage_posts {
              	echo $location;
             }
             else {
-                echo 'None listed';
+                _e('None listed');
             }
         }
     }
@@ -120,7 +120,7 @@ class ad_manage_posts {
 				echo $current_status[0]->name;
 			}
 			else {
-			    echo 'None';
+			    _e('None');
 			}
         }
     }
