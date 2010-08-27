@@ -268,12 +268,13 @@ jQuery(document).ready(function() {
 	
 	jQuery('.ad-remove-participant-button').each(function(index, button){
 		jQuery(button).click(function(){
+		    // role_id|user_id
 			var pieces = jQuery(button).val().split('|');
 			// Remove the user from that role.
-			jQuery('#ad-participant-' + pieces[0] + '-' + pieces[1]).remove();
+			jQuery('p#ad-participant-' + pieces[0] + '-' + pieces[1]).remove();
 			// @todo - roll up the role if no users left
+			return false;
 		});
-		return false;
 	});
 	
 	/* ============================ Pitched By ============================ */
