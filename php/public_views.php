@@ -382,6 +382,10 @@ class ad_public_views {
 			$all_votes = get_post_meta( $post_id, '_ad_votes_all', true );
 			$total_votes = (int)get_post_meta( $post_id, '_ad_votes_total', true );
 			
+			if(!is_array($all_votes)){
+			    $all_votes = array();
+			}
+			
 			$user_id = $current_user->ID;
 			
 			// If the user hasn't voted before, show the vote button
@@ -459,6 +463,10 @@ class ad_public_views {
 			
 			$all_votes = get_post_meta( $post_id, '_ad_votes_all', true );
 			$total_votes = (int)get_post_meta( $post_id, '_ad_votes_total', true );
+			
+			if(!is_array($all_votes)){
+			    $all_votes = array();
+			}
 			
 			if ( !in_array( $user_id, $all_votes ) ) {
 				$all_votes[] = $sanitized_user_id;
