@@ -10,6 +10,7 @@ class ad_manage_posts {
 		global $assignment_desk;
 		add_filter('manage_posts_columns', array(&$this, 'add_manage_post_columns'));
 		add_action('manage_posts_custom_column', array(&$this, 'handle_ad_assignment_status_column'), 10, 2);
+		add_action('manage_posts_custom_column', array(&$this, 'handle_ad_votes_total'), 10, 2);
 		
 		if ($assignment_desk->edit_flow_exists()) {
         	add_action('manage_posts_custom_column', array(&$this, 'handle_ef_duedate_column'), 10, 2);
@@ -26,6 +27,11 @@ class ad_manage_posts {
         // Custom post filters.
         add_action('restrict_manage_posts', array(&$this, 'add_eligible_contributor_type_filter'));
         add_action('restrict_manage_posts', array(&$this, 'add_assignment_status_filter'));
+        
+        // Sorting
+        add_action('restrict_manage_posts', array(&$this, 'add_sortby_option'));
+        add_action('parse_query', array(&$this, 'parse_query_sortby'));
+
         // Add postmeta to the manage_posts query
         add_filter('posts_join', array(&$this, 'posts_join_meta' ));
         // Add the taxonomy tables to the mange_posts query 
@@ -59,6 +65,7 @@ class ad_manage_posts {
 		    $custom_fields_to_add[_('_ad_user_type')] = _('Contributor Types');
 		    $custom_fields_to_add[_('_ad_volunteers')] = __('Volunteers');
 	    }
+	    $custom_fields_to_add[_('_ad_votes_total')] = _('Votes');
         
         foreach ($custom_fields_to_add as $field => $title) {
             $posts_columns["$field"] = $title;
@@ -180,6 +187,16 @@ class ad_manage_posts {
         } 
     }
     
+    function handle_ad_votes_total($column_name, $post_id){
+        if ($column_name == _('_ad_votes_total') ) {
+            $votes = get_post_meta($post_id, '_ad_votes_total', true);
+            if(!$votes){
+                $votes = 0;
+            }
+            echo $votes;
+        }
+    }
+    
     /**
      * Add a dropdown to filter posts by eligible user_types.
      */
@@ -219,6 +236,28 @@ class ad_manage_posts {
             ?>
         </select>
     <?php
+    }
+    
+    function add_sortby_option(){
+    ?>
+        <label for"ad-sortby-select"><?php _e('Sort by'); ?>:</label>
+        <select name='ad-sortby' id='ad-sortby-select' class='postform'>
+            <option value="">None</option>
+            <option value="votes" <?php echo ($_GET['ad-sortby'] == 'votes')? 'selected': ''?>>Votes</option>
+        </select>
+<?php
+    }
+    
+    function parse_query_sortby( $query ){
+        global $pagenow;
+        if (is_admin() && $pagenow=='edit.php' && isset($_GET['ad-sortby'])  && $_GET['ad-sortby'] !='None')  {
+            switch($_GET['ad-sortby']){
+                case 'votes':
+                    $query->query_vars['orderby'] = 'meta_value';
+                    $query->query_vars['meta_key'] = '_ad_votes_total';
+                    break;
+            }
+        }
     }
     
     /**
