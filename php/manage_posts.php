@@ -225,8 +225,8 @@ class ad_manage_posts {
      * join the posts SQL query on the postmeta table.
      */
     function posts_join_meta($join){
-        global $wpdb;
-        if(is_admin()){
+        global $wpdb, $pagenow;
+        if(is_admin() && $pagenow == 'edit.php'){
             if($_GET['ad-eligible-user-type']){
                 $join .= " LEFT JOIN $wpdb->postmeta ON($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
             }
@@ -239,8 +239,8 @@ class ad_manage_posts {
      * Added in order to query by assignment status.
      */
     function posts_join_taxonomy($join){
-        global $wpdb;
-        if(is_admin()){
+        global $wpdb, $pagenow;
+        if(is_admin() && $pagenow == 'edit.php'){
             if($_GET['ad-assignment-status']){
                 $join .= "LEFT JOIN $wpdb->term_relationships ON($wpdb->posts.ID = $wpdb->term_relationships.object_id)
                           LEFT JOIN $wpdb->term_taxonomy ON($wpdb->term_relationships.term_taxonomy_id = $wpdb->term_taxonomy.term_taxonomy_id)
@@ -279,8 +279,8 @@ class ad_manage_posts {
     * Modify the SQL where clause to include posts where that type is eligible.
     */
     function posts_contributor_type_where( $where ){
-        global $assignment_desk, $wpdb;
-        if(is_admin()){
+        global $assignment_desk, $wpdb, $pagenow;
+        if(is_admin() && $pagenow == 'edit.php'){
             if($_GET['ad-eligible-user-type']){
                 $where .= " AND $wpdb->postmeta.meta_key = '_ad_participant_type_{$_GET['ad-eligible-user-type']}'
                             AND $wpdb->postmeta.meta_value = 'on' ";
@@ -293,8 +293,8 @@ class ad_manage_posts {
      * Modify the where SQL clause to filter by assignment_status 
      */
     function add_ad_assignment_statuses_where($where){
-        global $assignment_desk, $wpdb;
-        if(is_admin()){
+        global $assignment_desk, $wpdb, $pagenow;
+        if(is_admin() && $pagenow == 'edit.php'){
             if($_GET['ad-assignment-status']){
                 $where .= " AND $wpdb->terms.term_id = {$_GET['ad-assignment-status']}";
             }
