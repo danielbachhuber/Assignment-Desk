@@ -293,7 +293,7 @@ class ad_post {
 					echo "<input type='hidden' name='ad-participant-role-{$user_role->term_id}[]' value='{$participant->ID}|{$participant_status}'>";
                     // assignment-desk specific actions
                     if ($participant_status == 'volunteered'){
-					    echo " <button class='button' name='ad-participant-assign' value='{$user_role->term_id}-{$participant->ID}'>assign</button>";
+					    echo " <button class='button' name='ad-participant-assign' value='{$user_role->term_id}|{$participant->ID}'>assign</button>";
 					}
                     echo " <button class='button ad-remove-participant-button' name='ad-participant-remove' value='{$user_role->term_id}|{$participant->ID}'>remove</button>";
                     echo "</p>";
@@ -423,16 +423,32 @@ class ad_post {
 					}
 				}
 				$all_role_participants[$user_role->term_id] = $role_participants;
-			
+
+			    // Remove a participant
     			if( $_POST['ad-participant-remove'] ){
-    		        $split = explode('|', $_POST['ad-participant-remove']);
-    		        $user_id = (int)$split[1];
-    		        $role_id = (int)$split[0];
+    		        $pieces = explode('|', $_POST['ad-participant-remove']);
+    		        $role_id = (int)$pieces[0];
+    		        $user_id = (int)$pieces[1];
     		        if ( is_array($all_participants[$user_id]) && in_array($role_id, $all_participants[$user_id]) ){
     		            unset($all_participants[$user_id][$role_id]);
     		        }
     		        if ( isset($all_role_participants[$role_id][$user_id]) ) {
     		            unset($all_role_participants[$role_id][$user_id]);
+    		        }
+    		    }
+    		    
+    		    // Assign a volunteer to the story
+    		    if( $_POST['ad-participant-assign'] ){
+    		        $pieces = explode('|', $_POST['ad-participant-assign']);
+    		        $role_id = (int)$pieces[0];
+    		        $user_id = (int)$pieces[1];
+    		        if ( isset($all_participants[$user_id]) && (!in_array($role_id, $all_participants[$user_id])) ){
+    		            $all_participants[$user_id][] = $role_id;
+    		        }
+    		        if ( isset($all_role_participants[$role_id][$user_id]) && 
+    		                $all_role_participants[$role_id][$user_id] == 'volunteered' ) {
+    		            $all_role_participants[$role_id][$user_id] = 'pending';
+    		            $this->send_assignment_email($post_id, $user_id, $role_id);
     		        }
     		    }
 
@@ -441,18 +457,26 @@ class ad_post {
     			    // Update the role membership and prepare an array of coauthor IDs.
 		            $coauthors = array();
         		    foreach ( $all_role_participants as $role_id => $role_participants ) {
-        			    update_post_meta($post_id, "_ad_participant_role_$role_id", $role_participants);
+        		        $existing_role_participants = get_post_meta($post_id, "_ad_participant_role_$role_id", true);
+        		        if(!$existing_role_participants){
+        		            $existing_role_participants = array();
+        		        }
         			    foreach ( $role_participants as $user_id => $status ) {
+        			        if( !in_array($user_id, $existing_role_participants)){
+        			            $this->send_assignment_email($post_id, $user_id, $role_id);
+        			        }
+        			        
         			        if ( $status == 'accepted') {
         			            $user = get_userdata($user_id);
         			            $coauthors[]= $user->user_login;
         			        }
         			    }
+        			    update_post_meta($post_id, "_ad_participant_role_$role_id", $role_participants);
         			}
     			    $_POST['coauthors'] = array_unique($coauthors);
                     $coauthors_plus->add_coauthors($post_id, array_unique($coauthors));
     			}
-			
+
     			// Also save the User Roles associated with a row for each participant
     			foreach ($all_participants as $participant_id => $user_role_ids) {
     				update_post_meta($post_id, "_ad_participant_$participant_id", $user_role_ids);
