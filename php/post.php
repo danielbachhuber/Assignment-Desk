@@ -16,6 +16,8 @@ class ad_post {
         add_action('save_post', array(&$this, 'save_post_meta_box'), 9, 2);
         add_action('edit_post', array(&$this, 'save_post_meta_box'), 9, 2);
         add_action('publish_post', array(&$this, 'save_post_meta_box'), 9, 2);
+        
+        add_action('save_post', array($this, 'zero_vote_count'), 9, 2);
         // Word counting for user stats
         add_action('save_post', array(&$this, 'save_post_word_count'), 9, 2);
 		
@@ -493,6 +495,13 @@ class ad_post {
             }
 		}
     }
+
+    function zero_vote_count($post_id, $post){
+	    $votes_total = get_post_meta($post_id, '_ad_votes_total', true);
+	    if(!$votes_total){
+	        update_post_meta($post_id, '_ad_votes_total', 0);
+	    }
+	}
     
     /**
      * Store the word count as post metadata. 

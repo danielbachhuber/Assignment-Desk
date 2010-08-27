@@ -7,10 +7,11 @@ class ad_manage_posts {
     }
 
 	function init() {
-		global $assignment_desk;
+		global $assignment_desk, $pagenow;
 		add_filter('manage_posts_columns', array(&$this, 'add_manage_post_columns'));
 		add_action('manage_posts_custom_column', array(&$this, 'handle_ad_assignment_status_column'), 10, 2);
 		add_action('manage_posts_custom_column', array(&$this, 'handle_ad_votes_total'), 10, 2);
+		add_action('manage_posts_custom_column', array(&$this, 'handle_ad_pitched_by'), 10, 2);
 		
 		if ($assignment_desk->edit_flow_exists()) {
         	add_action('manage_posts_custom_column', array(&$this, 'handle_ef_duedate_column'), 10, 2);
@@ -27,6 +28,7 @@ class ad_manage_posts {
         // Custom post filters.
         add_action('restrict_manage_posts', array(&$this, 'add_eligible_contributor_type_filter'));
         add_action('restrict_manage_posts', array(&$this, 'add_assignment_status_filter'));
+        add_action('restrict_manage_posts', array(&$this, 'add_pitched_by_filter'));
         
         // Sorting
         add_action('restrict_manage_posts', array(&$this, 'add_sortby_option'));
@@ -42,6 +44,12 @@ class ad_manage_posts {
         add_filter('posts_where', array(&$this, 'add_ef_custom_statuses_where_all_filter' ), 20);
         // Filter by assignment_status
         add_filter('posts_where', array(&$this, 'add_ad_assignment_statuses_where' ), 20);
+        add_filter('posts_where', array(&$this, 'add_ad_pitched_by_where' ), 20);
+        
+        // This javascript is only active on the edit.php
+        if ( $pagenow == 'edit.php' ){
+            wp_enqueue_script('ad-manage-posts-js', ASSIGNMENT_DESK_URL . 'js/manage_posts.js', array('jquery'));
+        }
 	}
     
     /**
@@ -66,6 +74,10 @@ class ad_manage_posts {
 		    $custom_fields_to_add[_('_ad_volunteers')] = __('Volunteers');
 	    }
 	    $custom_fields_to_add[_('_ad_votes_total')] = _('Votes');
+	    
+	    if ( $_GET['ad-pitched-by']){
+	        $custom_fields_to_add['_ad_pitched_by'] = _('Pitched By');
+	    }
         
         foreach ($custom_fields_to_add as $field => $title) {
             $posts_columns["$field"] = $title;
@@ -197,6 +209,23 @@ class ad_manage_posts {
         }
     }
     
+    function handle_ad_pitched_by($column_name, $post_id){
+        if ($column_name == _('_ad_pitched_by') ) {
+            $pitched_by = get_post_meta($post_id, '_ad_pitched_by', true);
+            if($pitched_by){
+                $user = get_userdata((int)$pitched_by);
+                if($user->display_name){
+                    $pitched_by = $user->display_name;
+                }
+                else {
+                    $pitched_by = $user->user_login;
+                }
+                
+            }
+            echo $pitched_by;
+        }
+    }
+    
     /**
      * Add a dropdown to filter posts by eligible user_types.
      */
@@ -238,6 +267,31 @@ class ad_manage_posts {
     <?php
     }
     
+    /**
+     * Add a dropdown to filter posts by eligible assignment_status.
+     * This function is eerily similar to add_eligible_contributor_type_filter. eer
+     */
+    function add_pitched_by_filter() {
+        global $assignment_desk, $wpdb;
+        $users = $wpdb->get_results("SELECT * FROM $wpdb->users");
+    ?>
+        <span class="hide-if-js" id="ad-pitched-by-wrap">
+            <select name='ad-pitched-by' id='ad-pitched-by-select' class='postform'>
+                <option value="">Pitched by:</option>
+                <?php 
+                foreach($users as $user){
+                    echo "<option value='$user->ID'>$user->display_name</option>";
+                }?>
+            </select>
+        </span>
+        
+        <span class="hide-if-no-js" id="ad-pitched-by-search-wrap">
+            <input class="hide-if-no-js" type="text" size="20" id="ad-pitched-by-search" value="Pitched by"/>
+        </span>
+        
+    <?php
+    }
+    
     function add_sortby_option(){
     ?>
         <label for"ad-sortby-select"><?php _e('Sort by'); ?>:</label>
@@ -250,7 +304,7 @@ class ad_manage_posts {
     
     function parse_query_sortby( $query ){
         global $pagenow;
-        if (is_admin() && $pagenow=='edit.php' && isset($_GET['ad-sortby'])  && $_GET['ad-sortby'] !='None')  {
+        if (is_admin() && $pagenow == 'edit.php' && isset($_GET['ad-sortby'])  && $_GET['ad-sortby'] !='None')  {
             switch($_GET['ad-sortby']){
                 case 'votes':
                     $query->query_vars['orderby'] = 'meta_value';
@@ -266,7 +320,7 @@ class ad_manage_posts {
     function posts_join_meta($join){
         global $wpdb, $pagenow;
         if(is_admin() && $pagenow == 'edit.php'){
-            if($_GET['ad-eligible-user-type']){
+            if($_GET['ad-eligible-user-type'] || $_GET['ad-pitched-by']){
                 $join .= " LEFT JOIN $wpdb->postmeta ON($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
             }
         }
@@ -336,6 +390,20 @@ class ad_manage_posts {
         if(is_admin() && $pagenow == 'edit.php'){
             if($_GET['ad-assignment-status']){
                 $where .= " AND $wpdb->terms.term_id = {$_GET['ad-assignment-status']}";
+            }
+        }
+        return $where;
+    }
+    
+    /**
+    * Modify the SQL where clause to include posts pitched by a certain user.
+    */
+    function add_ad_pitched_by_where( $where ){
+        global $assignment_desk, $wpdb, $pagenow;
+        if(is_admin() && $pagenow == 'edit.php'){
+            if($_GET['ad-pitched-by']){
+                $where .= " AND $wpdb->postmeta.meta_key = '_ad_pitched_by'
+                            AND $wpdb->postmeta.meta_value = '{$_GET['ad-pitched-by']}' ";
             }
         }
         return $where;
