@@ -45,6 +45,7 @@ if ( !class_exists( 'ad_settings' ) ){
 		add_settings_section( 'public_facing_views', 'Public-Facing Views', array(&$this, 'public_facing_views_setting_section'), $assignment_desk->public_facing_settings_page );
 		add_settings_field( 'public_facing_elements', 'Public-facing elements', array(&$this, 'public_facing_elements_option'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );
 		add_settings_field( 'public_facing_functionality', 'Public-facing functionality', array(&$this, 'public_facing_functionality_option'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );		
+		add_settings_field( 'public_facing_assignment_statuses[]', 'Public-facing assignment statuses', array(&$this, 'public_facing_assignment_statuses'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );		
 			
 	}
 	
@@ -448,6 +449,32 @@ Blog Editor");
 		}
 		echo ' />&nbsp;<label for="public_facing_commenting_enabled">Commenting</label></li>';
 		echo '</ul>';
+	}
+	
+	/**
+	 * Print the assignment statuses as a form. The admin chooses which assignment statuses will
+	 * be visible on the public-facing views. 
+	 */
+	function public_facing_assignment_statuses() {
+	    global $assignment_desk;
+	    $options = $assignment_desk->public_facing_options;
+	    $public_statuses = $options['public_facing_assignment_statuses'];
+	    if(!is_array($public_statuses)){
+	        $public_statuses = array((int)$public_statuses);
+	    }
+	    echo "<label>" . _("Posts of the following assignment statuses will be displayed on the public facing views (if enabled)") . ":</label>";
+	    echo "<ul>";
+	    foreach ($assignment_desk->custom_taxonomies->get_assignment_statuses() as $assignment_status){
+	        echo "<li>";
+	        echo "<input type='checkbox' value='{$assignment_status->term_id}' " .
+	                     'name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_assignment_statuses][]"';
+	        if ( in_array($assignment_status->term_id, $public_statuses) ) {
+	            echo ' checked="checked" ';
+	        } 
+	        echo '>';
+	        echo " $assignment_status->name</li>";
+	    }
+	    echo "</ul>";
 	}
 	
 	/**

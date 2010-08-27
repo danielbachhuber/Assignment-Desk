@@ -82,7 +82,6 @@ function get_unassigned_posts(){
 if (!function_exists('get_inprogress_posts')){
 function get_inprogress_posts(){
     global $assignment_desk, $wpdb;
-    $inprogress_posts = array();
     $completed_status = get_term($assignment_desk->general_options['default_published_assignment_status'], 
                                    $assignment_desk->custom_taxonomies->assignment_status_label);
    $exclude_status = -1;
@@ -109,12 +108,9 @@ function get_inprogress_posts(){
 if (!function_exists('get_public_feedback_posts')){
 function get_public_feedback_posts(){
     global $assignment_desk, $wpdb;
-    $inprogress_posts = array();
-    $completed_status = get_term($assignment_desk->general_options['default_published_assignment_status'], 
-                                   $assignment_desk->custom_taxonomies->assignment_status_label);
-    $exclude_status = -1;
-    if(!is_wp_error($completed_status)){
-        $exclude_status = $completed_status->term_id;
+    $include_statuses = implode(',', $assignment_desk->public_facing_options['public_facing_assignment_statuses']);
+    if ( ! $include_statuses ) {
+        $include_statuses = -1;
     }
     $results = $wpdb->get_results("SELECT * FROM $wpdb->posts
                                 LEFT JOIN $wpdb->postmeta ON($wpdb->posts.ID = $wpdb->postmeta.post_id)
@@ -125,7 +121,7 @@ function get_public_feedback_posts(){
                                 AND $wpdb->posts.post_status != 'publish'
                                 AND $wpdb->posts.post_status != 'trash'
                                 AND $wpdb->term_taxonomy.taxonomy = '{$assignment_desk->custom_taxonomies->assignment_status_label}'
-                                AND $wpdb->terms.term_id != {$exclude_status}
+                                AND $wpdb->terms.term_id IN ({$include_statuses})
                                 AND $wpdb->postmeta.meta_key = '_ad_private'
                                 AND $wpdb->postmeta.meta_value = 0
                                 ORDER BY $wpdb->posts.post_date DESC");
