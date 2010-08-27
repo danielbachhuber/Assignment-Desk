@@ -423,38 +423,51 @@ class ad_post {
 					}
 				}
 				$all_role_participants[$user_role->term_id] = $role_participants;
-			}
 			
-			if( $_POST['ad-participant-remove'] ){
-		        $split = explode('|', $_POST['ad-participant-remove']);
-		        $user_id = (int)$split[1];
-		        $role_id = (int)$split[0];
-		        if ( is_array($all_participants[$user_id]) && in_array($role_id, $all_participants[$user_id]) ){
-		            unset($all_participants[$user_id][$role_id]);
-		        }
-		        if ( isset($all_role_participants[$role_id][$user_id]) ) {
-		            unset($all_role_participants[$role_id][$user_id]);
-		        }
-		    }
-		    
-		    foreach ( $all_role_participants as $role_id => $role_participants ) {
-			    update_post_meta($post_id, "_ad_participant_role_$role_id", $role_participants);
-			}
+    			if( $_POST['ad-participant-remove'] ){
+    		        $split = explode('|', $_POST['ad-participant-remove']);
+    		        $user_id = (int)$split[1];
+    		        $role_id = (int)$split[0];
+    		        if ( is_array($all_participants[$user_id]) && in_array($role_id, $all_participants[$user_id]) ){
+    		            unset($all_participants[$user_id][$role_id]);
+    		        }
+    		        if ( isset($all_role_participants[$role_id][$user_id]) ) {
+    		            unset($all_role_participants[$role_id][$user_id]);
+    		        }
+    		    }
+
+    			if ( $assignment_desk->coauthors_plus_exists() ) {
+    			    global $coauthors_plus;
+    			    // Update the role membership and prepare an array of coauthor IDs.
+		            $coauthors = array();
+        		    foreach ( $all_role_participants as $role_id => $role_participants ) {
+        			    update_post_meta($post_id, "_ad_participant_role_$role_id", $role_participants);
+        			    foreach ( $role_participants as $user_id => $status ) {
+        			        if ( $status == 'accepted') {
+        			            $user = get_userdata($user_id);
+        			            $coauthors[]= $user->user_login;
+        			        }
+        			    }
+        			}
+    			    $_POST['coauthors'] = array_unique($coauthors);
+                    $coauthors_plus->add_coauthors($post_id, array_unique($coauthors));
+    			}
 			
-			// Also save the User Roles associated with a row for each participant
-			foreach ($all_participants as $participant_id => $user_role_ids) {
-				update_post_meta($post_id, "_ad_participant_$participant_id", $user_role_ids);
+    			// Also save the User Roles associated with a row for each participant
+    			foreach ($all_participants as $participant_id => $user_role_ids) {
+    				update_post_meta($post_id, "_ad_participant_$participant_id", $user_role_ids);
+    			}
 			}
-		}
-		
-        if($post->post_status == 'publish'){
-            $published_status = get_term($assignment_desk->general_options['default_published_assignment_status'],
+
+            // Update the assignment status if the post is published.
+			if($post->post_status == 'publish'){
+                $published_status = get_term($assignment_desk->general_options['default_published_assignment_status'],
                                          $assignment_desk->custom_taxonomies->assignment_status_label);
-            if($published_status){
-                wp_set_object_terms($post->ID, $published_status->slug, $assignment_desk->custom_taxonomies->assignment_status_label);
+                if($published_status){
+                    wp_set_object_terms($post->ID, $published_status->slug, $assignment_desk->custom_taxonomies->assignment_status_label);
+                }
             }
-        }
-        
+		}
     }
     
     /**
