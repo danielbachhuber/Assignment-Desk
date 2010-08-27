@@ -16,6 +16,7 @@ function ad_add_to_participants(user_id, user_nicename, role_id, role_name){
 	var error_message = false;
 	
 	// @todo This check doesn't work all that well
+	// @todo Internationalize this message.
 	user_id = parseInt(user_id);
 	if ( !user_id ) {
 	    error_message = '<div id="ad-participant-error-message" class="message alert">'
@@ -27,6 +28,7 @@ function ad_add_to_participants(user_id, user_nicename, role_id, role_name){
 	jQuery("#ad-participant-error-message").remove();
 	
 	// @todo check to see whether use was already assigned in this role
+	// @todo Internationalize this message.
 	jQuery('input[name="ad-participant-role-' + role_id + '[]"]').each(function() {
 		spl = jQuery(this).val().split('|');
 		if ( spl[0] == user_id && spl[1] != 'volunteered' ) {
@@ -146,7 +148,9 @@ jQuery(document).ready(function() {
 		return false;
 	});
 	
-	// Assign a volunteer to the form
+	/**
+	* Assign a volunteer to the story.
+	*/
 	jQuery("a[id^=ad-volunteer-]").each(function(index, link){
 		// a#ad-volunteer-$role_id-$role_name-$user_id
 		var spl = link.id.split('-');
@@ -266,6 +270,10 @@ jQuery(document).ready(function() {
 		return false;
 	});
 	
+	/**
+	 * This function is attached to the click event of the "Remove" buttons.
+	 * This removes the participant record from the next submission.
+	 */
 	jQuery('.ad-remove-participant-button').each(function(index, button){
 		jQuery(button).click(function(){
 		    // role_id|user_id
