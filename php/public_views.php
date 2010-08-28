@@ -17,7 +17,7 @@ class ad_public_views {
 		wp_enqueue_script('jquery-datepicker-js', ASSIGNMENT_DESK_URL .'js/jquery.datepicker.js', array('jquery-ui-core'));
 		wp_enqueue_script('ad-public-views', ASSIGNMENT_DESK_URL . 'js/public_views.js', array('jquery', 'jquery-datepicker-js'));
 		
-		wp_enqueue_style('ad-publix', ASSIGNMENT_DESK_URL . 'css/public.css');
+		wp_enqueue_style('ad-public', ASSIGNMENT_DESK_URL . 'css/public.css');
 		
 		// Run save_pitch_form() at WordPress initialization
 		$_REQUEST['assignment_desk_messages']['pitch_form'] = $this->save_pitch_form();

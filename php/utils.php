@@ -122,8 +122,6 @@ function get_public_feedback_posts(){
                                 AND $wpdb->posts.post_status != 'trash'
                                 AND $wpdb->term_taxonomy.taxonomy = '{$assignment_desk->custom_taxonomies->assignment_status_label}'
                                 AND $wpdb->terms.term_id IN ({$include_statuses})
-                                AND $wpdb->postmeta.meta_key = '_ad_private'
-                                AND $wpdb->postmeta.meta_value = 0
                                 ORDER BY $wpdb->posts.post_date DESC");
     if(!$results){
         $results = array();
