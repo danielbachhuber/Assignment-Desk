@@ -60,12 +60,12 @@ class ad_dashboard_widgets {
             <?php if($assignment_desk->coauthors_plus_exists()){
                 // @todo - Figure out how to link to the unassigned posts.
                 $unassigned_url = "#";
-                echo "<tr><td class='b'><a href='$unassigned_url'>" . count(get_unassigned_posts()) . "</a></td>";
+                echo "<tr><td class='b'><a href='$unassigned_url'>" . count(ad_get_unassigned_posts()) . "</a></td>";
                 echo "<td class='b'><a href='$unassigned_url'>" . _('Unassigned', 'assignment-desk') . "</a></td></tr>";
 
                 // @todo - Figure out how to link to inprogress posts.
                 $inprogress_url = "";
-                echo "<tr><td class='b'><a href='$inprogress_url'>" . count(get_inprogress_posts()) . "</a></td>";
+                echo "<tr><td class='b'><a href='$inprogress_url'>" . count(ad_get_inprogress_posts()) . "</a></td>";
                 echo "<td class='b'><a href='$inprogress_url'>" . _('In Progress', 'assignment-desk') . "</a></td></tr>";
             }
             

@@ -5,8 +5,8 @@
  * Optionally filter for user who's role record of a certain status.
  * Valid statuses are 'pending', 'volunteer', 'accepted', 'rejected'
  */
-if (!function_exists('get_participants')){
-function get_participants($post_id, $status_filter = array()){
+if (!function_exists('ad_get_participants')){
+function ad_get_participants($post_id, $status_filter = array()){
     global $assignment_desk, $wpdb;
     $participants = array();
     $user_roles = $assignment_desk->custom_taxonomies->get_user_roles(array());
@@ -34,11 +34,11 @@ function get_participants($post_id, $status_filter = array()){
  * Optionally filter for user who's role record of a certain status.
  * Valid statuses are 'pending', 'volunteer', 'accepted', 'rejected'
  */
-if (!function_exists('count_participants')){
-function count_participants($post_id, $status_filter = array()){
+if (!function_exists('ad_count_participants')){
+function ad_count_participants($post_id, $status_filter = array()){
     global $assignment_desk, $wpdb;
     $count = 0;
-    foreach ( get_participants($post_id, $status_filter) as $role_participants ){
+    foreach ( ad_get_participants($post_id, $status_filter) as $role_participants ){
         $count += count($role_participants);
     }
     return $count;
@@ -48,8 +48,8 @@ function count_participants($post_id, $status_filter = array()){
 /**
  * Get a list of posts that do not have assignees.
  */
-if (!function_exists('get_unassigned_posts')){
-function get_unassigned_posts(){
+if (!function_exists('ad_get_unassigned_posts')){
+function ad_get_unassigned_posts(){
     global $assignment_desk, $wpdb;
     $unassigned = array();
     if ( $assignment_desk->edit_flow_exists() ) {
@@ -65,7 +65,7 @@ function get_unassigned_posts(){
         $all_posts = get_posts($args);
         if ($all_posts) {
 		    foreach ($all_posts as $post) {
-		        if(!count_participants($post->ID)){
+		        if(!ad_count_participants($post->ID)){
 		            $unassigned[] = $post;
 		        }
 	        }
@@ -79,8 +79,8 @@ function get_unassigned_posts(){
  * Get a list of posts that are in progress.
  * Returns unpublished posts that do not have an assignment_status of completed 
  */
-if (!function_exists('get_inprogress_posts')){
-function get_inprogress_posts(){
+if (!function_exists('ad_get_inprogress_posts')){
+function ad_get_inprogress_posts(){
     global $assignment_desk, $wpdb;
     $completed_status = get_term($assignment_desk->general_options['default_published_assignment_status'], 
                                    $assignment_desk->custom_taxonomies->assignment_status_label);
