@@ -87,6 +87,13 @@ function ad_get_all_public_posts( $args = null ) {
         $include_statuses = -1;
     }
 
+	$defaults = array(
+				'sort_by' => 'post_date',
+				'showposts' => 10
+				);
+				
+	$args = array_merge( $defaults, $args );
+
 	$query = "SELECT $wpdb->posts.* FROM $wpdb->posts, $wpdb->term_relationships
 						WHERE $wpdb->posts.post_type = 'post' 
 						AND $wpdb->posts.post_status != 'publish'
@@ -94,8 +101,14 @@ function ad_get_all_public_posts( $args = null ) {
 						AND $wpdb->posts.post_status != 'auto-draft'
 						AND $wpdb->posts.post_status != 'inherit'
 						AND ( $wpdb->posts.ID = $wpdb->term_relationships.object_id
-							AND $wpdb->term_relationships.term_taxonomy_id IN ({$include_statuses}) )
-						ORDER BY $wpdb->posts.post_date DESC";
+							AND $wpdb->term_relationships.term_taxonomy_id IN ({$include_statuses}) )";
+
+	if ( $args['sort_by'] == 'post_date' ) {
+		$query .= " ORDER BY $wpdb->posts.post_date DESC";
+	} else if ( $args['sort_by'] == 'due_date' ) {
+	}
+	
+	$query .= " LIMIT " . $args['showposts'];
 
 	$results = $wpdb->get_results( $query );
 	

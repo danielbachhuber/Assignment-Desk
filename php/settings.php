@@ -43,6 +43,7 @@ if ( !class_exists( 'ad_settings' ) ){
 		
 		/* Public-facing */
 		add_settings_section( 'public_facing_views', 'Public-Facing Views', array(&$this, 'public_facing_views_setting_section'), $assignment_desk->public_facing_settings_page );
+		add_settings_field( 'public_facing_filtering', 'Public-facing filtering', array(&$this, 'public_facing_filtering_option'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );
 		add_settings_field( 'public_facing_elements', 'Public-facing elements', array(&$this, 'public_facing_elements_option'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );
 		add_settings_field( 'public_facing_functionality', 'Public-facing functionality', array(&$this, 'public_facing_functionality_option'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );		
 		add_settings_field( 'public_facing_assignment_statuses[]', 'Public-facing assignment statuses', array(&$this, 'public_facing_assignment_statuses'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );		
@@ -358,6 +359,20 @@ Blog Editor");
 	function public_facing_views_setting_section() {
 		global $assignment_desk;
 		echo "Enable public access to pitches and stories in progress by dropping <code>&#60;!--$assignment_desk->all_posts_key--&#62;</code> in a page.";
+	}
+	
+	function public_facing_filtering_option() {
+		global $assignment_desk;
+		$options = $assignment_desk->public_facing_options;
+		
+		// Sort by
+		echo '<input id="public_facing_filtering_sort_by_enabled" type="checkbox" '
+			. 'name="' . $assignment_desk->get_plugin_option_fullname('public_facing')
+			. '[public_facing_filtering_sort_by_enabled]"';
+		if ( $options['public_facing_filtering_sort_by_enabled'] ) {
+			echo ' checked="checked"';
+		}
+	 	echo ' />&nbsp;<label for="public_facing_filtering_sort_by_enabled">Sort by</label>';
 	}
 	
 	function public_facing_elements_option() {
