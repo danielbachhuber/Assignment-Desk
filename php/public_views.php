@@ -502,7 +502,7 @@ class ad_public_views {
 	
 			// See whether the user has already volunteered for the story
 			$existing_roles = get_post_meta( $post_id, "_ad_participant_$current_user->ID", true );
-			if(!$existing_roles){
+			if ( !$existing_roles ) {
 		        $existing_roles = array();  
 			} 
 	
@@ -689,26 +689,35 @@ class ad_public_views {
 			$duedate = get_post_meta( $post_id, '_ef_duedate', true );
 			$duedate = date_i18n( 'M d, Y', $duedate );
 			
-			$html .= '<div><h3><a href="' . get_permalink($post_id) . '">' . get_the_title($post_id) . '</a></h3>';
+			$html .= '<div class="assignment-desk-pitch"><h3><a href="' . get_permalink($post_id) . '">' . get_the_title($post_id) . '</a></h3>';
 			// Only show voting if it's enabled
 			if ( $options['public_facing_voting_enabled'] ) {
 				$html .= $this->show_all_votes( $post_id );					
 				$html .= $this->voting_form( $post_id );
 			}
+			
 			if ( $description || $duedate || $location ) {
-			    $html .= '<p class="meta">';
+			    $html .= '<div class="meta">';
 			}
 			if ( $options['public_facing_description_enabled'] && $description ) {
-			    $html .= '<label>Description:</label> ' . $description . '<br />';
+			    $html .= '<p><label>Description:</label> ' . $description . '</p>';
 			}
 			if ( $options['public_facing_duedate_enabled'] && $duedate ) {
-			    $html .= '<label>Due date:</label> ' . $duedate . '<br />';	
+			    $html .= '<p><label>Due date:</label> ' . $duedate . '</p>';	
 			}
 			if ( $options['public_facing_location_enabled'] && $location ) {
-			    $html .= '<label>Location:</label> ' . $location . '<br />';	
+			    $html .= '<p><label>Location:</label> ' . $location . '</p>';	
+			}
+			if ( $options['public_facing_tags_enabled'] ) {
+				$tags = get_the_tags( $post_id );
+				$tags_html = '';
+				foreach ( $tags as $tag ) {
+					$tags_html .= '<a href="' . get_tag_link($tag->term_id) . '">' . $tag->name . '</a>, ';
+				}
+				$html .= '<p><label>Tags:</label> ' . rtrim( $tags_html, ', ' ) . '</p>';
 			}
 			if ( $description || $duedate || $location ) {
-			    $html .= '</p>';
+			    $html .= '</div>';
 			}
 			if ( $options['public_facing_volunteering_enabled'] ) {
 			    $html .= $this->show_all_volunteers( $post_id );
