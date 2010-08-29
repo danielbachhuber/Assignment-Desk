@@ -96,7 +96,11 @@ function ad_get_all_public_posts( $args = null ) {
 				
 	$args = array_merge( $defaults, $args );
 
-	$query = "SELECT $wpdb->posts.* FROM ($wpdb->posts, $wpdb->term_relationships, $wpdb->postmeta)";
+	$query = "SELECT $wpdb->posts.* FROM ($wpdb->posts, $wpdb->term_relationships";
+	if ( $args['user_types'] != 'all' ) {
+		$query .= ", $wpdb->postmeta";
+	}
+	$query .= ")";
 	
 	// Join the postmeta table so we can sort by the meta_value column restricted to '_ef_duedate'
 	if ( $args['sort_by'] == 'due_date' ) {
