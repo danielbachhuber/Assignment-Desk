@@ -26,6 +26,8 @@ class ad_public_views {
 		
 		add_filter( 'the_content', array(&$this, 'show_all_posts') );
 		
+		add_filter( 'the_posts', array(&$this, 'show_single_post') );
+		
 		// Only add voting if its enabled
 		if ( $public_facing_options['public_facing_voting_enabled'] ) {
 			add_filter( 'the_content', array(&$this, 'prepend_voting_to_post') );		
@@ -617,6 +619,26 @@ class ad_public_views {
 	
 		}
 	
+	}
+	
+	/**
+	 * Hook into the WP_Query object to show unpublished posts
+	 * Will only show the post if it has a 'public' (defined in settings) assignment status
+	 */
+	function show_single_post( $all_posts ) {
+		
+		if ( empty($posts) && is_single() ) {
+			$args = array(
+					'post_id' => $_GET['p'],
+					'showposts' => 1
+					);
+			$results = ad_get_all_public_posts( $args );
+			if ( !empty($results) ) {
+				$all_posts = $results;
+			}
+		}
+		
+		return $all_posts;
 	}
 	
 	/*
