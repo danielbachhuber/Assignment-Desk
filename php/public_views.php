@@ -708,6 +708,14 @@ class ad_public_views {
 			if ( $options['public_facing_location_enabled'] && $location ) {
 			    $html .= '<p><label>Location:</label> ' . $location . '</p>';	
 			}
+			if ( $options['public_facing_categories_enabled'] ) {
+				$categories = get_the_category( $post_id );
+				$categories_html = '';
+				foreach ( $categories as $category ) {
+					$categories_html .= '<a href="' . get_category_link($category->cat_ID) . '">' . $category->name . '</a>, ';
+				}
+				$html .= '<p><label>Categories:</label> ' . rtrim( $categories_html, ', ' ) . '</p>';
+			}
 			if ( $options['public_facing_tags_enabled'] ) {
 				$tags = get_the_tags( $post_id );
 				$tags_html = '';
