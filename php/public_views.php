@@ -637,7 +637,7 @@ class ad_public_views {
 		
 		$html = '';
 		
-		if ( $_POST['sort_by'] == 'ranking' || $_POST['sort_by'] == 'post_date' ) {
+		if ( $_POST['sort_by'] == 'ranking' || $_POST['sort_by'] == 'post_date' || $_POST['sort_by'] == 'due_date' ) {
 			$sort_by = $_POST['sort_by'];
 		} else {
 			$sort_by = 'post_date';
