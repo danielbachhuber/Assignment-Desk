@@ -623,7 +623,7 @@ class ad_public_views {
 	* Replace an html comment <!--assignment-desk-all-posts--> with ad public pages.
 	*/
 	function show_all_posts( $the_content ) {
-		global $wpdb, $assignment_desk, $post;
+		global $wpdb, $assignment_desk, $post, $edit_flow;
 		$options = $assignment_desk->public_facing_options;
 	  
 		$template_tag = '<!--' . $assignment_desk->all_posts_key . '-->';
@@ -649,7 +649,14 @@ class ad_public_views {
 			$user_type_filter = 'all';
 		}
 		
+		if ( isset($_POST['post_status']) && $_POST['post_status'] != 'all' ) {
+			$post_status_filter = $_POST['post_status'];
+		} else {
+			$post_status_filter = 'all';
+		}
+		
 		$args = array(
+					'post_status' => $post_status_filter,
 					'user_types' => $user_type_filter,
 					'sort_by' => $sort_by
 					);
@@ -660,6 +667,25 @@ class ad_public_views {
 		$html .= '<input type="hidden" name="page_id" value="' . $parent_post->ID . '" />';
 		
 		$html .= '<span class="left">';
+		
+		if ( $options['public_facing_filtering_post_status_enabled'] ) {
+			$html .= '<select name="post_status" class="assignment-desk-filter-post-statuses">';
+			$html .= '<option value="all">Show all post statuses</options>';
+			if ( $assignment_desk->edit_flow_exists() ) {
+				$custom_statuses = $edit_flow->custom_status->get_custom_statuses();
+				foreach ( $custom_statuses as $custom_status ) {
+					$html .= '<option value="' . $custom_status->slug . '"';
+					if ( $custom_status->slug == $post_status_filter ) {
+						$html .= ' selected="selected"';
+					}
+					$html .= '>' . $custom_status->name . '</option>';
+				}
+			} else {
+				$html .= '<option value="pending">Pending Review</option>';
+				$html .= '<option value="draft">Draft</option>';
+			}
+			$html .= '</select>';
+		}
 		
 		if ( $options['public_facing_filtering_participant_type_enabled'] ) {
 			$user_types = $assignment_desk->custom_taxonomies->get_user_types();
