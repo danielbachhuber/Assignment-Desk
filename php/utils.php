@@ -88,6 +88,7 @@ function ad_get_all_public_posts( $args = null ) {
     }
 
 	$defaults = array(
+				'user_types' => 'all',
 				'sort_by' => 'post_date',
 				'showposts' => 10,
 				'page' => 0
@@ -95,7 +96,7 @@ function ad_get_all_public_posts( $args = null ) {
 				
 	$args = array_merge( $defaults, $args );
 
-	$query = "SELECT $wpdb->posts.* FROM ($wpdb->posts, $wpdb->term_relationships)";
+	$query = "SELECT $wpdb->posts.* FROM ($wpdb->posts, $wpdb->term_relationships, $wpdb->postmeta)";
 	
 	// Join the postmeta table so we can sort by the meta_value column restricted to '_ef_duedate'
 	if ( $args['sort_by'] == 'due_date' ) {
@@ -115,7 +116,11 @@ function ad_get_all_public_posts( $args = null ) {
 	// Only return posts that the user has specified as public assignments		
 	$query .= " AND ( $wpdb->posts.ID = $wpdb->term_relationships.object_id
 							AND $wpdb->term_relationships.term_taxonomy_id IN ({$public_assignment_statuses}) )";
-							
+	
+	if ( $args['user_types'] != 'all' ) {
+		$user_types = $args['user_types'];
+		$query .= " AND ( $wpdb->posts.ID = $wpdb->postmeta.post_id AND $wpdb->postmeta.meta_key = '_ad_participant_type_$user_types' AND $wpdb->postmeta.meta_value = 'on' )";
+	}
 
 	if ( $args['sort_by'] == 'post_date' ) {
 		$query .= " ORDER BY $wpdb->posts.post_date DESC";
