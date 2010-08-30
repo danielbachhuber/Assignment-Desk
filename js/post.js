@@ -305,7 +305,10 @@ jQuery(document).ready(function() {
 		jQuery('#ad-edit-pitched-by-participant').show();
 		var text = jQuery('select#ad-pitched-by-participant option:selected').text();
 		var user_id = jQuery('select#ad-pitched-by-participant option:selected').val();
-		var link = '<a href="' + wp_admin_url + 'user-edit.php?user_id=' + user_id + '">' + text + "</a>";
+		var link = "None"
+		if ( parseInt(user_id) ) {
+			link = '<a href="' + wp_admin_url + 'user-edit.php?user_id=' + user_id + '">' + text + "</a>";
+		}
 		jQuery('#ad-pitched-by-participant-display').html(link);
 		jQuery('#ad-pitched-by-participant-select').slideToggle();
 		return false;		
