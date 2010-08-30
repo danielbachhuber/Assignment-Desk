@@ -478,14 +478,6 @@ class ad_post {
 			$volunteers = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->usermeta WHERE meta_key='_ad_volunteer' AND meta_value=$post_id");
             update_post_meta($post_id, '_ad_total_volunteers', $volunteers);
 
-            // Update the assignment status if the post is published.
-			if($post->post_status == 'publish'){
-                $published_status = get_term($assignment_desk->general_options['default_published_assignment_status'],
-                                         $assignment_desk->custom_taxonomies->assignment_status_label);
-                if($published_status){
-                    wp_set_object_terms($post->ID, $published_status->slug, $assignment_desk->custom_taxonomies->assignment_status_label);
-                }
-            }
 		}
     }
     
