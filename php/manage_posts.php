@@ -29,7 +29,7 @@ class ad_manage_posts {
         add_action('restrict_manage_posts', array(&$this, 'add_assignment_status_filter'));
         
         // Sorting
-        add_action('restrict_manage_posts', array(&$this, 'add_sortby_option'));
+		add_action('restrict_manage_posts', array(&$this, 'add_sortby_option'));
         add_action('parse_query', array(&$this, 'parse_query_sortby'));
 
         // Add postmeta to the manage_posts query
@@ -214,26 +214,27 @@ class ad_manage_posts {
     }
     
     /**
-     * Add a dropdown to filter posts by eligible assignment_status.
-     * This function is eerily similar to add_eligible_contributor_type_filter. eer
+     * Add links to filter posts by assignment_status.
      */
     function add_assignment_status_filter() {
         global $assignment_desk;
         $assignment_statuses = $assignment_desk->custom_taxonomies->get_assignment_statuses();
-    ?>
-        <select name='ad-assignment-status' id='ad-assignment-status-select' class='postform'>
-            <option value="">Show all AD statuses</option>
-            <?php 
-            foreach($assignment_statuses as $assignment_status){
-                echo "<option value='$assignment_status->term_id'";
-                if($_GET['ad-assignment-status'] == $assignment_status->term_id){
-                    echo ' selected ';
-                }
-                echo ">$assignment_status->name</option>";
+    
+        echo "<div><ul class='subsubsub'>";
+        
+        $class = '';
+        if ( ! $_GET['ad-assignment-status'] ) {
+            $class = 'current';
+        }
+        $status_links = array("<a href='?' class='$class'>All</a>");
+        foreach($assignment_statuses as $assignment_status){
+            $class = '';
+            if($_GET['ad-assignment-status'] == $assignment_status->term_id){
+                $class = 'current';
             }
-            ?>
-        </select>
-    <?php
+            $status_links[]= "<a href='?ad-assignment-status=$assignment_status->term_id' class='$class'>{$assignment_status->name}</a>";            
+        }
+        echo implode(' | ', $status_links) . "</div> <br style='clear:both'>";
     }
     
     function add_sortby_option(){
