@@ -388,6 +388,12 @@ Blog Editor");
 		} else {
 				echo '<li>Please enable Edit Flow to allow description field.</li>';
 		}
+		// Content
+		echo '<li><input id="public_facing_content_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_content_enabled]" type="checkbox"';
+		if ($options['public_facing_content_enabled']) {
+			echo ' checked="checked"';
+		}
+		echo ' />&nbsp;<label for="public_facing_content_enabled">Content</label></li>';
 		// Due date
 		if ($assignment_desk->edit_flow_exists()) {
 			echo '<li><input id="public_facing_duedate_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_duedate_enabled]" type="checkbox"';
