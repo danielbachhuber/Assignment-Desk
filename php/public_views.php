@@ -757,6 +757,10 @@ class ad_public_views {
 		$html .= '</span>';
 		$html .= '</form>';
 		
+		if ( !$all_pitches ) {
+		    $all_pitches = array();
+		}
+		
 		foreach ( $all_pitches as $pitch ) {
 			
 			$post_id = $pitch->ID;
