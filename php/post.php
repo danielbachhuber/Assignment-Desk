@@ -377,6 +377,7 @@ class ad_post {
 		if (current_user_can($assignment_desk->define_editor_permissions)) {
 			$all_participants = array();
 			$all_role_participants = array();
+			$all_volunteer_ids = array();
 			// For each User Role, save participant ID and status
 			foreach ( $user_roles as $user_role ) {
 				$role_participants = array();
@@ -448,18 +449,28 @@ class ad_post {
         			            $user = get_userdata($user_id);
         			            $coauthors[]= $user->user_login;
         			        }
+        			        else if ( $status == 'volunteered' ) {
+        			            $all_volunteer_ids[]= $user->ID;
+        			        }
         			    }
         			    update_post_meta($post_id, "_ad_participant_role_$role_id", $role_participants);
         			}
     			    $_POST['coauthors'] = array_unique($coauthors);
                     $coauthors_plus->add_coauthors($post_id, array_unique($coauthors));
     			}
-
     			// Also save the User Roles associated with a row for each participant
     			foreach ($all_participants as $participant_id => $user_role_ids) {
     				update_post_meta($post_id, "_ad_participant_$participant_id", $user_role_ids);
     			}
 			}
+			$all_volunteer_ids = array_unique($all_volunteer_ids);
+			// Delete stale volunteering records. The volunteer was either assigned or removed.
+			$wpdb->query("DELETE FROM $wpdb->usermeta 
+			                     WHERE meta_value=$post_id 
+			                     AND meta_key='_ad_volunteer' 
+			                     AND user_id NOT IN (" . implode(',', $all_volunteer_ids) . ")");
+			$volunteers = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->usermeta WHERE meta_key='_ad_volunteer' AND meta_value=$post_id");
+            update_post_meta($post_id, '_ad_total_volunteers', $volunteers);
 
             // Update the assignment status if the post is published.
 			if($post->post_status == 'publish'){
