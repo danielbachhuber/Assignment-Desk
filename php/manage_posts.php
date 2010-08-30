@@ -238,28 +238,45 @@ class ad_manage_posts {
     }
     
     function add_sortby_option(){
+        global $assignment_desk;
     ?>
         <label for"ad-sortby-select"><?php _e('Sort by'); ?>:</label>
         <select name='ad-sortby' id='ad-sortby-select' class='postform'>
             <option value="">None</option>
             <option value="votes" <?php echo ($_GET['ad-sortby'] == 'votes')? 'selected': ''?>>Votes</option>
             <option value="volunteers" <?php echo ($_GET['ad-sortby'] == 'volunteers')? 'selected': ''?>>Volunteers</option>
+            <?php if( $assignment_desk->edit_flow_exists() ): ?>
+                <option value="_ef_duedate" <?php echo ($_GET['ad-sortby'] == '_ef_duedate')? 'selected': ''?>>Due Date</option>
+            <?php endif; ?>
         </select>
+        <input type="hidden" name="ad-sortby-reverse" value="<?php echo ($_GET['ad-sortby-reverse'])? '': '1'; ?>">
 <?php
     }
     
     function parse_query_sortby( $query ){
         global $pagenow;
         if (is_admin() && $pagenow == 'edit.php' && isset($_GET['ad-sortby'])  && $_GET['ad-sortby'] !='None')  {
+            $orderby = 'meta_value';
+            $meta_key = '';
+            $oder = '';
             switch($_GET['ad-sortby']){
                 case 'votes':
-                    $query->query_vars['orderby'] = 'meta_value';
-                    $query->query_vars['meta_key'] = '_ad_votes_total';
+                    $order = ($_GET['ad-sortby-reverse'])? 'ASC': 'DESC';
+                    $meta_key = '_ad_votes_total';
                     break;
                 case 'volunteers':
-                    $query->query_vars['orderby'] = 'meta_value';
-                    $query->query_vars['meta_key'] = '_ad_total_volunteers';
+                    $order = ($_GET['ad-sortby-reverse'])? 'ASC': 'DESC';
+                    $meta_key = '_ad_total_volunteers';
                     break;
+                case '_ef_duedate':
+                    $order = ($_GET['ad-sortby-reverse'])? 'DESC': 'ASC';
+                    $meta_key = '_ef_duedate';
+                    break;
+            }
+            if ( $meta_key ) {
+                $query->query_vars['orderby'] = $orderby;
+                $query->query_vars['meta_key'] = $meta_key;
+                $query->query_vars['order'] = $order;
             }
         }
     }
