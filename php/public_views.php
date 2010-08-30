@@ -569,7 +569,7 @@ class ad_public_views {
 	 * Sanitize the user volunteer information and add them as a volunteer.
 	 */
 	function save_volunteer_form() {
-	    global $assignment_desk, $current_user;
+	    global $assignment_desk, $current_user, $wpdb;
 	    
 		if ( $_POST['assignment_desk_volunteer_submit'] && is_user_logged_in() ) {
 	    
@@ -602,13 +602,16 @@ class ad_public_views {
 		        }
 	        }
 	
-			// Get previous roles, 
 			foreach ( $user_roles as $user_role ) {
+			    // Get previous roles, 
 				$previous_values = get_post_meta($post_id, '_ad_participant_role_' . $user_role->term_id, true);
+				// New participant is a volunteer
 				if ( in_array( $user_role->term_id, $valid_roles ) && !isset( $previous_values[$current_user->ID] ) ) {
 					$previous_values[$current_user->ID] = 'volunteered';
 					update_usermeta($current_user->ID, '_ad_volunteer', $post_id);
-				} else if ( !in_array( $user_role->term_id, $valid_roles ) && $previous_values[$current_user->ID] == 'volunteered' ) {
+				} 
+				// Invalid role suibmitted by a volunteer?
+				else if ( !in_array( $user_role->term_id, $valid_roles ) && $previous_values[$current_user->ID] == 'volunteered' ) {
 					unset($previous_values[$current_user->ID]);
 				}
 				$new_values = $previous_values;
@@ -616,9 +619,11 @@ class ad_public_views {
 			}
 			// Save the roles associated with the user id as well
 			update_post_meta( $post_id, "_ad_participant_$sanitized_user_id", $valid_roles );
-	
-		}
-	
+			// Update the count of total volunteers
+			$volunteers = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->usermeta WHERE meta_key='_ad_volunteer' AND meta_value=$post_id");
+			error_log($volunteers);
+    		update_post_meta($post_id, '_ad_total_volunteers', $volunteers);
+		}	
 	}
 	
 	/**
@@ -799,9 +804,11 @@ class ad_public_views {
 			if ( $options['public_facing_tags_enabled'] ) {
 				$tags = get_the_tags( $post_id );
 				$tags_html = '';
-				foreach ( $tags as $tag ) {
-					$tags_html .= '<a href="' . get_tag_link($tag->term_id) . '">' . $tag->name . '</a>, ';
-				}
+				if ( $tags ) {
+				    foreach ( $tags as $tag ) {
+					    $tags_html .= '<a href="' . get_tag_link($tag->term_id) . '">' . $tag->name . '</a>, ';
+				    }
+			    }
 				$html .= '<p><label>Tags:</label> ' . rtrim( $tags_html, ', ' ) . '</p>';
 			}
 			if ( $description || $duedate || $location ) {

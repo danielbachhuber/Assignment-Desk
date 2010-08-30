@@ -17,7 +17,7 @@ class ad_post {
         add_action('edit_post', array(&$this, 'save_post_meta_box'), 9, 2);
         add_action('publish_post', array(&$this, 'save_post_meta_box'), 9, 2);
         
-        add_action('save_post', array($this, 'zero_vote_count'), 9, 2);
+        add_action('save_post', array($this, 'zero_sort_by_counts'), 9, 2);
         // Word counting for user stats
         add_action('save_post', array(&$this, 'save_post_word_count'), 9, 2);
 		
@@ -471,11 +471,20 @@ class ad_post {
             }
 		}
     }
-
-    function zero_vote_count($post_id, $post){
-	    $votes_total = get_post_meta($post_id, '_ad_votes_total', true);
-	    if(!$votes_total){
+    
+    /**
+     * We need to store a zero vote and volunteer count so sorting by a meta_value count works correctly. 
+     * Without the 0 meta_value in the db posts will not show up when sorting.
+     */
+    function zero_sort_by_counts($post_id, $post){
+	    $total_votes = get_post_meta($post_id, '_ad_votes_total', true);
+	    if ( !$total_votes ) {
 	        update_post_meta($post_id, '_ad_votes_total', 0);
+	    }
+	    
+	    $total_volunteers = get_post_meta($post_id, '_ad_total_volunteers', true);
+	    if ( !$total_volunteers ) {
+	        update_post_meta($post_id, '_ad_total_volunteers', 0);
 	    }
 	}
     
