@@ -42,22 +42,22 @@ function ad_add_to_participants(user_id, user_nicename, role_id, role_name){
 	// Else, create a new one
 	if (jQuery("#ad-participant-role-" + role_id + "-wrap").length > 0 && !error_message) {
 		// create a new list item that hold a hidden form element.
-		var field_html = '<li><input type="hidden" id="ad-participant-'
+		var field_html = '<p id="ad-participants-' + role_id + '-' + user_id + '"><input type="hidden" id="ad-participant-'
 						+ user_id +'" name="ad-participant-role-'+role_id
 						+ '[]" value="'+ user_id + '|' + user_role_status + '"/>'
-						+ user_nicename + ' | ' + user_role_status + '</li>';
+						+ user_nicename + ' (' + user_role_status + ')</p>';
 		// Append it to the list
-		jQuery("ul#ad-participants-" + role_id).append(field_html);
+		jQuery("#ad-participant-role-" + role_id + "-wrap").append(field_html);
 	} else if (!error_message) {
 		jQuery('#ad-no-participants').remove();
 		var field_html = '<div id="ad-participant-role-' + role_id + '-wrap" class="ad-role-wrap">'
 						+ '<h5>' + role_name + '</h5>'
-						+ '<ul id="ad-participants-' + role_id + '">';
-		field_html += '<li><input type="hidden"' + user_id 
+						+ '<p id="ad-participants-' + role_id + '-' + user_id + '">';
+		field_html += '<input type="hidden"' + user_id 
 		                + '" name="ad-participant-role-'+role_id
 						+ '[]" value="'+ user_id + '|' + user_role_status + '"/>'
-						+ user_nicename + ' | ' + user_role_status + '</li>';
-		field_html += '</ul></div>';				
+						+ user_nicename + ' (' + user_role_status + ')';
+		field_html += '</p></div>';				
 		jQuery("#ad-participants-wrap").append(field_html);			
 	} else {
 		jQuery("#ad-assign-form").prepend(error_message);
@@ -274,15 +274,14 @@ jQuery(document).ready(function() {
 	 * This function is attached to the click event of the "Remove" buttons.
 	 * This removes the participant record from the next submission.
 	 */
-	jQuery('.ad-remove-participant-button').each(function(index, button){
-		jQuery(button).click(function(){
-		    // role_id|user_id
-			var pieces = jQuery(button).val().split('|');
-			// Remove the user from that role.
-			jQuery('p#ad-participant-' + pieces[0] + '-' + pieces[1]).remove();
-			// @todo - roll up the role if no users left
-			return false;
-		});
+	jQuery('.ad-remove-participant-button').click(function() {
+		// Hide the entire wrapper if its the last one
+		if ( jQuery(this).parents('div.ad-role-wrap').find('p').length == 1 ) {
+			jQuery(this).parents('div.ad-role-wrap').remove();
+		} else {
+			jQuery(this).parents('p').remove();
+		}
+		
 	});
 	
 	/* ============================ Pitched By ============================ */
