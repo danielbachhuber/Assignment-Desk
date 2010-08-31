@@ -51,7 +51,7 @@ class ad_dashboard_widgets {
                                      AND $wpdb->term_taxonomy.term_id = $status->term_id ");
 	    }
 	    else {
-	        return 1;
+	        return 0;
 	    }
 	    
 	}
