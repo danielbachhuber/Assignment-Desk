@@ -113,11 +113,6 @@ class ad_custom_taxonomies {
                        'slug' => 'private',
                        'description' => 'This assignment should not show up on public-facing views.',)
 		          ),
-            array( 'term' => 'Completed',
-                   'args' => array( 
-                       'slug' => 'completed',
-                       'description' => 'The assignment is complete and published.',)
-		          ),
         );
 	    
 	    foreach ( $default_assignment_labels as $term ){
