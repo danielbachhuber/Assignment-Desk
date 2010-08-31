@@ -621,7 +621,6 @@ class ad_public_views {
 			update_post_meta( $post_id, "_ad_participant_$sanitized_user_id", $valid_roles );
 			// Update the count of total volunteers
 			$volunteers = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->usermeta WHERE meta_key='_ad_volunteer' AND meta_value=$post_id");
-			error_log($volunteers);
     		update_post_meta($post_id, '_ad_total_volunteers', $volunteers);
 		}	
 	}
