@@ -378,6 +378,12 @@ Blog Editor");
 		echo '<ul>';
 		// Title
 		echo '<li><input type="checkbox" disabled="disabled" checked="checked" />&nbsp;<label for="public_facing_title">Title</label></li>';
+		// Content
+		echo '<li><input id="public_facing_content_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_content_enabled]" type="checkbox"';
+		if ($options['public_facing_content_enabled']) {
+			echo ' checked="checked"';
+		}
+		echo ' />&nbsp;<label for="public_facing_content_enabled">Content</label></li>';		
 		// Description
 		if ($assignment_desk->edit_flow_exists()) {
 			echo '<li><input id="public_facing_description_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_description_enabled]" type="checkbox"';
@@ -388,12 +394,6 @@ Blog Editor");
 		} else {
 				echo '<li>Please enable Edit Flow to allow description field.</li>';
 		}
-		// Content
-		echo '<li><input id="public_facing_content_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_content_enabled]" type="checkbox"';
-		if ($options['public_facing_content_enabled']) {
-			echo ' checked="checked"';
-		}
-		echo ' />&nbsp;<label for="public_facing_content_enabled">Content</label></li>';
 		// Due date
 		if ($assignment_desk->edit_flow_exists()) {
 			echo '<li><input id="public_facing_duedate_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_duedate_enabled]" type="checkbox"';
@@ -481,13 +481,13 @@ Blog Editor");
 	    echo "<ul>";
 	    foreach ($assignment_desk->custom_taxonomies->get_assignment_statuses() as $assignment_status){
 	        echo "<li>";
-	        echo "<input type='checkbox' value='{$assignment_status->term_id}' " .
+	        echo "<input type='checkbox' id='ad-status-{$assignment_status->term_id}' value='{$assignment_status->term_id}' " .
 	                     'name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_assignment_statuses][]"';
 	        if ( in_array($assignment_status->term_id, $public_statuses) ) {
 	            echo ' checked="checked" ';
 	        } 
 	        echo '>';
-	        echo " $assignment_status->name</li>";
+	        echo " <label for='ad-status-{$assignment_status->term_id}'>$assignment_status->name</label></li>";
 	    }
 	    echo "</ul>";
 	}

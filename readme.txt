@@ -36,6 +36,17 @@ For full functionality, please also install and configure Edit Flow and Co-Autho
 
 == Changelog ==
 
+= 0.5 =
+* Hide Assignment Desk functionality if post is published
+* Ability to show or hide the_content for a story in progress
+* Logged-out users can now properly see posts which haven't been published
+* Filter all pitches by normal post statuses, contributor types, or sort by post date, due date, or votes
+* Volunteering can be restricted to defined contributor types
+* Ability to sort by due date, votes, or number of volunteers in Manage Posts view
+* Filter by assignment status UI in Manage Posts has UI similar to normal post statuses
+* Styled the listing of contributors in the post meta box and improved markup
+* Setting for changing the text of the voting button
+
 = 0.4 =
 * Pitch form offers customizable labels and descriptions for every field
 * Pitch form supports Edit Flow due date field with jQuery datepicker
