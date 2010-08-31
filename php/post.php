@@ -50,7 +50,7 @@ class ad_post {
     function enqueue_admin_css(){
         // Enqueue the ad_post_meta.css
         wp_enqueue_style('ad-post-meta-style', ASSIGNMENT_DESK_URL.'css/post.css', false, false, 'all');
-        wp_enqueue_style('ad-fancybox', ASSIGNMENT_DESK_URL . 'js/fancybox/jquery.fancybox-1.3.1.css', false, false, 'all');
+
     }
     
     /**
