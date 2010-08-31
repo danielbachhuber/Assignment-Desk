@@ -330,10 +330,6 @@ class ad_post {
         if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) { return; }
         
         if ($executed_already) { return; }
-        
-        //if (!wp_verify_nonce($_POST['ad-noncename'], plugin_basename(__FILE__))){
-         //   return $post_id;
-       // }
 
         // The user who pitched this story
         if ( current_user_can( $assignment_desk->define_editor_permissions ) ) {

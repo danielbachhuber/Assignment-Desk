@@ -636,7 +636,50 @@ class ad_public_views {
 		$parent_post = $post;		
 		
 		$html = '';
-		$all_pitches = get_public_feedback_posts();
+		
+		if ( $_POST['sort_by'] == 'ranking' || $_POST['sort_by'] == 'post_date' ) {
+			$sort_by = $_POST['sort_by'];
+		} else {
+			$sort_by = 'post_date';
+		}
+		
+		$args = array(
+					'sort_by' => $sort_by
+					);
+		$all_pitches = ad_get_all_public_posts( $args );
+		
+		$html .= '<form class="assignment-desk-filter-form" method="POST">';
+		
+		$html .= '<input type="hidden" name="page_id" value="' . $parent_post->ID . '" />';
+		
+		if ( $options['public_facing_filtering_sort_by_enabled'] ) {
+			$html .= '<select name="sort_by">'
+				. '<option value="post_date"';
+			if ( $sort_by == 'post_date' ) {
+				$html .= ' selected="selected"';
+			}
+			$html .= '>Post date</option>';
+			if ( $options['public_facing_voting_enabled'] ) {
+				$html .= '<option value="ranking"';
+				if ( $sort_by == 'ranking' ) {
+					$html .= ' selected="selected"';
+				}
+				$html .= '>Ranking</option>';
+			}
+			if ( $assignment_desk->edit_flow_exists() ) {
+				$html .= '<option value="due_date"';
+				if ( $sort_by == 'due_date' ) {
+					$html .= ' selected="selected"';
+				}
+				$html .= '>Due date</option>';
+			}
+			
+			$html .= '</select>';
+		}
+		// Filter button
+		$html .= '<input type="submit" name="assignment-desk-filter-button" class="assignment-desk-filter-button" value="Filter" />';
+		
+		$html .= '</form>';
 		
 		foreach ( $all_pitches as $pitch ) {
 			
@@ -672,6 +715,7 @@ class ad_public_views {
 			    $html .= $this->volunteer_form( $post_id );
 		    }
 			$html .= "</div>";
+			
 		}
 		
 		$the_content = str_replace($template_tag, $html, $the_content);
