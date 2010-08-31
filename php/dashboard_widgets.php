@@ -31,6 +31,30 @@ class ad_dashboard_widgets {
 		$count = $count ? $count : 0;
 		return $count;
 	}
+	
+	function count_user_posts_by_assignment_status($status){
+	    global $current_user, $wpdb, $assignment_desk;
+	    get_currentuserinfo();
+	    
+	    $counts = array();
+	    
+	    if ( ! $assignment_desk->coauthors_plus_exists() ){
+            return $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts
+                                    LEFT JOIN $wpdb->term_relationships ON($wpdb->posts.ID = $wpdb->term_relationships.object_id)
+                                    LEFT JOIN $wpdb->term_taxonomy ON($wpdb->term_taxonomy.term_taxonomy_id = $wpdb->term_relationships.term_taxonomy_id)
+                                    WHERE $wpdb->posts.post_author = '$current_user->ID' 
+                                     AND $wpdb->posts.post_status != 'publish'
+                                     AND $wpdb->posts.post_status != 'inherit' 
+                                     AND $wpdb->posts.post_status != 'trash'
+             						 AND $wpdb->posts.post_status != 'auto-draft'
+                                     AND $wpdb->term_taxonomy.taxonomy = 'assignment_status'
+                                     AND $wpdb->term_taxonomy.term_id = $status->term_id ");
+	    }
+	    else {
+	        return 1;
+	    }
+	    
+	}
    
     function widget() {
         global $assignment_desk, $current_user, $wpdb;
@@ -44,29 +68,41 @@ class ad_dashboard_widgets {
             }
         }
         ?>
-        <?php if($assignment_desk->define_editor_permissions): ?>
         <p class="sub">By assignment status</p>
         <div class="table">
         <table>
             <tbody>
             <?php 
-            foreach ( $assignment_statuses as $assignment_status ) {
-                $url = admin_url() . "/edit.php?ad-assignment-status=$assignment_status->term_id";
-                echo "<tr><td class='b'><a href='$url'>" . $this->count_posts_by_assignment_status($assignment_status) . "</a></td>";
-                echo "<td class='b t'><a href='$url'>$assignment_status->name</a></td></tr>";
+            if ( current_user_can($assignment_desk->define_editor_permissions) ) { 
+                foreach ( $assignment_statuses as $assignment_status ) {
+                    $count = $this->count_posts_by_assignment_status($assignment_status);
+                    if ( $count ) {
+                        $url = admin_url() . "/edit.php?ad-assignment-status=$assignment_status->term_id";
+                        echo "<tr><td class='b'><a href='$url'>" . $count . "</a></td>";
+                        echo "<td class='b t'><a href='$url'>$assignment_status->name</a></td></tr>";
+                    }
+                }
+                $this_month_url = admin_url() . '/edit.php?post_status=publish&monthnum=' . date('M');
+                $q = new WP_Query( array('post_status' => 'publish', 'monthnum' => date('M')));
+                echo "<tr><td class='b'><a href='$this_month_url'>$q->found_posts</a></td>";
+                echo "<td class='b t'><a href='$this_month_url'>" . _('Published this month', 'assignment-desk') . "</a></td></tr>";
             }
-            $this_month_url = admin_url() . '/edit.php?post_status=publish&monthnum=' . date('M');
-            $q = new WP_Query( array('post_status' => 'publish', 'monthnum' => date('M')));
-            echo "<tr><td class='b'><a href='$this_month_url'>$q->found_posts</a></td>";
-            echo "<td class='b t'><a href='$this_month_url'>" . _('Published this month', 'assignment-desk') . "</a></td></tr>";
-            ?>
+            else {
+                foreach ( $assignment_statuses as $assignment_status ) {
+                    $count = $this->count_user_posts_by_assignment_status($assignment_status);
+                    if ( $count ) {
+                        $url = admin_url() . "/edit.php?ad-assignment-status=$assignment_status->term_id";
+                        echo "<tr><td class='b'><a href='$url'>" . $count . "</a></td>";
+                        echo "<td class='b t'><a href='$url'>$assignment_status->name</a></td></tr>";
+                    }
+                }
+            }
+                ?>
             </tbody>
         </table>
         </div>
         
         <br>
-        
-        <?php endif; ?>
 <?php
        
         $pending_posts = array();
