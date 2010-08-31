@@ -481,13 +481,13 @@ Blog Editor");
 	    echo "<ul>";
 	    foreach ($assignment_desk->custom_taxonomies->get_assignment_statuses() as $assignment_status){
 	        echo "<li>";
-	        echo "<input type='checkbox' value='{$assignment_status->term_id}' " .
+	        echo "<input type='checkbox' id='ad-status-{$assignment_status->term_id}' value='{$assignment_status->term_id}' " .
 	                     'name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_assignment_statuses][]"';
 	        if ( in_array($assignment_status->term_id, $public_statuses) ) {
 	            echo ' checked="checked" ';
 	        } 
 	        echo '>';
-	        echo " $assignment_status->name</li>";
+	        echo " <label for='ad-status-{$assignment_status->term_id}'>$assignment_status->name</label></li>";
 	    }
 	    echo "</ul>";
 	}
