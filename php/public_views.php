@@ -424,6 +424,9 @@ class ad_public_views {
 		}
 		
 		$all_votes = get_post_meta( $post_id, '_ad_votes_all', true );
+		if(!$all_votes){
+		    $all_votes = array();
+		}
 		$total_votes = (int)get_post_meta( $post_id, '_ad_votes_total', true );
 		
 		if (!$total_votes) {
