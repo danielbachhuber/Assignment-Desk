@@ -650,7 +650,8 @@ class ad_public_views {
 	* Replace an html comment <!--assignment-desk-all-posts--> with ad public pages.
 	*/
 	function show_all_posts( $the_content ) {
-		global $wpdb, $assignment_desk, $post, $edit_flow;
+		global $wpdb, $assignment_desk, $post, $edit_flow, $current_user;
+		wp_get_current_user();
 		$options = $assignment_desk->public_facing_options;
 	  
 		$template_tag = '<!--' . $assignment_desk->all_posts_key . '-->';
@@ -821,7 +822,14 @@ class ad_public_views {
 			}
 			if ( $options['public_facing_volunteering_enabled'] ) {
 			    $html .= $this->show_all_volunteers( $post_id );
-			    $html .= $this->volunteer_form( $post_id );
+			
+				$current_user_type = (int)get_usermeta( $current_user->ID, 'ad_user_type' );
+				// Do not equal negative if someone created a new user type on us that
+				// hasn't been saved in association with the post
+				if ( get_post_meta( $post->ID, "_ad_participant_type_$current_user_type" , true ) != 'off' ) {
+					$html .= $this->volunteer_form( $post_id );
+				}
+		
 		    }
 			$html .= "</div>";
 			
@@ -894,11 +902,18 @@ class ad_public_views {
 	 * Appending volunteering functionality to the ending of a post's content
 	 */
 	function append_volunteering_to_post( $the_content ) {
-		global $post, $assignment_desk;
+		global $post, $assignment_desk, $current_user;
+		wp_get_current_user();
 		
-		if ( is_single() && $post->post_status != 'publish'  ) {
+		if ( is_single() && $post->post_status != 'publish' ) {
 			$the_content .= $this->show_all_volunteers( $post->ID );
-			$the_content .= $this->volunteer_form( $post->ID );
+			
+			$current_user_type = (int)get_usermeta( $current_user->ID, 'ad_user_type' );
+			// Do not equal negative if someone created a new user type on us that
+			// hasn't been saved in association with the post
+			if ( get_post_meta( $post->ID, "_ad_participant_type_$current_user_type" , true ) != 'off' ) {
+				$the_content .= $this->volunteer_form( $post->ID );
+			}
 		}
 		
 		return $the_content;		
