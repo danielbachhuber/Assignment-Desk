@@ -22,12 +22,12 @@ class ad_dashboard_widgets {
      * Return the number of objects associated with this status
      * $status is a term
      */
-	function count_pitches($status){
+	function count_posts_by_assignment_status($status){
 		global $assignment_desk, $wpdb;
 		$count = $wpdb->get_var($wpdb->prepare("SELECT count FROM $wpdb->term_taxonomy 
-													WHERE taxonomy = '%s' AND term_id = %d", 
-													$assignment_desk->custom_taxonomies->assignment_status_label,
-													$status->term_id));
+												WHERE taxonomy = '%s' AND term_id = %d", 
+												$assignment_desk->custom_taxonomies->assignment_status_label,
+												$status->term_id));
 		$count = $count ? $count : 0;
 		return $count;
 	}
@@ -36,33 +36,37 @@ class ad_dashboard_widgets {
         global $assignment_desk, $current_user, $wpdb;
 
         get_currentuserinfo();
-		$new_pitches_count = $this->count_pitches('New');
-		$approved_post_count = $this->count_pitches('Approved');
-		
+        $assignment_statuses = $assignment_desk->custom_taxonomies->get_assignment_statuses();
+        
 		if($_REQUEST['ad-dashboard-editor-messages']){
             foreach($_REQUEST['ad-dashboard-assignment-messages'] as $messages){
                 echo "<div class='message info'>$message</div>";
             }
         }
         ?>
+        <?php if($assignment_desk->define_editor_permissions): ?>
+        <p class="sub">By assignment status</p>
         <div class="table">
         <table>
             <tbody>
-            <?php if($assignment_desk->coauthors_plus_exists()){
-                // @todo - Figure out how to link to the unassigned posts.
-                $unassigned_url = "#";
-                echo "<tr><td class='b'><a href='$unassigned_url'>" . count(ad_get_unassigned_posts()) . "</a></td>";
-                echo "<td class='b'><a href='$unassigned_url'>" . _('Unassigned', 'assignment-desk') . "</a></td></tr>";
+            <?php 
+            foreach ( $assignment_statuses as $assignment_status ) {
+                $url = admin_url() . "/edit.php?ad-assignment-status=$assignment_status->term_id";
+                echo "<tr><td class='b'><a href='$url'>" . $this->count_posts_by_assignment_status($assignment_status) . "</a></td>";
+                echo "<td class='b t'><a href='$url'>$assignment_status->name</a></td></tr>";
             }
-            
             $this_month_url = admin_url() . '/edit.php?post_status=publish&monthnum=' . date('M');
             $q = new WP_Query( array('post_status' => 'publish', 'monthnum' => date('M')));
             echo "<tr><td class='b'><a href='$this_month_url'>$q->found_posts</a></td>";
-            echo "<td class='b'><a href='$this_month_url'>" . _('Published this month', 'assignment-desk') . "</a></td></tr>";
-            ?>        
+            echo "<td class='b t'><a href='$this_month_url'>" . _('Published this month', 'assignment-desk') . "</a></td></tr>";
+            ?>
             </tbody>
         </table>
         </div>
+        
+        <br>
+        
+        <?php endif; ?>
 <?php
        
         $pending_posts = array();
@@ -77,6 +81,7 @@ class ad_dashboard_widgets {
         }
         
         $roles = $assignment_desk->custom_taxonomies->get_user_roles();
+        $max_pending = 5;
         
         foreach($participant_posts as $post ){
             foreach($roles as $user_role){
@@ -86,28 +91,31 @@ class ad_dashboard_widgets {
                     foreach ($participant_record as $user_id => $status ){
                         if( $user_id == $current_user->ID && $status == 'pending' ){
                            $pending_posts[] = array($post->post_id, $user_role);
+                           $max_pending--;
                         }
                     }
                 }
             }
+            if(!$max_pending){
+                break;
+            }
         }
         $count_pending = count($pending_posts);
-?>
-        <p class="sub"><?php echo $count_pending; ?> pending assignment<?php echo ($count_pending != 1)? 's': ''?>.</p>
-        <?php foreach($pending_posts as $pending): ?>
-            <div>
-                <?php $post = get_post($pending[0]); ?>
-                <?php 
-                echo "<p>{$post->post_title} | {$pending[1]->name}</p>";
-        
-                echo "<p><a class='button' href='" . admin_url() . "index.php?participant_response=accepted&post_id=$post->ID&role_id={$pending[1]->term_id}'>Accept</a> ";
-                echo "<a class='button' href='" . admin_url() . "index.php?participant_response=declined&post_id=$post->ID&role_id={$pending[1]->term_id}'>Decline</a></p>";  
-                ?>
-            </div>
-        <?php endforeach; ?>
-
-        <div class="inside">&raquo; <a href="?page=assignment_desk-index">Go to Assignment Desk landing page.</a></div>
-<?php
+        if ( $count_pending ) {
+            echo "<p class='sub'>$count_pending pending assignment";
+            echo ($count_pending != 1)? 's': ''; 
+            echo "</p>";
+            echo "<div class='table'><table><tbody>";
+            foreach($pending_posts as $pending) {
+                $post = get_post($pending[0]);
+                echo "<tr>";
+                echo "<td>{$post->post_title} | {$pending[1]->name}</td>";
+                echo "<td><a class='button' href='" . admin_url() . "index.php?participant_response=accepted&post_id=$post->ID&role_id={$pending[1]->term_id}'>Accept</a> ";
+                echo "<a class='button' href='" . admin_url() . "index.php?participant_response=declined&post_id=$post->ID&role_id={$pending[1]->term_id}'>Decline</a></td>";
+                echo "</tr>";  
+            }
+            echo "</table></div>";
+        }
    }
    
    function respond_to_story_invite(){
