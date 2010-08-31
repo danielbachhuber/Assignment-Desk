@@ -90,8 +90,10 @@ function ad_get_all_public_posts( $args = null ) {
 	$defaults = array(
 				'user_types' => 'all',
 				'sort_by' => 'post_date',
+				'post_status' => 'all',
 				'showposts' => 10,
-				'page' => 0
+				'page' => 0,
+				'post_id' => null
 				);
 				
 	$args = array_merge( $defaults, $args );
@@ -116,6 +118,10 @@ function ad_get_all_public_posts( $args = null ) {
 						AND $wpdb->posts.post_status != 'trash'
 						AND $wpdb->posts.post_status != 'auto-draft'
 						AND $wpdb->posts.post_status != 'inherit'";
+						
+	if ( $args['post_id'] ) {
+		$query .= $wpdb->prepare( " AND $wpdb->posts.ID = %s", $args['post_id'] );
+	}
 			
 	// Only return posts that the user has specified as public assignments		
 	$query .= " AND ( $wpdb->posts.ID = $wpdb->term_relationships.object_id

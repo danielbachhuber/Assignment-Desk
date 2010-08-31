@@ -490,7 +490,7 @@ Blog Editor");
 	    global $assignment_desk;
 	    $options = $assignment_desk->public_facing_options;
 	    $public_statuses = $options['public_facing_assignment_statuses'];
-	    if(!is_array($public_statuses)){
+	    if ( !is_array($public_statuses) ) {
 	        $public_statuses = array((int)$public_statuses);
 	    }
 	    echo "<label>" . _("Posts of the following assignment statuses will be displayed on the public facing views (if enabled)") . ":</label>";
