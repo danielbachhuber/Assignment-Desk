@@ -9,23 +9,13 @@ require_once(ASSIGNMENT_DESK_DIR_PATH . "/php/utils.php");
 class ad_dashboard_widgets {
     
     function init(){
-        add_action('wp_dashboard_setup', array(&$this, 'add_dashboard_widgets'));
+        add_action('wp_dashboard_setup', array(&$this, 'add_dashboard_widget'));
         add_action('admin_init', array(&$this, 'respond_to_story_invite'));
     }
        
-    function add_dashboard_widgets () {
+    function add_dashboard_widget () {
         global $assignment_desk, $current_user;
-           
-        // If the current user is a Editor or greater, show the editor_overview_widget
-        if ($current_user->has_cap('publish_posts')) {
-                   
-           // Add the editor_overview_widget widget, if enabled
-           // if ($assignment_desk->get_plugin_option('editor_overview_widget_enabled')) {
-               wp_add_dashboard_widget('ad_editor_overview', 'Assignment Desk Overview', array(&$this, 'overview_widget'));
-           // }
-        }
-        
-        wp_add_dashboard_widget('ad_assignments', 'Assignments', array(&$this, 'assignments_widget'));
+        wp_add_dashboard_widget('ad_assignments', 'Assignment Desk', array(&$this, 'widget'));
     }
 
     /**
@@ -42,9 +32,10 @@ class ad_dashboard_widgets {
 		return $count;
 	}
    
-    function overview_widget() {
+    function widget() {
         global $assignment_desk, $current_user, $wpdb;
 
+        get_currentuserinfo();
 		$new_pitches_count = $this->count_pitches('New');
 		$approved_post_count = $this->count_pitches('Approved');
 		
@@ -62,11 +53,6 @@ class ad_dashboard_widgets {
                 $unassigned_url = "#";
                 echo "<tr><td class='b'><a href='$unassigned_url'>" . count(ad_get_unassigned_posts()) . "</a></td>";
                 echo "<td class='b'><a href='$unassigned_url'>" . _('Unassigned', 'assignment-desk') . "</a></td></tr>";
-
-                // @todo - Figure out how to link to inprogress posts.
-                $inprogress_url = "";
-                echo "<tr><td class='b'><a href='$inprogress_url'>" . count(ad_get_inprogress_posts()) . "</a></td>";
-                echo "<td class='b'><a href='$inprogress_url'>" . _('In Progress', 'assignment-desk') . "</a></td></tr>";
             }
             
             $this_month_url = admin_url() . '/edit.php?post_status=publish&monthnum=' . date('M');
@@ -78,19 +64,9 @@ class ad_dashboard_widgets {
         </table>
         </div>
 <?php
-    }
-   
-    function assignments_widget(){
-        global $assignment_desk, $wpdb, $current_user;
        
-        get_currentuserinfo();
         $pending_posts = array();
-        
-        if($_REQUEST['ad-dashboard-assignment-messages']){
-            foreach($_REQUEST['ad-dashboard-assignment-messages'] as $message){
-                echo "<div class='message info'>$message</div>";
-            }
-        }
+
         // Find all of the posts this user participates in.
         $participant_posts = $wpdb->get_results("SELECT post_id FROM $wpdb->postmeta 
                                                   WHERE meta_key = '_ad_participant_{$current_user->ID}'
@@ -117,20 +93,20 @@ class ad_dashboard_widgets {
         }
         $count_pending = count($pending_posts);
 ?>
-<p class="sub"><?php echo $count_pending; ?> pending assignment<?php echo ($count_pending != 1)? 's': ''?>.</p>
-<?php foreach($pending_posts as $pending): ?>
-    <div>
-        <?php $post = get_post($pending[0]); ?>
-        <?php 
-        echo "<p>{$post->post_title} | {$pending[1]->name}</p>";
+        <p class="sub"><?php echo $count_pending; ?> pending assignment<?php echo ($count_pending != 1)? 's': ''?>.</p>
+        <?php foreach($pending_posts as $pending): ?>
+            <div>
+                <?php $post = get_post($pending[0]); ?>
+                <?php 
+                echo "<p>{$post->post_title} | {$pending[1]->name}</p>";
         
-        echo "<p><a class='button' href='" . admin_url() . "index.php?participant_response=accepted&post_id=$post->ID&role_id={$pending[1]->term_id}'>Accept</a> ";
-        echo "<a class='button' href='" . admin_url() . "index.php?participant_response=declined&post_id=$post->ID&role_id={$pending[1]->term_id}'>Decline</a></p>";  
-        ?>
-    </div>
-<?php endforeach; ?>
+                echo "<p><a class='button' href='" . admin_url() . "index.php?participant_response=accepted&post_id=$post->ID&role_id={$pending[1]->term_id}'>Accept</a> ";
+                echo "<a class='button' href='" . admin_url() . "index.php?participant_response=declined&post_id=$post->ID&role_id={$pending[1]->term_id}'>Decline</a></p>";  
+                ?>
+            </div>
+        <?php endforeach; ?>
 
-<div class="inside">&raquo; <a href="?page=assignment_desk-index">Go to Assignment Desk landing page.</a></div>
+        <div class="inside">&raquo; <a href="?page=assignment_desk-index">Go to Assignment Desk landing page.</a></div>
 <?php
    }
    
