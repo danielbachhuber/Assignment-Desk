@@ -643,7 +643,14 @@ class ad_public_views {
 			$sort_by = 'post_date';
 		}
 		
+		if ( isset($_POST['user_types']) && $_POST['user_types'] != 'all' ) {
+			$user_type_filter = (int)$_POST['user_types'];
+		} else {
+			$user_type_filter = 'all';
+		}
+		
 		$args = array(
+					'user_types' => $user_type_filter,
 					'sort_by' => $sort_by
 					);
 		$all_pitches = ad_get_all_public_posts( $args );
@@ -652,8 +659,29 @@ class ad_public_views {
 		
 		$html .= '<input type="hidden" name="page_id" value="' . $parent_post->ID . '" />';
 		
+		$html .= '<span class="left">';
+		
+		if ( $options['public_facing_filtering_participant_type_enabled'] ) {
+			$user_types = $assignment_desk->custom_taxonomies->get_user_types();
+			$html .= '<select name="user_types" class="assignment-desk-filter-participant-types">';
+			$html .= '<option value="all">Show all eligible types</options>';
+			foreach ( $user_types as $user_type ) {
+				$html .= '<option value="' . $user_type->term_id . '"';
+				if ( $user_type_filter == $user_type->term_id ) {
+					$html .= ' selected="selected"';
+				}
+				$html .= '>' . $user_type->name . '</option>';
+			}
+			$html .= '</select>';
+		}
+		
+		// Filter button
+		$html .= '<input type="submit" name="assignment-desk-filter-button" class="assignment-desk-filter-button" value="Filter" />';
+		$html .= '</span>';
+		
+		$html .= '<span class="right">';
 		if ( $options['public_facing_filtering_sort_by_enabled'] ) {
-			$html .= '<select name="sort_by">'
+			$html .= '<select name="sort_by" class="assignment-desk-sort-by">'
 				. '<option value="post_date"';
 			if ( $sort_by == 'post_date' ) {
 				$html .= ' selected="selected"';
@@ -676,9 +704,9 @@ class ad_public_views {
 			
 			$html .= '</select>';
 		}
-		// Filter button
-		$html .= '<input type="submit" name="assignment-desk-filter-button" class="assignment-desk-filter-button" value="Filter" />';
-		
+		// Sort button
+		$html .= '<input type="submit" name="assignment-desk-sort-button" class="assignment-desk-sort-button" value="Sort" />';
+		$html .= '</span>';
 		$html .= '</form>';
 		
 		foreach ( $all_pitches as $pitch ) {

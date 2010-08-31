@@ -364,7 +364,14 @@ Blog Editor");
 	function public_facing_filtering_option() {
 		global $assignment_desk;
 		$options = $assignment_desk->public_facing_options;
-		
+		// Filter by participant type
+		echo '<input id="public_facing_filtering_participant_type_enabled" type="checkbox" '
+			. 'name="' . $assignment_desk->get_plugin_option_fullname('public_facing')
+			. '[public_facing_filtering_participant_type_enabled]"';
+		if ( $options['public_facing_filtering_participant_type_enabled'] ) {
+			echo ' checked="checked"';
+		}
+	 	echo ' />&nbsp;<label for="public_facing_filtering_participant_type_enabled">Contributor type</label>&nbsp;';
 		// Sort by
 		echo '<input id="public_facing_filtering_sort_by_enabled" type="checkbox" '
 			. 'name="' . $assignment_desk->get_plugin_option_fullname('public_facing')
@@ -372,7 +379,7 @@ Blog Editor");
 		if ( $options['public_facing_filtering_sort_by_enabled'] ) {
 			echo ' checked="checked"';
 		}
-	 	echo ' />&nbsp;<label for="public_facing_filtering_sort_by_enabled">Sort by</label>';
+	 	echo ' />&nbsp;<label for="public_facing_filtering_sort_by_enabled">Sort by</label>&nbsp;';
 	}
 	
 	function public_facing_elements_option() {
