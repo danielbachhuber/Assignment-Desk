@@ -21,7 +21,6 @@ if ( !class_exists( 'ad_settings' ) ){
 		add_settings_section( 'general', 'General', array(&$this, 'general_setting_section'), $assignment_desk->top_level_page );
 		add_settings_field( 'default_new_assignment_status', 'Default assignment status', array(&$this, 'default_new_assignment_status_option'), $assignment_desk->top_level_page, 'general' );
 		add_settings_field( 'default_workflow_status', 'Default workflow status', array(&$this, 'default_workflow_status_option'), $assignment_desk->top_level_page, 'general' );
-		add_settings_field( 'default_published_assignment_status', 'Default assignment status for published posts', array(&$this, 'default_published_assignment_status_option'), $assignment_desk->top_level_page, 'general' );
 		
 		/* Assignment Management */
 		add_settings_section( 'assignment_management', 'Assignment Management', array(&$this, 'assignment_management_setting_section'), $assignment_desk->top_level_page );
@@ -68,15 +67,6 @@ if ( !class_exists( 'ad_settings' ) ){
                                           AND t.slug = 'new' LIMIT 1");
         $new_status = $new_status[0];
         $options['default_new_assignment_status'] = $new_status->term_id;
-        
-        // @todo - Why does get_term_by not work during activation?
-        // $published_status = get_term_by('slug', 'completed', $assignment_desk->custom_taxonomies->assignment_status_label);
-        $published_status = $wpdb->get_results("SELECT t.*, tt.* 
-                                          FROM $wpdb->terms AS t INNER JOIN $wpdb->term_taxonomy AS tt ON t.term_id = tt.term_id 
-                                          WHERE tt.taxonomy = '{$assignment_desk->custom_taxonomies->assignment_status_label}' 
-                                          AND t.slug = 'completed' LIMIT 1");
-        $published_status = $published_status[0];
-        $options['default_published_assignment_status'] = $published_status->term_id;
         
         $options['assignment_email_template_subject'] = _("[%blogname%] You've been assigned to %title%");
         $options['assignment_email_template'] =
@@ -137,19 +127,7 @@ Blog Editor");
 		
 	}
 	
-	function default_published_assignment_status_option() {
-	    global $assignment_desk;
-        echo "<select name='assignment_desk_general[default_published_assignment_status]' id='assignment_default_published_status'>";
-        foreach($assignment_desk->custom_taxonomies->get_assignment_statuses() as $status){
-            echo "<option value='$status->term_id'";
-            if($assignment_desk->general_options['default_published_assignment_status'] == $status->term_id){
-                echo " selected ";
-            }
-            echo ">$status->name</option>";
-        }
-        echo "</select>";
-    }
-    
+	
     function general_setting_section() {
 		global $assignment_desk;
 	}
@@ -410,6 +388,12 @@ Blog Editor");
 		} else {
 				echo '<li>Please enable Edit Flow to allow description field.</li>';
 		}
+		// Content
+		echo '<li><input id="public_facing_content_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_content_enabled]" type="checkbox"';
+		if ($options['public_facing_content_enabled']) {
+			echo ' checked="checked"';
+		}
+		echo ' />&nbsp;<label for="public_facing_content_enabled">Content</label></li>';
 		// Due date
 		if ($assignment_desk->edit_flow_exists()) {
 			echo '<li><input id="public_facing_duedate_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_duedate_enabled]" type="checkbox"';

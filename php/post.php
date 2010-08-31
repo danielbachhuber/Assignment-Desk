@@ -274,18 +274,18 @@ class ad_post {
             $role_participants = get_post_meta($post->ID, "_ad_participant_role_{$user_role->term_id}", true);
             if (is_array($role_participants) && count($role_participants) ) {
                 $total_participants += count($role_participants);
-                echo "<div id='ad-participant-role-{$user_role->term_id}'-wrap class='ad-role-wrap'>";
+                echo "<div id='ad-participant-role-{$user_role->term_id}-wrap' class='ad-role-wrap'>";
                 echo "<h5> $user_role->name </h5>";
                 foreach ($role_participants as $participant_id => $participant_status) {
 				    $participant = get_userdata((int)$participant_id);
-				    echo "<p id='ad-participant-{$user_role->term_id}-{$participant->ID}'>";
-				    echo "$participant->user_nicename | " . _($participant_status);
-					echo "<input type='hidden' name='ad-participant-role-{$user_role->term_id}[]' value='{$participant->ID}|{$participant_status}'>";
-                    // assignment-desk specific actions
+				    echo "<p id='ad-participant-{$user_role->term_id}-{$participant->ID}'><span class='ad-participant-buttons'>";
+					// assignment-desk specific actions
                     if ($participant_status == 'volunteered'){
-					    echo " <button class='button' name='ad-participant-assign' value='{$user_role->term_id}|{$participant->ID}'>assign</button>";
+					    echo " <button class='button' name='ad-participant-assign' value='{$user_role->term_id}|{$participant->ID}'>Assign</button>";
 					}
-                    echo " <button class='button ad-remove-participant-button' name='ad-participant-remove' value='{$user_role->term_id}|{$participant->ID}'>remove</button>";
+                    echo " <button class='button ad-remove-participant-button' name='ad-participant-remove' value='{$user_role->term_id}|{$participant->ID}'>Remove</button></span>";
+				    echo "$participant->user_nicename (" . _($participant_status) . ')';
+					echo "<input type='hidden' name='ad-participant-role-{$user_role->term_id}[]' value='{$participant->ID}|{$participant_status}'>";
                     echo "</p>";
 				}
                 echo "</div>";
@@ -478,14 +478,6 @@ class ad_post {
 			$volunteers = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->usermeta WHERE meta_key='_ad_volunteer' AND meta_value=$post_id");
             update_post_meta($post_id, '_ad_total_volunteers', $volunteers);
 
-            // Update the assignment status if the post is published.
-			if($post->post_status == 'publish'){
-                $published_status = get_term($assignment_desk->general_options['default_published_assignment_status'],
-                                         $assignment_desk->custom_taxonomies->assignment_status_label);
-                if($published_status){
-                    wp_set_object_terms($post->ID, $published_status->slug, $assignment_desk->custom_taxonomies->assignment_status_label);
-                }
-            }
 		}
     }
     

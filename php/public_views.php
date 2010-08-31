@@ -27,6 +27,7 @@ class ad_public_views {
 		add_filter( 'the_content', array(&$this, 'show_all_posts') );
 		
 		add_filter( 'the_posts', array(&$this, 'show_single_post') );
+		add_filter( 'the_content', array(&$this, 'handle_single_post_metadata') );		
 		
 		// Only add voting if its enabled
 		if ( $public_facing_options['public_facing_voting_enabled'] ) {
@@ -780,6 +781,11 @@ class ad_public_views {
 				$html .= $this->voting_form( $post_id );
 			}
 			
+			if ( $options['public_facing_content_enabled'] && $pitch->post_content ) {
+				// @todo This method doesn't work
+				$html .= '<p>' . $pitch->post_content . '</p>';
+			}
+			
 			if ( $description || $duedate || $location ) {
 			    $html .= '<div class="meta">';
 			}
@@ -841,6 +847,46 @@ class ad_public_views {
 		}
 		
 		return $the_content;
+	
+	}
+	
+	function handle_single_post_metadata( $the_content ) {
+		global $post, $assignment_desk;
+		$options = $assignment_desk->public_facing_options;
+		$post_id = $post->ID;
+		
+		$new_content = '';
+		if ( is_single() && $post->post_status != 'publish' ) {
+			
+			$description = get_post_meta( $post_id, '_ef_description', true );
+			$location = get_post_meta( $post_id, '_ef_location', true );
+			$duedate = get_post_meta( $post_id, '_ef_duedate', true );
+			$duedate = date_i18n( 'M d, Y', $duedate );
+			
+			if ( $options['public_facing_content_enabled'] ) {
+				$new_content .= $the_content;
+			}
+			
+			if ( $description || $duedate || $location ) {
+			    $new_content .= '<div class="meta">';
+			}
+			if ( $options['public_facing_description_enabled'] && $description ) {
+			    $new_content .= '<p><label>Description:</label> ' . $description . '</p>';
+			}
+			if ( $options['public_facing_duedate_enabled'] && $duedate ) {
+			    $new_content .= '<p><label>Due date:</label> ' . $duedate . '</p>';	
+			}
+			if ( $options['public_facing_location_enabled'] && $location ) {
+			    $new_content .= '<p><label>Location:</label> ' . $location . '</p>';	
+			}
+			if ( $description || $duedate || $location ) {
+			    $new_content .= '</div>';
+			}
+			
+		} else {
+			$new_content = $the_content;
+		}
+		return $new_content;
 		
 	}
 	
