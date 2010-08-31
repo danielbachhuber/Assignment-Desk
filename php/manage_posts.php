@@ -116,7 +116,7 @@ class ad_manage_posts {
              	echo $location;
             }
             else {
-                _e('None listed');
+                _e('None');
             }
         }
     }
@@ -153,8 +153,9 @@ class ad_manage_posts {
                     foreach($participants as $user => $status){
                         if($status == 'accepted'){
                             $at_least_one_user = true;
-                            $user = get_userdatabylogin($user);
-                            $links .= "<a href='" . admin_url() . "/user-edit.php?user_id=$user->ID'>$user->display_name</a> ";
+                            $user = get_userdata($user);
+                            $user_name = ($user->display_name)? $user->display_name : $user->user_login;
+                            $links .= "<a href='" . admin_url() . "/user-edit.php?user_id=$user->ID'>$user_name</a> ";
                         }
                     }
                     // Print the role header and user links
