@@ -76,32 +76,6 @@ function ad_get_unassigned_posts(){
 }
 
 /**
- * Get a list of posts that are in progress.
- * Returns unpublished posts that do not have an assignment_status of completed 
- */
-if (!function_exists('ad_get_inprogress_posts')){
-function ad_get_inprogress_posts(){
-    global $assignment_desk, $wpdb;
-    $completed_status = get_term($assignment_desk->general_options['default_published_assignment_status'], 
-                                   $assignment_desk->custom_taxonomies->assignment_status_label);
-   $exclude_status = -1;
-   if(!is_wp_error($completed_status)){
-       $exclude_status = $completed_status->term_id;
-   }
-    return $wpdb->get_results("SELECT * FROM $wpdb->posts
-                                LEFT JOIN $wpdb->term_relationships ON($wpdb->posts.ID = $wpdb->term_relationships.object_id)
-                                LEFT JOIN $wpdb->term_taxonomy ON($wpdb->term_relationships.term_taxonomy_id = $wpdb->term_taxonomy.term_taxonomy_id)
-                                LEFT JOIN $wpdb->terms ON($wpdb->term_taxonomy.term_id = $wpdb->terms.term_id)
-                                WHERE $wpdb->posts.post_type = 'post' 
-                                AND $wpdb->posts.post_status != 'publish'
-                                AND $wpdb->posts.post_status != 'trash'
-                                AND $wpdb->term_taxonomy.taxonomy = '{$assignment_desk->custom_taxonomies->assignment_status_label}'
-                                AND $wpdb->terms.term_id != {$exclude_status}
-                                ORDER BY $wpdb->posts.post_date DESC");
-}
-}
-
-/**
  * Get a list of posts that should be displayed to the public for feedback.
  * Returns unpublished posts that do not have an assignment_status of completed and are not private.
  */
