@@ -234,8 +234,8 @@ class ad_post {
      * Loren ipsum bitches
 	 */ 
     function user_role_select($user_roles){
-        echo "<label for='ad-user-role-dropdown'>Role:</label>&nbsp;";
-        echo "<select id='ad-user-role-dropdown' name='ad-user-role-dropdown'>";
+        echo "<label for='ad-participant-role-dropdown'>Role:</label>&nbsp;";
+        echo "<select id='ad-participant-role-dropdown' name='ad-participant-role-dropdown'>";
             foreach($user_roles as $user_role) {
                 echo "<option value='{$user_role->term_id}'>{$user_role->name}</option>";
             }
@@ -243,28 +243,15 @@ class ad_post {
     }
 
 	/**
-     * Loren ipsum bitches
+     * Show the form to add a new participant and current list of participants.
+     * If coauthors-plus is enabled show a text box with auto-completion for users.
+     * If coauthors-plus is not enabled we show a list of users in a select box.
      */
     function display_participants() {
         global $assignment_desk, $post, $wpdb;
         
         $user_roles = $assignment_desk->custom_taxonomies->get_user_roles(array('order' => "-name"));
-
-		// Load all existing participants from separate custom fields into
-		// one array so that we can list it later
-		$all_participants = array();
-		$total_participants = 0;
-		foreach ( $user_roles as $user_role ) {
-			$role_participants = get_post_meta($post->ID, "_ad_participant_role_$user_role->term_id");
-			$role_participants = $role_participants[0];
-			if (count($role_participants)) {
-				$all_participants[$user_role->term_id] = $role_participants;
-				$total_participants = $total_participants + count($role_participants);
-			}
-		}
-		
-		// Get all of the users in the database
-		$all_users = $wpdb->get_results("SELECT * FROM $wpdb->users");
+        
 
 		if ( count($user_roles) && current_user_can($assignment_desk->define_editor_permissions)) :
 			echo '<div id="ad-assign-form" class="misc-pub-section">';
@@ -276,6 +263,7 @@ class ad_post {
 				echo '<input type="text" id="ad-assignee-search" name="ad-assignee-search" size="20" maxlength="50"><br />';
 			} else {
 				echo "<select id='ad-assignee-dropdown' name='ad-assignee-dropdown'>";
+				$all_users = $wpdb->get_results("SELECT * FROM $wpdb->users");
 				foreach ( $all_users as $user ) {
 					echo "<option value='{$user->ID}'>{$user->user_nicename}</option>";
 				}
@@ -289,31 +277,31 @@ class ad_post {
 		<?php endif; ?>
 		
 		<div id="ad-participants-wrap">
-		<?php
-		
-        if ( count($all_participants) ): ?> 
-
-            <?php foreach ( $user_roles as $user_role ) : ?>
-			
-			<?php if (count($all_participants[$user_role->term_id])) : ?>
-			<div id="ad-user-role-<?php echo $user_role->term_id; ?>-wrap" class="ad-role-wrap">
-				<h5><?php echo $user_role->name; ?></h5>
-				<ul id="ad-participants-<?php echo "{$user_role->term_id}"; ?>">					
-					<?php foreach ($all_participants[$user_role->term_id] as $participant_id => $participant_status) : ?>
-						<?php $participant = get_userdata($participant_id);	?>						
-						<li id="ad-participant-<?php echo "{$user_role->term_id}-{$participant_id}"; ?>"><input type="hidden" id="ad-participant-<?php echo $participant_id; ?>" name="ad-participant-role-<?php echo $user_role->term_id; ?>[]" value="<?php echo "$participant_id|$participant_status"; ?>" /><?php echo "$participant->user_nicename | " . _($participant_status); ?>
-						    <?php if ($participant_status == 'volunteered') : ?>
-								<?php $user = get_userdata($participant_id); ?>
-						        <a href="#" id="ad-volunteer-<?php echo "$user_role->term_id-$user_role->name-$participant_id-$user->user_nicename"; ?>">assign</a>
-						    <?php endif; ?>
-						    <a href="#" class="ad-remove-participant" id="ad-remove-participant-<?php echo $user_role->term_id . '-' . $participant_id; ?>">remove</a></li>
-					<?php endforeach; ?>
-				</ul>
-			</div>
-			<?php endif; ?>
-			
-			<?php endforeach; ?>
-        <?php else: ?>
+        
+        <?php 
+        $total_participants = 0;
+        foreach ( $user_roles as $user_role ){
+            $role_participants = get_post_meta($post->ID, "_ad_participant_role_{$user_role->term_id}", true);
+            if (is_array($role_participants) && count($role_participants) ) {
+                $total_participants += count($role_participants);
+                echo "<div id='ad-participant-role-{$user_role->term_id}'-wrap class='ad-role-wrap'>";
+                echo "<h5> $user_role->name </h5>";
+                foreach ($role_participants as $participant_id => $participant_status) {
+				    $participant = get_userdata((int)$participant_id);
+				    echo "<p id='ad-participant-{$user_role->term_id}-{$participant->ID}'>";
+				    echo "$participant->user_nicename | " . _($participant_status);
+					echo "<input type='hidden' name='ad-participant-role-{$user_role->term_id}[]' value='{$participant->ID}|{$participant_status}'>";
+                    // assignment-desk specific actions
+                    if ($participant_status == 'volunteered'){
+					    echo " <button class='button' name='ad-participant-assign' value='{$user_role->term_id}|{$participant->ID}'>assign</button>";
+					}
+                    echo " <button class='button ad-remove-participant-button' name='ad-participant-remove' value='{$user_role->term_id}|{$participant->ID}'>remove</button>";
+                    echo "</p>";
+				}
+                echo "</div>";
+            }
+        }			
+        if( !$total_participants ): ?>
 			<div id="ad-no-participants" class="message info">
 				No contributors have volunteered or been assigned to this post.
 			</div>
@@ -410,54 +398,100 @@ class ad_post {
 		$user_roles = $assignment_desk->custom_taxonomies->get_user_roles();
 		if (current_user_can($assignment_desk->define_editor_permissions)) {
 			$all_participants = array();
+			$all_role_participants = array();
 			// For each User Role, save participant ID and status
 			foreach ( $user_roles as $user_role ) {
-				$raw_role_participants = array();
-				$all_role_participants = array();		
+				$role_participants = array();
 				$raw_role_participants = $_POST["ad-participant-role-$user_role->term_id"];
 				if ( count($raw_role_participants) ) {
 					foreach ($raw_role_participants as $raw_participant) {
 						$participant = explode('|', $raw_participant);;
-						$user = get_userdata($participant[0]); 
-						
+						$user = get_userdata((int)$participant[0]); 
 						// Check if the user_login is valid.
 						if($user){
-						    // array(user => "status", user => "status")
-						    $all_role_participants[$user->ID] = $participant[1];
-						    // array('user' => array(role_id, role_id, ...))
-						    $all_participants[$user->ID][] = $user_role->term_id;
-						    
-						    // Existing user_roles for this user on this post
-						    $participant_record = get_post_meta($post_id, "_ad_participant_$user_id", true);
-						    if(!$participant_record){ $participant_record = array(); }
-						    // check if the user is already assigned to that role
-						    // If the term_id for the user_role is NOT in the list of term_ids for this user.
-						    if(! in_array($user_role->term_id, $participant_record)){					        
-						        $this->send_assignment_email($post_id, $user->ID, $user_role->term_id);
+						    // array(user_ID => "status", user_ID => "status")
+						    $role_participants[$user->ID] = $participant[1];
+						    // array(user_ID => array(role_ID, role_ID, ...))
+						    if(!in_array($user->ID, $all_participants)){
+						        $all_participants[$user->ID] = array();
 						    }
+						    $all_participants[$user->ID][] = $user_role->term_id;
 						}
 						else {
-						    // Invalid user.
-						    // @todo - Store the error somewhere so it can be displayed
+						    // @todo -  Invalid user. Store the error somewhere so it can be displayed
 						}
 					}
 				}
-				update_post_meta($post_id, "_ad_participant_role_$user_role->term_id", $all_role_participants);
+				$all_role_participants[$user_role->term_id] = $role_participants;
+
+			    // Remove a participant
+    			if( $_POST['ad-participant-remove'] ){
+    		        $pieces = explode('|', $_POST['ad-participant-remove']);
+    		        $role_id = (int)$pieces[0];
+    		        $user_id = (int)$pieces[1];
+    		        if ( is_array($all_participants[$user_id]) && in_array($role_id, $all_participants[$user_id]) ){
+    		            unset($all_participants[$user_id][$role_id]);
+    		        }
+    		        if ( isset($all_role_participants[$role_id][$user_id]) ) {
+    		            unset($all_role_participants[$role_id][$user_id]);
+    		        }
+    		    }
+    		    
+    		    // Assign a volunteer to the story
+    		    if( $_POST['ad-participant-assign'] ){
+    		        $pieces = explode('|', $_POST['ad-participant-assign']);
+    		        $role_id = (int)$pieces[0];
+    		        $user_id = (int)$pieces[1];
+    		        if ( isset($all_participants[$user_id]) && (!in_array($role_id, $all_participants[$user_id])) ){
+    		            $all_participants[$user_id][] = $role_id;
+    		        }
+    		        if ( isset($all_role_participants[$role_id][$user_id]) && 
+    		                $all_role_participants[$role_id][$user_id] == 'volunteered' ) {
+    		            $all_role_participants[$role_id][$user_id] = 'pending';
+    		            $this->send_assignment_email($post_id, $user_id, $role_id);
+    		        }
+    		    }
+
+    			if ( $assignment_desk->coauthors_plus_exists() ) {
+    			    global $coauthors_plus;
+    			    // Update the role membership and prepare an array of coauthor IDs.
+		            $coauthors = array();
+        		    foreach ( $all_role_participants as $role_id => $role_participants ) {
+        		        $existing_role_participants = get_post_meta($post_id, "_ad_participant_role_$role_id", true);
+        		        if(!$existing_role_participants){
+        		            $existing_role_participants = array();
+        		        }
+        			    foreach ( $role_participants as $user_id => $status ) {
+        			        if( !in_array($user_id, $existing_role_participants)){
+        			            $this->send_assignment_email($post_id, $user_id, $role_id);
+        			        }
+        			        
+        			        if ( $status == 'accepted') {
+        			            $user = get_userdata($user_id);
+        			            $coauthors[]= $user->user_login;
+        			        }
+        			    }
+        			    update_post_meta($post_id, "_ad_participant_role_$role_id", $role_participants);
+        			}
+    			    $_POST['coauthors'] = array_unique($coauthors);
+                    $coauthors_plus->add_coauthors($post_id, array_unique($coauthors));
+    			}
+
+    			// Also save the User Roles associated with a row for each participant
+    			foreach ($all_participants as $participant_id => $user_role_ids) {
+    				update_post_meta($post_id, "_ad_participant_$participant_id", $user_role_ids);
+    			}
 			}
-			// Also save the User Roles associated with a row for each participant
-			foreach ($all_participants as $participant_id => $user_role_ids) {
-				update_post_meta($post_id, "_ad_participant_$participant_id", $user_role_ids);
-			}
-		}
-		
-        if($post->post_status == 'publish'){
-            $published_status = get_term($assignment_desk->general_options['default_published_assignment_status'],
+
+            // Update the assignment status if the post is published.
+			if($post->post_status == 'publish'){
+                $published_status = get_term($assignment_desk->general_options['default_published_assignment_status'],
                                          $assignment_desk->custom_taxonomies->assignment_status_label);
-            if($published_status){
-                wp_set_object_terms($post->ID, $published_status->slug, $assignment_desk->custom_taxonomies->assignment_status_label);
+                if($published_status){
+                    wp_set_object_terms($post->ID, $published_status->slug, $assignment_desk->custom_taxonomies->assignment_status_label);
+                }
             }
-        }
-        
+		}
     }
     
     /**
