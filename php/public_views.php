@@ -825,7 +825,7 @@ class ad_public_views {
 	function prepend_voting_to_post( $the_content ) {
 		global $post, $assignment_desk;
 		
-		if ( is_single() ) {
+		if ( is_single() && $post->post_status != 'publish' ) {
 			$the_content = $this->voting_form() . $the_content;
 			$the_content = $this->show_all_votes() . $the_content;
 		}
@@ -840,7 +840,7 @@ class ad_public_views {
 	function append_volunteering_to_post( $the_content ) {
 		global $post, $assignment_desk;
 		
-		if ( is_single() ) {
+		if ( is_single() && $post->post_status != 'publish'  ) {
 			$the_content .= $this->show_all_volunteers( $post->ID );
 			$the_content .= $this->volunteer_form( $post->ID );
 		}
