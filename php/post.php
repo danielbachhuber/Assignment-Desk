@@ -85,12 +85,6 @@ class ad_post {
     *
     * The ID of the person who pitched the story is saved as a
     * custom field under the key _ad_pitched_by_participant.
-    *
-    * If the person who pitched the story is NOT currently a member of the
-    * WP blog we store their email address in the _ad_pitched_by_participant field;
-    * 
-    * When the post is saved we try to look up the user by email. Maybe
-    * they became a member or were assigned a story.
     */
     function display_assignment_info(){
        	global $post, $wpdb, $assignment_desk;
@@ -219,18 +213,6 @@ class ad_post {
 		<?php 
 	
 	}
-	
-	function display_visibility_info(){
-	    global $post, $assignment_desk;
-	    if (current_user_can($assignment_desk->define_editor_permissions)){
-	?>
-	    <div class="misc-pub-section">
-	        <label for="ad-private">Private while in progress :</label>
-	        <input type="checkbox" name="ad-private" value="1" <?php echo (get_post_meta($post->ID, '_ad_private', true) == "1")? "checked": ""; ?>>
-	    </div>
-	<?php  
-        }
-	}
 
 	/**
      * Loren ipsum bitches
@@ -325,7 +307,6 @@ class ad_post {
         $this->display_assignment_info();
 		$this->display_assignment_status();
 		$this->display_participant_types();
-		$this->display_visibility_info();
         echo '</div></div>';
 
 		echo '<div class="ad-module">';
@@ -357,7 +338,6 @@ class ad_post {
         // The user who pitched this story
         if ( current_user_can( $assignment_desk->define_editor_permissions ) ) {
 		    update_post_meta($post_id, '_ad_pitched_by_participant', (int)$_POST['ad-pitched-by-participant']);
-		    update_post_meta($post_id, '_ad_private', (int)$_POST['ad-private']);
 	    }
        
  		// If current user can edit assignment status, let them
