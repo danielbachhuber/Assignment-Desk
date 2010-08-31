@@ -82,33 +82,49 @@ function ad_get_unassigned_posts(){
 if ( !function_exists('ad_get_all_public_posts') ) {
 function ad_get_all_public_posts( $args = null ) {
     global $assignment_desk, $wpdb;
-    $include_statuses = implode(',', $assignment_desk->public_facing_options['public_facing_assignment_statuses']);
-    if ( ! $include_statuses ) {
-        $include_statuses = -1;
+    $public_assignment_statuses = implode(',', $assignment_desk->public_facing_options['public_facing_assignment_statuses']);
+    if ( ! $public_assignment_statuses ) {
+        $public_assignment_statuses = -1;
     }
 
 	$defaults = array(
 				'sort_by' => 'post_date',
-				'showposts' => 10
+				'showposts' => 10,
+				'page' => 0
 				);
 				
 	$args = array_merge( $defaults, $args );
 
-	$query = "SELECT $wpdb->posts.* FROM $wpdb->posts, $wpdb->term_relationships
-						WHERE $wpdb->posts.post_type = 'post' 
+	$query = "SELECT $wpdb->posts.* FROM ($wpdb->posts, $wpdb->term_relationships)";
+	
+	// Join the postmeta table so we can sort by the meta_value column restricted to '_ef_duedate'
+	if ( $args['sort_by'] == 'due_date' ) {
+		$query .= " LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id AND $wpdb->postmeta.meta_key = '_ef_duedate')";		
+	}
+	
+	$query .= " WHERE $wpdb->posts.post_type = 'post' 
 						AND $wpdb->posts.post_status != 'publish'
 						AND $wpdb->posts.post_status != 'trash'
 						AND $wpdb->posts.post_status != 'auto-draft'
-						AND $wpdb->posts.post_status != 'inherit'
-						AND ( $wpdb->posts.ID = $wpdb->term_relationships.object_id
-							AND $wpdb->term_relationships.term_taxonomy_id IN ({$include_statuses}) )";
+						AND $wpdb->posts.post_status != 'inherit'";
+			
+	// Only return posts that the user has specified as public assignments		
+	$query .= " AND ( $wpdb->posts.ID = $wpdb->term_relationships.object_id
+							AND $wpdb->term_relationships.term_taxonomy_id IN ({$public_assignment_statuses}) )";
+							
 
 	if ( $args['sort_by'] == 'post_date' ) {
 		$query .= " ORDER BY $wpdb->posts.post_date DESC";
 	} else if ( $args['sort_by'] == 'due_date' ) {
+		$query .= " ORDER BY $wpdb->postmeta.meta_value ASC";
+	} else if ( $args['sort_by'] == 'ranking' ) {
+		
 	}
 	
 	$query .= " LIMIT " . $args['showposts'];
+	
+	$offset = $args['page'] * $args['showposts'];
+	$query .= " OFFSET " . $offset . ";";
 
 	$results = $wpdb->get_results( $query );
 	
