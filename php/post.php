@@ -99,8 +99,14 @@ class ad_post {
         <div id="ad-pitched-by-participant" class="misc-pub-section">
             <label for="ad-pitched-by-participant-select">Pitched by:</label>
             <span id="ad-pitched-by-participant-display">
-                <a href="<?php echo admin_url(); ?>user-edit.php?user_id=<?php echo $pitched_by; ?> ">
-                <?php echo $pitched_by_user->display_name; ?></a>
+        <?php
+            if( $pitched_by_user ) { 
+                echo "<a href='" . admin_url() . "user-edit.php?user_id=$pitched_by'>$pitched_by_user->display_name</a>";
+            }
+            else {
+                _e('None');
+            }
+        ?>
             </span>
             <a id="ad-edit-pitched-by-participant" class="hide-if-no-js" href="#pitched-by-participant">Edit</a>
 
