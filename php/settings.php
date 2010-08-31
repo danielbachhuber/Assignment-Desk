@@ -364,6 +364,14 @@ Blog Editor");
 	function public_facing_filtering_option() {
 		global $assignment_desk;
 		$options = $assignment_desk->public_facing_options;
+		// Filter by post status
+		echo '<input id="public_facing_filtering_post_status_enabled" type="checkbox" '
+			. 'name="' . $assignment_desk->get_plugin_option_fullname('public_facing')
+			. '[public_facing_filtering_post_status_enabled]"';
+		if ( $options['public_facing_filtering_post_status_enabled'] ) {
+			echo ' checked="checked"';
+		}
+	 	echo ' />&nbsp;<label for="public_facing_filtering_post_status_enabled">Post status</label>&nbsp;';
 		// Filter by participant type
 		echo '<input id="public_facing_filtering_participant_type_enabled" type="checkbox" '
 			. 'name="' . $assignment_desk->get_plugin_option_fullname('public_facing')
@@ -379,7 +387,8 @@ Blog Editor");
 		if ( $options['public_facing_filtering_sort_by_enabled'] ) {
 			echo ' checked="checked"';
 		}
-	 	echo ' />&nbsp;<label for="public_facing_filtering_sort_by_enabled">Sort by</label>&nbsp;';
+	 	echo ' />&nbsp;<label for="public_facing_filtering_sort_by_enabled">Sort by</label>';
+		echo '<p class="description">Indicate the different ways the user can filter posts.';
 	}
 	
 	function public_facing_elements_option() {

@@ -121,7 +121,12 @@ function ad_get_all_public_posts( $args = null ) {
 	$query .= " AND ( $wpdb->posts.ID = $wpdb->term_relationships.object_id
 							AND $wpdb->term_relationships.term_taxonomy_id IN ({$public_assignment_statuses}) )";
 	
+	if ( $args['post_status'] != 'all' ) {
+		$query .= $wpdb->prepare(" AND $wpdb->posts.post_status = '%s'", $args['post_status']);
+	}
+	
 	if ( $args['user_types'] != 'all' ) {
+		// @todo This may need to be sanitized to protect against SQL injections
 		$user_types = $args['user_types'];
 		$query .= " AND ( $wpdb->posts.ID = $wpdb->postmeta.post_id AND $wpdb->postmeta.meta_key = '_ad_participant_type_$user_types' AND $wpdb->postmeta.meta_value = 'on' )";
 	}
