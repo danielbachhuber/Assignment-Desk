@@ -61,7 +61,7 @@ if ( !class_exists( 'ad_settings' ) ){
         // @todo - Why does get_term_by not work during activation?
         // $new_status = get_term_by('slug', 'new', $assignment_desk->custom_taxonomies->assignment_status_label);
         $new_status = $wpdb->get_results("SELECT t.*, tt.* 
-                                          FROM wp_terms AS t INNER JOIN wp_term_taxonomy AS tt ON t.term_id = tt.term_id 
+                                          FROM $wpdb->terms AS t INNER JOIN $wpdb->term_taxonomy AS tt ON t.term_id = tt.term_id 
                                           WHERE tt.taxonomy = '{$assignment_desk->custom_taxonomies->assignment_status_label}' 
                                           AND t.slug = 'new' LIMIT 1");
         $new_status = $new_status[0];
@@ -70,7 +70,7 @@ if ( !class_exists( 'ad_settings' ) ){
         // @todo - Why does get_term_by not work during activation?
         // $published_status = get_term_by('slug', 'completed', $assignment_desk->custom_taxonomies->assignment_status_label);
         $published_status = $wpdb->get_results("SELECT t.*, tt.* 
-                                          FROM wp_terms AS t INNER JOIN wp_term_taxonomy AS tt ON t.term_id = tt.term_id 
+                                          FROM $wpdb->terms AS t INNER JOIN $wpdb->term_taxonomy AS tt ON t.term_id = tt.term_id 
                                           WHERE tt.taxonomy = '{$assignment_desk->custom_taxonomies->assignment_status_label}' 
                                           AND t.slug = 'completed' LIMIT 1");
         $published_status = $published_status[0];
@@ -147,6 +147,10 @@ Blog Editor");
         }
         echo "</select>";
     }
+    
+    function general_setting_section() {
+		global $assignment_desk;
+	}
 
 	function assignment_management_setting_section() {
 		global $assignment_desk;
