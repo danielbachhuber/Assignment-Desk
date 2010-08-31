@@ -166,7 +166,7 @@ class ad_dashboard_widgets {
                    update_post_meta($post_id, "_ad_participant_$current_user->ID", $user_participant);
                }
                else if($response == 'declined'){
-                   $_REQUEST['ad-dashboard-assignment-messages'][] = _('Sorry!.');
+                   $_REQUEST['ad-dashboard-assignment-messages'][] = _('Sorry!');
                }
            }
            update_post_meta($post_id, "_ad_participant_role_$role_id", $participant_record);
