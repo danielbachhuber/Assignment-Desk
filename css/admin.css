@@ -49,3 +49,10 @@ ul.ad_elements span.copy input { margin-right: 10px; }
 #ad_assignments .t { color: #777;  padding-right: 12px; padding-top: 6px; width: 100%; }
 #ad_assignments .b { padding-right: 6px; padding-top: 6px; }
 #ad_assignments p.sub { color: #777; font-family: Georgia, 'Times New Roman', 'Bitstream Charter', Times, serif; font-size: 13px; font-style: italic; margin: 0px; }
+
+/* Manage Posts */
+th.column-_ad_assignment_status { word-wrap: normal; }
+th.column-_ef_location { word-wrap: normal; }
+th.column-_ad_participants { word-wrap: normal; }
+th.column-_ad_user_type { word-wrap: normal; }
+th.column-_ad_volunteers { word-wrap: normal; }
