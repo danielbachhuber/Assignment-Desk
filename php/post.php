@@ -440,11 +440,13 @@ class ad_post {
     			foreach ( $user_roles as $user_role ) {
         		    foreach ( $role_participants[$user_role->term_id] as $user_id => $status ) {	
         			    if ( $status == 'accepted' ) {
-        			        $coauthors[] = $user_id;
+        			        $user = get_userdata($user_id);
+        			        $coauthors[] = $user->user_login;
         			    }
         		    }
     		    }
-        		$_POST['coauthors'] = $coauthors;
+    		    $_POST['coauthors'];
+        		$coauthors_plus->add_coauthors($post_id, $coauthors);
 			}
             
             // Update the participants for this role 
@@ -529,7 +531,6 @@ class ad_post {
         $subject = str_replace($search, $replace, $subject);
         // Send it off
         wp_mail($user->user_email, $subject, $email_template);
-        error_log("Sent email to $user->user_login about $post_id");
     }
     
     /**
