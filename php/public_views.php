@@ -381,8 +381,8 @@ class ad_public_views {
 			wp_get_current_user();
 			$all_votes = get_post_meta( $post_id, '_ad_votes_all', true );
 			$total_votes = (int)get_post_meta( $post_id, '_ad_votes_total', true );
-			
-			if(!is_array($all_votes)){
+						
+			if ( !is_array($all_votes) ){
 			    $all_votes = array();
 			}
 			
@@ -692,8 +692,8 @@ class ad_public_views {
 			$html .= '<div><h3><a href="' . get_permalink($post_id) . '">' . get_the_title($post_id) . '</a></h3>';
 			// Only show voting if it's enabled
 			if ( $options['public_facing_voting_enabled'] ) {
-				$html .= $this->show_all_votes();					
-				$html .= $this->voting_form();
+				$html .= $this->show_all_votes( $post_id );					
+				$html .= $this->voting_form( $post_id );
 			}
 			if ( $description || $duedate || $location ) {
 			    $html .= '<p class="meta">';
