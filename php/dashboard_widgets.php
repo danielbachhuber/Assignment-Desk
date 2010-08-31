@@ -47,11 +47,28 @@ class ad_dashboard_widgets {
                                      AND $wpdb->posts.post_status != 'inherit' 
                                      AND $wpdb->posts.post_status != 'trash'
              						 AND $wpdb->posts.post_status != 'auto-draft'
-                                     AND $wpdb->term_taxonomy.taxonomy = 'assignment_status'
+                                     AND $wpdb->term_taxonomy.taxonomy = '$assignment_desk->custom_taxonomies->assignment_status_label'
                                      AND $wpdb->term_taxonomy.term_id = $status->term_id ");
 	    }
 	    else {
-	        return 0;
+	        $count = 0;
+	        $posts = $wpdb->get_results("SELECT * FROM $wpdb->posts 
+	                                LEFT JOIN $wpdb->term_relationships ON($wpdb->posts.ID = $wpdb->term_relationships.object_id)
+                                    LEFT JOIN $wpdb->term_taxonomy ON($wpdb->term_taxonomy.term_taxonomy_id = $wpdb->term_relationships.term_taxonomy_id)
+                                    LEFT JOIN $wpdb->terms ON($wpdb->terms.term_id = $wpdb->term_taxonomy.term_id)
+                	                WHERE $wpdb->posts.post_status != 'publish'
+                                      AND $wpdb->posts.post_status != 'inherit' 
+                                      AND $wpdb->posts.post_status != 'trash'
+                    				  AND $wpdb->posts.post_status != 'auto-draft'
+                    				  AND $wpdb->term_taxonomy.taxonomy = 'author'
+                                      AND $wpdb->terms.name = '$current_user->user_login'");
+            foreach ( $posts as $post ){
+                $post_assignment_status = wp_get_object_terms($post->ID, $assignment_desk->custom_taxonomies->assignment_status_label);
+                if ( $post_assignment_status && $post_assignment_status[0]->term_id == $status->term_id ){
+                    $count++;
+                }
+            }
+            return $count;
 	    }
 	    
 	}
