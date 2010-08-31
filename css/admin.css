@@ -37,29 +37,15 @@ li.ad-message-error {
 
 
 /* Settings */
+ul.ad_elements span.field { width: 120px; display: inline-block;}
+ul.ad_elements span.copy.hidden { display: none; }
+ul.ad_elements span.copy label { margin-right: 5px; }
+ul.ad_elements span.copy input { margin-right: 10px; }
 
-ul.ad_elements span.field {
-	width: 120px;
-	display: inline-block;
-}
-
-ul.ad_elements span.copy.hidden {
-	display: none;
-}
-
-ul.ad_elements span.copy label {
-	margin-right: 5px;
-}
-
-ul.ad_elements span.copy input {
-	margin-right: 10px;
-}
-
-#ad_editor_overview td.b a { 
-	font-size: 16px;
-}
-#ad_editor_overview table {
-	width: 100%;
-}
-#ad_editor_overview table td{border-top:#ececec 1px solid;padding:3px 0;white-space:nowrap;}
-#ad_editor_overview table tr.first td{border-top:none;}
+/* Dashboard */
+#ad_assignments { font-size: 16px; }
+#ad_assignments table td{ border-top:#ececec 1px solid;padding:3px 0;white-space:nowrap; }
+#ad_assignments table tr.first td{ border-top:none; }
+#ad_assignments .t { color: #777;  padding-right: 12px; padding-top: 6px; width: 100%; }
+#ad_assignments .b { padding-right: 6px; padding-top: 6px; }
+#ad_assignments p.sub { color: #777; font-family: Georgia, 'Times New Roman', 'Bitstream Charter', Times, serif; font-size: 13px; font-style: italic; margin: 0px; }
