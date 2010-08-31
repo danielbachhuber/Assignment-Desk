@@ -361,6 +361,7 @@ class ad_post {
 		if ( current_user_can( $assignment_desk->define_editor_permissions ) ) {
 			foreach ($user_types as $user_type) {
 			    $participant_types = array();
+				// If $_POST['ad-participant-types'] isn't set, then we have no contributor types
 			    if ( $_POST['ad-participant-types'] ) {
 			        $participant_types = $_POST['ad-participant-types'];
 					if ( in_array($user_type->term_id, $participant_types) ) {
@@ -368,7 +369,9 @@ class ad_post {
 					} else {
 						update_post_meta($post_id, "_ad_participant_type_$user_type->term_id", 'off');
 					}
-			    }
+			    } else {
+					update_post_meta($post_id, "_ad_participant_type_$user_type->term_id", 'off');
+				}
 			}
 		} else {
 			foreach ( $user_types as $user_type ) {
