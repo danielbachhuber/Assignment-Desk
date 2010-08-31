@@ -86,7 +86,7 @@ class ad_custom_taxonomies {
     /**
      * Called only the first time the plugin is activated.
      */
-    function activate_once(){
+    function activate_once() {
         $default_assignment_labels = array(
             array( 'term' => 'New',
                    'args' => array( 
@@ -107,6 +107,11 @@ class ad_custom_taxonomies {
                    'args' => array( 
                        'slug' => 'on-hold',
                        'description' => 'Work on the pitch is on hold.',)
+		          ),
+			array( 'term' => 'Private',
+                   'args' => array( 
+                       'slug' => 'private',
+                       'description' => 'This assignment should not show up on public-facing views.',)
 		          ),
             array( 'term' => 'Completed',
                    'args' => array( 
@@ -179,7 +184,7 @@ class ad_custom_taxonomies {
         $taxonomy = $_GET['taxonomy'];
         if (!$taxonomy){ $taxonomy = $_POST['taxonomy']; }
         
-        if($taxonomy){            
+        if ( $taxonomy ) {
             $title = "";
             $singular = "";
             $vals = array(
