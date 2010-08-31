@@ -84,7 +84,7 @@ class ad_manage_posts {
       if ( $column_name == _( '_ad_user_type' ) ) {
         
 		$participant_types = $assignment_desk->custom_taxonomies->get_user_types_for_post($post_id);
-		
+
 		echo $participant_types['display'];
           
       }
@@ -173,29 +173,22 @@ class ad_manage_posts {
      * Show users who have volunteered for this post.
      */
     function handle_ad_volunteers_column($column_name, $post_id){
-        global $assignment_desk;
+        global $assignment_desk, $wpdb;
         $volunteers = 0;
-        if ($column_name == _('_ad_volunteers') ) {
-            $user_roles = $assignment_desk->custom_taxonomies->get_user_roles(array('order' => "-name"));
-            $at_least_one_user = false;
-            foreach($user_roles as $user_role){
-                $participants = get_post_meta($post_id, "_ad_participant_role_$user_role->term_id", true);
-                if($participants){
-                    foreach($participants as $user => $status){
-                        if($status == 'volunteered'){
-                            $volunteers++;
-                        }
-                    }
-                }
+        if ( $column_name == _('_ad_volunteers') ) {
+            $volunteers = get_post_meta($post_id, '_ad_total_volunteers', true);
+            if ( !$volunteers ) {
+                update_post_meta($post_id, '_ad_total_volunteers', 0);
+                $volunteers = 0;
             }
             echo "<span class='ad-volunteer-count'>$volunteers</span>";
         } 
     }
     
     function handle_ad_votes_total($column_name, $post_id){
-        if ($column_name == _('_ad_votes_total') ) {
+        if ( $column_name == _('_ad_votes_total') ) {
             $votes = get_post_meta($post_id, '_ad_votes_total', true);
-            if(!$votes){
+            if ( !$votes ) {
                 $votes = 0;
             }
             echo $votes;
@@ -249,6 +242,7 @@ class ad_manage_posts {
         <select name='ad-sortby' id='ad-sortby-select' class='postform'>
             <option value="">None</option>
             <option value="votes" <?php echo ($_GET['ad-sortby'] == 'votes')? 'selected': ''?>>Votes</option>
+            <option value="volunteers" <?php echo ($_GET['ad-sortby'] == 'volunteers')? 'selected': ''?>>Volunteers</option>
         </select>
 <?php
     }
@@ -260,6 +254,10 @@ class ad_manage_posts {
                 case 'votes':
                     $query->query_vars['orderby'] = 'meta_value';
                     $query->query_vars['meta_key'] = '_ad_votes_total';
+                    break;
+                case 'volunteers':
+                    $query->query_vars['orderby'] = 'meta_value';
+                    $query->query_vars['meta_key'] = '_ad_total_volunteers';
                     break;
             }
         }
