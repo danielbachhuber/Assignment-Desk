@@ -4,7 +4,7 @@ Plugin Name: Assignment Desk
 Plugin URI: http://code.nyu.edu/projects/show/s20
 Description: News pitch and story tools for local news blogs.
 Author: Erik Froese, Daniel Bachhuber
-Version: 0.4
+Version: 0.5
 Author URI: 
 */   
    
