@@ -42,10 +42,11 @@ if ( !class_exists( 'ad_settings' ) ){
 		
 		/* Public-facing */
 		add_settings_section( 'public_facing_views', 'Public-Facing Views', array(&$this, 'public_facing_views_setting_section'), $assignment_desk->public_facing_settings_page );
+		add_settings_field( 'public_facing_assignment_statuses[]', 'Public-facing assignment statuses', array(&$this, 'public_facing_assignment_statuses'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );			
 		add_settings_field( 'public_facing_filtering', 'Public-facing filtering', array(&$this, 'public_facing_filtering_option'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );
 		add_settings_field( 'public_facing_elements', 'Public-facing elements', array(&$this, 'public_facing_elements_option'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );
-		add_settings_field( 'public_facing_functionality', 'Public-facing functionality', array(&$this, 'public_facing_functionality_option'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );		
-		add_settings_field( 'public_facing_assignment_statuses[]', 'Public-facing assignment statuses', array(&$this, 'public_facing_assignment_statuses'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );		
+		add_settings_field( 'public_facing_functionality', 'Public-facing functionality', array(&$this, 'public_facing_functionality_option'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );	
+		add_settings_field( 'public_facing_no_pitches_message', 'Message to show if no pitches', array(&$this, 'public_facing_no_pitches_message_option'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );	
 			
 	}
 	
@@ -149,12 +150,11 @@ Blog Editor");
 	}
 	
 	function assignment_email_template_subject_option() {
-    		global $assignment_desk;
-    		$options = $assignment_desk->general_options;
-    		?>
-    		<input id="assignment_email_template_subject" name="assignment_desk_general[assignment_email_template_subject]" size="60" maxlength="60" 
-    		        value="<?php echo $options['assignment_email_template_subject']; ?>"><br>
-    <?php
+		global $assignment_desk;
+		$options = $assignment_desk->general_options;
+		echo '<input id="assignment_email_template_subject"'
+		 	. 'name="assignment_desk_general[assignment_email_template_subject]"'
+			. 'size="60" maxlength="60" value="' . $options['assignment_email_template_subject'] . '">';
     }
     	
 	function assignment_email_template_option() {
@@ -339,6 +339,31 @@ Blog Editor");
 		echo "Enable public access to pitches and stories in progress by dropping <code>&#60;!--$assignment_desk->all_posts_key--&#62;</code> in a page.";
 	}
 	
+	/**
+	 * Admin can choose which assignment statuses will be visible on the public-facing views. 
+	 */
+	function public_facing_assignment_statuses() {
+	    global $assignment_desk;
+	    $options = $assignment_desk->public_facing_options;
+	    $public_statuses = $options['public_facing_assignment_statuses'];
+	    if ( !is_array($public_statuses) ) {
+	        $public_statuses = array((int)$public_statuses);
+	    }
+	    echo "<label>" . _("Posts of the following assignment statuses will be displayed on the public facing views (if enabled)") . ":</label>";
+	    echo "<ul>";
+	    foreach ($assignment_desk->custom_taxonomies->get_assignment_statuses() as $assignment_status){
+	        echo "<li>";
+	        echo "<input type='checkbox' id='ad-status-{$assignment_status->term_id}' value='{$assignment_status->term_id}' " .
+	                     'name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_assignment_statuses][]"';
+	        if ( in_array($assignment_status->term_id, $public_statuses) ) {
+	            echo ' checked="checked" ';
+	        } 
+	        echo '>';
+	        echo " <label for='ad-status-{$assignment_status->term_id}'>$assignment_status->name</label></li>";
+	    }
+	    echo "</ul>";
+	}
+	
 	function public_facing_filtering_option() {
 		global $assignment_desk;
 		$options = $assignment_desk->public_facing_options;
@@ -466,30 +491,12 @@ Blog Editor");
 		echo '</ul>';
 	}
 	
-	/**
-	 * Print the assignment statuses as a form. The admin chooses which assignment statuses will
-	 * be visible on the public-facing views. 
-	 */
-	function public_facing_assignment_statuses() {
-	    global $assignment_desk;
-	    $options = $assignment_desk->public_facing_options;
-	    $public_statuses = $options['public_facing_assignment_statuses'];
-	    if ( !is_array($public_statuses) ) {
-	        $public_statuses = array((int)$public_statuses);
-	    }
-	    echo "<label>" . _("Posts of the following assignment statuses will be displayed on the public facing views (if enabled)") . ":</label>";
-	    echo "<ul>";
-	    foreach ($assignment_desk->custom_taxonomies->get_assignment_statuses() as $assignment_status){
-	        echo "<li>";
-	        echo "<input type='checkbox' id='ad-status-{$assignment_status->term_id}' value='{$assignment_status->term_id}' " .
-	                     'name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_assignment_statuses][]"';
-	        if ( in_array($assignment_status->term_id, $public_statuses) ) {
-	            echo ' checked="checked" ';
-	        } 
-	        echo '>';
-	        echo " <label for='ad-status-{$assignment_status->term_id}'>$assignment_status->name</label></li>";
-	    }
-	    echo "</ul>";
+	function public_facing_no_pitches_message_option() {
+		global $assignment_desk;
+		$options = $assignment_desk->public_facing_options;
+		echo '<input id="public_facing_no_pitches_message"'
+		 	. 'name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_no_pitches_message]"'
+			. ' size="60" maxlength="120" value="' . $options['public_facing_no_pitches_message'] . '">';
 	}
 	
 	/**
@@ -497,7 +504,7 @@ Blog Editor");
 	 */
 	function assignment_desk_validate($input) {
 		
-		// @todo Should we validate all elements?
+		// @todo Should we validate all settings elements?
 		
 		$input['default_new_assignment_status'] = (int)$input['default_new_assignment_status'];
 		$input['google_maps_api_key'] = wp_kses($input['google_maps_api_key'], $allowedtags);

@@ -664,7 +664,7 @@ class ad_public_views {
 		// Save the parent post so we can reset the object later
 		$parent_post = $post;		
 		
-		$html = '';
+		$html = '<div class="assignment-desk assignment-desk-all-pitches">';
 		
 		if ( $_POST['sort_by'] == 'ranking' || $_POST['sort_by'] == 'post_date' || $_POST['sort_by'] == 'due_date' ) {
 			$sort_by = $_POST['sort_by'];
@@ -768,78 +768,82 @@ class ad_public_views {
 			$html .= '</span>';	
 		}
 		$html .= '</form>';
+			
+ 		if ( is_array($all_pitches) ) {
 		
-		if ( !$all_pitches ) {
-		    $all_pitches = array();
-		}
-		
-		foreach ( $all_pitches as $pitch ) {
+			foreach ( $all_pitches as $pitch ) {
 			
-			$post_id = $pitch->ID;
-			$description = get_post_meta( $post_id, '_ef_description', true );
-			$location = get_post_meta( $post_id, '_ef_location', true );
-			$duedate = get_post_meta( $post_id, '_ef_duedate', true );
-			$duedate = date_i18n( 'M d, Y', $duedate );
+				$post_id = $pitch->ID;
+				$description = get_post_meta( $post_id, '_ef_description', true );
+				$location = get_post_meta( $post_id, '_ef_location', true );
+				$duedate = get_post_meta( $post_id, '_ef_duedate', true );
+				$duedate = date_i18n( 'M d, Y', $duedate );
 			
-			$html .= '<div class="assignment-desk-pitch"><h3><a href="' . get_permalink($post_id) . '">' . get_the_title($post_id) . '</a></h3>';
-			// Only show voting if it's enabled
-			if ( $options['public_facing_voting_enabled'] ) {
-				$html .= $this->show_all_votes( $post_id );					
-				$html .= $this->voting_form( $post_id );
-			}
-			
-			if ( $options['public_facing_content_enabled'] && $pitch->post_content ) {
-				// @todo This method doesn't work
-				$html .= '<p>' . $pitch->post_content . '</p>';
-			}
-			
-			if ( $description || $duedate || $location ) {
-			    $html .= '<div class="meta">';
-			}
-			if ( $options['public_facing_description_enabled'] && $description ) {
-			    $html .= '<p><label>Description:</label> ' . $description . '</p>';
-			}
-			if ( $options['public_facing_duedate_enabled'] && $duedate ) {
-			    $html .= '<p><label>Due date:</label> ' . $duedate . '</p>';	
-			}
-			if ( $options['public_facing_location_enabled'] && $location ) {
-			    $html .= '<p><label>Location:</label> ' . $location . '</p>';	
-			}
-			if ( $options['public_facing_categories_enabled'] ) {
-				$categories = get_the_category( $post_id );
-				$categories_html = '';
-				foreach ( $categories as $category ) {
-					$categories_html .= '<a href="' . get_category_link($category->cat_ID) . '">' . $category->name . '</a>, ';
+				$html .= '<div class="assignment-desk-pitch"><h3><a href="' . get_permalink($post_id) . '">' . get_the_title($post_id) . '</a></h3>';
+				// Only show voting if it's enabled
+				if ( $options['public_facing_voting_enabled'] ) {
+					$html .= $this->show_all_votes( $post_id );					
+					$html .= $this->voting_form( $post_id );
 				}
-				$html .= '<p><label>Categories:</label> ' . rtrim( $categories_html, ', ' ) . '</p>';
-			}
-			if ( $options['public_facing_tags_enabled'] ) {
-				$tags = get_the_tags( $post_id );
-				$tags_html = '';
-				if ( $tags ) {
-				    foreach ( $tags as $tag ) {
-					    $tags_html .= '<a href="' . get_tag_link($tag->term_id) . '">' . $tag->name . '</a>, ';
+			
+				if ( $options['public_facing_content_enabled'] && $pitch->post_content ) {
+					// @todo This method doesn't work
+					$html .= '<p>' . $pitch->post_content . '</p>';
+				}
+			
+				if ( $description || $duedate || $location ) {
+				    $html .= '<div class="meta">';
+				}
+				if ( $options['public_facing_description_enabled'] && $description ) {
+				    $html .= '<p><label>Description:</label> ' . $description . '</p>';
+				}
+				if ( $options['public_facing_duedate_enabled'] && $duedate ) {
+				    $html .= '<p><label>Due date:</label> ' . $duedate . '</p>';	
+				}
+				if ( $options['public_facing_location_enabled'] && $location ) {
+				    $html .= '<p><label>Location:</label> ' . $location . '</p>';	
+				}
+				if ( $options['public_facing_categories_enabled'] ) {
+					$categories = get_the_category( $post_id );
+					$categories_html = '';
+					foreach ( $categories as $category ) {
+						$categories_html .= '<a href="' . get_category_link($category->cat_ID) . '">' . $category->name . '</a>, ';
+					}
+					$html .= '<p><label>Categories:</label> ' . rtrim( $categories_html, ', ' ) . '</p>';
+				}
+				if ( $options['public_facing_tags_enabled'] ) {
+					$tags = get_the_tags( $post_id );
+					$tags_html = '';
+					if ( $tags ) {
+					    foreach ( $tags as $tag ) {
+						    $tags_html .= '<a href="' . get_tag_link($tag->term_id) . '">' . $tag->name . '</a>, ';
+					    }
 				    }
-			    }
-				$html .= '<p><label>Tags:</label> ' . rtrim( $tags_html, ', ' ) . '</p>';
-			}
-			if ( $description || $duedate || $location ) {
-			    $html .= '</div>';
-			}
-			if ( $options['public_facing_volunteering_enabled'] ) {
-			    $html .= $this->show_all_volunteers( $post_id );
-			
-				$current_user_type = (int)get_usermeta( $current_user->ID, 'ad_user_type' );
-				// Do not equal negative if someone created a new user type on us that
-				// hasn't been saved in association with the post
-				if ( get_post_meta( $post->ID, "_ad_participant_type_$current_user_type" , true ) != 'off' ) {
-					$html .= $this->volunteer_form( $post_id );
+					$html .= '<p><label>Tags:</label> ' . rtrim( $tags_html, ', ' ) . '</p>';
 				}
-		
-		    }
-			$html .= "</div>";
+				if ( $description || $duedate || $location ) {
+				    $html .= '</div>';
+				}
+				if ( $options['public_facing_volunteering_enabled'] ) {
+				    $html .= $this->show_all_volunteers( $post_id );
 			
+					$current_user_type = (int)get_usermeta( $current_user->ID, 'ad_user_type' );
+					// Do not equal negative if someone created a new user type on us that
+					// hasn't been saved in association with the post
+					if ( get_post_meta( $post->ID, "_ad_participant_type_$current_user_type" , true ) != 'off' ) {
+						$html .= $this->volunteer_form( $post_id );
+					}
+		
+			    }
+				$html .= "</div>";
+			
+			} // END foreach
+			
+		} else {
+			$html .= '<div class="message alert">' . $options['public_facing_no_pitches_message'] . '</div>';
 		}
+		
+		$html .= '</div>';		
 		
 		$the_content = str_replace($template_tag, $html, $the_content);
 		
