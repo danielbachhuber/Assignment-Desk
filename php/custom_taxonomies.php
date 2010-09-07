@@ -87,6 +87,11 @@ class ad_custom_taxonomies {
      * Called only the first time the plugin is activated.
      */
     function activate_once() {
+	
+		/**
+		 * Instantiates the default assignment statuses
+		 * Add all terms to an array, then insert them into the database
+		 */
         $default_assignment_labels = array(
             array( 'term' => 'New',
                    'args' => array( 
@@ -114,11 +119,14 @@ class ad_custom_taxonomies {
                        'description' => 'This assignment should not show up on public-facing views.',)
 		          ),
         );
-	    
 	    foreach ( $default_assignment_labels as $term ){
            wp_insert_term( $term['term'], $this->assignment_status_label, $term['args'] );
 	    }
 	    
+		/**
+		 * Instantiates the default user roles, or work users might volunteer to do in a story
+		 * Add all terms to an array, then insert them into the database
+		 */
 	    $default_user_roles = array(
             array( 'term' => 'Writer',
                    'args' => array( 
@@ -141,19 +149,23 @@ class ad_custom_taxonomies {
                         'description' => 'Manages the story production.',)
 		          ),
         );
-	    
 	    foreach ( $default_user_roles as $term ){
            wp_insert_term( $term['term'], $this->user_role_label, $term['args'] );
 	    }
+	
+		/**
+		 * Instantiates the default user types, 
+		 * Add all terms to an array, then insert them into the database
+		 */
 	    $default_user_types = array(
             array( 'term' => 'Community Contributor',
                    'args' => array( 
                        'slug' => 'community-contributor',
                        'description' => 'Someone from the community that writes for the blog.',)
 		          ),
-		    array( 'term' => 'Professional',
+		    array( 'term' => 'Professional Journalist',
 			       'args' => array( 
-			           'slug' => 'professional',
+			           'slug' => 'professional-journalist',
                        'description' => 'A professional journalist.',)
 		          ),
 		    array( 'term' => 'Student Journalist',
@@ -162,14 +174,15 @@ class ad_custom_taxonomies {
 					   'description' => 'A student who writes for the blog.',)
 		          ),
         );
-	    
 	    foreach ( $default_user_types as $term ){
            wp_insert_term( $term['term'], $this->user_type_label, $term['args'] );
 	    }
+	
     }
     
     /**
-    * Work around to change the labels on the geenrated custom taxonomy UIs. 
+    * Work around to change the labels on the WordPress custom taxonomy UIs.
+	* For WordPress pre-3.0
     * See js/edit_tags.js 
     * @todo Internationalize the labels we are replacing.
     */
@@ -177,7 +190,9 @@ class ad_custom_taxonomies {
         wp_enqueue_script('ad-edit-tags-js', ASSIGNMENT_DESK_URL .'js/edit_tags.js', array('jquery'));
 
         $taxonomy = $_GET['taxonomy'];
-        if (!$taxonomy){ $taxonomy = $_POST['taxonomy']; }
+        if ( !$taxonomy ) {
+			$taxonomy = $_POST['taxonomy'];
+		}
         
         if ( $taxonomy ) {
             $title = "";
@@ -205,8 +220,7 @@ class ad_custom_taxonomies {
 
 	/**
 	 * Wrapper for the get_terms method
-	 * @param array|string $args Standard set of get_term() parameters
-	 *
+	 * @param array $args Standard set of get_term() parameters
  	 */
 	function get_assignment_statuses( $args = null ) {
 		// Ensure our custom statuses get the respect they deserve
@@ -216,8 +230,7 @@ class ad_custom_taxonomies {
 	
 	/**
 	 * Wrapper for the get_terms method
-	 * @param array|string $args Standard set of get_term() parameters
-	 *
+	 * @param array $args Standard set of get_term() parameters
  	 */
 	function get_user_types( $args = null ) {
 		// Ensure our custom statuses get the respect they deserve
@@ -227,7 +240,7 @@ class ad_custom_taxonomies {
 	
 	/**
 	 * Wrapper for the get_terms method
-	 * @param array|string $args Standard set of get_term() parameters
+	 * @param array $args Standard set of get_term() parameters
 	 *
  	 */
 	function get_user_roles( $args = null ) {
@@ -345,11 +358,11 @@ class ad_custom_taxonomies {
 	 */
 	function manage_tags_columns($columns){
 	    
-	    if($_GET['taxonomy'] == 'user_type' || $_GET['taxonomy'] == 'user_role'){
-	        unset($columns['posts']);
-	        unset($columns['slug']);
+	    if ( $_GET['taxonomy'] == 'user_type' || $_GET['taxonomy'] == 'user_role' ){
+	        unset( $columns['posts'] );
+	        unset( $columns['slug'] );
         }
-	    if($_GET['taxonomy'] == 'user_type'){
+	    if ( $_GET['taxonomy'] == 'user_type' ) {
 	        $columns['_ad_users'] = _('Users');
 	    }
 	    return $columns;
@@ -360,7 +373,7 @@ class ad_custom_taxonomies {
 	 */
 	function handle_user_type_users_column( $c, $column_name, $term_id ){
 	    global $wpdb;
-	    if($column_name == '_ad_users'){
+	    if( $column_name == '_ad_users' ) {
 	        return $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->usermeta where meta_key='ad_user_type' and meta_value=$term_id");
 	    }
 	}
