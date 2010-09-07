@@ -840,7 +840,12 @@ class ad_public_views {
 			} // END foreach
 			
 		} else {
-			$html .= '<div class="message alert">' . $options['public_facing_no_pitches_message'] . '</div>';
+			if ( !$options['public_facing_no_pitches_message'] ) {
+				$no_pitches_message = $options['public_facing_no_pitches_message'];
+			} else {
+				$no_pitches_message = 'Sorry, there are currently no pitches listed.';
+			}
+			$html .= '<div class="message alert">' . $no_pitches_message . '</div>';
 		}
 		
 		$html .= '</div>';		
