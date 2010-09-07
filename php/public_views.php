@@ -472,7 +472,7 @@ class ad_public_views {
 			    $all_votes = array();
 			}
 			
-			if ( !in_array( $user_id, $all_votes ) ) {
+			if ( !in_array( $sanitized_user_id, $all_votes ) ) {
 				$all_votes[] = $sanitized_user_id;
 				update_post_meta( $post_id, '_ad_votes_all', $all_votes );
 				update_post_meta( $post_id, '_ad_votes_total', count($all_votes) );
@@ -481,8 +481,7 @@ class ad_public_views {
 				$form_messages['error']['message'] = 'Whoops, you already voted.';
 			}
 			
-			// Refresh the page so user can't submit the form again
-			$this->refresh_page();
+			return $form_messages;
 			
 		}
 		
@@ -933,24 +932,6 @@ class ad_public_views {
 		
 		return $the_content;		
 	}
-	
-	/**
-	 * Simple method to refresh the page if need be
-	 */ 
-	function refresh_page() {
-		if ( $_SERVER["HTTPS"] == "on") {
-			$location = "https://";			
-		} else {
-			$location = "http://";
-		}
-		if ( $_SERVER["SERVER_PORT"] != "80" ) {
-		    $location .= $_SERVER["SERVER_NAME"].":".$_SERVER["SERVER_PORT"].$_SERVER["REQUEST_URI"];
-		} else {
-		    $location .= $_SERVER["SERVER_NAME"].$_SERVER["REQUEST_URI"];
-		}
-		wp_redirect( $location );
-	}
-	
 	
 } // END:class ad_public_controller
 
