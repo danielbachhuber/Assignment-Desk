@@ -695,7 +695,9 @@ class ad_public_views {
 		
 		$html .= '<input type="hidden" name="page_id" value="' . $parent_post->ID . '" />';
 		
-		$html .= '<span class="left">';
+		if ( $options['public_facing_filtering_post_status_enabled'] || $options['public_facing_filtering_participant_type_enabled'] ) {
+			$html .= '<span class="left">';
+		}
 		
 		if ( $options['public_facing_filtering_post_status_enabled'] ) {
 			$html .= '<select name="post_status" class="assignment-desk-filter-post-statuses">';
@@ -730,9 +732,10 @@ class ad_public_views {
 			$html .= '</select>';
 		}
 		
-		// Filter button
-		$html .= '<input type="submit" name="assignment-desk-filter-button" class="assignment-desk-filter-button" value="Filter" />';
-		$html .= '</span>';
+		if ( $options['public_facing_filtering_post_status_enabled'] || $options['public_facing_filtering_participant_type_enabled'] ) {
+			$html .= '<input type="submit" name="assignment-desk-filter-button" class="assignment-desk-filter-button" value="Filter" />';
+			$html .= '</span>';
+		}
 		
 		// Sorting functionality is optional and configured by the admin
 		if ( $options['public_facing_filtering_sort_by_enabled'] ) {
