@@ -734,8 +734,9 @@ class ad_public_views {
 		$html .= '<input type="submit" name="assignment-desk-filter-button" class="assignment-desk-filter-button" value="Filter" />';
 		$html .= '</span>';
 		
-		$html .= '<span class="right">';
+		// Sorting functionality is optional and configured by the admin
 		if ( $options['public_facing_filtering_sort_by_enabled'] ) {
+			$html .= '<span class="right">';			
 			$html .= '<select name="sort_by" class="assignment-desk-sort-by">'
 				. '<option value="post_date"';
 			if ( $sort_by == 'post_date' ) {
@@ -758,10 +759,9 @@ class ad_public_views {
 			}
 			
 			$html .= '</select>';
+			$html .= '<input type="submit" name="assignment-desk-sort-button" class="assignment-desk-sort-button" value="Sort" />';
+			$html .= '</span>';	
 		}
-		// Sort button
-		$html .= '<input type="submit" name="assignment-desk-sort-button" class="assignment-desk-sort-button" value="Sort" />';
-		$html .= '</span>';
 		$html .= '</form>';
 		
 		if ( !$all_pitches ) {
