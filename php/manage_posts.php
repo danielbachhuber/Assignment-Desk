@@ -43,10 +43,6 @@ class ad_manage_posts {
         // Filter by assignment_status
         add_filter('posts_where', array(&$this, 'add_ad_assignment_statuses_where' ), 20);
         
-        // This javascript is only active on the edit.php
-        if ( $pagenow == 'edit.php' ){
-            wp_enqueue_script('ad-manage-posts-js', ASSIGNMENT_DESK_URL . 'js/manage_posts.js', array('jquery'));
-        }
 	}
     
     /**
