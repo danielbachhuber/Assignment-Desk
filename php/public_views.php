@@ -743,6 +743,7 @@ class ad_public_views {
 				$html .= ' selected="selected"';
 			}
 			$html .= '>Post date</option>';
+			// Only show the sort by rank option if voting is enabled
 			if ( $options['public_facing_voting_enabled'] ) {
 				$html .= '<option value="ranking"';
 				if ( $sort_by == 'ranking' ) {
@@ -750,7 +751,8 @@ class ad_public_views {
 				}
 				$html .= '>Ranking</option>';
 			}
-			if ( $assignment_desk->edit_flow_exists() ) {
+			// Only show the due_date option if Edit Flow exists and display of data is 'on'
+			if ( $assignment_desk->edit_flow_exists() && $options['public_facing_duedate_enabled'] ) {
 				$html .= '<option value="due_date"';
 				if ( $sort_by == 'due_date' ) {
 					$html .= ' selected="selected"';
