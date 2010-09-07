@@ -22,7 +22,7 @@ class ad_public_views {
 		// Run save_pitch_form() at WordPress initialization
 		$_REQUEST['assignment_desk_messages']['pitch_form'] = $this->save_pitch_form();
 		$_REQUEST['assignment_desk_messages']['volunteer_form'] = $this->save_volunteer_form();
-		$_REQUEST['assignment_desk_messages']['voting'] = $this->save_voting_form();
+		$this->save_voting_form();
 		
 		add_filter( 'the_content', array(&$this, 'show_all_posts') );
 		
@@ -392,6 +392,7 @@ class ad_public_views {
 			$user_id = $current_user->ID;
 			
 			// If the user hasn't voted before, show the vote button
+			// @todo Add functionality to remove a vote
 			if ( !in_array( $user_id, $all_votes ) ) {
 				$voting_form = '<form method="post" class="assignment_desk_voting_form">'
 							. '<input type="hidden" name="assignment_desk_voting_user_id" value="' . $user_id . '" />'
@@ -407,11 +408,6 @@ class ad_public_views {
 							. ' name="assignment_desk_voting_submit" value="' . $voting_button . '" />'
 							. '</form>';
 				return $voting_form;			
-			} else if ( $_REQUEST['assignment_desk_messages']['voting']['success'] ) {
-				$voting_message = '<div class="message success">'
-								. $_REQUEST['assignment_desk_messages']['voting']['success']['message']
-								. '</div>';
-				return $voting_message;
 			}
 			
 		}
@@ -432,8 +428,9 @@ class ad_public_views {
 		}
 		$total_votes = (int)get_post_meta( $post_id, '_ad_votes_total', true );
 		
-		if (!$total_votes) {
-			$votes_html = '<div class="ad_all_votes message alert">No votes yet, you could be the first!</div>';
+		if ( !$total_votes ) {
+			$total_votes = 0;
+			$votes_html = '<div class="ad_all_votes"><span class="ad_total_votes">' . $total_votes . '</span></div>';
 			return $votes_html;
 		} else {
 			$votes_html = '<div class="ad_all_votes"><span class="ad_total_votes">' . $total_votes . '</span>';
@@ -455,7 +452,7 @@ class ad_public_views {
 			
 			// Ensure that it was the user who submitted the form, not a bot
 			if ( !wp_verify_nonce($_POST['assignment_desk_voting_nonce'], 'assignment_desk_voting') ) {
-				return $form_messages['error']['nonce'];
+				return $form_messages['error']['nonce'] = true;
 			}
 	    
 			wp_get_current_user();
@@ -470,7 +467,8 @@ class ad_public_views {
 			$all_votes = get_post_meta( $post_id, '_ad_votes_all', true );
 			$total_votes = (int)get_post_meta( $post_id, '_ad_votes_total', true );
 			
-			if(!is_array($all_votes)){
+			// Catch if $all_votes has been set yet
+			if ( !is_array($all_votes) ){
 			    $all_votes = array();
 			}
 			
@@ -482,7 +480,10 @@ class ad_public_views {
 			} else {
 				$form_messages['error']['message'] = 'Whoops, you already voted.';
 			}
-			return $form_messages;
+			
+			// Refresh the page so user can't submit the form again
+			$this->refresh_page();
+			
 		}
 		
 	}
@@ -917,6 +918,23 @@ class ad_public_views {
 		}
 		
 		return $the_content;		
+	}
+	
+	/**
+	 * Simple method to refresh the page if need be
+	 */ 
+	function refresh_page() {
+		if ( $_SERVER["HTTPS"] == "on") {
+			$location = "https://";			
+		} else {
+			$location = "http://";
+		}
+		if ( $_SERVER["SERVER_PORT"] != "80" ) {
+		    $location .= $_SERVER["SERVER_NAME"].":".$_SERVER["SERVER_PORT"].$_SERVER["REQUEST_URI"];
+		} else {
+		    $location .= $_SERVER["SERVER_NAME"].$_SERVER["REQUEST_URI"];
+		}
+		wp_redirect( $location );
 	}
 	
 	
