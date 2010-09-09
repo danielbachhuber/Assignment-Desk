@@ -468,6 +468,9 @@ class ad_post {
 			$volunteers = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->usermeta WHERE meta_key='_ad_volunteer' AND meta_value=$post_id");
             update_post_meta($post_id, '_ad_total_volunteers', $volunteers);
 		}
+		
+		// Prevent this function from being called twice for a post during a single request.
+		$executed_already = true;
     }
     
     /**
