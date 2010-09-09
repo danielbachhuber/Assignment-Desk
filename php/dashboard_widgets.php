@@ -85,41 +85,57 @@ class ad_dashboard_widgets {
             }
         }
         ?>
-        <p class="sub">By assignment status</p>
+        <p class="sub"><?php _e('By assignment status'); ?></p>
         <div class="table">
         <table>
             <tbody>
-            <?php 
-            if ( current_user_can($assignment_desk->define_editor_permissions) ) { 
+            <?php
+            $counts = array();
+            $total_unpublished_assignments = 0;
+            
+            foreach ( $assignment_statuses as $assignment_status ) {
+                if ( current_user_can($assignment_desk->define_editor_permissions) ) {
+                    // Count all posts with a certain status
+                    $counts[$assignment_status->term_id] = $this->count_posts_by_assignment_status($assignment_status);
+                }
+                else {
+                    // Count all posts that this user can edit with a certain status
+                    $counts[$assignment_status->term_id] = $this->count_user_posts_by_assignment_status($assignment_status);
+                }
+                $total_unpublished_assignments += $counts[$assignment_status->term_id];
+            }
+            if ( $total_unpublished_assignments ) {
                 foreach ( $assignment_statuses as $assignment_status ) {
-                    $count = $this->count_posts_by_assignment_status($assignment_status);
-                    // if ( $count ) {
+                    // if ( $counts[$assignment_status->term_id] ) {
                         $url = admin_url() . "/edit.php?ad-assignment-status=$assignment_status->term_id";
-                        echo "<tr><td class='b'><a href='$url'>" . $count . "</a></td>";
+                        echo "<tr><td class='b'><a href='$url'>" . $counts[$assignment_status->term_id] . "</a></td>";
                         echo "<td class='b t'><a href='$url'>$assignment_status->name</a></td></tr>";
                     // }
                 }
+            }
+            else {
+                echo "<tr><td>" . _('No assigned stories.') . "</td><td></td></tr>";
+            }
+            ?>
+            </tbody>
+        </table>
+        </div>
+
+        <?php if ( current_user_can($assignment_desk->define_editor_permissions) ) : ?>
+        <p class="sub"><?php _e('Historical'); ?></p>
+        <div class="table">
+        <table>
+            <tbody>
+<?php
                 $this_month_url = admin_url() . '/edit.php?post_status=publish&monthnum=' . date('M');
                 $q = new WP_Query( array('post_status' => 'publish', 'monthnum' => date('M')));
                 echo "<tr><td class='b'><a href='$this_month_url'>$q->found_posts</a></td>";
                 echo "<td class='b t'><a href='$this_month_url'>" . _('Published this month', 'assignment-desk') . "</a></td></tr>";
-            }
-            else {
-                foreach ( $assignment_statuses as $assignment_status ) {
-                    $count = $this->count_user_posts_by_assignment_status($assignment_status);
-                    // if ( $count ) {
-                        $url = admin_url() . "/edit.php?ad-assignment-status=$assignment_status->term_id";
-                        echo "<tr><td class='b'><a href='$url'>" . $count . "</a></td>";
-                        echo "<td class='b t'><a href='$url'>$assignment_status->name</a></td></tr>";
-                    // }
-                }
-            }
-                ?>
+?>
             </tbody>
         </table>
         </div>
-        
-        <br>
+        <?php endif; ?>
 <?php
        
         $pending_posts = array();
@@ -155,6 +171,7 @@ class ad_dashboard_widgets {
         }
         $count_pending = count($pending_posts);
         if ( $count_pending ) {
+            echo "<br>";
             echo "<p class='sub'>$count_pending pending assignment";
             echo ($count_pending != 1)? 's': ''; 
             echo "</p>";
