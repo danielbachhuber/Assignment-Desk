@@ -35,26 +35,13 @@ class ad_dashboard_widgets {
 	function count_user_posts_by_assignment_status($status){
 	    global $current_user, $wpdb, $assignment_desk;
 	    get_currentuserinfo();
-	    
-	    $counts = array();
-	    
-	    if ( ! $assignment_desk->coauthors_plus_exists() ){
-            return $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts
-                                    LEFT JOIN $wpdb->term_relationships ON($wpdb->posts.ID = $wpdb->term_relationships.object_id)
-                                    LEFT JOIN $wpdb->term_taxonomy ON($wpdb->term_taxonomy.term_taxonomy_id = $wpdb->term_relationships.term_taxonomy_id)
-                                    WHERE $wpdb->posts.post_author = '$current_user->ID' 
-                                     AND $wpdb->posts.post_status != 'publish'
-                                     AND $wpdb->posts.post_status != 'inherit' 
-                                     AND $wpdb->posts.post_status != 'trash'
-             						 AND $wpdb->posts.post_status != 'auto-draft'
-                                     AND $wpdb->term_taxonomy.taxonomy = '$assignment_desk->custom_taxonomies->assignment_status_label'
-                                     AND $wpdb->term_taxonomy.term_id = $status->term_id ");
-	    }
-	    else {
-	        $count = 0;
-	        $posts = $wpdb->get_results("SELECT * FROM $wpdb->posts 
+	    	 
+	    $count = 0;  
+	    if ( $assignment_desk->coauthors_plus_exists() ){
+            $posts = $wpdb->get_results("SELECT * FROM $wpdb->posts 
 	                                LEFT JOIN $wpdb->term_relationships ON($wpdb->posts.ID = $wpdb->term_relationships.object_id)
-                                    LEFT JOIN $wpdb->term_taxonomy ON($wpdb->term_taxonomy.term_taxonomy_id = $wpdb->term_relationships.term_taxonomy_id)
+                                    LEFT JOIN $wpdb->term_taxonomy 
+                                        ON($wpdb->term_taxonomy.term_taxonomy_id = $wpdb->term_relationships.term_taxonomy_id)
                                     LEFT JOIN $wpdb->terms ON($wpdb->terms.term_id = $wpdb->term_taxonomy.term_id)
                 	                WHERE $wpdb->posts.post_status != 'publish'
                                       AND $wpdb->posts.post_status != 'inherit' 
@@ -68,8 +55,21 @@ class ad_dashboard_widgets {
                     $count++;
                 }
             }
-            return $count;
 	    }
+	    else {
+	        $count = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts
+                                    LEFT JOIN $wpdb->term_relationships ON($wpdb->posts.ID = $wpdb->term_relationships.object_id)
+                                    LEFT JOIN $wpdb->term_taxonomy 
+                                        ON($wpdb->term_taxonomy.term_taxonomy_id = $wpdb->term_relationships.term_taxonomy_id)
+                                    WHERE $wpdb->posts.post_author = '$current_user->ID' 
+                                     AND $wpdb->posts.post_status != 'publish'
+                                     AND $wpdb->posts.post_status != 'inherit' 
+                                     AND $wpdb->posts.post_status != 'trash'
+             						 AND $wpdb->posts.post_status != 'auto-draft'
+                                     AND $wpdb->term_taxonomy.taxonomy = '{$assignment_desk->custom_taxonomies->assignment_status_label}'
+                                     AND $wpdb->term_taxonomy.term_id = $status->term_id ");
+	    }
+	    return $count;
 	    
 	}
    
@@ -93,11 +93,11 @@ class ad_dashboard_widgets {
             if ( current_user_can($assignment_desk->define_editor_permissions) ) { 
                 foreach ( $assignment_statuses as $assignment_status ) {
                     $count = $this->count_posts_by_assignment_status($assignment_status);
-                    if ( $count ) {
+                    // if ( $count ) {
                         $url = admin_url() . "/edit.php?ad-assignment-status=$assignment_status->term_id";
                         echo "<tr><td class='b'><a href='$url'>" . $count . "</a></td>";
                         echo "<td class='b t'><a href='$url'>$assignment_status->name</a></td></tr>";
-                    }
+                    // }
                 }
                 $this_month_url = admin_url() . '/edit.php?post_status=publish&monthnum=' . date('M');
                 $q = new WP_Query( array('post_status' => 'publish', 'monthnum' => date('M')));
@@ -107,11 +107,11 @@ class ad_dashboard_widgets {
             else {
                 foreach ( $assignment_statuses as $assignment_status ) {
                     $count = $this->count_user_posts_by_assignment_status($assignment_status);
-                    if ( $count ) {
+                    // if ( $count ) {
                         $url = admin_url() . "/edit.php?ad-assignment-status=$assignment_status->term_id";
                         echo "<tr><td class='b'><a href='$url'>" . $count . "</a></td>";
                         echo "<td class='b t'><a href='$url'>$assignment_status->name</a></td></tr>";
-                    }
+                    // }
                 }
             }
                 ?>
