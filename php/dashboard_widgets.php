@@ -130,7 +130,7 @@ class ad_dashboard_widgets {
                 $this_month_url = admin_url() . '/edit.php?post_status=publish&monthnum=' . date('M');
                 $q = new WP_Query( array('post_status' => 'publish', 'monthnum' => date('M')));
                 echo "<tr><td class='b'><a href='$this_month_url'>$q->found_posts</a></td>";
-                echo "<td class='b t'><a href='$this_month_url'>" . _('Published this month', 'assignment-desk') . "</a></td></tr>";
+                echo "<td class='b t'><a href='$this_month_url'>" . __('Published this month') . "</a></td></tr>";
 ?>
             </tbody>
         </table>
