@@ -277,25 +277,26 @@ class ad_public_views {
 			$sanitized_location = wp_kses($_POST['assignment_desk_location'], $allowedposttags);
 			$sanitized_volunteer = $_POST['assignment_desk_volunteer'];
 			
-			// Sanitize the duedate
-			$sanitized_duedate = '';
-			$duedate_split = split('/', $_POST['assignment_desk_duedate']);
-			if(!count($duedate_split) == 3){
-			    $form_messages['errors']['duedate'] = 'Please enter a valid date of the form MM/DD/YYYY';
-			}
-			else {
-			    $duedate_month = (int)$duedate_split[0];
-			    $duedate_day = (int)$duedate_split[1];
-			    $duedate_year = (int)$duedate_split[2];
-			    
-			    // Zero pad for strtime
-			    if($duedate_month < 10 ){
-			        $duedate_month = "0$duedate_month";
-			    }
-			    $sanitized_duedate = strtotime($duedate_day . '-' . $duedate_month . '-' . $duedate_year);
-			    if(!$sanitized_duedate){
-			        $form_messages['errors']['duedate'] = 'Please enter a valid date of the form MM/DD/YYYY';
-			    }
+			if ( $_POST['assignment_desk_duedate'] ) {
+    			// Sanitize the duedate
+    			$sanitized_duedate = false;
+    			$duedate_split = split('/', $_POST['assignment_desk_duedate']);
+    			if(count($duedate_split) == 3){
+    			    $duedate_month = (int)$duedate_split[0];
+    			    $duedate_day = (int)$duedate_split[1];
+    			    $duedate_year = (int)$duedate_split[2];
+    			    // Zero pad for strtime
+    			    if($duedate_month < 10 ){
+    			        $duedate_month = "0$duedate_month";
+    			    }
+    			    $sanitized_duedate = strtotime($duedate_day . '-' . $duedate_month . '-' . $duedate_year);
+    			    if(!$sanitized_duedate){
+    			        $form_messages['errors']['duedate'] = 'Please enter a valid date of the form MM/DD/YYYY';
+    			    }
+    			}
+    			else {
+    			    $form_messages['errors']['duedate'] = 'Please enter a valid date of the form MM/DD/YYYY';
+    			}
 			}
 			
 			if ( count($form_messages['errors']) ) {
