@@ -181,8 +181,33 @@ class ad_dashboard_widgets {
                 echo "<tr>";
                 echo "<td>{$post->post_title} | {$pending[1]->name}</td>";
                 echo "<td><a class='button' href='" . admin_url() . "index.php?participant_response=accepted&post_id=$post->ID&role_id={$pending[1]->term_id}'>Accept</a> ";
-                echo "<a class='button' href='" . admin_url() . "index.php?participant_response=declined&post_id=$post->ID&role_id={$pending[1]->term_id}'>Decline</a></td>";
-                echo "</tr>";  
+                echo "<a class='button' href='" . admin_url() . "index.php?participant_response=declined&post_id=$post->ID&role_id={$pending[1]->term_id}'>Decline</a> ";
+                
+                echo "<a href='#' onclick=\"javascript:jQuery('#ad-{$post->ID}-summary').slideToggle();\">Details</a></td>";
+                echo "</tr>";
+                echo "<tr><td colspan='2'>";
+                echo "<div id='ad-{$post->ID}-summary' style='display:none'>";
+
+                $summary = get_post_meta($post->ID, '_ef_description', true);
+                if ( !$summary && $post->post_excerpt ) {
+                    $summary = $post->post_excerpt;
+                }
+                if ( !$summary && $post->post_content ) {
+                    $summary = $post->post_content;
+                }
+                echo "<p>" . _('Summary') . ": $summary</p>";
+                
+                if ( $assignment_desk->edit_flow_exists() ){
+                    $duedate = get_post_meta($post->ID, '_ef_duedate', true);
+                    if ( $duedate ) {
+                        $duedate = ad_format_ef_duedate($duedate);
+                    }
+                    else {
+                        $duedate = _('None assigned');
+                    }
+                    echo "<p>" . _('Due Date ') . ": $duedate</p>";
+                }
+                echo "</div></td></tr>";
             }
             echo "</table></div>";
         }
