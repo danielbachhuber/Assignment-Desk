@@ -90,7 +90,7 @@ Blog Editor");
         $public_facing_options['public_facing_assignment_status_enabled'] = true;
         $public_facing_options['public_facing_filtering_post_status_enabled'] = true;
         $public_facing_options['public_facing_filtering_participant_type_enabled'] = true;
-        $public_facing_options['public_facing_filtering_participant_type_enabled'] = true;
+        $public_facing_options['public_facing_filtering_sort_by_enabled'] = true;
         $public_facing_options['public_facing_volunteering_enabled'] = true;
         $public_facing_options['public_facing_voting_enabled'] = true;
         $public_facing_options['public_facing_no_pitches_message'] = _('No stories right now.');
