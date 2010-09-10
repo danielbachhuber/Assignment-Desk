@@ -389,6 +389,9 @@ class ad_post {
 			foreach ( $user_roles as $user_role ) {
 				$role_participants[$user_role->term_id] = get_post_meta($post_id, "_ad_participant_role_$user_role->term_id", true);
 			}
+			if ( ! $role_participants ){
+			    $role_participants = array();
+			}
 			// Remove a participant from a post
     		if( $_POST['ad-participant-remove'] ){
     			if (!is_array($_POST['ad-participant-remove'])){
