@@ -28,9 +28,6 @@ if ( !class_exists( 'ad_settings' ) ){
 		add_settings_field( 'assignment_email_template_subject', 'Subject template for notifications', array(&$this, 'assignment_email_template_subject_option'), $assignment_desk->top_level_page, 'assignment_management' );
 		add_settings_field( 'assignment_email_template', 'Template for notifications', array(&$this, 'assignment_email_template_option'), $assignment_desk->top_level_page, 'assignment_management' );
 		
-		add_settings_section( 'miscellaneous', 'Miscellaneous', array(&$this, 'miscellaneous_setting_section'), $assignment_desk->top_level_page );
-		add_settings_field( 'google_maps_api_key', 'Google Maps API key', array(&$this, 'google_maps_api_key_option'), $assignment_desk->top_level_page, 'miscellaneous' );
-		
 		register_setting( $assignment_desk->pitch_form_options_group, $assignment_desk->get_plugin_option_fullname('pitch_form') );
 		
 		/* Pitch form */
@@ -176,10 +173,6 @@ Blog Editor");
 		echo $options['google_maps_api_key'];
 		echo '"/>';
 		
-	}
-	
-	function miscellaneous_setting_section() {
-	    
 	}
 	
 	function story_pitches_setting_section() {
@@ -507,7 +500,6 @@ Blog Editor");
 		// @todo Should we validate all settings elements?
 		
 		$input['default_new_assignment_status'] = (int)$input['default_new_assignment_status'];
-		$input['google_maps_api_key'] = wp_kses($input['google_maps_api_key'], $allowedtags);
 		return $input;
 	}
     
