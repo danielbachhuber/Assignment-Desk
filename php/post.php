@@ -436,6 +436,8 @@ class ad_post {
     		// Update the coauthors
     		if ( $assignment_desk->coauthors_plus_exists() ) {
     			global $coauthors_plus;
+    			
+    			// Scan participants for those that accepted
     			$coauthors = array();
     			foreach ( $user_roles as $user_role ) {
         		    foreach ( $role_participants[$user_role->term_id] as $user_id => $status ) {	
@@ -445,16 +447,20 @@ class ad_post {
         			    }
         		    }
     		    }
-    		    $_POST['coauthors'];
-        		$coauthors_plus->add_coauthors($post_id, $coauthors);
+    		    $coauthors = array_unique($coauthors);
+    		    
+    		    // If no-coauthors assign it to the current user
+    		    if ( empty($coauthors) ) { 
+    		        $coauthors[] = $current_user->user_login;
+    		    }
+        		$_POST['coauthors'] = $coauthors;
 			}
-            
+
             // Update the participants for this role 
 			foreach ( $user_roles as $user_role ) {
     		    update_post_meta($post_id, "_ad_participant_role_{$user_role->term_id}", $role_participants[$user_role->term_id]);
-    		    
 		    }
-            
+
             // Update the number of unique volunteers
     		$all_volunteer_ids = array();
     		foreach ( $user_roles as $user_role ) {
@@ -468,7 +474,7 @@ class ad_post {
 			$volunteers = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->usermeta WHERE meta_key='_ad_volunteer' AND meta_value=$post_id");
             update_post_meta($post_id, '_ad_total_volunteers', $volunteers);
 		}
-		
+
 		// Prevent this function from being called twice for a post during a single request.
 		$executed_already = true;
     }
