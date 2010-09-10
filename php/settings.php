@@ -76,8 +76,31 @@ Please login to %dashboard_link% to accept or decline.
 
 Thanks
 Blog Editor");
-         // @todo - other defaults ?
-         update_option($assignment_desk->get_plugin_option_fullname('general'), $options);
+
+        update_option($assignment_desk->get_plugin_option_fullname('general'), $options);
+         
+        // Public facing defaults
+        $public_facing_options = $assignment_desk->public_facing_options;
+        $approved_status = $wpdb->get_results("SELECT t.*, tt.* 
+                                           FROM $wpdb->terms AS t INNER JOIN $wpdb->term_taxonomy AS tt ON t.term_id = tt.term_id 
+                                           WHERE tt.taxonomy = '{$assignment_desk->custom_taxonomies->assignment_status_label}' 
+                                           AND t.slug = 'approved' LIMIT 1");
+        $approved_status = $approved_status[0];
+        $public_facing_options['public_facing_assignment_statuses'] = array($approved_status->term_id);
+        $public_facing_options['public_facing_assignment_status_enabled'] = true;
+        $public_facing_options['public_facing_filtering_post_status_enabled'] = true;
+        $public_facing_options['public_facing_filtering_participant_type_enabled'] = true;
+        $public_facing_options['public_facing_filtering_participant_type_enabled'] = true;
+        $public_facing_options['public_facing_volunteering_enabled'] = true;
+        $public_facing_options['public_facing_voting_enabled'] = true;
+        $public_facing_options['public_facing_no_pitches_message'] = _('No stories right now.');
+        update_option($assignment_desk->get_plugin_option_fullname('public_facing'), $public_facing_options);
+         
+        // Pitch form defaults
+        $pitch_form_options = $assignment_desk->pitch_form_options;
+        $pitch_form_options['pitch_form_enabled'] = true;
+        update_option($assignment_desk->get_plugin_option_fullname('pitch_form'), $pitch_form_options);
+         
     }
 	
 	function default_new_assignment_status_option() {
@@ -407,7 +430,7 @@ Blog Editor");
 		if ($options['public_facing_assignment_status_enabled']) {
 			echo ' checked="checked"';
 		}
-		echo ' />&nbsp;<label for="public_facing_content_enabled">Assignment Status</label></li>';		
+		echo ' />&nbsp;<label for="public_facing_assignment_status_enabled">Assignment Status</label></li>';		
 		// Description
 		if ($assignment_desk->edit_flow_exists()) {
 			echo '<li><input id="public_facing_description_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_description_enabled]" type="checkbox"';
