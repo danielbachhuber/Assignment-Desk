@@ -1,5 +1,7 @@
 <?php
 
+require_once('utils.php');
+
 if (!class_exists('ad_post')) {
 
 /**
@@ -523,13 +525,19 @@ class ad_post {
         
         $search = array(  '%blogname%',
                           '%title%', 
+                          '%excerpt%',
+                          '%duedate%',
+                          '%description%',
                           '%post_link%',
                           '%display_name%',
                           '%role%',
                           '%dashboard_link%',
                        );
         $replace = array(get_option('blogname'),
-                        $post->post_title,  
+                        $post->post_title,
+                        $post->post_excerpt,
+                        ad_format_ef_duedate(get_post_meta($post_id, '_ef_duedate', true)),
+                        get_post_meta($post_id, '_ef_description', true),
                         get_permalink($post_id),
                         $user->display_name,
                         $role->name,

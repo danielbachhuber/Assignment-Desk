@@ -166,7 +166,7 @@ Blog Editor");
 		echo '</textarea><br />';
 		echo '<span class="description">' . 
 		    _('We support the following tokens') . 
-		    ': %blogname%, %title%, %role%, %display_name%, %location%, %post_link%, and %dashboard_link%.</span>';
+		    ': %blogname%, %title%, %excerpt%, %description%, %duedate%, %role%, %display_name%, %location%, %post_link%, and %dashboard_link%.</span>';
 	}
 	
 	function google_maps_api_key_option() {
