@@ -777,6 +777,10 @@ class ad_public_views {
 				$location = get_post_meta( $post_id, '_ef_location', true );
 				$duedate = get_post_meta( $post_id, '_ef_duedate', true );
 				$duedate = date_i18n( 'M d, Y', $duedate );
+				$assignment_status = wp_get_object_terms($post_id, $assignment_desk->custom_taxonomies->assignment_status_label);
+				if ( is_array($assignment_status) ) {
+				    $assignment_status = $assignment_status[0];
+				}
 			
 				$html .= '<div class="assignment-desk-pitch"><h3><a href="' . get_permalink($post_id) . '">' . get_the_title($post_id) . '</a></h3>';
 				// Only show voting if it's enabled
@@ -792,6 +796,9 @@ class ad_public_views {
 			
 				if ( $description || $duedate || $location ) {
 				    $html .= '<div class="meta">';
+				}
+				if ( $options['public_facing_assignment_status_enabled'] && $assignment_status ) {
+				    $html .= '<p><label>Status:</label> ' . $assignment_status->name . '</p>';
 				}
 				if ( $options['public_facing_description_enabled'] && $description ) {
 				    $html .= '<p><label>Description:</label> ' . $description . '</p>';
