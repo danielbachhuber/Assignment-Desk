@@ -183,7 +183,7 @@ class ad_dashboard_widgets {
                 echo "<td><a class='button' href='" . admin_url() . "index.php?participant_response=accepted&post_id=$post->ID&role_id={$pending[1]->term_id}'>Accept</a> ";
                 echo "<a class='button' href='" . admin_url() . "index.php?participant_response=declined&post_id=$post->ID&role_id={$pending[1]->term_id}'>Decline</a> ";
                 
-                echo "<a href='#' onclick=\"javascript:jQuery('#ad-{$post->ID}-summary').slideToggle();\">Details</a></td>";
+                echo "<a onclick=\"javascript:jQuery('#ad-{$post->ID}-summary').slideToggle();\">Details</a></td>";
                 echo "</tr>";
                 echo "<tr><td colspan='2'>";
                 echo "<div id='ad-{$post->ID}-summary' style='display:none'>";
