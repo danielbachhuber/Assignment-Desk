@@ -29,8 +29,6 @@ define('ASSIGNMENT_DESK_FILE_PATH', __FILE__);
 define('ASSIGNMENT_DESK_URL', plugins_url(plugin_basename(dirname(__FILE__)) .'/'));
 define('ASSIGMENT_DESK_VERSION', '0.5');
 
-define('ASSIGNMENT_DESK_DIR_PATH', dirname(__FILE__));
-
 require_once('php/user.php');
 require_once('php/dashboard_widgets.php');
 require_once('php/post.php');
@@ -71,7 +69,7 @@ if (!class_exists('assignment_desk')) {
 		public $define_admin_permissions = 'manage_options';
 
 
-	      /**
+	    /**
          * @var assignment_desk_dashboard_widgets $dashboard_widgets provides the widget.
          */
         public $dashboard_widgets;
@@ -129,12 +127,12 @@ if (!class_exists('assignment_desk')) {
 			
 			if ( is_admin() ) {
 				add_action( 'admin_menu', array(&$this, 'add_admin_menu_items'));
-				add_action( 'admin_menu', array(&$this->custom_taxonomies, 'remove_assignment_status_post_meta_box') );
+				add_action( 'admin_menu', array(&$this->custom_taxonomies, 'remove_assignment_status_post_meta_box'));
 				$this->manage_posts->init();
 				$this->dashboard_widgets->init();
 				$this->post->init();
 
-			} else if (!is_admin()) {
+			} else if ( !is_admin() ) {
 				$this->public_views->init();
 			}
 			
@@ -158,7 +156,7 @@ if (!class_exists('assignment_desk')) {
         function activate_plugin() {
             
             // This is an upgrade or re-activation
-            if ( $this->general_options['ad_installed_once'] == 'on' ){
+            if ( $this->general_options['ad_installed_once'] == 'on' ) {
                 // Custom Taxonomies
                 $this->custom_taxonomies->init();
                 $this->custom_taxonomies->activate();
