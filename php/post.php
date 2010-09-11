@@ -445,6 +445,9 @@ class ad_post {
     			// Scan participants for those that accepted
     			$coauthors = array();
     			foreach ( $user_roles as $user_role ) {
+    			    if ( !$role_participants[$user_role->term_id] ) {
+    			        continue;
+    			    }
         		    foreach ( $role_participants[$user_role->term_id] as $user_id => $status ) {	
         			    if ( $status == 'accepted' ) {
         			        $user = get_userdata($user_id);
@@ -469,6 +472,9 @@ class ad_post {
             // Update the number of unique volunteers
     		$all_volunteer_ids = array();
     		foreach ( $user_roles as $user_role ) {
+    		    if ( ! $role_participants[$user_role->term_id] ) {
+    		        continue;
+    		    }
     		    foreach ( $role_participants[$user_role->term_id] as $user_id => $status ) {	
     			    if ( $status == 'volunteered' ) {
     			        $all_volunteer_ids[] = $user_id;
