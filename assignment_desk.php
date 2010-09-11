@@ -30,8 +30,6 @@ define('ASSIGNMENT_DESK_URL', plugins_url(plugin_basename(dirname(__FILE__)) .'/
 define('ASSIGMENT_DESK_VERSION', '0.5');
 
 define('ASSIGNMENT_DESK_DIR_PATH', dirname(__FILE__));
-define('ASSIGNMENT_DESK_TEMPLATES_PATH', ASSIGNMENT_DESK_DIR_PATH . '/php/templates');
-
 
 require_once('php/user.php');
 require_once('php/dashboard_widgets.php');
@@ -51,19 +49,10 @@ if (!class_exists('assignment_desk')) {
         
         /** @var string $localizationDomain Domain used for localization */
         private $localizationDomain = "assignment_desk";
-
-        /** @var string $pluginurlpath The path to this plugin */
-        public $this_plugin_path = ASSIGNMENT_DESK_DIR_PATH;
         
         /** @var the URL to this plugin */
         public $url = ASSIGNMENT_DESK_URL;
 
-        /** @var string templates_path The path to the templates directory. */
-        public $templates_path = ASSIGNMENT_DESK_TEMPLATES_PATH;
-
-        /** @var string $table_prefix The prefix for this plugin's DB tables. */
-        public $table_prefix = 'ad_';
-        
         public $option_prefix = 'ad_';
 
 		var $options_group = 'assignment_desk_';

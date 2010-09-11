@@ -1,6 +1,6 @@
 <?php
 
-require_once(ASSIGNMENT_DESK_DIR_PATH . "/php/utils.php");
+require_once("utils.php");
 
 /*
 * This class manages the widgets that appear in the Wordpress Administration Dashboard.

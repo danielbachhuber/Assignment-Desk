@@ -1,7 +1,7 @@
 <?php
 if(!class_exists('ad_public_controller')){
 
-require_once(ASSIGNMENT_DESK_DIR_PATH . '/php/utils.php');
+require_once('utils.php');
 	
 class ad_public_views {
 	
