@@ -79,8 +79,8 @@ class ad_dashboard_widgets {
         get_currentuserinfo();
         $assignment_statuses = $assignment_desk->custom_taxonomies->get_assignment_statuses();
         
-		if($_REQUEST['ad-dashboard-editor-messages']){
-            foreach($_REQUEST['ad-dashboard-assignment-messages'] as $messages){
+		if ( $_REQUEST['ad-dashboard-editor-messages'] ) {
+            foreach( $_REQUEST['ad-dashboard-assignment-messages'] as $messages ) {
                 echo "<div class='message info'>$message</div>";
             }
         }
@@ -107,7 +107,7 @@ class ad_dashboard_widgets {
             if ( $total_unpublished_assignments ) {
                 foreach ( $assignment_statuses as $assignment_status ) {
                     // if ( $counts[$assignment_status->term_id] ) {
-                        $url = admin_url() . "/edit.php?ad-assignment-status=$assignment_status->term_id";
+                        $url = admin_url() . "edit.php?ad-assignment-status=$assignment_status->term_id";
                         echo "<tr><td class='b'><a href='$url'>" . $counts[$assignment_status->term_id] . "</a></td>";
                         echo "<td class='b t'><a href='$url'>$assignment_status->name</a></td></tr>";
                     // }
@@ -127,7 +127,7 @@ class ad_dashboard_widgets {
         <table>
             <tbody>
 <?php
-                $this_month_url = admin_url() . '/edit.php?post_status=publish&monthnum=' . date('M');
+                $this_month_url = admin_url() . 'edit.php?post_status=publish&monthnum=' . date('M');
                 $q = new WP_Query( array('post_status' => 'publish', 'monthnum' => date('M')));
                 echo "<tr><td class='b'><a href='$this_month_url'>$q->found_posts</a></td>";
                 echo "<td class='b t'><a href='$this_month_url'>" . __('Published this month') . "</a></td></tr>";
@@ -145,15 +145,15 @@ class ad_dashboard_widgets {
                                                   WHERE meta_key = '_ad_participant_{$current_user->ID}'
                                                   ORDER BY post_id");
         
-        if ( ! $participant_posts ){
+        if ( !$participant_posts ){
             $participant_posts = array();
         }
         
         $roles = $assignment_desk->custom_taxonomies->get_user_roles();
         $max_pending = 5;
         
-        foreach($participant_posts as $post ){
-            foreach($roles as $user_role){
+        foreach( $participant_posts as $post ){
+            foreach( $roles as $user_role ) {
                 // Get all of the roles this user has for this post
                 $participant_record = get_post_meta($post->post_id, "_ad_participant_role_$user_role->term_id", true);
                 if($participant_record) {
@@ -221,24 +221,24 @@ class ad_dashboard_widgets {
        $role_id = (int)$_GET['role_id'];
           
        get_currentuserinfo();
-       if (!$current_user->ID || $user_ID != $post_id) {
+       if ( !$current_user->ID || $user_ID != $post_id ) {
            $_REQUEST['ad-dashboard-assignment-messages'][] = _('Unauthorized assignment response. This is fishy.');
        }
        $_REQUEST['ad-dashboard-assignment-messages'] = array();
        
-       if ($response && $post_id && $role_id){
+       if ( $response && $post_id && $role_id ) {
            $participant_record = get_post_meta($post_id, "_ad_participant_role_$role_id", true);
            // This will not evaluate to true unless the user is currently pending for this role on this post.
-           if($participant_record && $participant_record[$current_user->ID] == 'pending'){
+           if ( $participant_record && $participant_record[$current_user->ID] == 'pending' ) {
                $participant_record[$current_user->ID] = $response;
-               if($response == 'accepted'){
+               if ( $response == 'accepted' ) {
                    $_REQUEST['ad-dashboard-assignment-messages'][] = _('Thank you.');
                    // Add as a co-author
-                   if($assignment_desk->coauthors_plus_exists()){
+                   if ( $assignment_desk->coauthors_plus_exists() ) {
                        $coauthors_plus->add_coauthors($post_id, array($current_user->user_login), true);
                    }
                    $user_participant = get_post_meta($post_id, "_ad_participant_$current_user->ID", true);
-                   if(!$user_participant){
+                   if ( !$user_participant ) {
                        $user_participant = array();
                    }
                    $user_participant[] = $role_id;
