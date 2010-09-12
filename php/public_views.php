@@ -43,6 +43,9 @@ class ad_public_views {
 		}
 	}
 	
+	/**
+	 * Show a form to pitch a story.
+	 */
 	function show_pitch_form( $the_content ) {
 		global $assignment_desk, $current_user;
 
@@ -68,16 +71,28 @@ class ad_public_views {
 		$template_tag = '<!--assignment-desk-pitch-form-->';
 
 		if ( is_user_logged_in() ) {
-
+            
 			$pitch_form = '';
-			
+
 			if ( $_REQUEST['assignment_desk_messages']['pitch_form']['success'] ) {
 				$pitch_form .= '<div class="message success"><p>Pitch submitted successfully.</p></div>';
 			} else if ( count($_REQUEST['assignment_desk_messages']['pitch_form']['errors']) ) {
 				$pitch_form .= '<div class="message error"><p>Please correct the error(s) below.</p></div>';
 			}
+
+			if ( $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['secret'] ) {
+                $pitch_form .= '<p class="error">'
+							. $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['secret']
+							. '</p>';
+            }
 		
 			$pitch_form .= '<form method="post" id="assignment_desk_pitch_form">';
+			
+			// Set a random one-time token in the form to prevent duplicate submissions.
+			$_SESSION['ASSIGNMENT_PITCH_FORM_SECRET'] = md5(uniqid(rand(), true));
+            $pitch_form .= "<input type='hidden' name='assignment_pitch_form_secret' 
+                            id='assignment_pitch_form_secret' value='{$_SESSION['ASSIGNMENT_PITCH_FORM_SECRET']}' />";
+            
 			// Title
 			if ( $options['pitch_form_title_label'] ) {
 				$title_label = $options['pitch_form_title_label'];
@@ -243,7 +258,7 @@ class ad_public_views {
 		$the_content = str_replace($template_tag, $pitch_form, $the_content);
 		return $the_content;
 	}
-	
+
 	function save_pitch_form() {
 		global $assignment_desk, $current_user;
 		$message = array();
@@ -253,19 +268,27 @@ class ad_public_views {
 		if ($assignment_desk->edit_flow_exists()) {
 			global $edit_flow;
 		}
-		
+
 		// @todo Sanitize all of the fields
-		// @todo Validate all of the fields
-		
+		// @todo Validate all of the fields		
+		session_start();
+
 		if ($_POST['assignment_desk_pitch_submit']) {
-			
-			$form_messages = array();			
-			
+		    $form_messages = array();
+
+		    $form_secret = $_POST['assignment_pitch_form_secret'];
+
+            if ( !isset($_SESSION['ASSIGNMENT_PITCH_FORM_SECRET']) || 
+                 strcasecmp($form_secret, $_SESSION['ASSIGNMENT_PITCH_FORM_SECRET']) != 0 ) {
+                $form_messages['errors']['secret'] = __('Did you just refresh the browser?');
+                return $form_messages;
+            }
+
 			// Ensure that it was the user who submitted the form, not a bot
 			if ( !wp_verify_nonce($_POST['assignment_desk_pitch_nonce'], 'assignment_desk_pitch') ) {
 				return $form_messages['error']['nonce'];
 			}
-			
+
 			$sanitized_title = $_POST['assignment_desk_title'];
 			if ( !$sanitized_title ) {
 				$form_messages['errors']['title'] = 'Please add a title to this pitch.';
