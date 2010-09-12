@@ -267,8 +267,6 @@ class ad_public_views {
 			// Set a random one-time token in the form to prevent duplicate submissions.
 			$_SESSION['assignment_desk_pitch_form_secret'] = md5(uniqid(rand(), true));
 			$pitch_form .= "<input type='hidden' name='assignment_desk_pitch_form_secret' id='assignment_desk_pitch_form_secret' value='{$_SESSION['assignment_desk_pitch_form_secret']}' />";
-			
-			var_dump($_SESSION['assignment_desk_pitch_form_secret']);
 						
 			$pitch_form .= '<input type="hidden" name="assignment_desk_pitch_nonce" value="' 
 						. wp_create_nonce('assignment_desk_pitch') . '" />';
