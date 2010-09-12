@@ -23,15 +23,14 @@ More details can be found at (http://www.openassignment.org/)
 
 == Installation ==
 
-This section describes how to install the plugin and get it working.
+This section describes how to install and configure the Assignment Desk.
 
-1. Download the plugin 
-2. Upload to wp-contents/plugins directory
-3. Activate and enjoy!
-4. Optionally install Coauthors-plus. Tested with 2.1.1.
-5. Optionally install Edit-Flow. Tested with 0.5.2.
-
-For full functionality, please also install and configure Edit Flow and Co-Authors Plus.
+1. Download the plugin from WordPress.org
+2. Upload it to the wp-contents/plugins directory of your website. 
+3. Activate it. The first time you activate the plugin, the Assignment Desk will install a default set of contributor types, contributor roles, and assignment statuses.
+5. Optionally install Edit-Flow. Assignment Desk has been tested with 0.5.2. Edit-Flow gives us several editorial tools with enable a fully integrated newsroom workflow. Installation of this plugin is highly recommended.
+4. Optionally install Co-Authors Plus. Assignment Desk has been tested with 2.1.1. Co-Authors Plus allows us to assign multiple users to a post as authors. Multiple authors can then edit the post. Installation of this plugin is highly recommended.
+6. Optionally install Adminimize. Assignment Desk has been tested with 1.7.7. Adminimize allows you the ability to hide certain boxes on the post edit screen based on the users user type. The Assignment Desk is not dependent on this plugin.
 
 == Frequently Asked Questions ==
 
