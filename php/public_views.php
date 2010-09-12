@@ -158,14 +158,14 @@ class ad_public_views {
 			
 			// Edit Flow Due Date
 			if ( $options['pitch_form_duedate_enabled'] && $assignment_desk->edit_flow_exists() ) {
-				if ( $options['pitch_form_dudedate_label'] ) {
-					$duedate_label = $options['pitch_form_dudedate_label'];
+				if ( $options['pitch_form_duedate_label'] ) {
+					$duedate_label = $options['pitch_form_duedate_label'];
 				} else {
 					$duedate_label = 'Due Date';
 				}	
 				$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_duedate">' . $duedate_label . '</label>';
 				$pitch_form .= '<input type="text" size="12" name="assignment_desk_duedate" id="assignment_desk_duedate">';
-				if ( $options['pitch_form_dudedate_description'] ) {
+				if ( $options['pitch_form_duedate_description'] ) {
 				    $pitch_form .= '<p class="description">' . $options['pitch_form_dudedate_description'] . '</p>';
 				}
 				if ( $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['duedate'] ) {
@@ -178,8 +178,8 @@ class ad_public_views {
 			
 			// Categories
 			if ( $options['pitch_form_categories_enabled'] ) {
-				if ( $options['pitch_form_category_label'] ) {
-					$category_label = $options['pitch_form_category_label'];
+				if ( $options['pitch_form_categories_label'] ) {
+					$category_label = $options['pitch_form_categories_label'];
 				} else {
 					$category_label = 'Category';
 				}	
@@ -301,7 +301,7 @@ class ad_public_views {
 		// @todo Sanitize all of the fields
 		// @todo Validate all of the fields
 
-		if ( $_POST['assignment_desk_pitch_submit'] ) {
+		if ( $_POST && isset($_POST['assignment_desk_pitch_submit']) ) {
 		    $form_messages = array();
 
 			// Check to see whether this is the second time the form has been submitted
