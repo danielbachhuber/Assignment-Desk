@@ -766,6 +766,7 @@ class ad_public_views {
 		$parent_post = $post;		
 		
 		$html = '<div class="assignment-desk assignment-desk-all-pitches">';
+		$action_links = '';
 		
 		if ( $_POST['sort_by'] == 'ranking' || $_POST['sort_by'] == 'post_date' || $_POST['sort_by'] == 'due_date' ) {
 			$sort_by = $_POST['sort_by'];
@@ -934,7 +935,16 @@ class ad_public_views {
 				}
 				if ( $options['public_facing_volunteering_enabled'] ) {
 				    $html .= $this->show_all_volunteers( $post_id );
+					$action_links .= '<a href="' . get_permalink( $post_id ) . '#assignment_desk_volunteer_form">Volunteer</a> | ';
 			    }
+				if ( $options['public_facing_commenting_enabled'] ) {
+					$action_links .= '<a href="' . get_permalink( $post_id ) . '#respond">Comment</a> |';
+				}
+				if ( $options['public_facing_volunteering_enabled'] || $options['public_facing_commenting_enabled'] ) {
+					$html .= '<div class="links">';
+					$html .= rtrim( $action_links, ' |' );
+					$html .= '</div>';					
+				}
 				$html .= "</div>";
 			
 			} // END foreach
