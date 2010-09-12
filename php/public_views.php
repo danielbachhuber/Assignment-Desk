@@ -266,7 +266,9 @@ class ad_public_views {
 						
 			// Set a random one-time token in the form to prevent duplicate submissions.
 			$_SESSION['assignment_desk_pitch_form_secret'] = md5(uniqid(rand(), true));
-			$pitch_form .= "<input type='hidden' name='assignment_pitch_form_secret' id='assignment_pitch_form_secret' value='{$_SESSION['assignment_desk_pitch_form_secret']}' />";				
+			$pitch_form .= "<input type='hidden' name='assignment_desk_pitch_form_secret' id='assignment_desk_pitch_form_secret' value='{$_SESSION['assignment_desk_pitch_form_secret']}' />";
+			
+			var_dump($_SESSION['assignment_desk_pitch_form_secret']);
 						
 			$pitch_form .= '<input type="hidden" name="assignment_desk_pitch_nonce" value="' 
 						. wp_create_nonce('assignment_desk_pitch') . '" />';
@@ -299,13 +301,13 @@ class ad_public_views {
 
 		// @todo Sanitize all of the fields
 		// @todo Validate all of the fields
+		session_start();		
 
 		if ( $_POST && isset($_POST['assignment_desk_pitch_submit']) ) {
 		    $form_messages = array();
 
 			// Check to see whether this is the second time the form has been submitted
-		    $form_secret = $_POST['assignment_pitch_form_secret'];			
-			session_start();
+		    $form_secret = $_POST['assignment_desk_pitch_form_secret'];
             if ( !isset( $_SESSION['assignment_desk_pitch_form_secret'] ) || 
                  strcasecmp($form_secret, $_SESSION['assignment_desk_pitch_form_secret']) != 0 ) {
                 $form_messages['errors']['secret'] = __('Did you just refresh the browser?');
