@@ -564,6 +564,7 @@ class ad_public_views {
 	 */
 	function volunteer_form( $post_id = null ) {
 	    global $assignment_desk, $current_user;
+		$pitch_form_options = $assignment_desk->pitch_form_options;
 	
 		if ( !$post_id ) {
 			global $post;
@@ -589,9 +590,16 @@ class ad_public_views {
 				return false;
 			}
 	
-		    $volunteer_form = '';
+		    $volunteer_form = '<a name="assignment_desk_volunteer_form"></a>';
 		    $volunteer_form .= '<form method="post" class="assignment_desk_volunteer_form">';
-			$volunteer_form .= '<fieldset class="standard"><ul class="assignment_desk_volunteer">';
+			$volunteer_form .= '<fieldset class="standard">';
+			if ( $pitch_form_options['pitch_form_volunteer_label'] ) {
+				$volunteer_label = $pitch_form_options['pitch_form_volunteer_label'];
+			} else {
+				$volunteer_label = 'Volunteer';
+			}
+			$volunteer_form .= '<label for="assignment_desk_volunteer">' . $volunteer_label . '</label>';
+			$volunteer_form .= '<ul class="assignment_desk_volunteer">';
 			foreach ( $user_roles as $user_role ) {
 				$volunteer_form .= '<li><input type="checkbox" id="assignment_desk_post_' . $post_id
 								. '_volunteer_' . $user_role->term_id
@@ -604,7 +612,13 @@ class ad_public_views {
 								. '_volunteer_' . $user_role->term_id .'">' . $user_role->name
 								. '</label></li>';
 			}
-			$volunteer_form .= '</ul></fieldset>';
+			$volunteer_form .= '</ul>';
+			if ( $pitch_form_options['pitch_form_volunteer_description'] ) {
+			$pitch_form .= '<p class="description">'
+						. $pitch_form_options['pitch_form_volunteer_description']
+						. '</p>';
+			}
+			$volunteer_form .= '</fieldset>';
 		    $volunteer_form .= "<input type='hidden' name='assignment_desk_volunteer_user_id' value='$current_user->ID' />";	
 		    $volunteer_form .= "<input type='hidden' name='assignment_desk_volunteer_post_id' value='$post_id' />";	
 			$volunteer_form .= '<input type="hidden" name="assignment_desk_volunteering_nonce" value="' 
