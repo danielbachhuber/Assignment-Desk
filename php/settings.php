@@ -271,8 +271,8 @@ Blog Editor");
 			. $options['pitch_form_categories_description'] . '" size="35" />';	
 		echo '</span></li>';
 		// Tags
-		echo '<li><span class="field"<input id="pitch_form_tags_enabled" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_tags_enabled]" type="checkbox"';
-		if ($options['pitch_form_tags_enabled']) {
+		echo '<li><span class="field"><input id="pitch_form_tags_enabled" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_tags_enabled]" type="checkbox"';
+		if ( $options['pitch_form_tags_enabled'] ) {
 			echo ' checked="checked"';
 		}
 		echo ' />&nbsp;<label for="pitch_form_tags_enabled">Tags</label></span>';
