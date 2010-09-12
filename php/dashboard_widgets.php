@@ -32,11 +32,19 @@ class ad_dashboard_widgets {
 		return $count;
 	}
 	
+	/**
+	 * Count the unpublished posts assigned to the current user.
+	 * Users coauthors if enabled.
+	 * @param term $status The term from the assignment_status taxonomy.
+	 * @return int the number of unpublished posts of that assignment_status assigned to the current user
+	 */
 	function count_user_posts_by_assignment_status($status){
 	    global $current_user, $wpdb, $assignment_desk;
 	    get_currentuserinfo();
-	    	 
-	    $count = 0;  
+	 
+	    $count = 0;
+	    // Query for all the unpublished posts where $current_user is a coauthor.
+	    // Then tally up the count for the status.
 	    if ( $assignment_desk->coauthors_plus_exists() ){
             $posts = $wpdb->get_results("SELECT * FROM $wpdb->posts 
 	                                LEFT JOIN $wpdb->term_relationships ON($wpdb->posts.ID = $wpdb->term_relationships.object_id)
@@ -57,6 +65,8 @@ class ad_dashboard_widgets {
             }
 	    }
 	    else {
+	        // Slightly easier without coauthors.
+	        // Just query for the count.
 	        $count = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts
                                     LEFT JOIN $wpdb->term_relationships ON($wpdb->posts.ID = $wpdb->term_relationships.object_id)
                                     LEFT JOIN $wpdb->term_taxonomy 
@@ -73,15 +83,18 @@ class ad_dashboard_widgets {
 	    
 	}
    
+    /**
+    * Display the Assignment Desk dashboard widget.
+    */
     function widget() {
         global $assignment_desk, $current_user, $wpdb;
 
         get_currentuserinfo();
         $assignment_statuses = $assignment_desk->custom_taxonomies->get_assignment_statuses();
         
-		if ( $_REQUEST['ad-dashboard-editor-messages'] ) {
+		if ( $_REQUEST['ad-dashboard-assignment-messages'] ) {
             foreach( $_REQUEST['ad-dashboard-assignment-messages'] as $messages ) {
-                echo "<div class='message info'>$message</div>";
+                echo "<p class='message info'>$message</p>";
             }
         }
         ?>
@@ -93,6 +106,10 @@ class ad_dashboard_widgets {
             $counts = array();
             $total_unpublished_assignments = 0;
             
+            /* If the $current_user is editor or higher display the total count for each assignment_status across the whole blog.
+             * If they don't have editor permissions show the number of posts assigned to the $current_user.
+             */
+
             foreach ( $assignment_statuses as $assignment_status ) {
                 if ( current_user_can($assignment_desk->define_editor_permissions) ) {
                     // Count all posts with a certain status
@@ -213,6 +230,9 @@ class ad_dashboard_widgets {
         }
    }
    
+   /**
+    * Confirm or decline a story assignment.
+    */
    function respond_to_story_invite(){
        global $current_user, $assignment_desk, $coauthors_plus, $user_ID;
        
@@ -221,22 +241,28 @@ class ad_dashboard_widgets {
        $role_id = (int)$_GET['role_id'];
           
        get_currentuserinfo();
-       if ( !$current_user->ID || $user_ID != $post_id ) {
+       if ( !$current_user->ID || !$user_ID || !$post_id || !$role_id ) {
            $_REQUEST['ad-dashboard-assignment-messages'][] = _('Unauthorized assignment response. This is fishy.');
        }
        $_REQUEST['ad-dashboard-assignment-messages'] = array();
        
        if ( $response && $post_id && $role_id ) {
            $participant_record = get_post_meta($post_id, "_ad_participant_role_$role_id", true);
-           // This will not evaluate to true unless the user is currently pending for this role on this post.
+
+           // Are we waiting for a response from this user for this post/role?
            if ( $participant_record && $participant_record[$current_user->ID] == 'pending' ) {
                $participant_record[$current_user->ID] = $response;
+
                if ( $response == 'accepted' ) {
-                   $_REQUEST['ad-dashboard-assignment-messages'][] = _('Thank you.');
-                   // Add as a co-author
+                   // Add as a coauthor
                    if ( $assignment_desk->coauthors_plus_exists() ) {
                        $coauthors_plus->add_coauthors($post_id, array($current_user->user_login), true);
                    }
+                   // Add as author
+                   else {
+                       wp_update_post(array( 'ID' => $post_id, $author => $current_user->user_login ));
+                   }
+                   $_REQUEST['ad-dashboard-assignment-messages'][] = _('Thank you.');
                    $user_participant = get_post_meta($post_id, "_ad_participant_$current_user->ID", true);
                    if ( !$user_participant ) {
                        $user_participant = array();
@@ -245,7 +271,7 @@ class ad_dashboard_widgets {
                    update_post_meta($post_id, "_ad_participant_$current_user->ID", $user_participant);
                }
                else if($response == 'declined'){
-                   $_REQUEST['ad-dashboard-assignment-messages'][] = _('Sorry!');
+                   $_REQUEST['ad-dashboard-assignment-messages'][] = _("Sorry.");
                }
            }
            update_post_meta($post_id, "_ad_participant_role_$role_id", $participant_record);
