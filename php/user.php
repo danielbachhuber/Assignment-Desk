@@ -11,7 +11,7 @@ if ( !class_exists( 'ad_user' ) ) {
       
     }
     
-    function init_user() {
+    function init() {
       global $assignment_desk;
       
       add_action('edit_user_profile', array(&$this, 'profile_options'));
@@ -19,7 +19,7 @@ if ( !class_exists( 'ad_user' ) ) {
       
       add_action('profile_update', array(&$this, 'save_profile_options'));
     
-      add_filter('manage_users_columns', array(&$this, 'add_manage_user_columns'));
+      add_filter('manage_users_columns', array(&$this, 'manage_user_columns'));
       add_filter('manage_users_custom_column', array(&$this, 'handle_ad_user_total_words_column'), 10, 3);
       add_filter('manage_users_custom_column', array(&$this, 'handle_ad_user_average_words_column'), 10, 3);
       add_filter('manage_users_custom_column', array(&$this, 'handle_ad_user_pitches_count_column'), 10, 3);
@@ -27,11 +27,14 @@ if ( !class_exists( 'ad_user' ) ) {
       if($assignment_desk->public_facing_options['public_facing_volunteering_enabled'] == 'on'){
         add_filter('manage_users_custom_column', array(&$this, 'handle_ad_user_volunteer_count_column'), 10, 3);
       }
-      //@todo  this is last because of an unresolves situation where only the last column prints.
       add_filter('manage_users_custom_column', array(&$this, 'handle_ad_user_type_column'), 10, 3);
     }
     
-    function add_manage_user_columns($user_columns) {
+    /**
+     * Add custom columns to the manage_users view.
+     * @return array The columns
+     */
+    function manage_user_columns($user_columns) {
       global $assignment_desk;
       $custom_fields_to_add = array(
                                   _('_ad_user_type') => __('User Type'),
@@ -47,14 +50,17 @@ if ( !class_exists( 'ad_user' ) ) {
           $user_columns[$field] = $title;
       } 
       return $user_columns;
-      
     }
     
+    /**
+     * Filter for displaying the user type custom column
+     * @return string The content of the cell
+     */
     function handle_ad_user_type_column( $default, $column_name, $user_id ) {
       global $assignment_desk;
       
       if ( $column_name == __( '_ad_user_type' ) ) {
-        $user_type_term_name = 'None assigned';
+        $user_type_term_name = __('None assigned');
         $user_type = (int)get_usermeta($user_id, $assignment_desk->option_prefix.'user_type', true);        
         $term = get_term($user_type, $assignment_desk->custom_taxonomies->user_type_label);
         if($term->name){
@@ -65,6 +71,13 @@ if ( !class_exists( 'ad_user' ) ) {
       return $default;
     }
     
+    /**
+     * Filter for displaying the average words custom column
+     * @param string $default The content of the cell
+     * @param string $column_name The name of the column
+     * @param int $user_id The ID of the user
+     * @return string the content of the cell
+     */
     function handle_ad_user_average_words_column( $default, $column_name, $user_id ) {
       if ( $column_name == __( '_ad_user_average_words' ) ) {
         return $this->average_words($user_id); 
@@ -74,6 +87,7 @@ if ( !class_exists( 'ad_user' ) ) {
     
     /** 
     * Returns the average words per post for this user
+    * @return int The average words per post for the user
     */
     function average_words( $user_id ) {
         $num_posts = get_usernumposts($user_id);
@@ -83,6 +97,13 @@ if ( !class_exists( 'ad_user' ) ) {
         return 0;
     }
     
+    /**
+     * Filter for displaying the total words custom column
+     * @param string $default The content of the cell
+     * @param string $column_name The name of the column
+     * @param int $user_id The ID of the user
+     * @return string The content of the cell
+     */
     function handle_ad_user_total_words_column( $default, $column_name, $user_id ) {
       if ( $column_name == __( '_ad_user_total_words' ) ) {
         return $this->count_total_words($user_id);
@@ -93,6 +114,8 @@ if ( !class_exists( 'ad_user' ) ) {
     /**
     * Returns the sum of the number of words in any published post where 
     * user_id is a coauthor and an accepted participant in the writer role.
+    * @param int $user_id The ID of the user
+    * @return int The total words for all of the user's posts.
     */
     function count_total_words($user_id){
         global $assignment_desk, $wpdb;
@@ -139,6 +162,13 @@ if ( !class_exists( 'ad_user' ) ) {
         return $total_words;
     }
     
+    /**
+     * Filter for displaying the volunteer count custom column
+     * @param string $default The content of the cell
+     * @param string $column_name The name of the column
+     * @param int $user_id The ID of the user
+     * @return string The content of the cell
+     */
     function handle_ad_user_volunteer_count_column( $default, $column_name, $user_id ) {
         global $assignment_desk, $wpdb;
         if ( $column_name == __( '_ad_user_volunteer_count' ) ) {
@@ -152,6 +182,13 @@ if ( !class_exists( 'ad_user' ) ) {
         return $default;
     }
     
+    /**
+     * Filter for displaying the pitch count custom column
+     * @param string $default The content of the cell
+     * @param string $column_name The name of the column
+     * @param int $user_id The ID of the user
+     * @return string The content of the cell
+     */
     function handle_ad_user_pitches_count_column( $default, $column_name, $user_id ) {
         global $assignment_desk, $wpdb;
         if ( $column_name == __( '_ad_user_pitch_count' ) ) {
@@ -164,6 +201,9 @@ if ( !class_exists( 'ad_user' ) ) {
         return $default;
     }
     
+    /**
+     * Add custom fields to the user profile form.
+     */
     function profile_options() {
       global $profileuser, $assignment_desk;
       
@@ -208,7 +248,11 @@ if ( !class_exists( 'ad_user' ) ) {
     </table>
 <?php
     }
-    
+
+    /**
+     * Update the custom data in the user profile form.
+     * @param int $user_id The ID of the user
+     */
     function save_profile_options($user_id) {
       global $assignment_desk;
       
