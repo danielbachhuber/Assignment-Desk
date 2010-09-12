@@ -1,7 +1,6 @@
 === Plugin Name ===
 Contributors: efroese, danielbachhuber
-Donate link: 
-Tags: news, editorial, journalism, crowdsourcing
+Tags: editorial workflow, journalism, crowdsourcing, assignment management
 Requires at least: 2.9.2
 Tested up to: 3.0.1
 Stable tag: 0.5
@@ -10,13 +9,17 @@ Empower the community to participate in the journalistic process and guide them 
 
 == Description ==
 
-The goal of the Assignment Desk is to empower the community to participate in the journalistic process and guide them along the way.
+The Assignment Desk is an editorial tool for news organizations using WordPress as their content management system. The goal of the plugin is to facilitate community engagement with the news production process.
 
-Community members can submit story pitches, vote on them, and volunteer for them. Editors can moderate pitches and assign them to staff or interested community journalists. 
+The plugin allows community members to submit tips and story ideas to the news organization, and volunteer to help with the story in various ways.
 
-NOTICE: THIS PLUGIN IS PRE-PRE-RELEASE AND SHOULD NOT BE USED IN PRODUCTION. WE WILL BREAK YOUR SETTINGS.
+Once story ideas have been approved, the Assignment Desk allows users to participate in the reporting for a particular story. An editor may assign specific roles (e.g. photographer, writer) to the user as well as limit those eligible to contribute by user type (e.g. student contributor, professional journalist).
 
-Much longer description.
+It also allows community members to demonstrate their support in story ideas that have either have not yet been assigned or are in production. They can give feedback on stories in progress.
+
+Ultimately, the Assignment Desk hopes bring any community member, let it be business owner, high school students, freelance journalist or otherwise, into the story production process in a structured way.
+
+More details can be found at (http://www.openassignment.org/)
 
 == Installation ==
 
