@@ -5,19 +5,19 @@ Requires at least: 2.9.2
 Tested up to: 3.0.1
 Stable tag: 0.5
 
-Empower the community to participate in the journalistic process and guide them along the way.
+Empower the users to participate in the journalism being done at your site and guide them along the way.
 
 == Description ==
 
-The Assignment Desk is an editorial tool for news organizations using WordPress as their content management system. The goal of the plugin is to facilitate community engagement with the news production process.
+Assignment Desk is an editorial tool for news organizations using WordPress as their content management system. The goal of the plug-in is to make community engagement with the news production process easier and more efficient.
 
-The plugin allows community members to submit tips and story ideas to the news organization, and volunteer to help with the story in various ways.
+The plug-in allows community members to submit tips or story ideas to the news organization, and volunteer to help with the story in various ways, while preserving editorial oversight.
 
-Once story ideas have been approved, the Assignment Desk allows users to participate in the reporting for a particular story. An editor may assign specific roles (e.g. photographer, writer) to the user as well as limit those eligible to contribute by user type (e.g. student contributor, professional journalist).
+Once story ideas have been approved, Assignment Desk allows users to participate in the reporting of a particular story. An editor may assign specific roles (e.g. photographer, writer) to the user as well as limit those eligible to contribute by user type (e.g. first time contributor, regular contributor, professional journalist).
 
-It also allows community members to demonstrate their support in story ideas that have either have not yet been assigned or are in production. They can give feedback on stories in progress.
+Community members can vote their support for story ideas that have either have not yet been assigned or are in production. They can also give feedback on stories in progress.
 
-Ultimately, the Assignment Desk hopes bring any community member, let it be business owner, high school students, freelance journalist or otherwise, into the story production process in a structured way.
+Assignment Desk hopes bring any community member into the story production process in a structured way. But it could also be used to manage a large staff of professional or semi-pro contributors and distribute assignments to them, while permitting them to suggest ideas, as well.
 
 More details can be found at (http://www.openassignment.org/)
 
