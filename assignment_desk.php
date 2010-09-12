@@ -98,7 +98,7 @@ if (!class_exists('assignment_desk')) {
 			$_REQUEST['assignment_desk_messages'] = array();
 			
 			/**
-			 * Provide an easy way to access Assignment Desk settings w/o querying database every time
+			 * Provide an easy way to access Assignment Desk settings w/o using a nasty method every time
 			 */
 			$this->general_options = get_option($this->get_plugin_option_fullname('general'));
 			$this->pitch_form_options = get_option($this->get_plugin_option_fullname('pitch_form'));
@@ -114,6 +114,7 @@ if (!class_exists('assignment_desk')) {
 			$this->custom_taxonomies->init();
             $this->user->init();
 			
+			// Only load admin-specific functionality in the admin
 			if ( is_admin() ) {
 				add_action( 'admin_menu', array(&$this, 'add_admin_menu_items'));
 				add_action( 'admin_menu', array(&$this->custom_taxonomies, 'remove_assignment_status_post_meta_box'));
@@ -129,6 +130,7 @@ if (!class_exists('assignment_desk')) {
 
 		/**
 		 * Initialize the plugin for the admin 
+		 * @todo This is unnecessary and could be moved to the init method
 		 */
 		function admin_init() {
 			
@@ -160,8 +162,6 @@ if (!class_exists('assignment_desk')) {
                 $this->custom_taxonomies->activate_once();
                 $this->settings->setup_defaults();
                 
-                // Another Component
-                
                 // Update the settings so we don't go through the install-time routines on upgrade/re-activation
                 $this->general_options = get_option($this->get_plugin_option_fullname('general'));
                 $this->general_options['ad_installed_once'] = 'on';
@@ -170,14 +170,14 @@ if (!class_exists('assignment_desk')) {
         }
 
 		/**
-		 * Utility function
+		 * Get the full name of a plugin options group
 		 */
 		function get_plugin_option_fullname( $name ) {
 			return $this->options_group . $name;
 		}
 		
 		/**
-		 * Check to see if Edit Flow is activated
+		 * Helper method checks to see if Edit Flow is activated
 		 */
 		function edit_flow_exists() {
 			if ( class_exists('edit_flow') ) {
@@ -188,7 +188,7 @@ if (!class_exists('assignment_desk')) {
 		}
 		
 		/**
-		 * Check to see if Co-Authors Plus is activated
+		 * Helper method checks to see if Co-Authors Plus is activated
 		 */
 		function coauthors_plus_exists() {
 			if ( class_exists('coauthors_plus') ) {
@@ -272,8 +272,8 @@ global $assignment_desk;
 $assignment_desk = new assignment_desk();
 
 // Core hooks to initialize the plugin
-add_action('init', array(&$assignment_desk,'init'));
-add_action('admin_init', array(&$assignment_desk,'admin_init'));
+add_action( 'init', array(&$assignment_desk,'init') );
+add_action( 'admin_init', array(&$assignment_desk,'admin_init') );
 
 // Hook to perform action when plugin activated
-register_activation_hook(ASSIGNMENT_DESK_FILE_PATH, array(&$assignment_desk, 'activate_plugin'));
+register_activation_hook( ASSIGNMENT_DESK_FILE_PATH, array(&$assignment_desk, 'activate_plugin') );
