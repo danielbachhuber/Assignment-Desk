@@ -431,10 +431,11 @@ class ad_post {
     		        
     		        // Add the role to the corresponding user record for this post
     		        $user_participant = get_post_meta($post_id, "_ad_participant_$user_id", true);
-    		        if ( $user_participant and is_array($user_participant) ){
-    		            $user_participant[] = $role_id;
-                        update_post_meta($post_id, "_ad_participant_$user_id", $user_participant);
+    		        if ( !$user_participant or !is_array($user_participant) ){
+    		            $user_participant = array();
     		        }
+		            $user_participant[] = $role_id;
+		            update_post_meta($post_id, "_ad_participant_$user_id", $user_participant);
 		        }
 		    }
     		
@@ -457,7 +458,7 @@ class ad_post {
     		    }
     		    $coauthors = array_unique($coauthors);
     		    
-    		    // If no-coauthors assign it to the current user
+    		    // If no coauthors assign it to the current user
     		    if ( empty($coauthors) ) { 
     		        $coauthors[] = $current_user->user_login;
     		    }
