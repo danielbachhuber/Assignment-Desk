@@ -38,7 +38,7 @@ class ad_dashboard_widgets {
 	 * @param term $status The term from the assignment_status taxonomy.
 	 * @return int the number of unpublished posts of that assignment_status assigned to the current user
 	 */
-	function count_user_posts_by_assignment_status($status){
+	function count_user_posts_by_assignment_status( $status ) {
 	    global $current_user, $wpdb, $assignment_desk;
 	    get_currentuserinfo();
 	 
