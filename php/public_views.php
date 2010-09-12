@@ -9,12 +9,18 @@ class ad_public_views {
 
 	}
 	
+	/**
+	 * We need to make sure all of this is established every time the plugin is loaded 
+	 */
 	function init() {
 		global $assignment_desk;
 		$pitch_form_options = $assignment_desk->pitch_form_options;		
 		$public_facing_options = $assignment_desk->public_facing_options;
 		
-		wp_enqueue_script('jquery-datepicker-js', ASSIGNMENT_DESK_URL .'js/jquery.datepicker.js', array('jquery-ui-core'));
+		// The datepicker UI is used on the pitch submission form. Only load if enabled
+		if ( $pitch_form_options['pitch_form_enabled'] ) {
+			wp_enqueue_script('jquery-datepicker-js', ASSIGNMENT_DESK_URL .'js/jquery.datepicker.js', array('jquery-ui-core'));
+		}
 		wp_enqueue_script('ad-public-views', ASSIGNMENT_DESK_URL . 'js/public_views.js', array('jquery', 'jquery-datepicker-js'));
 		
 		wp_enqueue_style('ad-public', ASSIGNMENT_DESK_URL . 'css/public.css');
@@ -33,6 +39,12 @@ class ad_public_views {
 		if ( $public_facing_options['public_facing_voting_enabled'] ) {
 			add_filter( 'the_content', array(&$this, 'prepend_voting_to_post') );		
 		}
+		// Only add commenting if its enabled
+		add_filter( 'comments_open', array(&$this, 'enable_disable_commenting') );
+		if ( $public_facing_options['public_facing_commenting_enabled'] ) {
+			add_action( 'comment_on_draft', array(&$this, 'handle_comment_post'), 1 );
+		}
+		
 		// Only add volunteering if its enabled
 		if ( $public_facing_options['public_facing_volunteering_enabled'] ) {
 			add_filter( 'the_content', array(&$this, 'append_volunteering_to_post') );		
@@ -44,14 +56,22 @@ class ad_public_views {
 	}
 	
 	/**
-	 * Show a form to pitch a story.
+	 * Initialize first use of the plugin with default settings
+	 * @todo Finish this method
+	 */
+	function activate_once() {
+		
+	}
+	
+	/**
+	 * Show the pitch form on post or pages with template tag if enabled
 	 */
 	function show_pitch_form( $the_content ) {
 		global $assignment_desk, $current_user;
 
 		$options = $assignment_desk->pitch_form_options;		
 		
-		if ($assignment_desk->edit_flow_exists()) {
+		if ( $assignment_desk->edit_flow_exists() ) {
 			global $edit_flow;
 		}
 		wp_get_current_user();
@@ -70,9 +90,13 @@ class ad_public_views {
 		
 		$template_tag = '<!--assignment-desk-pitch-form-->';
 
+		// Only show the pitch form if the User is logged in
 		if ( is_user_logged_in() ) {
             
 			$pitch_form = '';
+
+			
+			// Messages to the User appear at the top of the form
 
 			if ( $_REQUEST['assignment_desk_messages']['pitch_form']['success'] ) {
 				$pitch_form .= '<div class="message success"><p>Pitch submitted successfully.</p></div>';
@@ -86,12 +110,12 @@ class ad_public_views {
 							. '</p>';
             }
 		
+			/**
+			 * For all of the fields, the admin has the ability to define a label and a description
+			 * in the settings. If those aren't defined, then the stock label will show with no description
+			 */
+		
 			$pitch_form .= '<form method="post" id="assignment_desk_pitch_form">';
-			
-			// Set a random one-time token in the form to prevent duplicate submissions.
-			$_SESSION['ASSIGNMENT_PITCH_FORM_SECRET'] = md5(uniqid(rand(), true));
-            $pitch_form .= "<input type='hidden' name='assignment_pitch_form_secret' 
-                            id='assignment_pitch_form_secret' value='{$_SESSION['ASSIGNMENT_PITCH_FORM_SECRET']}' />";
             
 			// Title
 			if ( $options['pitch_form_title_label'] ) {
@@ -113,8 +137,8 @@ class ad_public_views {
 			}
 			$pitch_form	.= '</fieldset>';
 			
-			// Description
-			if ( $options['pitch_form_description_enabled'] ) {
+			// Edit Flow Description
+			if ( $options['pitch_form_description_enabled'] && $assignment_desk->edit_flow_exists() ) {
 				if ( $options['pitch_form_description_label'] ) {
 					$description_label = $options['pitch_form_description_label'];
 				} else {
@@ -132,8 +156,8 @@ class ad_public_views {
 				$pitch_form .= '</fieldset>';
 			}
 			
-			// Due Date
-			if ( $options['pitch_form_duedate_enabled'] ) {
+			// Edit Flow Due Date
+			if ( $options['pitch_form_duedate_enabled'] && $assignment_desk->edit_flow_exists() ) {
 				if ( $options['pitch_form_dudedate_label'] ) {
 					$duedate_label = $options['pitch_form_dudedate_label'];
 				} else {
@@ -193,8 +217,8 @@ class ad_public_views {
 				$pitch_form .= '</fieldset>';
 			}
 			
-			// Location
-			if ( $options['pitch_form_location_enabled'] ) {
+			// Edit Flow Location
+			if ( $options['pitch_form_location_enabled'] && $assignment_desk->edit_flow_exists() ) {
 				if ( $options['pitch_form_location_label'] ) {
 					$location_label = $options['pitch_form_location_label'];
 				} else {
@@ -237,11 +261,13 @@ class ad_public_views {
 				$pitch_form .= '</fieldset>';
 			}
 			
-			// @todo Confirm your user information
-			
 			// Author information and submit
 			$pitch_form .= '<fieldset class="submit">'
 						. '<input type="hidden" id="assignment_desk_author" name="assignment_desk_author" value="' . $current_user->ID . '" />';
+						
+			// Set a random one-time token in the form to prevent duplicate submissions.
+			$_SESSION['ASSIGNMENT_PITCH_FORM_SECRET'] = md5(uniqid(rand(), true));
+			$pitch_form .= "<input type='hidden' name='assignment_pitch_form_secret' id='assignment_pitch_form_secret' value='{$_SESSION['ASSIGNMENT_PITCH_FORM_SECRET']}' />";				
 						
 			$pitch_form .= '<input type="hidden" name="assignment_desk_pitch_nonce" value="' 
 						. wp_create_nonce('assignment_desk_pitch') . '" />';
@@ -258,7 +284,10 @@ class ad_public_views {
 		$the_content = str_replace($template_tag, $pitch_form, $the_content);
 		return $the_content;
 	}
-
+	
+	/**
+	 * Saves data after a User submits a pitch form
+	 */
 	function save_pitch_form() {
 		global $assignment_desk, $current_user;
 		$message = array();
@@ -270,14 +299,14 @@ class ad_public_views {
 		}
 
 		// @todo Sanitize all of the fields
-		// @todo Validate all of the fields		
-		session_start();
+		// @todo Validate all of the fields
 
-		if ($_POST['assignment_desk_pitch_submit']) {
+		if ( $_POST['assignment_desk_pitch_submit'] ) {
 		    $form_messages = array();
 
-		    $form_secret = $_POST['assignment_pitch_form_secret'];
-
+			// Check to see whether this is the second time the form has been submitted
+		    $form_secret = $_POST['assignment_pitch_form_secret'];			
+			session_start();
             if ( !isset($_SESSION['ASSIGNMENT_PITCH_FORM_SECRET']) || 
                  strcasecmp($form_secret, $_SESSION['ASSIGNMENT_PITCH_FORM_SECRET']) != 0 ) {
                 $form_messages['errors']['secret'] = __('Did you just refresh the browser?');
@@ -289,7 +318,7 @@ class ad_public_views {
 				return $form_messages['error']['nonce'];
 			}
 
-			$sanitized_title = $_POST['assignment_desk_title'];
+			$sanitized_title = strip_tags($_POST['assignment_desk_title']);
 			if ( !$sanitized_title ) {
 				$form_messages['errors']['title'] = 'Please add a title to this pitch.';
 			}
@@ -304,16 +333,16 @@ class ad_public_views {
     			// Sanitize the duedate
     			$sanitized_duedate = false;
     			$duedate_split = split('/', $_POST['assignment_desk_duedate']);
-    			if(count($duedate_split) == 3){
+    			if ( count($duedate_split) == 3) {
     			    $duedate_month = (int)$duedate_split[0];
     			    $duedate_day = (int)$duedate_split[1];
     			    $duedate_year = (int)$duedate_split[2];
     			    // Zero pad for strtime
-    			    if($duedate_month < 10 ){
+    			    if ( $duedate_month < 10 ) {
     			        $duedate_month = "0$duedate_month";
     			    }
     			    $sanitized_duedate = strtotime($duedate_day . '-' . $duedate_month . '-' . $duedate_year);
-    			    if(!$sanitized_duedate){
+    			    if ( !$sanitized_duedate ) {
     			        $form_messages['errors']['duedate'] = 'Please enter a valid date of the form MM/DD/YYYY';
     			    }
     			}
@@ -322,6 +351,7 @@ class ad_public_views {
     			}
 			}
 			
+			// Don't process the form if any errors have been set
 			if ( count($form_messages['errors']) ) {
 				return $form_messages;
 			}
@@ -343,16 +373,20 @@ class ad_public_views {
 			// Once the pitch is saved, we can save data to custom fields
 			if ( $post_id ) {
 				
-				// Save description to Edit Flow metadata field
-				update_post_meta($post_id, '_ef_description', $sanitized_description);
+				// Only handle description if Edit Flow exists
+				if ( $assignment_desk->edit_flow_exists() ) {
+					update_post_meta($post_id, '_ef_description', $sanitized_description);
+				}
 				
-				if($sanitized_duedate){
-				    // Save duedate to Edit Flow metadata field
+				// Only handle duedate if Edit Flow exists
+				if ( $sanitized_duedate && $assignment_desk->edit_flow_exists() ) {
     				update_post_meta($post_id, '_ef_duedate', $sanitized_duedate);
 				}
 				
-				// Save location to Edit Flow metadata field
-				update_post_meta($post_id, '_ef_location', $sanitized_location);
+				// Only handle location if Edit Flow exists
+				if ( $assignment_desk->edit_flow_exists() ) {
+					update_post_meta($post_id, '_ef_location', $sanitized_location);
+				}
 				
 				// Save pitched_by_participant and pitched_by_date information
 				update_post_meta($post_id, '_ad_pitched_by_participant', $sanitized_author);
@@ -362,12 +396,13 @@ class ad_public_views {
 				$default_status = $assignment_desk->custom_taxonomies->get_default_assignment_status();
 				wp_set_object_terms($post_id, (int)$default_status->term_id, $assignment_desk->custom_taxonomies->assignment_status_label);
 				
-				// A new assignment gets all User Types by default
-				foreach ($user_types as $user_type) {			
+				// All User Types can participate in a new assignment by default
+				foreach ( $user_types as $user_type ) {
 					update_post_meta($post_id, "_ad_participant_type_$user_type->term_id", 'on');
 				}
 				
-				if($sanitized_volunteer){				    
+				// Record any roles a User has volunteered for
+				if ( $sanitized_volunteer ) {
     				// Save the roles user volunteered for both with each role
     				// and under the user's row
     				$all_roles = array();				
@@ -393,6 +428,7 @@ class ad_public_views {
 	
 	/**
 	 * Print a form giving the user the option to vote on an item
+	 * @todo Functionality to remove a vote
 	 */
 	function voting_form( $post_id = null ) {
 		global $assignment_desk, $current_user;
@@ -403,6 +439,7 @@ class ad_public_views {
 			$post_id = $post->ID;
 		}
 		
+		// Only show the voting form to logged-in users
 		if ( is_user_logged_in() ) {
 			
 			wp_get_current_user();
@@ -415,8 +452,10 @@ class ad_public_views {
 			
 			$user_id = $current_user->ID;
 			
-			// If the user hasn't voted before, show the vote button
-			// @todo Add functionality to remove a vote
+			/**
+			 * Only show the vote button if the user hasn't voted before
+			 * Text display is user-configurable but defaults to 'vote'
+			 */
 			if ( !in_array( $user_id, $all_votes ) ) {
 				$voting_form = '<form method="post" class="assignment_desk_voting_form">'
 							. '<input type="hidden" name="assignment_desk_voting_user_id" value="' . $user_id . '" />'
@@ -438,6 +477,9 @@ class ad_public_views {
 		
 	}
 	
+	/**
+	 * Display the number of votes and avatars for the users who have voted on the item
+	 */
 	function show_all_votes( $post_id = null ) {
 		global $assignment_desk, $current_user;
 		
@@ -447,7 +489,7 @@ class ad_public_views {
 		}
 		
 		$all_votes = get_post_meta( $post_id, '_ad_votes_all', true );
-		if(!$all_votes){
+		if ( !$all_votes ) {
 		    $all_votes = array();
 		}
 		$total_votes = (int)get_post_meta( $post_id, '_ad_votes_total', true );
@@ -468,13 +510,17 @@ class ad_public_views {
 		
 	}
 	
-	function save_voting_form( ) {
+	/**
+	 * Save the voting form when submitted by the User
+	 */
+	function save_voting_form() {
 		global $assignment_desk, $current_user;
 	    
+		// Only logged-in users have the ability to vote
 		if ( $_POST['assignment_desk_voting_submit'] && is_user_logged_in() ) {
 			$form_messages = array();
 			
-			// Ensure that it was the user who submitted the form, not a bot
+			// Ensure that it was the user who submitted the form, not a darn bot
 			if ( !wp_verify_nonce($_POST['assignment_desk_voting_nonce'], 'assignment_desk_voting') ) {
 				return $form_messages['error']['nonce'] = true;
 			}
@@ -496,6 +542,7 @@ class ad_public_views {
 			    $all_votes = array();
 			}
 			
+			// Check whether the user has voted on this post yet. Users can only vote once
 			if ( !in_array( $sanitized_user_id, $all_votes ) ) {
 				$all_votes[] = $sanitized_user_id;
 				update_post_meta( $post_id, '_ad_votes_all', $all_votes );
@@ -513,6 +560,7 @@ class ad_public_views {
 	
 	/**
 	 * Print a form with available roles and ability to volunteer
+	 * @todo Better message for logged-out users
 	 */
 	function volunteer_form( $post_id = null ) {
 	    global $assignment_desk, $current_user;
@@ -522,6 +570,7 @@ class ad_public_views {
 			$post_id = $post->ID;
 		}
 	
+		// Only logged-in users can volunteer on assignments
 		if ( is_user_logged_in() ) {
 	
 			wp_get_current_user();
@@ -531,7 +580,14 @@ class ad_public_views {
 			$existing_roles = get_post_meta( $post_id, "_ad_participant_$current_user->ID", true );
 			if ( !$existing_roles ) {
 		        $existing_roles = array();  
-			} 
+			}
+			
+			$current_user_type = (int)get_usermeta( $current_user->ID, 'ad_user_type' );
+			// Do not equal negative if someone created a new user type on us that
+			// hasn't been saved in association with the post
+			if ( get_post_meta( $post_id, "_ad_participant_type_$current_user_type" , true ) == 'off' ) {
+				return false;
+			}
 	
 		    $volunteer_form = '';
 		    $volunteer_form .= '<form method="post" class="assignment_desk_volunteer_form">';
@@ -618,7 +674,7 @@ class ad_public_views {
 		    $user_roles = $assignment_desk->custom_taxonomies->get_user_roles();
 			// @todo abstract this to class method
 		    $valid_roles = array();
-		    foreach($sanitized_roles as $maybe_role){
+		    foreach( $sanitized_roles as $maybe_role ){
 		        $maybe_role = (int)$maybe_role;
 		        foreach ( $user_roles as $role ){
 		            if ( $maybe_role == $role->term_id ) {
@@ -856,14 +912,6 @@ class ad_public_views {
 				}
 				if ( $options['public_facing_volunteering_enabled'] ) {
 				    $html .= $this->show_all_volunteers( $post_id );
-			
-					$current_user_type = (int)get_usermeta( $current_user->ID, 'ad_user_type' );
-					// Do not equal negative if someone created a new user type on us that
-					// hasn't been saved in association with the post
-					if ( get_post_meta( $post->ID, "_ad_participant_type_$current_user_type" , true ) != 'off' ) {
-						$html .= $this->volunteer_form( $post_id );
-					}
-		
 			    }
 				$html .= "</div>";
 			
@@ -962,6 +1010,96 @@ class ad_public_views {
 		}
 		
 		return $the_content;		
+	}
+	
+	/**
+	 * Enable or disable public commenting on pitches based on preferences
+	 */
+	function enable_disable_commenting( $status ) {
+		global $assignment_desk, $post;
+		$public_facing_options = $assignment_desk->public_facing_options;
+		
+		// Only alter commenting preferences on single posts that are unpublished
+		if ( is_single() && $post->post_status != 'publish' ) {		
+			if ( $public_facing_options['public_facing_commenting_enabled'] ) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return $status;
+		}
+		
+	}
+	
+	/**
+	 * Handle a comment being posted to the system
+	 * Ugly hack to get around limitation on commenting on unpublished content
+	 * Code copy and pasted from WordPress 2.9.2
+	 */
+	function handle_comment_post( $comment_post_id ) {
+		require( ABSPATH . '/wp-load.php' );		
+		global $current_user, $wpdb;
+		
+		$comment_author       = ( isset($_POST['author']) )  ? trim(strip_tags($_POST['author'])) : null;
+		$comment_author_email = ( isset($_POST['email']) )   ? trim($_POST['email']) : null;
+		$comment_author_url   = ( isset($_POST['url']) )     ? trim($_POST['url']) : null;
+		$comment_content      = ( isset($_POST['comment']) ) ? trim($_POST['comment']) : null;
+
+		// If the user is logged in
+		$current_user = wp_get_current_user();
+		if ( $current_user->ID ) {
+			if ( empty( $current_user->display_name ) )
+				$current_user->display_name = $current_user->user_login;
+			$comment_author       = $wpdb->escape($current_user->display_name);
+			$comment_author_email = $wpdb->escape($current_user->user_email);
+			$comment_author_url   = $wpdb->escape($current_user->user_url);
+			if ( current_user_can('unfiltered_html') ) {
+				if ( wp_create_nonce('unfiltered-html-comment_' . $comment_post_ID) != $_POST['_wp_unfiltered_html_comment'] ) {
+					kses_remove_filters(); // start with a clean slate
+					kses_init_filters(); // set up the filters
+				}
+			}
+		} else {
+			if ( get_option('comment_registration') || 'private' == $status->post_status )
+				wp_die( __('Sorry, you must be logged in to post a comment.') );
+		}
+
+		$comment_type = '';
+
+		if ( get_option('require_name_email') && !$user->ID ) {
+			if ( 6 > strlen($comment_author_email) || '' == $comment_author )
+				wp_die( __('Error: please fill the required fields (name, email).') );
+			elseif ( !is_email($comment_author_email))
+				wp_die( __('Error: please enter a valid email address.') );
+		}
+
+		if ( '' == $comment_content )
+			wp_die( __('Error: please type a comment.') );
+
+		$comment_parent = isset($_POST['comment_parent']) ? absint($_POST['comment_parent']) : 0;
+
+		$commentdata = compact('comment_post_ID', 'comment_author', 'comment_author_email', 'comment_author_url', 'comment_content', 'comment_type', 'comment_parent', 'user_ID');
+	
+		$comment_id = wp_new_comment( $commentdata );
+		
+		// The proper comment_post_id isn't set for some reason or another, so we have to update it here
+		$query = $wpdb->prepare( "UPDATE $wpdb->comments SET comment_post_id = %d WHERE comment_id = $comment_id", array($comment_post_id) );
+		$wpdb->query( $query );
+
+		$comment = get_comment($comment_id);
+		if ( !$user->ID ) {
+			$comment_cookie_lifetime = apply_filters('comment_cookie_lifetime', 30000000);
+			setcookie('comment_author_' . COOKIEHASH, $comment->comment_author, time() + $comment_cookie_lifetime, COOKIEPATH, COOKIE_DOMAIN);
+			setcookie('comment_author_email_' . COOKIEHASH, $comment->comment_author_email, time() + $comment_cookie_lifetime, COOKIEPATH, COOKIE_DOMAIN);
+			setcookie('comment_author_url_' . COOKIEHASH, esc_url($comment->comment_author_url), time() + $comment_cookie_lifetime, COOKIEPATH, COOKIE_DOMAIN);
+		}
+
+		$location = get_permalink( $comment_post_id ) . '#comment-' . $comment_id;
+		$location = apply_filters('comment_post_redirect', $location, $comment);
+
+		wp_redirect($location);
+		
 	}
 	
 } // END:class ad_public_controller

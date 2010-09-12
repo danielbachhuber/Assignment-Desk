@@ -165,13 +165,14 @@ if (!class_exists('assignment_desk')) {
             }
             // This is the first time we've ever activated the plugin.
             else {
-                // Custom Taxonomies
+                // Initialize the plugin with a default set of custom taxonomies
                 $this->custom_taxonomies->init();
                 $this->custom_taxonomies->activate();
                 $this->custom_taxonomies->activate_once();
                 $this->settings->setup_defaults();
                 
-                // Another Component
+				// Install relevant public-facing view settings
+				$this->public_views->activate_once();
                 
                 // Update the settings so we don't go through the install-time routines on upgrade/re-activation
                 $this->general_options = get_option($this->get_plugin_option_fullname('general'));
