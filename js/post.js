@@ -1,7 +1,7 @@
 /**
 * Add a trim() method to all string objects
 */
-if(typeof(String.prototype.trim) === "undefined") {
+if ( typeof(String.prototype.trim) === "undefined" ) {
     String.prototype.trim = function() {
         return String(this).replace(/^\s+|\s+$/g, '');
     };
@@ -168,8 +168,7 @@ jQuery(document).ready(function() {
 	 * This function is attached to the click event of the "Remove" buttons.
 	 * This removes the participant record from the next submission.
 	 */
-	jQuery('button.ad-remove-participant-button').each(function(index, button){
-		jQuery(button).click(function(){
+	jQuery('button.ad-remove-participant-button').click(function(){
 			// Hide the entire wrapper if its the last one
 			var remove_input = '<input type="hidden" name="ad-participant-remove[]" value="' + jQuery(this).val() + '">';
 			if ( jQuery(this).parents('div.ad-role-wrap').find('p').length == 1 ) {
@@ -179,7 +178,6 @@ jQuery(document).ready(function() {
 				jQuery(this).parents('p').remove();
 			}
 			return false;
-		});
 	});
 	
 	/* ============================ Assignment Status ============================ */

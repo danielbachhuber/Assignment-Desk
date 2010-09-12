@@ -7,7 +7,7 @@ jQuery(document).ready(function() {
 	* The title and singlular variables are set by javascript printed by
 	* $assignment_desk->custom_taxonomies->javascript() 
 	*/
-	if(typeof title != 'undefined' && typeof singular != 'undefined'){
+	if ( typeof title != 'undefined' && typeof singular != 'undefined' ) {
 		jQuery('div.tagcloud').remove();
 		jQuery('div.wrap h2').replaceWith('<h2>' + title + '</h2>');
 		jQuery('div.tagcloud h3').remove();
