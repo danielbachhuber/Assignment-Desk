@@ -748,6 +748,41 @@ class ad_public_views {
 		return $all_posts;
 	}
 	
+	/**
+	 * Get all of the CSS classes we might want on a pitch
+	 *
+	 * @param $post_id int The post ID
+	 * @todo Class for has votes
+	 * @todo Class for has volunteers
+	 * @todo Class for has comments
+	 * @return $classes array All of the classes to include in the HTML
+	 */
+	function get_css_classes_for_pitch( $post_id = null ) {
+		global $assignment_desk;
+		$public_facing_options = $assignment_desk->public_facing_options;
+		
+		$classes = array();
+		
+		if ( !$post_id ) {
+			global $post;
+			$post_id = $post->ID;
+		}
+		
+		$classes[] = 'assignment-desk-post-status-' . get_post_status( $post_id );
+		
+		if ( $public_facing_options['public_facing_voting_enabled'] ) {
+			$classes[] = 'assigment-desk-voting-enabled';			
+		}
+		if ( $public_facing_options['public_facing_commenting_enabled'] ) {
+			$classes[] = 'assigment-desk-commenting-enabled';
+		}
+		if ( $public_facing_options['public_facing_volunteering_enabled'] ) {
+			$classes[] = 'assigment-desk-volunteering-enabled';
+		}
+		
+		return $classes;
+	}
+	
 	/*
 	* Replace an html comment <!--assignment-desk-all-posts--> with ad public pages.
 	*/
@@ -884,8 +919,15 @@ class ad_public_views {
 				if ( is_array($assignment_status) ) {
 				    $assignment_status = $assignment_status[0];
 				}
+				
+				$css_classes = $this->get_css_classes_for_pitch( $post_id );
+				
 			
-				$html .= '<div class="assignment-desk-pitch"><h3><a href="' . get_permalink($post_id) . '">' . get_the_title($post_id) . '</a></h3>';
+				$html .= '<div class="assignment-desk-pitch';
+				if ( $css_classes ) {
+					$html .= ' ' . implode( ' ', $css_classes );
+				}
+				$html .= '"><h3><a href="' . get_permalink( $post_id ) . '">' . get_the_title( $post_id ) . '</a></h3>';
 				// Only show voting if it's enabled
 				if ( $options['public_facing_voting_enabled'] ) {
 					$html .= $this->show_all_votes( $post_id );					
