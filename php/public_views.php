@@ -95,16 +95,15 @@ class ad_public_views {
             
 			$pitch_form = '';
 
-			
 			// Messages to the User appear at the top of the form
 
-			if ( $_REQUEST['assignment_desk_messages']['pitch_form']['success'] ) {
+			if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['success']) ) {
 				$pitch_form .= '<div class="message success"><p>Pitch submitted successfully.</p></div>';
 			} else if ( count($_REQUEST['assignment_desk_messages']['pitch_form']['errors']) ) {
 				$pitch_form .= '<div class="message error"><p>Please correct the error(s) below.</p></div>';
 			}
 
-			if ( $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['secret'] ) {
+			if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors']['secret']) ) {
                 $pitch_form .= '<p class="error">'
 							. $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['secret']
 							. '</p>';
@@ -130,7 +129,7 @@ class ad_public_views {
 						. $options['pitch_form_title_description']
 						. '</p>';
 			}
-			if ( $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['title'] ) {
+			if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors']['title']) ) {
 				$pitch_form .= '<p class="error">'
 							. $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['title']
 							. '</p>';
@@ -168,7 +167,7 @@ class ad_public_views {
 				if ( $options['pitch_form_duedate_description'] ) {
 				    $pitch_form .= '<p class="description">' . $options['pitch_form_dudedate_description'] . '</p>';
 				}
-				if ( $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['duedate'] ) {
+				if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors']['duedate']) ) {
     				$pitch_form .= '<p class="error">'
     							. $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['duedate']
     							. '</p>';
@@ -266,8 +265,8 @@ class ad_public_views {
 						. '<input type="hidden" id="assignment_desk_author" name="assignment_desk_author" value="' . $current_user->ID . '" />';
 						
 			// Set a random one-time token in the form to prevent duplicate submissions.
-			$_SESSION['ASSIGNMENT_PITCH_FORM_SECRET'] = md5(uniqid(rand(), true));
-			$pitch_form .= "<input type='hidden' name='assignment_pitch_form_secret' id='assignment_pitch_form_secret' value='{$_SESSION['ASSIGNMENT_PITCH_FORM_SECRET']}' />";				
+			$_SESSION['assignment_desk_pitch_form_secret'] = md5(uniqid(rand(), true));
+			$pitch_form .= "<input type='hidden' name='assignment_pitch_form_secret' id='assignment_pitch_form_secret' value='{$_SESSION['assignment_desk_pitch_form_secret']}' />";				
 						
 			$pitch_form .= '<input type="hidden" name="assignment_desk_pitch_nonce" value="' 
 						. wp_create_nonce('assignment_desk_pitch') . '" />';
@@ -307,8 +306,8 @@ class ad_public_views {
 			// Check to see whether this is the second time the form has been submitted
 		    $form_secret = $_POST['assignment_pitch_form_secret'];			
 			session_start();
-            if ( !isset($_SESSION['ASSIGNMENT_PITCH_FORM_SECRET']) || 
-                 strcasecmp($form_secret, $_SESSION['ASSIGNMENT_PITCH_FORM_SECRET']) != 0 ) {
+            if ( !isset( $_SESSION['assignment_desk_pitch_form_secret'] ) || 
+                 strcasecmp($form_secret, $_SESSION['assignment_desk_pitch_form_secret']) != 0 ) {
                 $form_messages['errors']['secret'] = __('Did you just refresh the browser?');
                 return $form_messages;
             }
@@ -522,7 +521,7 @@ class ad_public_views {
 		global $assignment_desk, $current_user;
 	    
 		// Only logged-in users have the ability to vote
-		if ( $_POST['assignment_desk_voting_submit'] && is_user_logged_in() ) {
+		if ( isset($_POST['assignment_desk_voting_submit']) && is_user_logged_in() ) {
 			$form_messages = array();
 			
 			// Ensure that it was the user who submitted the form, not a darn bot
@@ -674,7 +673,7 @@ class ad_public_views {
 	function save_volunteer_form() {
 	    global $assignment_desk, $current_user, $wpdb;
 	    
-		if ( $_POST['assignment_desk_volunteer_submit'] && is_user_logged_in() ) {
+		if ( isset($_POST['assignment_desk_volunteer_submit']) && is_user_logged_in() ) {
 	    
 			$form_messages = array();
 	
