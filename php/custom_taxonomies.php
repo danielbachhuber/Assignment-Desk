@@ -1,12 +1,12 @@
 <?php
 
 if(!class_exists('ad_custom_taxonomies')){
-    
+
 /**
 * Base class for operations on custom taxonomies
 */
 class ad_custom_taxonomies {
-  
+
     var $assignment_status_label = 'assignment_status';
     var $user_role_label = 'user_role';
     var $user_type_label = 'user_type';
@@ -27,9 +27,8 @@ class ad_custom_taxonomies {
         
 		$args = array();
 		$labels = array();
-		// Register $assignment_taxonomy if it doesn't exist, else generate an object								
+		// Register $assignment_taxonomy if it doesn't exist.
 		if (!$this->ad_taxonomy_exists($this->assignment_status_label)) {
-			// @todo Need to label the different text on the view
 			$labels = array('name' => 'Assignment Statuses',
 							'singular_name' => 'Assignment Status',
 							'search_items' => 'Search Assignment Statuses',
@@ -43,14 +42,11 @@ class ad_custom_taxonomies {
 							'rewrite' => false
 							);
 			register_taxonomy($this->assignment_status_label, array('post'), $args);
-			
-			add_action('delete_term_taxonomy', array(&$this, 'handle_user_type_delete'));
-			
 			add_filter('manage_edit-tags_columns', array(&$this, 'manage_tags_columns'));
 			add_action('manage_user_type_custom_column', array(&$this, 'handle_user_type_users_column'), 10, 3);
 		}
-			
-		// Register $user_role_taxonomy if it doesn't exist									
+
+		// Register $user_role_taxonomy if it doesn't exist
 		if (!$this->ad_taxonomy_exists($this->user_role_label)) {
 		  // @todo Need to label the different text on the view
 		  $args = array('label' => 'User Roles',
@@ -72,6 +68,7 @@ class ad_custom_taxonomies {
 						'rewrite' => false
 		                );
 		  register_taxonomy($this->user_type_label, array('user'), $args);
+		  add_action('delete_term_taxonomy', array(&$this, 'handle_user_type_delete'));
 		}
       
     }
@@ -90,7 +87,6 @@ class ad_custom_taxonomies {
 	
 		/**
 		 * Instantiates the default assignment statuses
-		 * Add all terms to an array, then insert them into the database
 		 */
         $default_assignment_labels = array(
             array( 'term' => 'New',
@@ -125,7 +121,6 @@ class ad_custom_taxonomies {
 	    
 		/**
 		 * Instantiates the default user roles, or work users might volunteer to do in a story
-		 * Add all terms to an array, then insert them into the database
 		 */
 	    $default_user_roles = array(
             array( 'term' => 'Writer',
@@ -155,7 +150,6 @@ class ad_custom_taxonomies {
 	
 		/**
 		 * Instantiates the default user types, 
-		 * Add all terms to an array, then insert them into the database
 		 */
 	    $default_user_types = array(
             array( 'term' => 'Community Contributor',
