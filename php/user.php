@@ -24,7 +24,7 @@ if ( !class_exists( 'ad_user' ) ) {
       add_filter('manage_users_custom_column', array(&$this, 'handle_ad_user_average_words_column'), 10, 3);
       add_filter('manage_users_custom_column', array(&$this, 'handle_ad_user_pitches_count_column'), 10, 3);
       
-      if($assignment_desk->public_facing_options['public_facing_volunteering_enabled'] == 'on'){
+      if ( isset($assignment_desk->public_facing_options['public_facing_volunteering_enabled'])  && $assignment_desk->public_facing_options['public_facing_volunteering_enabled'] == 'on' ) {
         add_filter('manage_users_custom_column', array(&$this, 'handle_ad_user_volunteer_count_column'), 10, 3);
       }
       add_filter('manage_users_custom_column', array(&$this, 'handle_ad_user_type_column'), 10, 3);
@@ -42,7 +42,7 @@ if ( !class_exists( 'ad_user' ) ) {
                                   _('_ad_user_average_words') => __('Average Words'),
                                   _('_ad_user_pitch_count') => __('Pitches'),
                               );
-      if($assignment_desk->public_facing_options['public_facing_volunteering_enabled'] == 'on'){
+      if ( $assignment_desk->public_facing_options['public_facing_volunteering_enabled'] == 'on' ) {
         $custom_fields_to_add[_('_ad_user_volunteer_count')] = __('Volunteered');
       }
       
