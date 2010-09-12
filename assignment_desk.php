@@ -221,7 +221,6 @@ if (!class_exists('assignment_desk')) {
 			// Enqueue necessary scripts
 			wp_enqueue_script('tiny_mce');
 			wp_enqueue_script('wp-ajax-response');
-			wp_enqueue_script('jquery-truncator-js', ASSIGNMENT_DESK_URL .'js/jquery.truncator.js', array('jquery'));
 			wp_enqueue_script('ad-admin-js', ASSIGNMENT_DESK_URL .'js/admin.js', 
 	                             array('jquery'), ASSIGMENT_DESK_VERSION);
 	    }
