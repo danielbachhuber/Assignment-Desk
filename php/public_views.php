@@ -39,6 +39,9 @@ class ad_public_views {
 		if ( $public_facing_options['public_facing_voting_enabled'] ) {
 			add_filter( 'the_content', array(&$this, 'prepend_voting_to_post') );		
 		}
+		// Only add commenting if its enabled
+		add_filter( 'comments_open', array(&$this, 'enable_disable_commenting') );
+		
 		// Only add volunteering if its enabled
 		if ( $public_facing_options['public_facing_volunteering_enabled'] ) {
 			add_filter( 'the_content', array(&$this, 'append_volunteering_to_post') );		
@@ -1004,6 +1007,26 @@ class ad_public_views {
 		}
 		
 		return $the_content;		
+	}
+	
+	/**
+	 * Enable or disable public commenting on pitches based on preferences
+	 */
+	function enable_disable_commenting( $status ) {
+		global $assignment_desk, $post;
+		$public_facing_options = $assignment_desk->public_facing_options;
+		
+		// Only alter commenting preferences on single posts that are unpublished
+		if ( is_single() && $post->post_status != 'publish' ) {		
+			if ( $public_facing_options['public_facing_commenting_enabled'] ) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return $status;
+		}
+		
 	}
 	
 } // END:class ad_public_controller
