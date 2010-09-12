@@ -41,6 +41,9 @@ class ad_public_views {
 		}
 		// Only add commenting if its enabled
 		add_filter( 'comments_open', array(&$this, 'enable_disable_commenting') );
+		if ( $public_facing_options['public_facing_commenting_enabled'] ) {
+			add_action( 'comment_on_draft', array(&$this, 'handle_comment_post'), 1 );
+		}
 		
 		// Only add volunteering if its enabled
 		if ( $public_facing_options['public_facing_volunteering_enabled'] ) {
@@ -582,7 +585,7 @@ class ad_public_views {
 			$current_user_type = (int)get_usermeta( $current_user->ID, 'ad_user_type' );
 			// Do not equal negative if someone created a new user type on us that
 			// hasn't been saved in association with the post
-			if ( get_post_meta( $post->ID, "_ad_participant_type_$current_user_type" , true ) == 'off' ) {
+			if ( get_post_meta( $post_id, "_ad_participant_type_$current_user_type" , true ) == 'off' ) {
 				return false;
 			}
 	
@@ -1026,6 +1029,76 @@ class ad_public_views {
 		} else {
 			return $status;
 		}
+		
+	}
+	
+	/**
+	 * Handle a comment being posted to the system
+	 * Ugly hack to get around limitation on commenting on unpublished content
+	 * Code copy and pasted from WordPress 2.9.2
+	 */
+	function handle_comment_post( $comment_post_id ) {
+		require( ABSPATH . '/wp-load.php' );		
+		global $current_user, $wpdb;
+		
+		$comment_author       = ( isset($_POST['author']) )  ? trim(strip_tags($_POST['author'])) : null;
+		$comment_author_email = ( isset($_POST['email']) )   ? trim($_POST['email']) : null;
+		$comment_author_url   = ( isset($_POST['url']) )     ? trim($_POST['url']) : null;
+		$comment_content      = ( isset($_POST['comment']) ) ? trim($_POST['comment']) : null;
+
+		// If the user is logged in
+		$current_user = wp_get_current_user();
+		if ( $current_user->ID ) {
+			if ( empty( $current_user->display_name ) )
+				$current_user->display_name = $current_user->user_login;
+			$comment_author       = $wpdb->escape($current_user->display_name);
+			$comment_author_email = $wpdb->escape($current_user->user_email);
+			$comment_author_url   = $wpdb->escape($current_user->user_url);
+			if ( current_user_can('unfiltered_html') ) {
+				if ( wp_create_nonce('unfiltered-html-comment_' . $comment_post_ID) != $_POST['_wp_unfiltered_html_comment'] ) {
+					kses_remove_filters(); // start with a clean slate
+					kses_init_filters(); // set up the filters
+				}
+			}
+		} else {
+			if ( get_option('comment_registration') || 'private' == $status->post_status )
+				wp_die( __('Sorry, you must be logged in to post a comment.') );
+		}
+
+		$comment_type = '';
+
+		if ( get_option('require_name_email') && !$user->ID ) {
+			if ( 6 > strlen($comment_author_email) || '' == $comment_author )
+				wp_die( __('Error: please fill the required fields (name, email).') );
+			elseif ( !is_email($comment_author_email))
+				wp_die( __('Error: please enter a valid email address.') );
+		}
+
+		if ( '' == $comment_content )
+			wp_die( __('Error: please type a comment.') );
+
+		$comment_parent = isset($_POST['comment_parent']) ? absint($_POST['comment_parent']) : 0;
+
+		$commentdata = compact('comment_post_ID', 'comment_author', 'comment_author_email', 'comment_author_url', 'comment_content', 'comment_type', 'comment_parent', 'user_ID');
+	
+		$comment_id = wp_new_comment( $commentdata );
+		
+		// The proper comment_post_id isn't set for some reason or another, so we have to update it here
+		$query = $wpdb->prepare( "UPDATE $wpdb->comments SET comment_post_id = %d WHERE comment_id = $comment_id", array($comment_post_id) );
+		$wpdb->query( $query );
+
+		$comment = get_comment($comment_id);
+		if ( !$user->ID ) {
+			$comment_cookie_lifetime = apply_filters('comment_cookie_lifetime', 30000000);
+			setcookie('comment_author_' . COOKIEHASH, $comment->comment_author, time() + $comment_cookie_lifetime, COOKIEPATH, COOKIE_DOMAIN);
+			setcookie('comment_author_email_' . COOKIEHASH, $comment->comment_author_email, time() + $comment_cookie_lifetime, COOKIEPATH, COOKIE_DOMAIN);
+			setcookie('comment_author_url_' . COOKIEHASH, esc_url($comment->comment_author_url), time() + $comment_cookie_lifetime, COOKIEPATH, COOKIE_DOMAIN);
+		}
+
+		$location = get_permalink( $comment_post_id ) . '#comment-' . $comment_id;
+		$location = apply_filters('comment_post_redirect', $location, $comment);
+
+		wp_redirect($location);
 		
 	}
 	
