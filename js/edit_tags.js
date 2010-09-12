@@ -1,8 +1,12 @@
-/**
-* Wordpress 2.9.2 doesn't give us a way to change the taxonomy labels on edit-tags.php
-* This just goes around and replaces them.s
-*/
-function ad_replace_tags(){
+jQuery(document).ready(function() {
+	/**
+	* Replaces the from labels with more descriptive labels.
+	* Wordpress 2.9.2 doesn't give us a way to change the taxonomy labels on edit-tags.php
+	* Not used in 3.0+
+	*
+	* The title and singlular variables are set by javascript printed by
+	* $assignment_desk->custom_taxonomies->javascript() 
+	*/
 	if(typeof title != 'undefined' && typeof singular != 'undefined'){
 		jQuery('div.tagcloud').remove();
 		jQuery('div.wrap h2').replaceWith('<h2>' + title + '</h2>');
@@ -14,8 +18,4 @@ function ad_replace_tags(){
 		jQuery('#submit').val('Add ' + singular);
 		jQuery('p.search-box input[type=submit]').val('Search ' + title);
 	}
-}
-
-jQuery(document).ready(function() {
-	ad_replace_tags();
 });
