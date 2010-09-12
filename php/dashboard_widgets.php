@@ -91,10 +91,10 @@ class ad_dashboard_widgets {
 
         get_currentuserinfo();
         $assignment_statuses = $assignment_desk->custom_taxonomies->get_assignment_statuses();
-        
+
 		if ( $_REQUEST['ad-dashboard-assignment-messages'] ) {
-            foreach( $_REQUEST['ad-dashboard-assignment-messages'] as $messages ) {
-                echo "<p class='message info'>$message</p>";
+            foreach( $_REQUEST['ad-dashboard-assignment-messages'] as $message ) {
+                echo "<div class='message info'>$message</div>";
             }
         }
         ?>
