@@ -9,12 +9,18 @@ class ad_public_views {
 
 	}
 	
+	/**
+	 * We need to make sure all of this is established every time the plugin is loaded 
+	 */
 	function init() {
 		global $assignment_desk;
 		$pitch_form_options = $assignment_desk->pitch_form_options;		
 		$public_facing_options = $assignment_desk->public_facing_options;
 		
-		wp_enqueue_script('jquery-datepicker-js', ASSIGNMENT_DESK_URL .'js/jquery.datepicker.js', array('jquery-ui-core'));
+		// The datepicker UI is used on the pitch submission form. Only load if enabled
+		if ( $pitch_form_options['pitch_form_enabled'] ) {
+			wp_enqueue_script('jquery-datepicker-js', ASSIGNMENT_DESK_URL .'js/jquery.datepicker.js', array('jquery-ui-core'));
+		}
 		wp_enqueue_script('ad-public-views', ASSIGNMENT_DESK_URL . 'js/public_views.js', array('jquery', 'jquery-datepicker-js'));
 		
 		wp_enqueue_style('ad-public', ASSIGNMENT_DESK_URL . 'css/public.css');
@@ -43,12 +49,23 @@ class ad_public_views {
 		}
 	}
 	
+	/**
+	 * Initialize first use of the plugin with default settings
+	 * @todo Finish this method
+	 */
+	function activate_once() {
+		
+	}
+	
+	/**
+	 * Show the pitch form on post or pages with template tag if enabled
+	 */
 	function show_pitch_form( $the_content ) {
 		global $assignment_desk, $current_user;
 
 		$options = $assignment_desk->pitch_form_options;		
 		
-		if ($assignment_desk->edit_flow_exists()) {
+		if ( $assignment_desk->edit_flow_exists() ) {
 			global $edit_flow;
 		}
 		wp_get_current_user();
@@ -67,17 +84,24 @@ class ad_public_views {
 		
 		$template_tag = '<!--assignment-desk-pitch-form-->';
 
+		// Only show the pitch form if the User is logged in
 		if ( is_user_logged_in() ) {
 
 			$pitch_form = '';
 			
+			// Messages to the User appear at the top of the form
 			if ( $_REQUEST['assignment_desk_messages']['pitch_form']['success'] ) {
 				$pitch_form .= '<div class="message success"><p>Pitch submitted successfully.</p></div>';
 			} else if ( count($_REQUEST['assignment_desk_messages']['pitch_form']['errors']) ) {
 				$pitch_form .= '<div class="message error"><p>Please correct the error(s) below.</p></div>';
 			}
 		
-			$pitch_form .= '<form method="post" id="assignment_desk_pitch_form">';
+			/**
+			 * For all of the fields, the admin has the ability to define a label and a description
+			 * in the settings. If those aren't defined, then the stock label will show with no description
+			 */
+		
+			$pitch_form .= '<form method="post" class="assignment_desk_pitch_form">';
 			// Title
 			if ( $options['pitch_form_title_label'] ) {
 				$title_label = $options['pitch_form_title_label'];
@@ -98,8 +122,8 @@ class ad_public_views {
 			}
 			$pitch_form	.= '</fieldset>';
 			
-			// Description
-			if ( $options['pitch_form_description_enabled'] ) {
+			// Edit Flow Description
+			if ( $options['pitch_form_description_enabled'] && $assignment_desk->edit_flow_exists() ) {
 				if ( $options['pitch_form_description_label'] ) {
 					$description_label = $options['pitch_form_description_label'];
 				} else {
@@ -117,8 +141,8 @@ class ad_public_views {
 				$pitch_form .= '</fieldset>';
 			}
 			
-			// Due Date
-			if ( $options['pitch_form_duedate_enabled'] ) {
+			// Edit Flow Due Date
+			if ( $options['pitch_form_duedate_enabled'] && $assignment_desk->edit_flow_exists() ) {
 				if ( $options['pitch_form_dudedate_label'] ) {
 					$duedate_label = $options['pitch_form_dudedate_label'];
 				} else {
@@ -178,8 +202,8 @@ class ad_public_views {
 				$pitch_form .= '</fieldset>';
 			}
 			
-			// Location
-			if ( $options['pitch_form_location_enabled'] ) {
+			// Edit Flow Location
+			if ( $options['pitch_form_location_enabled'] && $assignment_desk->edit_flow_exists() ) {
 				if ( $options['pitch_form_location_label'] ) {
 					$location_label = $options['pitch_form_location_label'];
 				} else {
@@ -221,8 +245,6 @@ class ad_public_views {
 				}
 				$pitch_form .= '</fieldset>';
 			}
-			
-			// @todo Confirm your user information
 			
 			// Author information and submit
 			$pitch_form .= '<fieldset class="submit">'
