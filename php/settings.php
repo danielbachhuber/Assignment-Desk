@@ -12,6 +12,9 @@ if ( !class_exists( 'ad_settings' ) ){
       
     }
 
+    /**
+     * Register all of the settings and sections with the Wordpress Settings API
+     */
 	function init() {
 		global $assignment_desk;
 		
@@ -47,6 +50,9 @@ if ( !class_exists( 'ad_settings' ) ){
 			
 	}
 	
+	/**
+	 * Define all of the default settings.
+	 */
 	function setup_defaults() {
         global $assignment_desk, $wpdb;
         $options = $assignment_desk->general_options;
@@ -188,16 +194,7 @@ Blog Editor");
 		    _('We support the following tokens') . 
 		    ': %blogname%, %title%, %excerpt%, %description%, %duedate%, %role%, %display_name%, %location%, %post_link%, and %dashboard_link%.</span>';
 	}
-	
-	function google_maps_api_key_option() {
-		global $assignment_desk;
-		$options = $assignment_desk->general_options;
-		echo '<input type="text" id="google_maps_api_key" name="assignment_desk_general[google_maps_api_key]" value="';
-		echo $options['google_maps_api_key'];
-		echo '"/>';
 		
-	}
-	
 	function story_pitches_setting_section() {
 		global $assignment_desk;
 		echo "Add an Assignment Desk pitch form to any page or post by adding <code>&#60;!--$assignment_desk->pitch_form_key--&#62;</code> where you'd it to appear.";
@@ -409,7 +406,7 @@ Blog Editor");
 	 	echo ' />&nbsp;<label for="public_facing_filtering_sort_by_enabled">Sort by</label>';
 		echo '<p class="description">Indicate the different ways the user can filter posts.';
 	}
-	
+
 	function public_facing_elements_option() {
 		global $assignment_desk;
 		if ($assignment_desk->edit_flow_exists()) {
@@ -476,7 +473,7 @@ Blog Editor");
 		echo ' />&nbsp;<label for="public_facing_tags_enabled">Tags</label></li>';
 		echo '</ul>';
 	}
-	
+
 	function public_facing_functionality_option() {
 		global $assignment_desk;
 		if ($assignment_desk->edit_flow_exists()) {
@@ -525,9 +522,9 @@ Blog Editor");
 	 * Validation for all of our form elements
 	 */
 	function assignment_desk_validate($input) {
-		
+
 		// @todo Should we validate all settings elements?
-		
+
 		$input['default_new_assignment_status'] = (int)$input['default_new_assignment_status'];
 		return $input;
 	}
@@ -540,7 +537,6 @@ Blog Editor");
 			$msg = __('Settings Saved', 'assignment-desk');
 		}
 
-    
 ?>                                   
 	<div class="wrap">
 		<div class="icon32" id="icon-options-general"><br/></div>
@@ -598,8 +594,7 @@ Blog Editor");
 	</div>
 
 <?php
-      
-      
+
     }
 
 	function public_facing_settings() {
@@ -636,10 +631,9 @@ Blog Editor");
       
       
     }
-  
+
   }
-  
-  
+
 }
 
 
