@@ -250,6 +250,8 @@ class ad_public_views {
 								. ' /><label for="assignment_desk_volunteer_'
 								. $user_role->term_id .'">' . $user_role->name
 								. '</label>';
+					$pitch_form .= '<br /><span class="description">' . $user_role->description . '</span>';
+					$pitch_form .= '</li>';
 				}
 				$pitch_form .= '</ul>';
 				if ( $options['pitch_form_volunteer_description'] ) {
@@ -616,7 +618,9 @@ class ad_public_views {
 				}
 				$volunteer_form .= ' /><label for="assignment_desk_post_' . $post_id
 								. '_volunteer_' . $user_role->term_id .'">' . $user_role->name
-								. '</label></li>';
+								. '</label>';
+				$volunteer_form .= '<br /><span class="description">' . $user_role->description . '</span>';								
+				$volunteer_form .= '</li>';
 			}
 			$volunteer_form .= '</ul>';
 			if ( $pitch_form_options['pitch_form_volunteer_description'] ) {

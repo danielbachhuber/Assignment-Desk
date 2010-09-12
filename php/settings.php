@@ -329,7 +329,7 @@ Blog Editor");
 		}
 		// Volunteer
 		echo '<li><span class="field"><input id="pitch_form_volunteer_enabled" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_volunteer_enabled]" type="checkbox"';
-		if ($options['pitch_form_volunteer_enabled']) {
+		if ( $options['pitch_form_volunteer_enabled'] ) {
 			echo ' checked="checked"';
 		}
 		echo ' />&nbsp;<label for="pitch_form_volunteer_enabled">Volunteer</label></span>';
@@ -342,7 +342,7 @@ Blog Editor");
 			. $options['pitch_form_volunteer_label'] . '" size="15" />';
 		echo '<label for="pitch_form_volunteer_description">Description</label>';
 		echo '<input id="pitch_form_volunteer_description" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_volunteer_description]" type="text" value="'
-			. $options['pitch_form_volunteer_description'] . '" size="35" />';	
+			. $options['pitch_form_volunteer_description'] . '" size="35" />';
 		echo '</span></li>';
 		echo '</ul>';
 	}
