@@ -428,6 +428,8 @@ class ad_public_views {
 	
 	/**
 	 * Print a form giving the user the option to vote on an item
+	 * @param int $post_id The Post ID
+	 * @return string the voting form HTML.
 	 * @todo Functionality to remove a vote
 	 */
 	function voting_form( $post_id = null ) {
@@ -478,7 +480,9 @@ class ad_public_views {
 	}
 	
 	/**
-	 * Display the number of votes and avatars for the users who have voted on the item
+	 * Display the number of votes and avatars for the users who have voted on the item.
+	 * @param int $post_id The Post ID
+ 	 * @return string the voting results in HTML.
 	 */
 	function show_all_votes( $post_id = null ) {
 		global $assignment_desk, $current_user;
@@ -512,6 +516,7 @@ class ad_public_views {
 	
 	/**
 	 * Save the voting form when submitted by the User
+	 * @return array messages indicating results.
 	 */
 	function save_voting_form() {
 		global $assignment_desk, $current_user;
@@ -560,6 +565,8 @@ class ad_public_views {
 	
 	/**
 	 * Print a form with available roles and ability to volunteer
+	 * @param int $post_id The Post ID
+ 	 * @return string the volunteer form HTML
 	 * @todo Better message for logged-out users
 	 */
 	function volunteer_form( $post_id = null ) {
@@ -638,6 +645,7 @@ class ad_public_views {
 	/**
 	 * List total count for all volunteers
 	 * @param int $post_id The Post ID
+  	 * @return string the volunteer display HTML
 	 */
 	function show_all_volunteers( $post_id = null ) {
 	    global $assignment_desk;
@@ -965,6 +973,9 @@ class ad_public_views {
 	
 	}
 	
+	/**
+	 * Append metadata to the single post content if enabled.
+	 */
 	function handle_single_post_metadata( $the_content ) {
 		global $post, $assignment_desk;
 		$options = $assignment_desk->public_facing_options;
