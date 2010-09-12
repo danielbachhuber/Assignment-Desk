@@ -67,17 +67,6 @@ if (!class_exists('assignment_desk')) {
 		// Only WP Editor and above can edit pages
 		public $define_editor_permissions = 'edit_pages';
 		public $define_admin_permissions = 'manage_options';
-
-
-	    /**
-         * @var assignment_desk_dashboard_widgets $dashboard_widgets provides the widget.
-         */
-        public $dashboard_widgets;
-        
-        /**
-         * @var ad_settings provides all of the settings views
-         */
-        public $settings;
         
         /**
          * Assignment Desk Constructor
