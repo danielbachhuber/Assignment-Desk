@@ -574,7 +574,14 @@ class ad_public_views {
 			$existing_roles = get_post_meta( $post_id, "_ad_participant_$current_user->ID", true );
 			if ( !$existing_roles ) {
 		        $existing_roles = array();  
-			} 
+			}
+			
+			$current_user_type = (int)get_usermeta( $current_user->ID, 'ad_user_type' );
+			// Do not equal negative if someone created a new user type on us that
+			// hasn't been saved in association with the post
+			if ( get_post_meta( $post->ID, "_ad_participant_type_$current_user_type" , true ) == 'off' ) {
+				return false;
+			}
 	
 		    $volunteer_form = '';
 		    $volunteer_form .= '<form method="post" class="assignment_desk_volunteer_form">';
@@ -899,14 +906,6 @@ class ad_public_views {
 				}
 				if ( $options['public_facing_volunteering_enabled'] ) {
 				    $html .= $this->show_all_volunteers( $post_id );
-			
-					$current_user_type = (int)get_usermeta( $current_user->ID, 'ad_user_type' );
-					// Do not equal negative if someone created a new user type on us that
-					// hasn't been saved in association with the post
-					if ( get_post_meta( $post->ID, "_ad_participant_type_$current_user_type" , true ) != 'off' ) {
-						$html .= $this->volunteer_form( $post_id );
-					}
-		
 			    }
 				$html .= "</div>";
 			
