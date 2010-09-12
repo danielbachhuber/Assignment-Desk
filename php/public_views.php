@@ -278,7 +278,10 @@ class ad_public_views {
 		$the_content = str_replace($template_tag, $pitch_form, $the_content);
 		return $the_content;
 	}
-
+	
+	/**
+	 * Saves data after a User submits a pitch form
+	 */
 	function save_pitch_form() {
 		global $assignment_desk, $current_user;
 		$message = array();
@@ -290,14 +293,14 @@ class ad_public_views {
 		}
 
 		// @todo Sanitize all of the fields
-		// @todo Validate all of the fields		
-		session_start();
+		// @todo Validate all of the fields
 
-		if ($_POST['assignment_desk_pitch_submit']) {
+		if ( $_POST['assignment_desk_pitch_submit'] ) {
 		    $form_messages = array();
 
-		    $form_secret = $_POST['assignment_pitch_form_secret'];
-
+			// Check to see whether this is the second time the form has been submitted
+		    $form_secret = $_POST['assignment_pitch_form_secret'];			
+			session_start();
             if ( !isset($_SESSION['ASSIGNMENT_PITCH_FORM_SECRET']) || 
                  strcasecmp($form_secret, $_SESSION['ASSIGNMENT_PITCH_FORM_SECRET']) != 0 ) {
                 $form_messages['errors']['secret'] = __('Did you just refresh the browser?');
@@ -309,7 +312,7 @@ class ad_public_views {
 				return $form_messages['error']['nonce'];
 			}
 
-			$sanitized_title = $_POST['assignment_desk_title'];
+			$sanitized_title = strip_tags($_POST['assignment_desk_title']);
 			if ( !$sanitized_title ) {
 				$form_messages['errors']['title'] = 'Please add a title to this pitch.';
 			}
@@ -324,16 +327,16 @@ class ad_public_views {
     			// Sanitize the duedate
     			$sanitized_duedate = false;
     			$duedate_split = split('/', $_POST['assignment_desk_duedate']);
-    			if(count($duedate_split) == 3){
+    			if ( count($duedate_split) == 3) {
     			    $duedate_month = (int)$duedate_split[0];
     			    $duedate_day = (int)$duedate_split[1];
     			    $duedate_year = (int)$duedate_split[2];
     			    // Zero pad for strtime
-    			    if($duedate_month < 10 ){
+    			    if ( $duedate_month < 10 ) {
     			        $duedate_month = "0$duedate_month";
     			    }
     			    $sanitized_duedate = strtotime($duedate_day . '-' . $duedate_month . '-' . $duedate_year);
-    			    if(!$sanitized_duedate){
+    			    if ( !$sanitized_duedate ) {
     			        $form_messages['errors']['duedate'] = 'Please enter a valid date of the form MM/DD/YYYY';
     			    }
     			}
@@ -342,6 +345,7 @@ class ad_public_views {
     			}
 			}
 			
+			// Don't process the form if any errors have been set
 			if ( count($form_messages['errors']) ) {
 				return $form_messages;
 			}
@@ -363,16 +367,20 @@ class ad_public_views {
 			// Once the pitch is saved, we can save data to custom fields
 			if ( $post_id ) {
 				
-				// Save description to Edit Flow metadata field
-				update_post_meta($post_id, '_ef_description', $sanitized_description);
+				// Only handle description if Edit Flow exists
+				if ( $assignment_desk->edit_flow_exists() ) {
+					update_post_meta($post_id, '_ef_description', $sanitized_description);
+				}
 				
-				if($sanitized_duedate){
-				    // Save duedate to Edit Flow metadata field
+				// Only handle duedate if Edit Flow exists
+				if ( $sanitized_duedate && $assignment_desk->edit_flow_exists() ) {
     				update_post_meta($post_id, '_ef_duedate', $sanitized_duedate);
 				}
 				
-				// Save location to Edit Flow metadata field
-				update_post_meta($post_id, '_ef_location', $sanitized_location);
+				// Only handle location if Edit Flow exists
+				if ( $assignment_desk->edit_flow_exists() ) {
+					update_post_meta($post_id, '_ef_location', $sanitized_location);
+				}
 				
 				// Save pitched_by_participant and pitched_by_date information
 				update_post_meta($post_id, '_ad_pitched_by_participant', $sanitized_author);
@@ -382,12 +390,13 @@ class ad_public_views {
 				$default_status = $assignment_desk->custom_taxonomies->get_default_assignment_status();
 				wp_set_object_terms($post_id, (int)$default_status->term_id, $assignment_desk->custom_taxonomies->assignment_status_label);
 				
-				// A new assignment gets all User Types by default
-				foreach ($user_types as $user_type) {			
+				// All User Types can participate in a new assignment by default
+				foreach ( $user_types as $user_type ) {
 					update_post_meta($post_id, "_ad_participant_type_$user_type->term_id", 'on');
 				}
 				
-				if($sanitized_volunteer){				    
+				// Record any roles a User has volunteered for
+				if ( $sanitized_volunteer ) {
     				// Save the roles user volunteered for both with each role
     				// and under the user's row
     				$all_roles = array();				
@@ -413,6 +422,7 @@ class ad_public_views {
 	
 	/**
 	 * Print a form giving the user the option to vote on an item
+	 * @todo Functionality to remove a vote
 	 */
 	function voting_form( $post_id = null ) {
 		global $assignment_desk, $current_user;
@@ -423,6 +433,7 @@ class ad_public_views {
 			$post_id = $post->ID;
 		}
 		
+		// Only show the voting form to logged-in users
 		if ( is_user_logged_in() ) {
 			
 			wp_get_current_user();
@@ -435,8 +446,10 @@ class ad_public_views {
 			
 			$user_id = $current_user->ID;
 			
-			// If the user hasn't voted before, show the vote button
-			// @todo Add functionality to remove a vote
+			/**
+			 * Only show the vote button if the user hasn't voted before
+			 * Text display is user-configurable but defaults to 'vote'
+			 */
 			if ( !in_array( $user_id, $all_votes ) ) {
 				$voting_form = '<form method="post" class="assignment_desk_voting_form">'
 							. '<input type="hidden" name="assignment_desk_voting_user_id" value="' . $user_id . '" />'
@@ -458,6 +471,9 @@ class ad_public_views {
 		
 	}
 	
+	/**
+	 * Display the number of votes and avatars for the users who have voted on the item
+	 */
 	function show_all_votes( $post_id = null ) {
 		global $assignment_desk, $current_user;
 		
@@ -467,7 +483,7 @@ class ad_public_views {
 		}
 		
 		$all_votes = get_post_meta( $post_id, '_ad_votes_all', true );
-		if(!$all_votes){
+		if ( !$all_votes ) {
 		    $all_votes = array();
 		}
 		$total_votes = (int)get_post_meta( $post_id, '_ad_votes_total', true );
@@ -488,13 +504,17 @@ class ad_public_views {
 		
 	}
 	
-	function save_voting_form( ) {
+	/**
+	 * Save the voting form when submitted by the User
+	 */
+	function save_voting_form() {
 		global $assignment_desk, $current_user;
 	    
+		// Only logged-in users have the ability to vote
 		if ( $_POST['assignment_desk_voting_submit'] && is_user_logged_in() ) {
 			$form_messages = array();
 			
-			// Ensure that it was the user who submitted the form, not a bot
+			// Ensure that it was the user who submitted the form, not a darn bot
 			if ( !wp_verify_nonce($_POST['assignment_desk_voting_nonce'], 'assignment_desk_voting') ) {
 				return $form_messages['error']['nonce'] = true;
 			}
@@ -516,6 +536,7 @@ class ad_public_views {
 			    $all_votes = array();
 			}
 			
+			// Check whether the user has voted on this post yet. Users can only vote once
 			if ( !in_array( $sanitized_user_id, $all_votes ) ) {
 				$all_votes[] = $sanitized_user_id;
 				update_post_meta( $post_id, '_ad_votes_all', $all_votes );
@@ -533,6 +554,7 @@ class ad_public_views {
 	
 	/**
 	 * Print a form with available roles and ability to volunteer
+	 * @todo Better message for logged-out users
 	 */
 	function volunteer_form( $post_id = null ) {
 	    global $assignment_desk, $current_user;
@@ -542,6 +564,7 @@ class ad_public_views {
 			$post_id = $post->ID;
 		}
 	
+		// Only logged-in users can volunteer on assignments
 		if ( is_user_logged_in() ) {
 	
 			wp_get_current_user();
@@ -638,7 +661,7 @@ class ad_public_views {
 		    $user_roles = $assignment_desk->custom_taxonomies->get_user_roles();
 			// @todo abstract this to class method
 		    $valid_roles = array();
-		    foreach($sanitized_roles as $maybe_role){
+		    foreach( $sanitized_roles as $maybe_role ){
 		        $maybe_role = (int)$maybe_role;
 		        foreach ( $user_roles as $role ){
 		            if ( $maybe_role == $role->term_id ) {
