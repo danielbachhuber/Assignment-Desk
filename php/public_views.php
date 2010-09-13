@@ -64,6 +64,17 @@ class ad_public_views {
 	}
 	
 	/**
+	 * Helper function which returns a value if the variable is set
+	 */
+	function return_if_set( $var = null ) {
+		if ( isset($var) ) {
+			return $var;
+		} else {
+			return null;
+		}
+	}
+	
+	/**
 	 * Show the pitch form on post or pages with template tag if enabled
 	 */
 	function show_pitch_form( $the_content ) {
@@ -128,7 +139,8 @@ class ad_public_views {
 				$title_label = 'Title';
 			}
 			$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_title">' . $title_label . '</label>'
-						. '<input type="text" id="assignment_desk_title" name="assignment_desk_title" />';
+						. '<input type="text" id="assignment_desk_title" name="assignment_desk_title" ';
+			$pitch_form .= 'value="' . $this->return_if_set($_POST['assignment_desk_title']) . '"/>';
 			if ( $options['pitch_form_title_description'] ) {
 			$pitch_form .= '<p class="description">'
 						. $options['pitch_form_title_description']
@@ -151,6 +163,7 @@ class ad_public_views {
 				$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_description">' . $description_label . '</label>'
 							. '<textarea id="assignment_desk_description"'
 							. ' name="assignment_desk_description">';
+				$pitch_form .= $this->return_if_set($_POST['assignment_desk_description']);
 				$pitch_form .= '</textarea>';
 				if ( $options['pitch_form_description_description'] ) {
 				$pitch_form .= '<p class="description">'
@@ -168,7 +181,8 @@ class ad_public_views {
 					$duedate_label = 'Due Date';
 				}	
 				$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_duedate">' . $duedate_label . '</label>';
-				$pitch_form .= '<input type="text" size="12" name="assignment_desk_duedate" id="assignment_desk_duedate">';
+				$pitch_form .= '<input type="text" size="12" name="assignment_desk_duedate" id="assignment_desk_duedate" ';
+				$pitch_form .= 'value="' . $this->return_if_set($_POST['assignment_desk_duedate']) . '"/>';
 				if ( $options['pitch_form_duedate_description'] ) {
 				    $pitch_form .= '<p class="description">' . $options['pitch_form_dudedate_description'] . '</p>';
 				}
@@ -190,7 +204,11 @@ class ad_public_views {
 				$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_categories">' . $category_label . '</label>';
 				$pitch_form .= '<select id="assignment_desk_categories" name="assignment_desk_categories">';
 				foreach ( $categories as $category ) {
-					$pitch_form .= '<option value="' . $category->term_id . '">'
+					$pitch_form .= '<option value="' . $category->term_id . '"';
+					if ( $category->term_id == $this->return_if_set($_POST['assignment_desk_categories']) ) {
+						$pitch_form .= ' selected="selected"';
+					}
+					$pitch_form .= '>'
 								. $category->name
 								. '</option>';
 				}
@@ -211,9 +229,9 @@ class ad_public_views {
 					$tags_label = 'Tags';
 				}	
 				$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_tags">' . $tags_label . '</label>'
-							. '<input type="text" id="assignment_desk_tags"'
-							. ' name="assignment_desk_tags" />';
-				if ($options['pitch_form_tags_description']) {
+							. '<input type="text" id="assignment_desk_tags" name="assignment_desk_tags"';
+				$pitch_form .= 'value="' . $this->return_if_set($_POST['assignment_desk_tags']) . '"/>';							
+				if ( $options['pitch_form_tags_description'] ) {
 				$pitch_form .= '<p class="description">'
 							. $options['pitch_form_tags_description']
 							. '</p>';
@@ -229,8 +247,8 @@ class ad_public_views {
 					$location_label = 'Location';
 				}
 				$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_location">' . $location_label . '</label>'
-							. '<input type="text" id="assignment_desk_location"'
-							. ' name="assignment_desk_location" />';
+							. '<input type="text" id="assignment_desk_location" name="assignment_desk_location" ';
+				$pitch_form .= 'value="' . $this->return_if_set($_POST['assignment_desk_location']) . '"/>';
 				if ( $options['pitch_form_location_description'] ) {
 				$pitch_form .= '<p class="description">'
 							. $options['pitch_form_location_description']
@@ -250,8 +268,11 @@ class ad_public_views {
 				foreach ( $user_roles as $user_role ) {
 					$pitch_form .= '<li><input type="checkbox" '
 								. 'id="assignment_desk_volunteer_' . $user_role->term_id
-								. '" name="assignment_desk_volunteer[]"'
-								. ' value="' . $user_role->term_id . '"'
+								. '" name="assignment_desk_volunteer[]"';
+					if ( in_array( $user_role->term_id, $this->return_if_set($_POST['assignment_desk_volunteer']) ) ) {
+						$pitch_form .= ' checked="checked"';
+					}
+					$pitch_form .= ' value="' . $user_role->term_id . '"'
 								. ' /><label for="assignment_desk_volunteer_'
 								. $user_role->term_id .'">' . $user_role->name
 								. '</label>';
