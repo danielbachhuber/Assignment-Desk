@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: Assignment Desk
-Plugin URI: http://code.nyu.edu/projects/show/s20
+Plugin URI: http://openassignment.org/
 Description: News pitch and story tools for local news blogs.
 Author: Erik Froese, Daniel Bachhuber
-Version: 0.5
-Author URI: 
+Version: 0.6
+Author URI: http://openassignment.org/
 */   
    
 /*  Copyright 2010  
@@ -27,11 +27,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 define('ASSIGNMENT_DESK_FILE_PATH', __FILE__);
 define('ASSIGNMENT_DESK_URL', plugins_url(plugin_basename(dirname(__FILE__)) .'/'));
-define('ASSIGMENT_DESK_VERSION', '0.4');
-
-define('ASSIGNMENT_DESK_DIR_PATH', dirname(__FILE__));
-define('ASSIGNMENT_DESK_TEMPLATES_PATH', ASSIGNMENT_DESK_DIR_PATH . '/php/templates');
-
+define('ASSIGMENT_DESK_VERSION', '0.6');
 
 require_once('php/user.php');
 require_once('php/dashboard_widgets.php');
@@ -51,19 +47,10 @@ if (!class_exists('assignment_desk')) {
         
         /** @var string $localizationDomain Domain used for localization */
         private $localizationDomain = "assignment_desk";
-
-        /** @var string $pluginurlpath The path to this plugin */
-        public $this_plugin_path = ASSIGNMENT_DESK_DIR_PATH;
         
         /** @var the URL to this plugin */
         public $url = ASSIGNMENT_DESK_URL;
 
-        /** @var string templates_path The path to the templates directory. */
-        public $templates_path = ASSIGNMENT_DESK_TEMPLATES_PATH;
-
-        /** @var string $table_prefix The prefix for this plugin's DB tables. */
-        public $table_prefix = 'ad_';
-        
         public $option_prefix = 'ad_';
 
 		var $options_group = 'assignment_desk_';
@@ -80,17 +67,6 @@ if (!class_exists('assignment_desk')) {
 		// Only WP Editor and above can edit pages
 		public $define_editor_permissions = 'edit_pages';
 		public $define_admin_permissions = 'manage_options';
-
-
-	      /**
-         * @var assignment_desk_dashboard_widgets $dashboard_widgets provides the widget.
-         */
-        public $dashboard_widgets;
-        
-        /**
-         * @var ad_settings provides all of the settings views
-         */
-        public $settings;
         
         /**
          * Assignment Desk Constructor
@@ -122,7 +98,7 @@ if (!class_exists('assignment_desk')) {
 			$_REQUEST['assignment_desk_messages'] = array();
 			
 			/**
-			 * Provide an easy way to access Assignment Desk settings w/o querying database every time
+			 * Provide an easy way to access Assignment Desk settings w/o using a nasty method every time
 			 */
 			$this->general_options = get_option($this->get_plugin_option_fullname('general'));
 			$this->pitch_form_options = get_option($this->get_plugin_option_fullname('pitch_form'));
@@ -136,16 +112,17 @@ if (!class_exists('assignment_desk')) {
 		function init() {
 			
 			$this->custom_taxonomies->init();
-            $this->user->init_user();
+            $this->user->init();
 			
+			// Only load admin-specific functionality in the admin
 			if ( is_admin() ) {
 				add_action( 'admin_menu', array(&$this, 'add_admin_menu_items'));
-				add_action( 'admin_menu', array(&$this->custom_taxonomies, 'remove_assignment_status_post_meta_box') );
+				add_action( 'admin_menu', array(&$this->custom_taxonomies, 'remove_assignment_status_post_meta_box'));
 				$this->manage_posts->init();
 				$this->dashboard_widgets->init();
 				$this->post->init();
 
-			} else if (!is_admin()) {
+			} else if ( !is_admin() ) {
 				$this->public_views->init();
 			}
 			
@@ -153,6 +130,7 @@ if (!class_exists('assignment_desk')) {
 
 		/**
 		 * Initialize the plugin for the admin 
+		 * @todo This is unnecessary and could be moved to the init method
 		 */
 		function admin_init() {
 			
@@ -169,7 +147,7 @@ if (!class_exists('assignment_desk')) {
         function activate_plugin() {
             
             // This is an upgrade or re-activation
-            if ( $this->general_options['ad_installed_once'] == 'on' ){
+            if ( $this->general_options['ad_installed_once'] == 'on' ) {
                 // Custom Taxonomies
                 $this->custom_taxonomies->init();
                 $this->custom_taxonomies->activate();
@@ -184,8 +162,6 @@ if (!class_exists('assignment_desk')) {
                 $this->custom_taxonomies->activate_once();
                 $this->settings->setup_defaults();
                 
-                // Another Component
-                
                 // Update the settings so we don't go through the install-time routines on upgrade/re-activation
                 $this->general_options = get_option($this->get_plugin_option_fullname('general'));
                 $this->general_options['ad_installed_once'] = 'on';
@@ -194,14 +170,14 @@ if (!class_exists('assignment_desk')) {
         }
 
 		/**
-		 * Utility function
+		 * Get the full name of a plugin options group
 		 */
 		function get_plugin_option_fullname( $name ) {
 			return $this->options_group . $name;
 		}
 		
 		/**
-		 * Check to see if Edit Flow is activated
+		 * Helper method checks to see if Edit Flow is activated
 		 */
 		function edit_flow_exists() {
 			if ( class_exists('edit_flow') ) {
@@ -212,7 +188,7 @@ if (!class_exists('assignment_desk')) {
 		}
 		
 		/**
-		 * Check to see if Co-Authors Plus is activated
+		 * Helper method checks to see if Co-Authors Plus is activated
 		 */
 		function coauthors_plus_exists() {
 			if ( class_exists('coauthors_plus') ) {
@@ -234,7 +210,6 @@ if (!class_exists('assignment_desk')) {
 			// Enqueue necessary scripts
 			wp_enqueue_script('tiny_mce');
 			wp_enqueue_script('wp-ajax-response');
-			wp_enqueue_script('jquery-truncator-js', ASSIGNMENT_DESK_URL .'js/jquery.truncator.js', array('jquery'));
 			wp_enqueue_script('ad-admin-js', ASSIGNMENT_DESK_URL .'js/admin.js', 
 	                             array('jquery'), ASSIGMENT_DESK_VERSION);
 	    }
@@ -297,8 +272,8 @@ global $assignment_desk;
 $assignment_desk = new assignment_desk();
 
 // Core hooks to initialize the plugin
-add_action('init', array(&$assignment_desk,'init'));
-add_action('admin_init', array(&$assignment_desk,'admin_init'));
+add_action( 'init', array(&$assignment_desk,'init') );
+add_action( 'admin_init', array(&$assignment_desk,'admin_init') );
 
 // Hook to perform action when plugin activated
-register_activation_hook(ASSIGNMENT_DESK_FILE_PATH, array(&$assignment_desk, 'activate_plugin'));
+register_activation_hook( ASSIGNMENT_DESK_FILE_PATH, array(&$assignment_desk, 'activate_plugin') );

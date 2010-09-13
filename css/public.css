@@ -1,4 +1,5 @@
 a.adsk-button {
+	border-radius: 8px;
 	-moz-border-radius: 8px;
 	-webkit-border-radius: 8px;
 	border: solid 1px #999;

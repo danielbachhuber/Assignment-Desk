@@ -1,7 +1,7 @@
 /**
 * Add a trim() method to all string objects
 */
-if(typeof(String.prototype.trim) === "undefined") {
+if ( typeof(String.prototype.trim) === "undefined" ) {
     String.prototype.trim = function() {
         return String(this).replace(/^\s+|\s+$/g, '');
     };
@@ -43,9 +43,8 @@ function ad_add_to_participants(user_id, user_nicename, role_id, role_name){
 	if (jQuery("#ad-participant-role-" + role_id + "-wrap").length > 0 && !error_message) {
 		// create a new list item that hold a hidden form element.
 		var field_html = '<p id="ad-participants-' + role_id + '-' + user_id + '"><input type="hidden" id="ad-participant-'
-						+ user_id +'" name="ad-participant-role-'+role_id
-						+ '[]" value="'+ user_id + '|' + user_role_status + '"/>'
-						+ user_nicename + ' (' + user_role_status + ')</p>';
+						+ user_id +'" name="ad-participant-assign[]" value="'+ role_id + '|' + user_id + '"/>'
+						+ user_nicename + ' (pending)</p>';
 		// Append it to the list
 		jQuery("#ad-participant-role-" + role_id + "-wrap").append(field_html);
 	} else if (!error_message) {
@@ -54,9 +53,9 @@ function ad_add_to_participants(user_id, user_nicename, role_id, role_name){
 						+ '<h5>' + role_name + '</h5>'
 						+ '<p id="ad-participants-' + role_id + '-' + user_id + '">';
 		field_html += '<input type="hidden"' + user_id 
-		                + '" name="ad-participant-role-'+role_id
-						+ '[]" value="'+ user_id + '|' + user_role_status + '"/>'
-						+ user_nicename + ' (' + user_role_status + ')';
+		                + '" name="ad-participant-assign[]"'
+						+ 'value="'+ role_id + '|' + user_id + '"/>'
+						+ user_nicename + ' (pending)';
 		field_html += '</p></div>';				
 		jQuery("#ad-participants-wrap").append(field_html);			
 	} else {
@@ -151,19 +150,34 @@ jQuery(document).ready(function() {
 	/**
 	* Assign a volunteer to the story.
 	*/
-	jQuery("a[id^=ad-volunteer-]").each(function(index, link){
-		// a#ad-volunteer-$role_id-$role_name-$user_id
-		var spl = link.id.split('-');
-		var role_id = spl[2];
-		var role_name = spl[3];
-		var user_id = spl[4];
-		var user_nicename = spl[5];
+	jQuery("button.ad-assign-participant-button").each(function(index, button){
+		var spl = jQuery(button).val().split('|');
+		var role_id = spl[0];
+		var role_name = spl[1];
+		var user_id = spl[2];
+		var user_nicename = spl[3];
 	
-		jQuery(link).click(function(){
+		jQuery(button).click(function(){
 			ad_add_to_participants(user_id, user_nicename, role_id, role_name);
-			jQuery(link).parent().remove();
+			jQuery(button).parents('p').remove();
 			return false;
 		});
+	});
+	
+	/**
+	 * This function is attached to the click event of the "Remove" buttons.
+	 * This removes the participant record from the next submission.
+	 */
+	jQuery('button.ad-remove-participant-button').click(function(){
+			// Hide the entire wrapper if its the last one
+			var remove_input = '<input type="hidden" name="ad-participant-remove[]" value="' + jQuery(this).val() + '">';
+			if ( jQuery(this).parents('div.ad-role-wrap').find('p').length == 1 ) {
+				jQuery(this).parents('div.ad-role-wrap').html(remove_input);
+			} else {
+				jQuery(this).parents('div.ad-role-wrap').append(remove_input)
+				jQuery(this).parents('p').remove();
+			}
+			return false;
 	});
 	
 	/* ============================ Assignment Status ============================ */
@@ -268,20 +282,6 @@ jQuery(document).ready(function() {
 		});		
 		jQuery('#ad-edit-participant-types').show();
 		return false;
-	});
-	
-	/**
-	 * This function is attached to the click event of the "Remove" buttons.
-	 * This removes the participant record from the next submission.
-	 */
-	jQuery('.ad-remove-participant-button').click(function() {
-		// Hide the entire wrapper if its the last one
-		if ( jQuery(this).parents('div.ad-role-wrap').find('p').length == 1 ) {
-			jQuery(this).parents('div.ad-role-wrap').remove();
-		} else {
-			jQuery(this).parents('p').remove();
-		}
-		
 	});
 	
 	/* ============================ Pitched By ============================ */

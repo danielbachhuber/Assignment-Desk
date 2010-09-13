@@ -1,5 +1,17 @@
 <?php
 
+if (!function_exists('ad_format_ef_duedate')){
+function ad_format_ef_duedate($duedate){
+    $formatted = '';
+    if($duedate) {
+    	$duedate_month = date('M', $duedate);
+    	$duedate_day = date('j', $duedate);
+    	$duedate_year = date('Y', $duedate);
+    	$formatted = "$duedate_month/$duedate_day/$duedate_year";
+    } 
+    return $formatted;
+}
+}
 /**
  * Fetch all of the participants for a post.
  * Optionally filter for user who's role record of a certain status.

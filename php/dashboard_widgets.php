@@ -1,6 +1,6 @@
 <?php
 
-require_once(ASSIGNMENT_DESK_DIR_PATH . "/php/utils.php");
+require_once("utils.php");
 
 /*
 * This class manages the widgets that appear in the Wordpress Administration Dashboard.
@@ -32,77 +32,127 @@ class ad_dashboard_widgets {
 		return $count;
 	}
 	
-	function count_user_posts_by_assignment_status($status){
+	/**
+	 * Count the unpublished posts assigned to the current user.
+	 * Users coauthors if enabled.
+	 * @param term $status The term from the assignment_status taxonomy.
+	 * @return int the number of unpublished posts of that assignment_status assigned to the current user
+	 */
+	function count_user_posts_by_assignment_status( $status ) {
 	    global $current_user, $wpdb, $assignment_desk;
 	    get_currentuserinfo();
-	    
-	    $counts = array();
-	    
-	    if ( ! $assignment_desk->coauthors_plus_exists() ){
-            return $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts
+	 
+	    $count = 0;
+	    // Query for all the unpublished posts where $current_user is a coauthor.
+	    // Then tally up the count for the status.
+	    if ( $assignment_desk->coauthors_plus_exists() ){
+            $posts = $wpdb->get_results("SELECT * FROM $wpdb->posts 
+	                                LEFT JOIN $wpdb->term_relationships ON($wpdb->posts.ID = $wpdb->term_relationships.object_id)
+                                    LEFT JOIN $wpdb->term_taxonomy 
+                                        ON($wpdb->term_taxonomy.term_taxonomy_id = $wpdb->term_relationships.term_taxonomy_id)
+                                    LEFT JOIN $wpdb->terms ON($wpdb->terms.term_id = $wpdb->term_taxonomy.term_id)
+                	                WHERE $wpdb->posts.post_status != 'publish'
+                                      AND $wpdb->posts.post_status != 'inherit' 
+                                      AND $wpdb->posts.post_status != 'trash'
+                    				  AND $wpdb->posts.post_status != 'auto-draft'
+                    				  AND $wpdb->term_taxonomy.taxonomy = 'author'
+                                      AND $wpdb->terms.name = '$current_user->user_login'");
+            foreach ( $posts as $post ){
+                $post_assignment_status = wp_get_object_terms($post->ID, $assignment_desk->custom_taxonomies->assignment_status_label);
+                if ( $post_assignment_status && $post_assignment_status[0]->term_id == $status->term_id ){
+                    $count++;
+                }
+            }
+	    }
+	    else {
+	        // Slightly easier without coauthors.
+	        // Just query for the count.
+	        $count = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->posts
                                     LEFT JOIN $wpdb->term_relationships ON($wpdb->posts.ID = $wpdb->term_relationships.object_id)
-                                    LEFT JOIN $wpdb->term_taxonomy ON($wpdb->term_taxonomy.term_taxonomy_id = $wpdb->term_relationships.term_taxonomy_id)
+                                    LEFT JOIN $wpdb->term_taxonomy 
+                                        ON($wpdb->term_taxonomy.term_taxonomy_id = $wpdb->term_relationships.term_taxonomy_id)
                                     WHERE $wpdb->posts.post_author = '$current_user->ID' 
                                      AND $wpdb->posts.post_status != 'publish'
                                      AND $wpdb->posts.post_status != 'inherit' 
                                      AND $wpdb->posts.post_status != 'trash'
              						 AND $wpdb->posts.post_status != 'auto-draft'
-                                     AND $wpdb->term_taxonomy.taxonomy = 'assignment_status'
+                                     AND $wpdb->term_taxonomy.taxonomy = '{$assignment_desk->custom_taxonomies->assignment_status_label}'
                                      AND $wpdb->term_taxonomy.term_id = $status->term_id ");
 	    }
-	    else {
-	        return 0;
-	    }
+	    return $count;
 	    
 	}
    
+    /**
+    * Display the Assignment Desk dashboard widget.
+    */
     function widget() {
         global $assignment_desk, $current_user, $wpdb;
 
         get_currentuserinfo();
         $assignment_statuses = $assignment_desk->custom_taxonomies->get_assignment_statuses();
-        
-		if($_REQUEST['ad-dashboard-editor-messages']){
-            foreach($_REQUEST['ad-dashboard-assignment-messages'] as $messages){
+
+		if ( $_REQUEST['ad-dashboard-assignment-messages'] ) {
+            foreach( $_REQUEST['ad-dashboard-assignment-messages'] as $message ) {
                 echo "<div class='message info'>$message</div>";
             }
         }
         ?>
-        <p class="sub">By assignment status</p>
+        <p class="sub"><?php _e('By assignment status'); ?></p>
         <div class="table">
         <table>
             <tbody>
-            <?php 
-            if ( current_user_can($assignment_desk->define_editor_permissions) ) { 
-                foreach ( $assignment_statuses as $assignment_status ) {
-                    $count = $this->count_posts_by_assignment_status($assignment_status);
-                    if ( $count ) {
-                        $url = admin_url() . "/edit.php?ad-assignment-status=$assignment_status->term_id";
-                        echo "<tr><td class='b'><a href='$url'>" . $count . "</a></td>";
-                        echo "<td class='b t'><a href='$url'>$assignment_status->name</a></td></tr>";
-                    }
+            <?php
+            $counts = array();
+            $total_unpublished_assignments = 0;
+            
+            /* If the $current_user is editor or higher display the total count for each assignment_status across the whole blog.
+             * If they don't have editor permissions show the number of posts assigned to the $current_user.
+             */
+
+            foreach ( $assignment_statuses as $assignment_status ) {
+                if ( current_user_can($assignment_desk->define_editor_permissions) ) {
+                    // Count all posts with a certain status
+                    $counts[$assignment_status->term_id] = $this->count_posts_by_assignment_status($assignment_status);
                 }
-                $this_month_url = admin_url() . '/edit.php?post_status=publish&monthnum=' . date('M');
-                $q = new WP_Query( array('post_status' => 'publish', 'monthnum' => date('M')));
-                echo "<tr><td class='b'><a href='$this_month_url'>$q->found_posts</a></td>";
-                echo "<td class='b t'><a href='$this_month_url'>" . _('Published this month', 'assignment-desk') . "</a></td></tr>";
+                else {
+                    // Count all posts that this user can edit with a certain status
+                    $counts[$assignment_status->term_id] = $this->count_user_posts_by_assignment_status($assignment_status);
+                }
+                $total_unpublished_assignments += $counts[$assignment_status->term_id];
+            }
+            if ( $total_unpublished_assignments ) {
+                foreach ( $assignment_statuses as $assignment_status ) {
+                    // if ( $counts[$assignment_status->term_id] ) {
+                        $url = admin_url() . "edit.php?ad-assignment-status=$assignment_status->term_id";
+                        echo "<tr><td class='b'><a href='$url'>" . $counts[$assignment_status->term_id] . "</a></td>";
+                        echo "<td class='b t'><a href='$url'>$assignment_status->name</a></td></tr>";
+                    // }
+                }
             }
             else {
-                foreach ( $assignment_statuses as $assignment_status ) {
-                    $count = $this->count_user_posts_by_assignment_status($assignment_status);
-                    if ( $count ) {
-                        $url = admin_url() . "/edit.php?ad-assignment-status=$assignment_status->term_id";
-                        echo "<tr><td class='b'><a href='$url'>" . $count . "</a></td>";
-                        echo "<td class='b t'><a href='$url'>$assignment_status->name</a></td></tr>";
-                    }
-                }
+                echo "<tr><td>" . _('No assigned stories.') . "</td><td></td></tr>";
             }
-                ?>
+            ?>
             </tbody>
         </table>
         </div>
-        
-        <br>
+
+        <?php if ( current_user_can($assignment_desk->define_editor_permissions) ) : ?>
+        <p class="sub"><?php _e('Historical'); ?></p>
+        <div class="table">
+        <table>
+            <tbody>
+<?php
+                $this_month_url = admin_url() . 'edit.php?post_status=publish&monthnum=' . date('M');
+                $q = new WP_Query( array('post_status' => 'publish', 'monthnum' => date('M')));
+                echo "<tr><td class='b'><a href='$this_month_url'>$q->found_posts</a></td>";
+                echo "<td class='b t'><a href='$this_month_url'>" . __('Published this month') . "</a></td></tr>";
+?>
+            </tbody>
+        </table>
+        </div>
+        <?php endif; ?>
 <?php
        
         $pending_posts = array();
@@ -112,15 +162,15 @@ class ad_dashboard_widgets {
                                                   WHERE meta_key = '_ad_participant_{$current_user->ID}'
                                                   ORDER BY post_id");
         
-        if ( ! $participant_posts ){
+        if ( !$participant_posts ){
             $participant_posts = array();
         }
         
         $roles = $assignment_desk->custom_taxonomies->get_user_roles();
         $max_pending = 5;
         
-        foreach($participant_posts as $post ){
-            foreach($roles as $user_role){
+        foreach( $participant_posts as $post ){
+            foreach( $roles as $user_role ) {
                 // Get all of the roles this user has for this post
                 $participant_record = get_post_meta($post->post_id, "_ad_participant_role_$user_role->term_id", true);
                 if($participant_record) {
@@ -138,6 +188,7 @@ class ad_dashboard_widgets {
         }
         $count_pending = count($pending_posts);
         if ( $count_pending ) {
+            echo "<br>";
             echo "<p class='sub'>$count_pending pending assignment";
             echo ($count_pending != 1)? 's': ''; 
             echo "</p>";
@@ -147,13 +198,41 @@ class ad_dashboard_widgets {
                 echo "<tr>";
                 echo "<td>{$post->post_title} | {$pending[1]->name}</td>";
                 echo "<td><a class='button' href='" . admin_url() . "index.php?participant_response=accepted&post_id=$post->ID&role_id={$pending[1]->term_id}'>Accept</a> ";
-                echo "<a class='button' href='" . admin_url() . "index.php?participant_response=declined&post_id=$post->ID&role_id={$pending[1]->term_id}'>Decline</a></td>";
-                echo "</tr>";  
+                echo "<a class='button' href='" . admin_url() . "index.php?participant_response=declined&post_id=$post->ID&role_id={$pending[1]->term_id}'>Decline</a> ";
+                
+                echo "<a onclick=\"javascript:jQuery('#ad-{$post->ID}-summary').slideToggle();\">Details</a></td>";
+                echo "</tr>";
+                echo "<tr><td colspan='2'>";
+                echo "<div id='ad-{$post->ID}-summary' style='display:none'>";
+
+                $summary = get_post_meta($post->ID, '_ef_description', true);
+                if ( !$summary && $post->post_excerpt ) {
+                    $summary = $post->post_excerpt;
+                }
+                if ( !$summary && $post->post_content ) {
+                    $summary = $post->post_content;
+                }
+                echo "<p>" . _('Summary') . ": $summary</p>";
+                
+                if ( $assignment_desk->edit_flow_exists() ){
+                    $duedate = get_post_meta($post->ID, '_ef_duedate', true);
+                    if ( $duedate ) {
+                        $duedate = ad_format_ef_duedate($duedate);
+                    }
+                    else {
+                        $duedate = _('None assigned');
+                    }
+                    echo "<p>" . _('Due Date ') . ": $duedate</p>";
+                }
+                echo "</div></td></tr>";
             }
             echo "</table></div>";
         }
    }
    
+   /**
+    * Confirm or decline a story assignment.
+    */
    function respond_to_story_invite(){
        global $current_user, $assignment_desk, $coauthors_plus, $user_ID;
        
@@ -162,31 +241,37 @@ class ad_dashboard_widgets {
        $role_id = (int)$_GET['role_id'];
           
        get_currentuserinfo();
-       if (!$current_user->ID || $user_ID != $post_id) {
+       if ( !$current_user->ID || !$user_ID || !$post_id || !$role_id ) {
            $_REQUEST['ad-dashboard-assignment-messages'][] = _('Unauthorized assignment response. This is fishy.');
        }
        $_REQUEST['ad-dashboard-assignment-messages'] = array();
        
-       if ($response && $post_id && $role_id){
+       if ( $response && $post_id && $role_id ) {
            $participant_record = get_post_meta($post_id, "_ad_participant_role_$role_id", true);
-           // This will not evaluate to true unless the user is currently pending for this role on this post.
-           if($participant_record && $participant_record[$current_user->ID] == 'pending'){
+
+           // Are we waiting for a response from this user for this post/role?
+           if ( $participant_record && $participant_record[$current_user->ID] == 'pending' ) {
                $participant_record[$current_user->ID] = $response;
-               if($response == 'accepted'){
-                   $_REQUEST['ad-dashboard-assignment-messages'][] = _('Thank you.');
-                   // Add as a co-author
-                   if($assignment_desk->coauthors_plus_exists()){
+
+               if ( $response == 'accepted' ) {
+                   // Add as a coauthor
+                   if ( $assignment_desk->coauthors_plus_exists() ) {
                        $coauthors_plus->add_coauthors($post_id, array($current_user->user_login), true);
                    }
+                   // Add as author
+                   else {
+                       wp_update_post(array( 'ID' => $post_id, $author => $current_user->user_login ));
+                   }
+                   $_REQUEST['ad-dashboard-assignment-messages'][] = _('Thank you.');
                    $user_participant = get_post_meta($post_id, "_ad_participant_$current_user->ID", true);
-                   if(!$user_participant){
+                   if ( !$user_participant ) {
                        $user_participant = array();
                    }
                    $user_participant[] = $role_id;
                    update_post_meta($post_id, "_ad_participant_$current_user->ID", $user_participant);
                }
                else if($response == 'declined'){
-                   $_REQUEST['ad-dashboard-assignment-messages'][] = _('Sorry!');
+                   $_REQUEST['ad-dashboard-assignment-messages'][] = _("Sorry.");
                }
            }
            update_post_meta($post_id, "_ad_participant_role_$role_id", $participant_record);

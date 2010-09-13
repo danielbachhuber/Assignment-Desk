@@ -24,13 +24,16 @@ class ad_manage_posts {
 		    add_action('manage_posts_custom_column', array(&$this, 'handle_ad_user_type_column'), 10, 2);
     		add_action('manage_posts_custom_column', array(&$this, 'handle_ad_volunteers_column'), 10, 2);
 		}
-        // Custom post filters.
+		
+		// Filter by eligible contributor types
         add_action('restrict_manage_posts', array(&$this, 'add_eligible_contributor_type_filter'));
-        add_action('restrict_manage_posts', array(&$this, 'add_assignment_status_filter'));
         
-        // Sorting
+		// Sorting
 		add_action('restrict_manage_posts', array(&$this, 'add_sortby_option'));
         add_action('parse_query', array(&$this, 'parse_query_sortby'));
+
+        // Filter by assignment status
+        add_action('restrict_manage_posts', array(&$this, 'add_assignment_status_filter'));
 
         // Add postmeta to the manage_posts query
         add_filter('posts_join', array(&$this, 'posts_join_meta' ));
@@ -43,10 +46,6 @@ class ad_manage_posts {
         // Filter by assignment_status
         add_filter('posts_where', array(&$this, 'add_ad_assignment_statuses_where' ), 20);
         
-        // This javascript is only active on the edit.php
-        if ( $pagenow == 'edit.php' ){
-            wp_enqueue_script('ad-manage-posts-js', ASSIGNMENT_DESK_URL . 'js/manage_posts.js', array('jquery'));
-        }
 	}
     
     /**
@@ -116,7 +115,7 @@ class ad_manage_posts {
              	echo $location;
             }
             else {
-                _e('None listed');
+                _e('None');
             }
         }
     }
@@ -153,8 +152,9 @@ class ad_manage_posts {
                     foreach($participants as $user => $status){
                         if($status == 'accepted'){
                             $at_least_one_user = true;
-                            $user = get_userdatabylogin($user);
-                            $links .= "<a href='" . admin_url() . "/user-edit.php?user_id=$user->ID'>$user->display_name</a> ";
+                            $user = get_userdata($user);
+                            $user_name = ($user->display_name)? $user->display_name : $user->user_login;
+                            $links .= "<a href='" . admin_url() . "/user-edit.php?user_id=$user->ID'>$user_name</a> ";
                         }
                     }
                     // Print the role header and user links

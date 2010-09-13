@@ -1,12 +1,12 @@
 <?php
 
 if(!class_exists('ad_custom_taxonomies')){
-    
+
 /**
 * Base class for operations on custom taxonomies
 */
 class ad_custom_taxonomies {
-  
+
     var $assignment_status_label = 'assignment_status';
     var $user_role_label = 'user_role';
     var $user_type_label = 'user_type';
@@ -27,9 +27,8 @@ class ad_custom_taxonomies {
         
 		$args = array();
 		$labels = array();
-		// Register $assignment_taxonomy if it doesn't exist, else generate an object								
+		// Register $assignment_taxonomy if it doesn't exist.
 		if (!$this->ad_taxonomy_exists($this->assignment_status_label)) {
-			// @todo Need to label the different text on the view
 			$labels = array('name' => 'Assignment Statuses',
 							'singular_name' => 'Assignment Status',
 							'search_items' => 'Search Assignment Statuses',
@@ -43,14 +42,11 @@ class ad_custom_taxonomies {
 							'rewrite' => false
 							);
 			register_taxonomy($this->assignment_status_label, array('post'), $args);
-			
-			add_action('delete_term_taxonomy', array(&$this, 'handle_user_type_delete'));
-			
 			add_filter('manage_edit-tags_columns', array(&$this, 'manage_tags_columns'));
 			add_action('manage_user_type_custom_column', array(&$this, 'handle_user_type_users_column'), 10, 3);
 		}
-			
-		// Register $user_role_taxonomy if it doesn't exist									
+
+		// Register $user_role_taxonomy if it doesn't exist
 		if (!$this->ad_taxonomy_exists($this->user_role_label)) {
 		  // @todo Need to label the different text on the view
 		  $args = array('label' => 'User Roles',
@@ -72,6 +68,7 @@ class ad_custom_taxonomies {
 						'rewrite' => false
 		                );
 		  register_taxonomy($this->user_type_label, array('user'), $args);
+		  add_action('delete_term_taxonomy', array(&$this, 'handle_user_type_delete'));
 		}
       
     }
@@ -87,6 +84,10 @@ class ad_custom_taxonomies {
      * Called only the first time the plugin is activated.
      */
     function activate_once() {
+	
+		/**
+		 * Instantiates the default assignment statuses
+		 */
         $default_assignment_labels = array(
             array( 'term' => 'New',
                    'args' => array( 
@@ -114,11 +115,13 @@ class ad_custom_taxonomies {
                        'description' => 'This assignment should not show up on public-facing views.',)
 		          ),
         );
-	    
 	    foreach ( $default_assignment_labels as $term ){
            wp_insert_term( $term['term'], $this->assignment_status_label, $term['args'] );
 	    }
 	    
+		/**
+		 * Instantiates the default user roles, or work users might volunteer to do in a story
+		 */
 	    $default_user_roles = array(
             array( 'term' => 'Writer',
                    'args' => array( 
@@ -140,20 +143,28 @@ class ad_custom_taxonomies {
                         'slug' => 'editor',
                         'description' => 'Manages the story production.',)
 		          ),
+            array(  'term' => 'Fact Checker',
+                     'args' => array( 
+                        'slug' => 'fact-checker',
+                        'description' => 'Checks the facts.',)
+    		      ),
         );
-	    
 	    foreach ( $default_user_roles as $term ){
            wp_insert_term( $term['term'], $this->user_role_label, $term['args'] );
 	    }
+	
+		/**
+		 * Instantiates the default user types, 
+		 */
 	    $default_user_types = array(
             array( 'term' => 'Community Contributor',
                    'args' => array( 
                        'slug' => 'community-contributor',
                        'description' => 'Someone from the community that writes for the blog.',)
 		          ),
-		    array( 'term' => 'Professional',
+		    array( 'term' => 'Professional Journalist',
 			       'args' => array( 
-			           'slug' => 'professional',
+			           'slug' => 'professional-journalist',
                        'description' => 'A professional journalist.',)
 		          ),
 		    array( 'term' => 'Student Journalist',
@@ -161,15 +172,26 @@ class ad_custom_taxonomies {
 			           'slug' => 'student-journalist',
 					   'description' => 'A student who writes for the blog.',)
 		          ),
+            array( 'term' => 'Local Business Owner',
+                   'args' => array( 
+                       'slug' => 'business-owner',
+                       'description' => 'Owns a local business.',)
+		          ),
+            array( 'term' => 'High School Student',
+                   'args' => array( 
+                       'slug' => 'high-school',
+                       'description' => 'A local high school student.',)
+  		          ),
         );
-	    
 	    foreach ( $default_user_types as $term ){
            wp_insert_term( $term['term'], $this->user_type_label, $term['args'] );
 	    }
+	
     }
     
     /**
-    * Work around to change the labels on the geenrated custom taxonomy UIs. 
+    * Work around to change the labels on the WordPress custom taxonomy UIs.
+	* For WordPress pre-3.0
     * See js/edit_tags.js 
     * @todo Internationalize the labels we are replacing.
     */
@@ -177,7 +199,9 @@ class ad_custom_taxonomies {
         wp_enqueue_script('ad-edit-tags-js', ASSIGNMENT_DESK_URL .'js/edit_tags.js', array('jquery'));
 
         $taxonomy = $_GET['taxonomy'];
-        if (!$taxonomy){ $taxonomy = $_POST['taxonomy']; }
+        if ( !$taxonomy ) {
+			$taxonomy = $_POST['taxonomy'];
+		}
         
         if ( $taxonomy ) {
             $title = "";
@@ -205,8 +229,7 @@ class ad_custom_taxonomies {
 
 	/**
 	 * Wrapper for the get_terms method
-	 * @param array|string $args Standard set of get_term() parameters
-	 *
+	 * @param array $args Standard set of get_term() parameters
  	 */
 	function get_assignment_statuses( $args = null ) {
 		// Ensure our custom statuses get the respect they deserve
@@ -216,8 +239,7 @@ class ad_custom_taxonomies {
 	
 	/**
 	 * Wrapper for the get_terms method
-	 * @param array|string $args Standard set of get_term() parameters
-	 *
+	 * @param array $args Standard set of get_term() parameters
  	 */
 	function get_user_types( $args = null ) {
 		// Ensure our custom statuses get the respect they deserve
@@ -227,7 +249,7 @@ class ad_custom_taxonomies {
 	
 	/**
 	 * Wrapper for the get_terms method
-	 * @param array|string $args Standard set of get_term() parameters
+	 * @param array $args Standard set of get_term() parameters
 	 *
  	 */
 	function get_user_roles( $args = null ) {
@@ -333,11 +355,12 @@ class ad_custom_taxonomies {
 	/**
 	* When we remove a user_type delete all 'ad_user_type' user metadata for user's of that type.
 	*/
-	function handle_user_type_delete($tt_id){
+	function handle_user_type_delete( $tt_id ) {
 	    global $wpdb;
 	    $term_id = $wpdb->get_var("SELECT term_id FROM $wpdb->term_taxonomy WHERE term_taxonomy_id = $tt_id");
         $wpdb->query("DELETE FROM $wpdb->usermeta WHERE meta_key='ad_user_type' and meta_value = $term_id");
 	}
+	
 	/**
 	 * Manage the columns on the edit-tags.php page (the generated UI for custom taxonomies.)
 	 * Remove the Posts and Slug columns on the user_type and user_role taxonomies.
@@ -345,11 +368,11 @@ class ad_custom_taxonomies {
 	 */
 	function manage_tags_columns($columns){
 	    
-	    if($_GET['taxonomy'] == 'user_type' || $_GET['taxonomy'] == 'user_role'){
-	        unset($columns['posts']);
-	        unset($columns['slug']);
+	    if ( $_GET['taxonomy'] == 'user_type' || $_GET['taxonomy'] == 'user_role' ){
+	        unset( $columns['posts'] );
+	        unset( $columns['slug'] );
         }
-	    if($_GET['taxonomy'] == 'user_type'){
+	    if ( $_GET['taxonomy'] == 'user_type' ) {
 	        $columns['_ad_users'] = _('Users');
 	    }
 	    return $columns;
@@ -360,7 +383,7 @@ class ad_custom_taxonomies {
 	 */
 	function handle_user_type_users_column( $c, $column_name, $term_id ){
 	    global $wpdb;
-	    if($column_name == '_ad_users'){
+	    if( $column_name == '_ad_users' ) {
 	        return $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->usermeta where meta_key='ad_user_type' and meta_value=$term_id");
 	    }
 	}

@@ -12,6 +12,9 @@ if ( !class_exists( 'ad_settings' ) ){
       
     }
 
+    /**
+     * Register all of the settings and sections with the Wordpress Settings API
+     */
 	function init() {
 		global $assignment_desk;
 		
@@ -28,27 +31,29 @@ if ( !class_exists( 'ad_settings' ) ){
 		add_settings_field( 'assignment_email_template_subject', 'Subject template for notifications', array(&$this, 'assignment_email_template_subject_option'), $assignment_desk->top_level_page, 'assignment_management' );
 		add_settings_field( 'assignment_email_template', 'Template for notifications', array(&$this, 'assignment_email_template_option'), $assignment_desk->top_level_page, 'assignment_management' );
 		
-		add_settings_section( 'miscellaneous', 'Miscellaneous', array(&$this, 'miscellaneous_setting_section'), $assignment_desk->top_level_page );
-		add_settings_field( 'google_maps_api_key', 'Google Maps API key', array(&$this, 'google_maps_api_key_option'), $assignment_desk->top_level_page, 'miscellaneous' );
-		
 		register_setting( $assignment_desk->pitch_form_options_group, $assignment_desk->get_plugin_option_fullname('pitch_form') );
 		
 		/* Pitch form */
 		add_settings_section( 'story_pitches', 'Story Pitches', array(&$this, 'story_pitches_setting_section'), $assignment_desk->pitch_form_settings_page );
 		add_settings_field( 'pitch_form_enabled', 'Enable pitch forms', array(&$this, 'pitch_form_enabled_option'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );
 		add_settings_field( 'pitch_form_elements', 'Pitch form elements', array(&$this, 'pitch_form_elements_option'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );
+		add_settings_field( 'pitch_form_success_message', 'Success message', array(&$this, 'pitch_form_success_message_option'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );			
 		
 		register_setting( $assignment_desk->public_facing_options_group, $assignment_desk->get_plugin_option_fullname('public_facing') );
 		
 		/* Public-facing */
 		add_settings_section( 'public_facing_views', 'Public-Facing Views', array(&$this, 'public_facing_views_setting_section'), $assignment_desk->public_facing_settings_page );
+		add_settings_field( 'public_facing_assignment_statuses[]', 'Public-facing assignment statuses', array(&$this, 'public_facing_assignment_statuses'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );			
 		add_settings_field( 'public_facing_filtering', 'Public-facing filtering', array(&$this, 'public_facing_filtering_option'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );
 		add_settings_field( 'public_facing_elements', 'Public-facing elements', array(&$this, 'public_facing_elements_option'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );
-		add_settings_field( 'public_facing_functionality', 'Public-facing functionality', array(&$this, 'public_facing_functionality_option'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );		
-		add_settings_field( 'public_facing_assignment_statuses[]', 'Public-facing assignment statuses', array(&$this, 'public_facing_assignment_statuses'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );		
+		add_settings_field( 'public_facing_functionality', 'Public-facing functionality', array(&$this, 'public_facing_functionality_option'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );	
+		add_settings_field( 'public_facing_no_pitches_message', 'Message to show if no pitches', array(&$this, 'public_facing_no_pitches_message_option'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );	
 			
 	}
 	
+	/**
+	 * Define all of the default settings.
+	 */
 	function setup_defaults() {
         global $assignment_desk, $wpdb;
         $options = $assignment_desk->general_options;
@@ -66,9 +71,9 @@ if ( !class_exists( 'ad_settings' ) ){
                                           WHERE tt.taxonomy = '{$assignment_desk->custom_taxonomies->assignment_status_label}' 
                                           AND t.slug = 'new' LIMIT 1");
         $new_status = $new_status[0];
-        $options['default_new_assignment_status'] = $new_status->term_id;
-        
-        $options['assignment_email_template_subject'] = _("[%blogname%] You've been assigned to %title%");
+        $options['default_new_assignment_status']          = $new_status->term_id;
+        $options['assignment_email_notifications_enabled'] = true;
+        $options['assignment_email_template_subject']      = _("[%blogname%] You've been assigned to %title%");
         $options['assignment_email_template'] =
 _(
 "Hello %display_name%,
@@ -78,8 +83,47 @@ Please login to %dashboard_link% to accept or decline.
 
 Thanks
 Blog Editor");
-         // @todo - other defaults ?
-         update_option($assignment_desk->get_plugin_option_fullname('general'), $options);
+
+        update_option($assignment_desk->get_plugin_option_fullname('general'), $options);
+         
+        // Public facing defaults
+        $public_facing_options = $assignment_desk->public_facing_options;
+        $approved_status = $wpdb->get_results("SELECT t.*, tt.* 
+                                           FROM $wpdb->terms AS t INNER JOIN $wpdb->term_taxonomy AS tt ON t.term_id = tt.term_id 
+                                           WHERE tt.taxonomy = '{$assignment_desk->custom_taxonomies->assignment_status_label}' 
+                                           AND t.slug = 'approved' LIMIT 1");
+        $approved_status = $approved_status[0];
+        $public_facing_options['public_facing_assignment_statuses'] = array($approved_status->term_id);
+
+        $public_facing_options['public_facing_assignment_status_enabled'] = true;
+        $public_facing_options['public_facing_description_enabled'] = true;
+        $public_facing_options['public_facing_duedate_enabled'] = true;
+        $public_facing_options['public_facing_location_enabled'] = true;
+        $public_facing_options['public_facing_categories_enabled'] = true;
+        $public_facing_options['public_facing_tags_enabled'] = true;
+        
+        $public_facing_options['public_facing_filtering_post_status_enabled'] = true;
+        $public_facing_options['public_facing_filtering_participant_type_enabled'] = true;
+        $public_facing_options['public_facing_filtering_sort_by_enabled'] = true;
+
+        $public_facing_options['public_facing_volunteering_enabled'] = true;
+        $public_facing_options['public_facing_voting_enabled'] = true;
+        $public_facing_options['public_facing_commenting_enabled'] = true;
+        $public_facing_options['public_facing_no_pitches_message'] = _('No stories right now.');
+        update_option($assignment_desk->get_plugin_option_fullname('public_facing'), $public_facing_options);
+         
+        // Pitch form defaults
+        $pitch_form_options = $assignment_desk->pitch_form_options;
+        $pitch_form_options['pitch_form_enabled']             = true;
+        $pitch_form_options['pitch_form_description_enabled'] = true;
+        $pitch_form_options['pitch_form_categories_enabled']  = true;
+        $pitch_form_options['pitch_form_tags_enabled']        = true;
+        $pitch_form_options['pitch_form_duedate_enabled']     = true;
+        $pitch_form_options['pitch_form_location_enabled']    = true;
+        $pitch_form_options['pitch_form_volunteer_enabled']   = true;
+
+        update_option($assignment_desk->get_plugin_option_fullname('pitch_form'), $pitch_form_options);
+         
     }
 	
 	function default_new_assignment_status_option() {
@@ -149,12 +193,11 @@ Blog Editor");
 	}
 	
 	function assignment_email_template_subject_option() {
-    		global $assignment_desk;
-    		$options = $assignment_desk->general_options;
-    		?>
-    		<input id="assignment_email_template_subject" name="assignment_desk_general[assignment_email_template_subject]" size="60" maxlength="60" 
-    		        value="<?php echo $options['assignment_email_template_subject']; ?>"><br>
-    <?php
+		global $assignment_desk;
+		$options = $assignment_desk->general_options;
+		echo '<input id="assignment_email_template_subject"'
+		 	. 'name="assignment_desk_general[assignment_email_template_subject]"'
+			. 'size="60" maxlength="60" value="' . $options['assignment_email_template_subject'] . '">';
     }
     	
 	function assignment_email_template_option() {
@@ -163,25 +206,12 @@ Blog Editor");
 		
 		echo '<textarea id="assignment_email_template" name="assignment_desk_general[assignment_email_template]" rows="8" cols="60">';
 		echo $options['assignment_email_template'];
-		echo '</textarea><br />';
-		echo '<span class="description">' . 
-		    _('We support the following tokens') . 
-		    ': %blogname%, %title%, %role%, %display_name%, %location%, %post_link%, and %dashboard_link%.</span>';
+		echo '</textarea>';
+		echo '<p class="description">' . 
+		    _('Template supports the following tokens') . 
+		    ': %blogname%, %title%, %excerpt%, %description%, %duedate%, %role%, %display_name%, %location%, %post_link%, and %dashboard_link%.</p>';
 	}
-	
-	function google_maps_api_key_option() {
-		global $assignment_desk;
-		$options = $assignment_desk->general_options;
-		echo '<input type="text" id="google_maps_api_key" name="assignment_desk_general[google_maps_api_key]" value="';
-		echo $options['google_maps_api_key'];
-		echo '"/>';
 		
-	}
-	
-	function miscellaneous_setting_section() {
-	    
-	}
-	
 	function story_pitches_setting_section() {
 		global $assignment_desk;
 		echo "Add an Assignment Desk pitch form to any page or post by adding <code>&#60;!--$assignment_desk->pitch_form_key--&#62;</code> where you'd it to appear.";
@@ -255,8 +285,8 @@ Blog Editor");
 			. $options['pitch_form_categories_description'] . '" size="35" />';	
 		echo '</span></li>';
 		// Tags
-		echo '<li><span class="field"<input id="pitch_form_tags_enabled" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_tags_enabled]" type="checkbox"';
-		if ($options['pitch_form_tags_enabled']) {
+		echo '<li><span class="field"><input id="pitch_form_tags_enabled" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_tags_enabled]" type="checkbox"';
+		if ( $options['pitch_form_tags_enabled'] ) {
 			echo ' checked="checked"';
 		}
 		echo ' />&nbsp;<label for="pitch_form_tags_enabled">Tags</label></span>';
@@ -316,7 +346,7 @@ Blog Editor");
 		}
 		// Volunteer
 		echo '<li><span class="field"><input id="pitch_form_volunteer_enabled" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_volunteer_enabled]" type="checkbox"';
-		if ($options['pitch_form_volunteer_enabled']) {
+		if ( $options['pitch_form_volunteer_enabled'] ) {
 			echo ' checked="checked"';
 		}
 		echo ' />&nbsp;<label for="pitch_form_volunteer_enabled">Volunteer</label></span>';
@@ -329,14 +359,54 @@ Blog Editor");
 			. $options['pitch_form_volunteer_label'] . '" size="15" />';
 		echo '<label for="pitch_form_volunteer_description">Description</label>';
 		echo '<input id="pitch_form_volunteer_description" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_volunteer_description]" type="text" value="'
-			. $options['pitch_form_volunteer_description'] . '" size="35" />';	
+			. $options['pitch_form_volunteer_description'] . '" size="35" />';
 		echo '</span></li>';
 		echo '</ul>';
+	}
+	
+	function pitch_form_success_message_option() {
+		global $assignment_desk;
+		$options = $assignment_desk->pitch_form_options;
+		echo '<textarea id="pitch_form_success_message"'
+		 	. 'name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_success_message]"'
+			. ' cols="45" rows="4">' . $options['pitch_form_success_message'] . '</textarea>';
+		echo '<p class="description">'
+			. _('Optional: Enter a custom success message')
+			. '</p>';
+		/* @todo Token support
+		echo '<p class="description">' . 
+		    _('Message supports the following tokens') . 
+		    ': %post_link%, %title%, %description%, %duedate%, and %location%.</p>'; */
 	}
 	
 	function public_facing_views_setting_section() {
 		global $assignment_desk;
 		echo "Enable public access to pitches and stories in progress by dropping <code>&#60;!--$assignment_desk->all_posts_key--&#62;</code> in a page.";
+	}
+	
+	/**
+	 * Admin can choose which assignment statuses will be visible on the public-facing views. 
+	 */
+	function public_facing_assignment_statuses() {
+	    global $assignment_desk;
+	    $options = $assignment_desk->public_facing_options;
+	    $public_statuses = $options['public_facing_assignment_statuses'];
+	    if ( !is_array($public_statuses) ) {
+	        $public_statuses = array((int)$public_statuses);
+	    }
+	    echo "<label>" . _("Posts of the following assignment statuses will be displayed on the public facing views (if enabled)") . ":</label>";
+	    echo "<ul>";
+	    foreach ($assignment_desk->custom_taxonomies->get_assignment_statuses() as $assignment_status){
+	        echo "<li>";
+	        echo "<input type='checkbox' id='ad-status-{$assignment_status->term_id}' value='{$assignment_status->term_id}' " .
+	                     'name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_assignment_statuses][]"';
+	        if ( in_array($assignment_status->term_id, $public_statuses) ) {
+	            echo ' checked="checked" ';
+	        } 
+	        echo '>';
+	        echo " <label for='ad-status-{$assignment_status->term_id}'>$assignment_status->name</label></li>";
+	    }
+	    echo "</ul>";
 	}
 	
 	function public_facing_filtering_option() {
@@ -368,7 +438,7 @@ Blog Editor");
 	 	echo ' />&nbsp;<label for="public_facing_filtering_sort_by_enabled">Sort by</label>';
 		echo '<p class="description">Indicate the different ways the user can filter posts.';
 	}
-	
+
 	function public_facing_elements_option() {
 		global $assignment_desk;
 		if ($assignment_desk->edit_flow_exists()) {
@@ -383,7 +453,13 @@ Blog Editor");
 		if ($options['public_facing_content_enabled']) {
 			echo ' checked="checked"';
 		}
-		echo ' />&nbsp;<label for="public_facing_content_enabled">Content</label></li>';		
+		echo ' />&nbsp;<label for="public_facing_content_enabled">Content</label></li>';
+		// Assignment Status
+		echo '<li><input id="public_facing_assignment_status_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_assignment_status_enabled]" type="checkbox"';
+		if ($options['public_facing_assignment_status_enabled']) {
+			echo ' checked="checked"';
+		}
+		echo ' />&nbsp;<label for="public_facing_assignment_status_enabled">Assignment Status</label></li>';		
 		// Description
 		if ($assignment_desk->edit_flow_exists()) {
 			echo '<li><input id="public_facing_description_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_description_enabled]" type="checkbox"';
@@ -429,7 +505,7 @@ Blog Editor");
 		echo ' />&nbsp;<label for="public_facing_tags_enabled">Tags</label></li>';
 		echo '</ul>';
 	}
-	
+
 	function public_facing_functionality_option() {
 		global $assignment_desk;
 		if ($assignment_desk->edit_flow_exists()) {
@@ -466,6 +542,14 @@ Blog Editor");
 		echo '</ul>';
 	}
 	
+	function public_facing_no_pitches_message_option() {
+		global $assignment_desk;
+		$options = $assignment_desk->public_facing_options;
+		echo '<input id="public_facing_no_pitches_message"'
+		 	. 'name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_no_pitches_message]"'
+			. ' size="60" maxlength="120" value="' . $options['public_facing_no_pitches_message'] . '">';
+	}
+	
 	/**
 	 * Print the assignment statuses as a form. The admin chooses which assignment statuses will
 	 * be visible on the public-facing views. 
@@ -496,11 +580,10 @@ Blog Editor");
 	 * Validation for all of our form elements
 	 */
 	function assignment_desk_validate($input) {
-		
-		// @todo Should we validate all elements?
-		
+
+		// @todo Should we validate all settings elements?
+
 		$input['default_new_assignment_status'] = (int)$input['default_new_assignment_status'];
-		$input['google_maps_api_key'] = wp_kses($input['google_maps_api_key'], $allowedtags);
 		return $input;
 	}
     
@@ -512,7 +595,6 @@ Blog Editor");
 			$msg = __('Settings Saved', 'assignment-desk');
 		}
 
-    
 ?>                                   
 	<div class="wrap">
 		<div class="icon32" id="icon-options-general"><br/></div>
@@ -570,8 +652,7 @@ Blog Editor");
 	</div>
 
 <?php
-      
-      
+
     }
 
 	function public_facing_settings() {
@@ -608,10 +689,9 @@ Blog Editor");
       
       
     }
-  
+
   }
-  
-  
+
 }
 
 

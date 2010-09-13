@@ -2,39 +2,7 @@
 .ad-module { margin-bottom: 10px; }
 .ad-module h2 { margin: 2px; font-size: 16px; font-weight: 900;}
 
-/* User messages. */
-li.ad-message-success {
-	border:solid 1px #90ac13; 
-	background:#eef4d3 url(../images/success.png) 8px 6px no-repeat;
-	color:#6b800d;
-	font-weight:bold;
-	padding:4px;
-	text-align:center;
-}
-
-li.ad-message-info {
-	border:solid 1px #90ac13; 
-	background:#eef4d3 url(../images/success.png) 8px 6px no-repeat;
-	color:#6b800d;
-	font-weight:bold;
-	padding:4px;
-	text-align:center;
-}
-
-li.ad-message-error {
-    border:solid 1px #CC0000;
-	background:#F7CBCA url(../images/error.png) 8px 6px no-repeat;
-	color:#CC0000;
-	font-weight:bold;
-	padding:4px;
-	text-align:center;
-}
-
-.avatar {
-    float:left;
-    padding-right: 10px;
-}
-
+.avatar { float:left; padding-right: 10px; }
 
 /* Settings */
 ul.ad_elements span.field { width: 120px; display: inline-block;}
@@ -49,3 +17,10 @@ ul.ad_elements span.copy input { margin-right: 10px; }
 #ad_assignments .t { color: #777;  padding-right: 12px; padding-top: 6px; width: 100%; }
 #ad_assignments .b { padding-right: 6px; padding-top: 6px; }
 #ad_assignments p.sub { color: #777; font-family: Georgia, 'Times New Roman', 'Bitstream Charter', Times, serif; font-size: 13px; font-style: italic; margin: 0px; }
+
+/* Manage Posts */
+th.column-_ad_assignment_status { word-wrap: normal; }
+th.column-_ef_location { word-wrap: normal; }
+th.column-_ad_participants { word-wrap: normal; }
+th.column-_ad_user_type { word-wrap: normal; }
+th.column-_ad_volunteers { word-wrap: normal; }
