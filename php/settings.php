@@ -70,9 +70,9 @@ if ( !class_exists( 'ad_settings' ) ){
                                           WHERE tt.taxonomy = '{$assignment_desk->custom_taxonomies->assignment_status_label}' 
                                           AND t.slug = 'new' LIMIT 1");
         $new_status = $new_status[0];
-        $options['default_new_assignment_status'] = $new_status->term_id;
-        
-        $options['assignment_email_template_subject'] = _("[%blogname%] You've been assigned to %title%");
+        $options['default_new_assignment_status']          = $new_status->term_id;
+        $options['assignment_email_notifications_enabled'] = true;
+        $options['assignment_email_template_subject']      = _("[%blogname%] You've been assigned to %title%");
         $options['assignment_email_template'] =
 _(
 "Hello %display_name%,
@@ -93,18 +93,34 @@ Blog Editor");
                                            AND t.slug = 'approved' LIMIT 1");
         $approved_status = $approved_status[0];
         $public_facing_options['public_facing_assignment_statuses'] = array($approved_status->term_id);
+
         $public_facing_options['public_facing_assignment_status_enabled'] = true;
+        $public_facing_options['public_facing_description_enabled'] = true;
+        $public_facing_options['public_facing_duedate_enabled'] = true;
+        $public_facing_options['public_facing_location_enabled'] = true;
+        $public_facing_options['public_facing_categories_enabled'] = true;
+        $public_facing_options['public_facing_tags_enabled'] = true;
+        
         $public_facing_options['public_facing_filtering_post_status_enabled'] = true;
         $public_facing_options['public_facing_filtering_participant_type_enabled'] = true;
         $public_facing_options['public_facing_filtering_sort_by_enabled'] = true;
+
         $public_facing_options['public_facing_volunteering_enabled'] = true;
         $public_facing_options['public_facing_voting_enabled'] = true;
+        $public_facing_options['public_facing_commenting_enabled'] = true;
         $public_facing_options['public_facing_no_pitches_message'] = _('No stories right now.');
         update_option($assignment_desk->get_plugin_option_fullname('public_facing'), $public_facing_options);
          
         // Pitch form defaults
         $pitch_form_options = $assignment_desk->pitch_form_options;
-        $pitch_form_options['pitch_form_enabled'] = true;
+        $pitch_form_options['pitch_form_enabled']             = true;
+        $pitch_form_options['pitch_form_description_enabled'] = true;
+        $pitch_form_options['pitch_form_categories_enabled']  = true;
+        $pitch_form_options['pitch_form_tags_enabled']        = true;
+        $pitch_form_options['pitch_form_duedate_enabled']     = true;
+        $pitch_form_options['pitch_form_location_enabled']    = true;
+        $pitch_form_options['pitch_form_volunteer_enabled']   = true;
+
         update_option($assignment_desk->get_plugin_option_fullname('pitch_form'), $pitch_form_options);
          
     }
