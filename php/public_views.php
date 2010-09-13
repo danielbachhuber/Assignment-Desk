@@ -265,7 +265,7 @@ class ad_public_views {
 				$pitch_form .= '<li><input type="checkbox" '
 							. 'id="assignment_desk_volunteer_' . $user_role->term_id
 							. '" name="assignment_desk_volunteer[]"';
-				if ( in_array( $user_role->term_id, $this->return_if_set($_POST['assignment_desk_volunteer']) ) ) {
+				if ( $this->return_if_set($_POST['assignment_desk_volunteer']) && in_array( $user_role->term_id, $this->return_if_set($_POST['assignment_desk_volunteer']) ) ) {
 					$pitch_form .= ' checked="checked"';
 				}
 				$pitch_form .= ' value="' . $user_role->term_id . '"'
