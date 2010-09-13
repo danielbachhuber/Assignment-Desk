@@ -260,7 +260,7 @@ class ad_public_views {
 			} else {
 				$volunteer_label = 'Volunteer';
 			}	
-			$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_volunteer">' . $volunteer_label . '</label><ul id="assignment_desk_volunteer">';
+			$pitch_form .= '<fieldset class="list"><label for="assignment_desk_volunteer">' . $volunteer_label . '</label><ul id="assignment_desk_volunteer">';
 			foreach ( $user_roles as $user_role ) {
 				$pitch_form .= '<li><input type="checkbox" '
 							. 'id="assignment_desk_volunteer_' . $user_role->term_id
@@ -657,7 +657,7 @@ class ad_public_views {
 	
 		    $volunteer_form = '<a name="assignment_desk_volunteer_form"></a>';
 		    $volunteer_form .= '<form method="post" class="assignment_desk_volunteer_form">';
-			$volunteer_form .= '<fieldset class="standard">';
+			$volunteer_form .= '<fieldset class="list">';
 			if ( $pitch_form_options['pitch_form_volunteer_label'] ) {
 				$volunteer_label = $pitch_form_options['pitch_form_volunteer_label'];
 			} else {
@@ -861,7 +861,6 @@ class ad_public_views {
 		$parent_post = $post;		
 		
 		$html = '<div class="assignment-desk assignment-desk-all-pitches">';
-		$action_links = '';
 		
 		if ( $_POST['sort_by'] == 'ranking' || $_POST['sort_by'] == 'post_date' || $_POST['sort_by'] == 'due_date' ) {
 			$sort_by = $_POST['sort_by'];
@@ -1035,6 +1034,8 @@ class ad_public_views {
 				if ( $description || $duedate || $location ) {
 				    $html .= '</div>';
 				}
+				
+				$action_links = '';				
 				if ( $options['public_facing_volunteering_enabled'] ) {
 				    $html .= $this->show_all_volunteers( $post_id );
 					$action_links .= '<a href="' . get_permalink( $post_id ) . '#assignment_desk_volunteer_form">Volunteer</a> | ';
