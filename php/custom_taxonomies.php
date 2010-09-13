@@ -143,6 +143,11 @@ class ad_custom_taxonomies {
                         'slug' => 'editor',
                         'description' => 'Manages the story production.',)
 		          ),
+            array(  'term' => 'Fact Checker',
+                     'args' => array( 
+                        'slug' => 'fact-checker',
+                        'description' => 'Checks the facts.',)
+    		      ),
         );
 	    foreach ( $default_user_roles as $term ){
            wp_insert_term( $term['term'], $this->user_role_label, $term['args'] );
@@ -167,6 +172,16 @@ class ad_custom_taxonomies {
 			           'slug' => 'student-journalist',
 					   'description' => 'A student who writes for the blog.',)
 		          ),
+            array( 'term' => 'Local Business Owner',
+                   'args' => array( 
+                       'slug' => 'business-owner',
+                       'description' => 'Owns a local business.',)
+		          ),
+            array( 'term' => 'High School Student',
+                   'args' => array( 
+                       'slug' => 'high-school',
+                       'description' => 'A local high school student.',)
+  		          ),
         );
 	    foreach ( $default_user_types as $term ){
            wp_insert_term( $term['term'], $this->user_type_label, $term['args'] );
