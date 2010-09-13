@@ -24,13 +24,16 @@ class ad_manage_posts {
 		    add_action('manage_posts_custom_column', array(&$this, 'handle_ad_user_type_column'), 10, 2);
     		add_action('manage_posts_custom_column', array(&$this, 'handle_ad_volunteers_column'), 10, 2);
 		}
-        // Custom post filters.
+		
+		// Filter by eligible contributor types
         add_action('restrict_manage_posts', array(&$this, 'add_eligible_contributor_type_filter'));
-        add_action('restrict_manage_posts', array(&$this, 'add_assignment_status_filter'));
         
-        // Sorting
+		// Sorting
 		add_action('restrict_manage_posts', array(&$this, 'add_sortby_option'));
         add_action('parse_query', array(&$this, 'parse_query_sortby'));
+
+        // Filter by assignment status
+        add_action('restrict_manage_posts', array(&$this, 'add_assignment_status_filter'));
 
         // Add postmeta to the manage_posts query
         add_filter('posts_join', array(&$this, 'posts_join_meta' ));
