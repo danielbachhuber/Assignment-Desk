@@ -78,14 +78,13 @@ class ad_public_views {
 	 * Show the pitch form on post or pages with template tag if enabled
 	 */
 	function show_pitch_form( $the_content ) {
-		global $assignment_desk, $current_user;
+		global $assignment_desk;
 
 		$options = $assignment_desk->pitch_form_options;		
 		
 		if ( $assignment_desk->edit_flow_exists() ) {
 			global $edit_flow;
 		}
-		wp_get_current_user();
 	
 		$user_roles = $assignment_desk->custom_taxonomies->get_user_roles();
 		
@@ -100,213 +99,231 @@ class ad_public_views {
 	    $categories = get_categories($category_args);
 		
 		$template_tag = '<!--assignment-desk-pitch-form-->';
-
-		// Only show the pitch form if the User is logged in
-		if ( is_user_logged_in() ) {
             
-			$pitch_form = '';
+		$pitch_form = '';
 
-			// Messages to the User appear at the top of the form
+		// Messages to the User appear at the top of the form
 
-			if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['success']) ) {
-				if ( $options['pitch_form_success_message'] ) {
-					$success_message = $options['pitch_form_success_message'];
-				} else {
-					$success_message = 'Pitch submitted successfully. Thanks!';
-				}
-				$pitch_form .= '<div class="message success">' . $success_message . '</div>';
-			} else if ( count($_REQUEST['assignment_desk_messages']['pitch_form']['errors']) ) {
-				$pitch_form .= '<div class="message error">Please correct the error(s) below.</div>';
-			}
-
-			if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors']['secret']) ) {
-                $pitch_form .= '<p class="error">'
-							. $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['secret']
-							. '</p>';
-            }
-		
-			/**
-			 * For all of the fields, the admin has the ability to define a label and a description
-			 * in the settings. If those aren't defined, then the stock label will show with no description
-			 */
-		
-			$pitch_form .= '<form method="post" id="assignment_desk_pitch_form">';
-            
-			// Title
-			if ( $options['pitch_form_title_label'] ) {
-				$title_label = $options['pitch_form_title_label'];
+		if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['success']) ) {
+			if ( $options['pitch_form_success_message'] ) {
+				$success_message = $options['pitch_form_success_message'];
 			} else {
-				$title_label = 'Title';
+				$success_message = 'Pitch submitted successfully. Thanks!';
 			}
-			$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_title">' . $title_label . '</label>'
-						. '<input type="text" id="assignment_desk_title" name="assignment_desk_title" ';
-			$pitch_form .= 'value="' . $this->return_if_set($_POST['assignment_desk_title']) . '"/>';
-			if ( $options['pitch_form_title_description'] ) {
+			$pitch_form .= '<div class="message success">' . $success_message . '</div>';
+		} else if ( count($_REQUEST['assignment_desk_messages']['pitch_form']['errors']) ) {
+			$pitch_form .= '<div class="message error">Please correct the error(s) below.</div>';
+		}
+
+		if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors']['secret']) ) {
+               $pitch_form .= '<p class="error">'
+						. $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['secret']
+						. '</p>';
+           }
+	
+		/**
+		 * For all of the fields, the admin has the ability to define a label and a description
+		 * in the settings. If those aren't defined, then the stock label will show with no description
+		 */
+	
+		$pitch_form .= '<form method="post" id="assignment_desk_pitch_form">';
+           
+		// Title
+		if ( $options['pitch_form_title_label'] ) {
+			$title_label = $options['pitch_form_title_label'];
+		} else {
+			$title_label = 'Title';
+		}
+		$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_title">' . $title_label . '</label>'
+					. '<input type="text" id="assignment_desk_title" name="assignment_desk_title" ';
+		$pitch_form .= 'value="' . $this->return_if_set($_POST['assignment_desk_title']) . '"/>';
+		if ( $options['pitch_form_title_description'] ) {
+		$pitch_form .= '<p class="description">'
+					. $options['pitch_form_title_description']
+					. '</p>';
+		}
+		if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors']['title']) ) {
+			$pitch_form .= '<p class="error">'
+						. $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['title']
+						. '</p>';
+		}
+		$pitch_form	.= '</fieldset>';
+		
+		// Edit Flow Description
+		if ( $options['pitch_form_description_enabled'] && $assignment_desk->edit_flow_exists() ) {
+			if ( $options['pitch_form_description_label'] ) {
+				$description_label = $options['pitch_form_description_label'];
+			} else {
+				$description_label = 'Description';
+			}
+			$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_description">' . $description_label . '</label>'
+						. '<textarea id="assignment_desk_description"'
+						. ' name="assignment_desk_description">';
+			$pitch_form .= $this->return_if_set($_POST['assignment_desk_description']);
+			$pitch_form .= '</textarea>';
+			if ( $options['pitch_form_description_description'] ) {
 			$pitch_form .= '<p class="description">'
-						. $options['pitch_form_title_description']
+						. $options['pitch_form_description_description']
 						. '</p>';
 			}
-			if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors']['title']) ) {
-				$pitch_form .= '<p class="error">'
-							. $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['title']
-							. '</p>';
+			$pitch_form .= '</fieldset>';
+		}
+		
+		// Edit Flow Due Date
+		if ( $options['pitch_form_duedate_enabled'] && $assignment_desk->edit_flow_exists() ) {
+			if ( $options['pitch_form_duedate_label'] ) {
+				$duedate_label = $options['pitch_form_duedate_label'];
+			} else {
+				$duedate_label = 'Due Date';
+			}	
+			$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_duedate">' . $duedate_label . '</label>';
+			$pitch_form .= '<input type="text" size="12" name="assignment_desk_duedate" id="assignment_desk_duedate" ';
+			$pitch_form .= 'value="' . $this->return_if_set($_POST['assignment_desk_duedate']) . '"/>';
+			if ( $options['pitch_form_duedate_description'] ) {
+			    $pitch_form .= '<p class="description">' . $options['pitch_form_dudedate_description'] . '</p>';
 			}
-			$pitch_form	.= '</fieldset>';
-			
-			// Edit Flow Description
-			if ( $options['pitch_form_description_enabled'] && $assignment_desk->edit_flow_exists() ) {
-				if ( $options['pitch_form_description_label'] ) {
-					$description_label = $options['pitch_form_description_label'];
-				} else {
-					$description_label = 'Description';
+			if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors']['duedate']) ) {
+   				$pitch_form .= '<p class="error">'
+   							. $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['duedate']
+   							. '</p>';
+   			}
+			$pitch_form .= '</fieldset>';
+		}
+		
+		// Categories
+		if ( $options['pitch_form_categories_enabled'] ) {
+			if ( $options['pitch_form_categories_label'] ) {
+				$category_label = $options['pitch_form_categories_label'];
+			} else {
+				$category_label = 'Category';
+			}	
+			$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_categories">' . $category_label . '</label>';
+			$pitch_form .= '<select id="assignment_desk_categories" name="assignment_desk_categories">';
+			foreach ( $categories as $category ) {
+				$pitch_form .= '<option value="' . $category->term_id . '"';
+				if ( $category->term_id == $this->return_if_set($_POST['assignment_desk_categories']) ) {
+					$pitch_form .= ' selected="selected"';
 				}
-				$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_description">' . $description_label . '</label>'
-							. '<textarea id="assignment_desk_description"'
-							. ' name="assignment_desk_description">';
-				$pitch_form .= $this->return_if_set($_POST['assignment_desk_description']);
-				$pitch_form .= '</textarea>';
-				if ( $options['pitch_form_description_description'] ) {
-				$pitch_form .= '<p class="description">'
-							. $options['pitch_form_description_description']
-							. '</p>';
-				}
-				$pitch_form .= '</fieldset>';
+				$pitch_form .= '>'
+							. $category->name
+							. '</option>';
 			}
-			
-			// Edit Flow Due Date
-			if ( $options['pitch_form_duedate_enabled'] && $assignment_desk->edit_flow_exists() ) {
-				if ( $options['pitch_form_duedate_label'] ) {
-					$duedate_label = $options['pitch_form_duedate_label'];
-				} else {
-					$duedate_label = 'Due Date';
-				}	
-				$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_duedate">' . $duedate_label . '</label>';
-				$pitch_form .= '<input type="text" size="12" name="assignment_desk_duedate" id="assignment_desk_duedate" ';
-				$pitch_form .= 'value="' . $this->return_if_set($_POST['assignment_desk_duedate']) . '"/>';
-				if ( $options['pitch_form_duedate_description'] ) {
-				    $pitch_form .= '<p class="description">' . $options['pitch_form_dudedate_description'] . '</p>';
-				}
-				if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors']['duedate']) ) {
-    				$pitch_form .= '<p class="error">'
-    							. $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['duedate']
-    							. '</p>';
-    			}
-				$pitch_form .= '</fieldset>';
+			$pitch_form .= '</select>';
+			if ($options['pitch_form_categories_description']) {
+			$pitch_form .= '<p class="description">'
+						. $options['pitch_form_categories_description']
+						. '</p>';
 			}
-			
-			// Categories
-			if ( $options['pitch_form_categories_enabled'] ) {
-				if ( $options['pitch_form_categories_label'] ) {
-					$category_label = $options['pitch_form_categories_label'];
-				} else {
-					$category_label = 'Category';
-				}	
-				$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_categories">' . $category_label . '</label>';
-				$pitch_form .= '<select id="assignment_desk_categories" name="assignment_desk_categories">';
-				foreach ( $categories as $category ) {
-					$pitch_form .= '<option value="' . $category->term_id . '"';
-					if ( $category->term_id == $this->return_if_set($_POST['assignment_desk_categories']) ) {
-						$pitch_form .= ' selected="selected"';
-					}
-					$pitch_form .= '>'
-								. $category->name
-								. '</option>';
-				}
-				$pitch_form .= '</select>';
-				if ($options['pitch_form_categories_description']) {
-				$pitch_form .= '<p class="description">'
-							. $options['pitch_form_categories_description']
-							. '</p>';
-				}
-				$pitch_form .= '</fieldset>';
-			}		
-						
-			// Tags
-			if ( $options['pitch_form_tags_enabled'] ) {
-				if ( $options['pitch_form_tags_label'] ) {
-					$tags_label = $options['pitch_form_tags_label'];
-				} else {
-					$tags_label = 'Tags';
-				}	
-				$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_tags">' . $tags_label . '</label>'
-							. '<input type="text" id="assignment_desk_tags" name="assignment_desk_tags"';
-				$pitch_form .= 'value="' . $this->return_if_set($_POST['assignment_desk_tags']) . '"/>';							
-				if ( $options['pitch_form_tags_description'] ) {
-				$pitch_form .= '<p class="description">'
-							. $options['pitch_form_tags_description']
-							. '</p>';
-				}
-				$pitch_form .= '</fieldset>';
-			}
-			
-			// Edit Flow Location
-			if ( $options['pitch_form_location_enabled'] && $assignment_desk->edit_flow_exists() ) {
-				if ( $options['pitch_form_location_label'] ) {
-					$location_label = $options['pitch_form_location_label'];
-				} else {
-					$location_label = 'Location';
-				}
-				$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_location">' . $location_label . '</label>'
-							. '<input type="text" id="assignment_desk_location" name="assignment_desk_location" ';
-				$pitch_form .= 'value="' . $this->return_if_set($_POST['assignment_desk_location']) . '"/>';
-				if ( $options['pitch_form_location_description'] ) {
-				$pitch_form .= '<p class="description">'
-							. $options['pitch_form_location_description']
-							. '</p>';
-				}
-				$pitch_form .= '</fieldset>';
-			}
-			
-			// Volunteer
-			if ( $options['pitch_form_volunteer_enabled'] ) {
-				if ( $options['pitch_form_volunteer_label'] ) {
-					$volunteer_label = $options['pitch_form_volunteer_label'];
-				} else {
-					$volunteer_label = 'Volunteer';
-				}	
-				$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_volunteer">' . $volunteer_label . '</label><ul id="assignment_desk_volunteer">';
-				foreach ( $user_roles as $user_role ) {
-					$pitch_form .= '<li><input type="checkbox" '
-								. 'id="assignment_desk_volunteer_' . $user_role->term_id
-								. '" name="assignment_desk_volunteer[]"';
-					if ( in_array( $user_role->term_id, $this->return_if_set($_POST['assignment_desk_volunteer']) ) ) {
-						$pitch_form .= ' checked="checked"';
-					}
-					$pitch_form .= ' value="' . $user_role->term_id . '"'
-								. ' /><label for="assignment_desk_volunteer_'
-								. $user_role->term_id .'">' . $user_role->name
-								. '</label>';
-					$pitch_form .= '<br /><span class="description">' . $user_role->description . '</span>';
-					$pitch_form .= '</li>';
-				}
-				$pitch_form .= '</ul>';
-				if ( $options['pitch_form_volunteer_description'] ) {
-				$pitch_form .= '<p class="description">'
-							. $options['pitch_form_volunteer_description']
-							. '</p>';
-				}
-				$pitch_form .= '</fieldset>';
-			}
-			
-			// Author information and submit
-			$pitch_form .= '<fieldset class="submit">'
-						. '<input type="hidden" id="assignment_desk_author" name="assignment_desk_author" value="' . $current_user->ID . '" />';
-						
-			// Set a random one-time token in the form to prevent duplicate submissions.
-			$_SESSION['assignment_desk_pitch_form_secret'] = md5(uniqid(rand(), true));
-			$pitch_form .= "<input type='hidden' name='assignment_desk_pitch_form_secret' id='assignment_desk_pitch_form_secret' value='{$_SESSION['assignment_desk_pitch_form_secret']}' />";
-						
-			$pitch_form .= '<input type="hidden" name="assignment_desk_pitch_nonce" value="' 
-						. wp_create_nonce('assignment_desk_pitch') . '" />';
-			$pitch_form .= '<input type="submit" value="Submit" id="assignment_desk_pitch_submit" name="assignment_desk_pitch_submit" /></fieldset>';					
+			$pitch_form .= '</fieldset>';
+		}		
 					
-			$pitch_form .= '</form>';
-			
+		// Tags
+		if ( $options['pitch_form_tags_enabled'] ) {
+			if ( $options['pitch_form_tags_label'] ) {
+				$tags_label = $options['pitch_form_tags_label'];
+			} else {
+				$tags_label = 'Tags';
+			}	
+			$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_tags">' . $tags_label . '</label>'
+						. '<input type="text" id="assignment_desk_tags" name="assignment_desk_tags"';
+			$pitch_form .= 'value="' . $this->return_if_set($_POST['assignment_desk_tags']) . '"/>';							
+			if ( $options['pitch_form_tags_description'] ) {
+			$pitch_form .= '<p class="description">'
+						. $options['pitch_form_tags_description']
+						. '</p>';
+			}
+			$pitch_form .= '</fieldset>';
+		}
+		
+		// Edit Flow Location
+		if ( $options['pitch_form_location_enabled'] && $assignment_desk->edit_flow_exists() ) {
+			if ( $options['pitch_form_location_label'] ) {
+				$location_label = $options['pitch_form_location_label'];
+			} else {
+				$location_label = 'Location';
+			}
+			$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_location">' . $location_label . '</label>'
+						. '<input type="text" id="assignment_desk_location" name="assignment_desk_location" ';
+			$pitch_form .= 'value="' . $this->return_if_set($_POST['assignment_desk_location']) . '"/>';
+			if ( $options['pitch_form_location_description'] ) {
+			$pitch_form .= '<p class="description">'
+						. $options['pitch_form_location_description']
+						. '</p>';
+			}
+			$pitch_form .= '</fieldset>';
+		}
+		
+		// Volunteer
+		if ( $options['pitch_form_volunteer_enabled'] ) {
+			if ( $options['pitch_form_volunteer_label'] ) {
+				$volunteer_label = $options['pitch_form_volunteer_label'];
+			} else {
+				$volunteer_label = 'Volunteer';
+			}	
+			$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_volunteer">' . $volunteer_label . '</label><ul id="assignment_desk_volunteer">';
+			foreach ( $user_roles as $user_role ) {
+				$pitch_form .= '<li><input type="checkbox" '
+							. 'id="assignment_desk_volunteer_' . $user_role->term_id
+							. '" name="assignment_desk_volunteer[]"';
+				if ( in_array( $user_role->term_id, $this->return_if_set($_POST['assignment_desk_volunteer']) ) ) {
+					$pitch_form .= ' checked="checked"';
+				}
+				$pitch_form .= ' value="' . $user_role->term_id . '"'
+							. ' /><label for="assignment_desk_volunteer_'
+							. $user_role->term_id .'">' . $user_role->name
+							. '</label>';
+				$pitch_form .= '<br /><span class="description">' . $user_role->description . '</span>';
+				$pitch_form .= '</li>';
+			}
+			$pitch_form .= '</ul>';
+			if ( $options['pitch_form_volunteer_description'] ) {
+			$pitch_form .= '<p class="description">'
+						. $options['pitch_form_volunteer_description']
+						. '</p>';
+			}
+			$pitch_form .= '</fieldset>';
+		}
+		
+		if ( is_user_logged_in() ) {
+			global $current_user;
+			wp_get_current_user();			
+		
+			// Current user information
+			$pitch_form .= '<fieldset class="standard assignment-desk-user">'
+						. '<label>You are currently logged in as:</label> '
+						. $current_user->display_name . ' &#60;' . $current_user->user_email . '&#62;'
+						. '<input type="hidden" id="assignment_desk_author" name="assignment_desk_author" value="' . $current_user->ID . '" />'
+						. '</fieldset>';
+					
 		} else {
 			
-			$pitch_form = '<div class="message alert">Oops, you have to be logged in to submit a pitch.</div>';
+			$pitch_form .= '<fieldset class="standard assignment-desk-login">'
+						. '<label for="assignment_desk_username">Username:</label> '
+						. '<input id="assignment_desk_username" name="assignment_desk_username" type="text" '
+						. 'value="' . $this->return_if_set($_POST['assignment_desk_username']) . '" />'							
+						. '<br /><label for="">Password:</label> '
+						. '<input id="assignment_desk_password" name="assignment_desk_password" type="password" '
+						. '/>';
+			if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors']['login']) ) {
+   				$pitch_form .= '<p class="error">'
+   							. $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['login']
+   							. '</p>';
+   			}
+			$pitch_form .= '</fieldset>';
 			
 		}
+		
+		$pitch_form .= '<fieldset class="submit">';
+					
+		// Set a random one-time token in the form to prevent duplicate submissions.
+		$_SESSION['assignment_desk_pitch_form_secret'] = md5(uniqid(rand(), true));
+		$pitch_form .= "<input type='hidden' name='assignment_desk_pitch_form_secret' id='assignment_desk_pitch_form_secret' value='{$_SESSION['assignment_desk_pitch_form_secret']}' />";
+					
+		$pitch_form .= '<input type="hidden" name="assignment_desk_pitch_nonce" value="' 
+					. wp_create_nonce('assignment_desk_pitch') . '" />';
+		$pitch_form .= '<input type="submit" value="Submit" id="assignment_desk_pitch_submit" name="assignment_desk_pitch_submit" /></fieldset>';				
+				
+		$pitch_form .= '</form>';
 
 		$the_content = str_replace($template_tag, $pitch_form, $the_content);
 		return $the_content;
@@ -316,7 +333,7 @@ class ad_public_views {
 	 * Saves data after a User submits a pitch form
 	 */
 	function save_pitch_form() {
-		global $assignment_desk, $current_user;
+		global $assignment_desk;
 		$message = array();
 		$options = $assignment_desk->general_options;
 		$user_types = $assignment_desk->custom_taxonomies->get_user_types();
@@ -336,20 +353,34 @@ class ad_public_views {
 		    $form_secret = $_POST['assignment_desk_pitch_form_secret'];
             if ( !isset( $_SESSION['assignment_desk_pitch_form_secret'] ) || 
                  strcasecmp($form_secret, $_SESSION['assignment_desk_pitch_form_secret']) != 0 ) {
-                $form_messages['errors']['secret'] = __('Did you just refresh the browser?');
-                return $form_messages;
+                $form_messages['errors']['secret'] = __('Form invalidates when you refresh your browser. Please start over.');
             }
 
 			// Ensure that it was the user who submitted the form, not a bot
 			if ( !wp_verify_nonce($_POST['assignment_desk_pitch_nonce'], 'assignment_desk_pitch') ) {
-				return $form_messages['error']['nonce'];
+				$form_messages['error']['nonce'] = 'Are you a bot?';
 			}
 
 			$sanitized_title = strip_tags($_POST['assignment_desk_title']);
 			if ( !$sanitized_title ) {
 				$form_messages['errors']['title'] = 'Please add a title to this pitch.';
 			}
-			$sanitized_author = (int)$_POST['assignment_desk_author'];
+			if ( is_user_logged_in() ) {
+				global $current_user;
+				$sanitized_author = (int)$_POST['assignment_desk_author'];
+			} else {
+				require_once(ABSPATH . WPINC . '/registration.php');
+				$credentials['user_login'] = $_POST['assignment_desk_username'];
+				$credentials['user_password'] = $_POST['assignment_desk_password'];
+				$credentials['remember'] = true;
+				$user = wp_signon($credentials);
+				if ( is_wp_error($user) ) {
+				   $form_messages['errors']['login'] = $user->get_error_message();
+				} else {
+					wp_set_current_user($user->ID);
+					$sanitized_author = $user->ID;
+				}
+			}
 			$sanitized_description = wp_kses($_POST['assignment_desk_description'], $allowedposttags);
 			$sanitized_tags = $_POST['assignment_desk_tags'];
 			$sanitized_categories = (int)$_POST['assignment_desk_categories'];
@@ -445,7 +476,7 @@ class ad_public_views {
 			}
 			
 			$form_messages['success']['post_id'] = $post_id;
-			
+			unset($_POST);
 			return $form_messages;
 		}
 		
