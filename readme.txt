@@ -3,7 +3,7 @@ Contributors: efroese, danielbachhuber
 Tags: editorial workflow, journalism, crowdsourcing, assignment management
 Requires at least: 2.9.2
 Tested up to: 3.0.1
-Stable tag: 0.5
+Stable tag: 0.6
 
 Empower the users to participate in the journalism being done at your site and guide them along the way.
 
@@ -32,11 +32,23 @@ This section describes how to install and configure the Assignment Desk.
 4. Optionally install Co-Authors Plus. Assignment Desk has been tested with 2.1.1. Co-Authors Plus allows us to assign multiple users to a post as authors. Multiple authors can then edit the post. Installation of this plugin is highly recommended.
 6. Optionally install Adminimize. Assignment Desk has been tested with 1.7.7. Adminimize allows you the ability to hide certain boxes on the post edit screen based on the users user type. The Assignment Desk is not dependent on this plugin.
 
+Further configuration information is available on the website http://openassignment.org/configuration/
+
 == Frequently Asked Questions ==
+
+Hit us with questions in the forum http://wordpress.org/tags/assignment-desk
 
 == Screenshots ==
 
 == Changelog ==
+
+= 0.6 =
+* Pitch form shows to all visitors by default. If user isn't logged in, a username and password field appears at the bottom. Pitch form also has customizable success message, and saves form data if submission is invalid.
+* Volunteering form moved to single post page and includes descriptions for each user role.
+* Pitch metadata appears in initial assignment email to end user.
+* Assignment details are accessible in the dashboard widget.
+* Bug fix: Assignment notification emails are no longer sent multiple times in a row.
+* Bug fix: Users can now comment on posts with status of 'draft' or 'pending'. Ability to enable or disable the comment form on unpublished posts is now functional as well.
 
 = 0.5 =
 * Hide Assignment Desk functionality if post is published
