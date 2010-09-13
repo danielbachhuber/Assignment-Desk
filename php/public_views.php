@@ -98,9 +98,14 @@ class ad_public_views {
 			// Messages to the User appear at the top of the form
 
 			if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['success']) ) {
-				$pitch_form .= '<div class="message success"><p>Pitch submitted successfully.</p></div>';
+				if ( $options['pitch_form_success_message'] ) {
+					$success_message = $options['pitch_form_success_message'];
+				} else {
+					$success_message = 'Pitch submitted successfully. Thanks!';
+				}
+				$pitch_form .= '<div class="message success">' . $success_message . '</div>';
 			} else if ( count($_REQUEST['assignment_desk_messages']['pitch_form']['errors']) ) {
-				$pitch_form .= '<div class="message error"><p>Please correct the error(s) below.</p></div>';
+				$pitch_form .= '<div class="message error">Please correct the error(s) below.</div>';
 			}
 
 			if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors']['secret']) ) {
@@ -613,7 +618,7 @@ class ad_public_views {
 								. '_volunteer_' . $user_role->term_id
 								. '" name="assignment_desk_volunteer_roles[]"'
 								. ' value="' . $user_role->term_id . '"';
-				if (in_array($user_role->term_id, $existing_roles) ) {
+				if ( in_array($user_role->term_id, $existing_roles) ) {
 					$volunteer_form .= ' checked="checked"';
 				}
 				$volunteer_form .= ' /><label for="assignment_desk_post_' . $post_id
@@ -639,7 +644,7 @@ class ad_public_views {
 		
 		} else {
 			
-			$volunteer_message = '<div class="message alert">You must be logged in to volunteer.</div>';
+			$volunteer_message = '<div class="message alert">Sorry, you must be logged in to volunteer.</div>';
 			return $volunteer_message;
 			
 		}

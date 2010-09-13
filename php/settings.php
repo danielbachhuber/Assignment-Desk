@@ -37,6 +37,7 @@ if ( !class_exists( 'ad_settings' ) ){
 		add_settings_section( 'story_pitches', 'Story Pitches', array(&$this, 'story_pitches_setting_section'), $assignment_desk->pitch_form_settings_page );
 		add_settings_field( 'pitch_form_enabled', 'Enable pitch forms', array(&$this, 'pitch_form_enabled_option'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );
 		add_settings_field( 'pitch_form_elements', 'Pitch form elements', array(&$this, 'pitch_form_elements_option'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );
+		add_settings_field( 'pitch_form_success_message', 'Success message', array(&$this, 'pitch_form_success_message_option'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );			
 		
 		register_setting( $assignment_desk->public_facing_options_group, $assignment_desk->get_plugin_option_fullname('public_facing') );
 		
@@ -205,10 +206,10 @@ Blog Editor");
 		
 		echo '<textarea id="assignment_email_template" name="assignment_desk_general[assignment_email_template]" rows="8" cols="60">';
 		echo $options['assignment_email_template'];
-		echo '</textarea><br />';
-		echo '<span class="description">' . 
-		    _('We support the following tokens') . 
-		    ': %blogname%, %title%, %excerpt%, %description%, %duedate%, %role%, %display_name%, %location%, %post_link%, and %dashboard_link%.</span>';
+		echo '</textarea>';
+		echo '<p class="description">' . 
+		    _('Template supports the following tokens') . 
+		    ': %blogname%, %title%, %excerpt%, %description%, %duedate%, %role%, %display_name%, %location%, %post_link%, and %dashboard_link%.</p>';
 	}
 		
 	function story_pitches_setting_section() {
@@ -361,6 +362,21 @@ Blog Editor");
 			. $options['pitch_form_volunteer_description'] . '" size="35" />';
 		echo '</span></li>';
 		echo '</ul>';
+	}
+	
+	function pitch_form_success_message_option() {
+		global $assignment_desk;
+		$options = $assignment_desk->pitch_form_options;
+		echo '<textarea id="pitch_form_success_message"'
+		 	. 'name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_success_message]"'
+			. ' cols="45" rows="4">' . $options['pitch_form_success_message'] . '</textarea>';
+		echo '<p class="description">'
+			. _('Optional: Enter a custom success message')
+			. '</p>';
+		/* @todo Token support
+		echo '<p class="description">' . 
+		    _('Message supports the following tokens') . 
+		    ': %post_link%, %title%, %description%, %duedate%, and %location%.</p>'; */
 	}
 	
 	function public_facing_views_setting_section() {
