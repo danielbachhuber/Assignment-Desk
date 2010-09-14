@@ -551,32 +551,6 @@ Blog Editor");
 	}
 	
 	/**
-	 * Print the assignment statuses as a form. The admin chooses which assignment statuses will
-	 * be visible on the public-facing views. 
-	 */
-	function public_facing_assignment_statuses() {
-	    global $assignment_desk;
-	    $options = $assignment_desk->public_facing_options;
-	    $public_statuses = $options['public_facing_assignment_statuses'];
-	    if ( !is_array($public_statuses) ) {
-	        $public_statuses = array((int)$public_statuses);
-	    }
-	    echo "<label>" . _("Posts of the following assignment statuses will be displayed on the public facing views (if enabled)") . ":</label>";
-	    echo "<ul>";
-	    foreach ($assignment_desk->custom_taxonomies->get_assignment_statuses() as $assignment_status){
-	        echo "<li>";
-	        echo "<input type='checkbox' id='ad-status-{$assignment_status->term_id}' value='{$assignment_status->term_id}' " .
-	                     'name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_assignment_statuses][]"';
-	        if ( in_array($assignment_status->term_id, $public_statuses) ) {
-	            echo ' checked="checked" ';
-	        } 
-	        echo '>';
-	        echo " <label for='ad-status-{$assignment_status->term_id}'>$assignment_status->name</label></li>";
-	    }
-	    echo "</ul>";
-	}
-	
-	/**
 	 * Validation for all of our form elements
 	 */
 	function assignment_desk_validate($input) {
