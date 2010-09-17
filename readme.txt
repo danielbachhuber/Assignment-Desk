@@ -3,7 +3,7 @@ Contributors: efroese, danielbachhuber
 Tags: editorial workflow, journalism, crowdsourcing, assignment management
 Requires at least: 2.9.2
 Tested up to: 3.0.1
-Stable tag: 0.6
+Stable tag: 0.6.1
 
 Empower the users to participate in the journalism being done at your site and guide them along the way.
 
@@ -41,6 +41,10 @@ Hit us with questions in the forum http://wordpress.org/tags/assignment-desk
 == Screenshots ==
 
 == Changelog ==
+
+=======
+= 0.6.1 =
+* Fix a duplicate function declaration ad_settings that caused an error.
 
 = 0.6 =
 * Pitch form shows to all visitors by default. If user isn't logged in, a username and password field appears at the bottom. Pitch form also has customizable success message, and saves form data if submission is invalid.
