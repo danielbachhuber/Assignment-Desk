@@ -398,7 +398,7 @@ Thanks
 		echo '<input id="pitch_form_notification_emails" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_notification_emails]" type="text" value="'
 			. $options['pitch_form_notification_emails'] . '" size="100" />';
 		echo '<p class="description">' . 
-		    _('Enter a comma seperated list of email addresses who will receive an email. You can notify the submitter by adding %submitter_email%.') . '</p>';
+		    _('Enter comma separated list of email addresses to receive notifications on form submissions. You can notify the submitter by adding %submitter_email%') . '</p>';
 		
 	}
 	
