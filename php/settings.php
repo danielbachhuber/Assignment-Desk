@@ -38,7 +38,7 @@ if ( !class_exists( 'ad_settings' ) ){
 		add_settings_field( 'pitch_form_enabled', 'Enable pitch forms', array(&$this, 'pitch_form_enabled_option'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );
 		add_settings_field( 'pitch_form_elements', 'Pitch form elements', array(&$this, 'pitch_form_elements_option'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );
 		add_settings_field( 'pitch_form_success_message', 'Success message', array(&$this, 'pitch_form_success_message_option'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );
-		add_settings_field( 'pitch_form_notification_emails', 'Send email for new pitches', array(&$this, 'pitch_form_notification_emails'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );
+		add_settings_field( 'pitch_form_notification_emails', 'Send email for new pitches', array(&$this, 'pitch_form_notification_emails_option'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );
 		add_settings_field( 'pitch_form_email_template_subject', 'Subject template for notifications', array(&$this, 'pitch_form_email_template_subject_option'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );
 		add_settings_field( 'pitch_form_email_template', 'Template for notifications', array(&$this, 'pitch_form_email_template_option'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );
 		
@@ -392,7 +392,7 @@ Thanks
 		    ': %post_link%, %title%, %description%, %duedate%, and %location%.</p>';
 	}
 	
-	function pitch_form_notification_emails() {
+	function pitch_form_notification_emails_option() {
 		global $assignment_desk;
 		$options = $assignment_desk->pitch_form_options;
 		echo '<input id="pitch_form_notification_emails" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_notification_emails]" type="text" value="'
