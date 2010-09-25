@@ -95,7 +95,7 @@ Blog Editor");
         $approved_status = $approved_status[0];
         $public_facing_options['public_facing_assignment_statuses'] = array($approved_status->term_id);
 
-        $public_facing_options['public_facing_assignment_status_enabled'] = true;
+        $public_facing_options['public_facing_post_status_enabled'] = true;
         $public_facing_options['public_facing_description_enabled'] = true;
         $public_facing_options['public_facing_duedate_enabled'] = true;
         $public_facing_options['public_facing_location_enabled'] = true;
