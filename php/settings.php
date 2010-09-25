@@ -95,7 +95,7 @@ Blog Editor");
         $approved_status = $approved_status[0];
         $public_facing_options['public_facing_assignment_statuses'] = array($approved_status->term_id);
 
-        $public_facing_options['public_facing_assignment_status_enabled'] = true;
+        $public_facing_options['public_facing_post_status_enabled'] = true;
         $public_facing_options['public_facing_description_enabled'] = true;
         $public_facing_options['public_facing_duedate_enabled'] = true;
         $public_facing_options['public_facing_location_enabled'] = true;
@@ -453,12 +453,12 @@ Blog Editor");
 			echo ' checked="checked"';
 		}
 		echo ' />&nbsp;<label for="public_facing_content_enabled">Content</label></li>';
-		// Assignment Status
-		echo '<li><input id="public_facing_assignment_status_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_assignment_status_enabled]" type="checkbox"';
-		if ($options['public_facing_assignment_status_enabled']) {
+		// Post Status
+		echo '<li><input id="public_facing_post_status_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_post_status_enabled]" type="checkbox"';
+		if ($options['public_facing_post_status_enabled']) {
 			echo ' checked="checked"';
 		}
-		echo ' />&nbsp;<label for="public_facing_assignment_status_enabled">Assignment Status</label></li>';		
+		echo ' />&nbsp;<label for="public_facing_post_status_enabled">Post Status</label></li>';		
 		// Description
 		if ($assignment_desk->edit_flow_exists()) {
 			echo '<li><input id="public_facing_description_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_description_enabled]" type="checkbox"';
