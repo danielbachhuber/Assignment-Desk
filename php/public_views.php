@@ -22,21 +22,15 @@ class ad_public_views {
 			wp_enqueue_script('jquery-datepicker-js', ASSIGNMENT_DESK_URL .'js/jquery.datepicker.js', array('jquery-ui-core'));
 		}
 		wp_enqueue_script('ad-public-views', ASSIGNMENT_DESK_URL . 'js/public_views.js', array('jquery', 'jquery-datepicker-js'));
-		
 		wp_enqueue_style('ad-public', ASSIGNMENT_DESK_URL . 'css/public.css');
 		
-		// Run save_pitch_form() at WordPress initialization
-		$_REQUEST['assignment_desk_messages']['pitch_form'] = $this->save_pitch_form();
-		$_REQUEST['assignment_desk_messages']['volunteer_form'] = $this->save_volunteer_form();
-		$this->save_voting_form();
-		
 		add_filter( 'the_content', array(&$this, 'show_all_posts') );
-		
 		add_filter( 'the_posts', array(&$this, 'show_single_post') );
 		add_filter( 'the_content', array(&$this, 'handle_single_post_metadata') );		
 		
 		// Only add voting if its enabled
 		if ( $public_facing_options['public_facing_voting_enabled'] ) {
+            $this->save_voting_form();
 			add_filter( 'the_content', array(&$this, 'prepend_voting_to_post') );		
 		}
 		// Only add commenting if its enabled
@@ -47,10 +41,12 @@ class ad_public_views {
 		
 		// Only add volunteering if its enabled
 		if ( $public_facing_options['public_facing_volunteering_enabled'] ) {
+		    $_REQUEST['assignment_desk_messages']['volunteer_form'] = $this->save_volunteer_form();
 			add_filter( 'the_content', array(&$this, 'append_volunteering_to_post') );		
 		}
 		// Only show pitch forms if the functionality is enabled
 		if ( $pitch_form_options['pitch_form_enabled'] ) {
+		    $_REQUEST['assignment_desk_messages']['pitch_form'] = $this->save_pitch_form();
 			add_filter( 'the_content', array(&$this, 'show_pitch_form') );
 		}
 	}
