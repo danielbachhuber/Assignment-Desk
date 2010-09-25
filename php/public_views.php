@@ -696,6 +696,7 @@ class ad_public_views {
 	
 			wp_get_current_user();
 		    $user_roles = $assignment_desk->custom_taxonomies->get_user_roles();
+			$available_roles = $assignment_desk->custom_taxonomies->get_user_roles_for_post( $post_id );
 	
 			// See whether the user has already volunteered for the story
 			$existing_roles = get_post_meta( $post_id, "_ad_participant_$current_user->ID", true );
@@ -721,6 +722,8 @@ class ad_public_views {
 			$volunteer_form .= '<label for="assignment_desk_volunteer">' . $volunteer_label . '</label>';
 			$volunteer_form .= '<ul class="assignment_desk_volunteer">';
 			foreach ( $user_roles as $user_role ) {
+				// Only show roles that the editor has specified as available for volunteering
+				if ( $available_roles[$user_role->term_id] == 'on' ) {
 				$volunteer_form .= '<li><input type="checkbox" id="assignment_desk_post_' . $post_id
 								. '_volunteer_' . $user_role->term_id
 								. '" name="assignment_desk_volunteer_roles[]"'
@@ -733,6 +736,7 @@ class ad_public_views {
 								. '</label>';
 				$volunteer_form .= '<br /><span class="description">' . $user_role->description . '</span>';								
 				$volunteer_form .= '</li>';
+				}
 			}
 			$volunteer_form .= '</ul>';
 			if ( $pitch_form_options['pitch_form_volunteer_description'] ) {
