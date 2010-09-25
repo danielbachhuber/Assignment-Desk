@@ -221,6 +221,42 @@ class ad_post {
 		<?php 
 	
 	}
+	
+	/**
+	 * Print selected volunteering roles
+	 * Editor and above can change the permitted participant types
+	 */
+	function display_participant_roles() {
+		global $post, $wpdb, $assignment_desk, $current_user;
+		
+		wp_get_current_user();
+		
+		$user_roles = $assignment_desk->custom_taxonomies->get_user_roles();		
+		$participant_roles = $assignment_desk->custom_taxonomies->get_user_roles_for_post($post->ID);
+		?>
+		<div class="misc-pub-section">
+			<label for="ad-participant-roles">Volunteering options:</label>
+		<?php if (count($user_roles)) : ?>
+			<span id="ad-participant-roles-display"><?php echo $participant_roles['display']; ?></span> 
+		<?php if (current_user_can($assignment_desk->define_editor_permissions)) : ?>
+			<a id="ad-edit-participant-roles" class='hide-if-no-js' href='#participant-roles'>Edit</a>
+			<div id="ad-participant-roles-select" class="hide-if-js">
+				<ul>
+				<?php foreach( $user_roles as $user_role ) : ?>
+					<li><input type="checkbox" id="ad-participant-role-<?php echo $user_role->term_id; ?>" name="ad-participant-roles[]" value="<?php echo $user_role->term_id; ?>"<?php if ( $participant_roles[$user_role->term_id] == 'on') { echo ' checked="checked"'; } ?> />&nbsp;<label for="ad-participant-role-<?php echo $user_role->term_id; ?>"><?php echo $user_role->name; ?></label></li> 
+				<?php endforeach; ?>
+				</ul>
+				<p><a id="save-ad-participant-roles" class="hide-if-no-js button" href="#participant-roles">OK</a>
+				<a id="cancel-ad-participant-roles" class="hide-if-no-js" href="#participant-roles">Cancel</a></p>
+			</div>
+		<?php endif; ?>
+		<?php else : ?>
+			<span id="ad-participant-roles-display">None defined</span> 
+			<a href='<?php echo admin_url(); ?>edit-tags.php?taxonomy=<?php echo $assignment_desk->custom_taxonomies->user_role_label; ?>' target='_blank'>Create</a>
+		<?php endif; ?>
+		</div>
+		<?php
+	}
 
 	/**
      * Loren ipsum bitches
@@ -319,6 +355,7 @@ class ad_post {
         $this->display_assignment_info();
 		$this->display_assignment_status();
 		$this->display_participant_types();
+		$this->display_participant_roles();		
         echo '</div></div>';
 
 		echo '<div class="ad-module">';
