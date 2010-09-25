@@ -986,9 +986,15 @@ class ad_public_views {
 				$location = get_post_meta( $post_id, '_ef_location', true );
 				$duedate = get_post_meta( $post_id, '_ef_duedate', true );
 				$duedate = date_i18n( 'M d, Y', $duedate );
-				$assignment_status = wp_get_object_terms($post_id, $assignment_desk->custom_taxonomies->assignment_status_label);
-				if ( is_array($assignment_status) ) {
-				    $assignment_status = $assignment_status[0];
+				if ( $assignment_desk->edit_flow_exists() ) {
+					$post_status_object = get_term_by( 'slug', $pitch->post_status, 'post_status' );
+					$post_status = $post_status_object->name;
+				} else {
+					if ( $pitch->post_status == 'draft' ) {
+						$post_status = 'Draft';
+					} else if ( $pitch->post_status == 'pending' ) {
+						$post_status = 'Pending Review';
+					}
 				}
 				
 				$css_classes = $this->get_css_classes_for_pitch( $post_id );
@@ -1013,8 +1019,9 @@ class ad_public_views {
 				if ( $description || $duedate || $location ) {
 				    $html .= '<div class="meta">';
 				}
-				if ( $options['public_facing_assignment_status_enabled'] && $assignment_status ) {
-				    $html .= '<p><label>Status:</label> ' . $assignment_status->name . '</p>';
+				
+				if ( $options['public_facing_post_status_enabled'] && $post_status ) {
+				    $html .= '<p><label>Status:</label> ' . $post_status . '</p>';
 				}
 				if ( $options['public_facing_description_enabled'] && $description ) {
 				    $html .= '<p><label>Description:</label> ' . $description . '</p>';
@@ -1114,12 +1121,26 @@ class ad_public_views {
 			$duedate = get_post_meta( $post_id, '_ef_duedate', true );
 			$duedate = date_i18n( 'M d, Y', $duedate );
 			
+			if ( $assignment_desk->edit_flow_exists() ) {
+				$post_status_object = get_term_by( 'slug', $post->post_status, 'post_status' );
+				$post_status = $post_status_object->name;
+			} else {
+				if ( $post->post_status == 'draft' ) {
+					$post_status = 'Draft';
+				} else if ( $post->post_status == 'pending' ) {
+					$post_status = 'Pending Review';
+				}
+			}
+			
 			if ( $options['public_facing_content_enabled'] ) {
 				$new_content .= $the_content;
 			}
 			
 			if ( $description || $duedate || $location ) {
 			    $new_content .= '<div class="meta">';
+			}
+			if ( $options['public_facing_post_status_enabled'] && $post_status ) {
+			    $new_content .= '<p><label>Status:</label> ' . $post_status . '</p>';
 			}
 			if ( $options['public_facing_description_enabled'] && $description ) {
 			    $new_content .= '<p><label>Description:</label> ' . $description . '</p>';
