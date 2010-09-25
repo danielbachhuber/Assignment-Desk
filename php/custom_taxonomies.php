@@ -306,6 +306,53 @@ class ad_custom_taxonomies {
 	}
 	
 	/**
+	 * Gets permitted user roles for a given post
+	 * @param int $post_id The ID for the post
+	 * @return array $user_roles_for_post Permitted user roles on post
+ 	 */
+	function get_user_roles_for_post( $post_id = null ) {
+		$user_roles_for_post = array();
+		$user_roles = $this->get_user_roles();	
+		$all_participant_roles = '';
+					
+		// If the post hasn't been saved, all user roles are on
+		// Otherwise, load the user roles from custom fields
+		if ( !$post_id ) {
+			
+			$user_roles_for_post['display'] = 'All';
+			foreach ( $user_roles as $user_role ) {
+				$user_roles_for_post[$user_role->term_id] = 'on';
+			}
+			return $user_roles_for_post;
+			
+		} else {
+	
+			foreach ( $user_roles as $user_role ) {
+				$user_roles_for_post[$user_role->term_id] = get_post_meta($post_id, "_ad_participant_role_status_$user_role->term_id", true);
+				// If it's been set before, build the string of permitted roles
+				// Else, set all of the participant roles to 'on'
+				if ( $user_roles_for_post[$user_role->term_id] == 'on' ) {
+					$all_participant_roles .= $user_role->name . ', ';
+				} else if ($user_roles_for_post[$user_role->term_id] == '' || !$user_roles_for_post[$user_role->term_id]) {
+					$user_roles_for_post[$user_role->term_id] = 'on';
+				}
+			
+			}
+		
+			if (in_array('off', $user_roles_for_post) && !in_array('on', $user_roles_for_post)) {
+				$user_roles_for_post['display'] = 'None';
+			} else if ($all_participant_roles == '' || !in_array('off', $user_roles_for_post)) {
+				$user_roles_for_post['display'] = 'All';
+			} else {
+				$user_roles_for_post['display'] = rtrim($all_participant_roles, ', ');
+			}
+		
+			return $user_roles_for_post;
+		}
+		
+	}	
+	
+	/**
 	 * Wrapper for determining whether taxonomy exists
 	 * @param string $taxonomy
 	 */
