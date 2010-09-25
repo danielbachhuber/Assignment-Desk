@@ -235,7 +235,7 @@ class ad_post {
 		$participant_roles = $assignment_desk->custom_taxonomies->get_user_roles_for_post($post->ID);
 		?>
 		<div class="misc-pub-section">
-			<label for="ad-participant-roles">Volunteering options:</label>
+			<label for="ad-participant-roles">Contributor roles:</label>
 		<?php if (count($user_roles)) : ?>
 			<span id="ad-participant-roles-display"><?php echo $participant_roles['display']; ?></span> 
 		<?php if (current_user_can($assignment_desk->define_editor_permissions)) : ?>
@@ -424,8 +424,35 @@ class ad_post {
 				}
 			}
 		}
-		$user_roles = $assignment_desk->custom_taxonomies->get_user_roles();
 		
+		$user_roles = $assignment_desk->custom_taxonomies->get_user_roles();
+		// If the current user can edit participant types, allow them to do so
+		// Otherwise, set all participant types to 'on' if they're unset
+		// Only editors can update the participant types on an assignment
+		if ( current_user_can( $assignment_desk->define_editor_permissions ) ) {
+			foreach ($user_roles as $user_role) {
+			    $participant_roles = array();
+				// If $_POST['ad-participant-roles'] isn't set, then we have no contributor roles
+			    if ( $_POST['ad-participant-roles'] ) {
+			        $participant_roles = $_POST['ad-participant-roles'];
+					if ( in_array($user_role->term_id, $participant_roles) ) {
+						update_post_meta($post_id, "_ad_participant_role_status_$user_role->term_id", 'on');
+					} else {
+						update_post_meta($post_id, "_ad_participant_role_status_$user_role->term_id", 'off');
+					}
+			    } else {
+					update_post_meta($post_id, "_ad_participant_role_status_$user_role->term_id", 'off');
+				}
+			}
+		} else {
+			foreach ( $user_roles as $user_role ) {
+				$participant_role_state = get_post_meta($post_id, "_ad_participant_role_status_$user_role->term_id", true);
+				if ( $participant_role_state != 'on' && $participant_role_state != 'off' ) {
+					update_post_meta($post_id, "_ad_participant_role_status_$user_role->term_id", 'on');
+				}
+			}
+		}
+				
 		if (current_user_can($assignment_desk->define_editor_permissions)) {
 			$all_volunteer_ids = array();
 			// For each User Role, save participant ID and status
