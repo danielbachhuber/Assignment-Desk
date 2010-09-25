@@ -279,13 +279,19 @@ class ad_post {
                 echo "<h5> $user_role->name </h5>";
                 foreach ($role_participants as $participant_id => $participant_status) {
 				    $participant = get_userdata((int)$participant_id);
-				    echo "<p id='ad-participant-{$user_role->term_id}-{$participant->ID}'><span class='ad-participant-buttons'>";
+				    echo "<p id='ad-participant-{$user_role->term_id}-{$participant->ID}'>";
 					// assignment-desk specific actions
-                    if ($participant_status == 'volunteered'){
-					    echo " <button class='button ad-assign-participant-button' name='ad-participant-assign[]' value='{$user_role->term_id}|{$user_role->name}|{$participant->ID}|{$participant->user_nicename}'>Assign</button>";
-					}
-                    echo " <button class='button ad-remove-participant-button' name='ad-participant-remove[]' value='{$user_role->term_id}|{$participant->ID}'>Remove</button></span>";
-				    echo "$participant->user_nicename (" . _($participant_status) . ')';
+                    if ( current_user_can($assignment_desk->define_editor_permissions) ) {
+                        echo "<span class='ad-participant-buttons'>";
+                        if ( $participant_status == 'volunteered' ){
+                            echo " <button class='button ad-assign-participant-button' name='ad-participant-assign[]' value='{$user_role->term_id}|{$user_role->name}|{$participant->ID}|{$participant->user_nicename}'>Assign</button>";
+                        }
+                        echo " <button class='button ad-remove-participant-button' name='ad-participant-remove[]' value='{$user_role->term_id}|{$participant->ID}'>Remove</button></span>";
+				        echo "$participant->user_nicename (" . _($participant_status) . ')';
+                    }
+                    else {
+			            echo "$participant->user_nicename (" . _($participant_status) . ')';
+                    }
                     echo "</p>";
 				}
                 echo "</div>";
