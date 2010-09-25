@@ -373,10 +373,9 @@ Blog Editor");
 		echo '<p class="description">'
 			. _('Optional: Enter a custom success message')
 			. '</p>';
-		/* @todo Token support
 		echo '<p class="description">' . 
 		    _('Message supports the following tokens') . 
-		    ': %post_link%, %title%, %description%, %duedate%, and %location%.</p>'; */
+		    ': %post_link%, %title%, %description%, %duedate%, and %location%.</p>';
 	}
 	
 	function public_facing_views_setting_section() {

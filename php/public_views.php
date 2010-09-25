@@ -106,9 +106,21 @@ class ad_public_views {
 
 		if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['success']) ) {
 			if ( $options['pitch_form_success_message'] ) {
-				$success_message = $options['pitch_form_success_message'];
+		        $search = array( '%title%', 
+                                 '%duedate%',
+                                 '%description%',
+                                 '%post_link%',
+                                 '%location%',
+                               );
+                $replace = array( $_REQUEST['assignment_desk_title'],
+                                  $_REQUEST['assignment_desk_duedate'],
+                                  $_REQUEST['assignment_desk_description'],
+                                  get_permalink($_REQUEST['assignment_desk_messages']['pitch_form']['success']['post_id']),
+                                  $_REQUEST['assignment_desk_location'],
+                                 );
+                $success_message = str_replace($search, $replace, $options['pitch_form_success_message']);
 			} else {
-				$success_message = 'Pitch submitted successfully. Thanks!';
+				$success_message = _('Pitch submitted successfully. Thanks!');
 			}
 			$pitch_form .= '<div class="message success">' . $success_message . '</div>';
 		} else if ( count($_REQUEST['assignment_desk_messages']['pitch_form']['errors']) ) {
