@@ -69,6 +69,7 @@ jQuery(document).ready(function() {
 	
 	var ad_current_assignment_status = '';
 	var ad_current_participant_types = [];
+	var ad_current_participant_roles = [];	
 	var ad_current_pitched_by_participant = '';
 
 	/**
@@ -281,6 +282,74 @@ jQuery(document).ready(function() {
 			}
 		});		
 		jQuery('#ad-edit-participant-types').show();
+		return false;
+	});
+	
+	/* ============================ Participant Roles ============================ */
+	
+	/**
+	 * Manipulate the DOM when the user wants to "Edit" participant roles
+	 * In short, save current checkbox states and then show list of roles
+	 */
+	jQuery('#ad-edit-participant-roles').click(function(){
+		jQuery(this).hide();
+		jQuery("input[name='ad-participant-roles[]']").each(function(){
+			if (jQuery(this).is(':checked')) {
+				ad_current_participant_roles[jQuery(this).val()] = 'on';
+			} else {
+				ad_current_participant_roles[jQuery(this).val()] = 'off';
+			}
+		});
+		jQuery('#ad-participant-roles-select').slideToggle();
+		return false;		
+	});
+	
+	/**
+	 * Manipulate the DOM when the user hits "Save" on participant roles
+	 * In short, build new field label and then hide list of roles
+	 */
+	jQuery('#save-ad-participant-roles').click(function(){
+		jQuery('#ad-participant-roles-select').slideToggle();
+		var ad_all_participant_roles = [];
+		var ad_display_participant_roles = '';
+		jQuery("input[name='ad-participant-roles[]']").each(function(){
+			if ( jQuery(this).is(':checked') ) {
+				ad_display_participant_roles += jQuery(this).parent().find('label').html() + ', ';
+				ad_all_participant_roles[jQuery(this).val()] = 'on';
+			} else {
+				ad_all_participant_roles[jQuery(this).val()] = 'off';
+			}
+		});
+		// Hacky way to check if values are in array
+		var joined = '|' + ad_all_participant_roles.join('|') + '|';
+		if (joined.indexOf('on') != -1 && joined.indexOf('off') == -1) {
+			ad_display_participant_roles = 'All';
+		} else if (joined.indexOf('on') == -1 && joined.indexOf('off') != -1) {
+			ad_display_participant_roles = 'None';
+		} else {
+			ad_display_participant_roles = ad_display_participant_roles.slice(0, ad_display_participant_roles.length - 2);
+		}
+		// Update the label for the field because we have new values
+		jQuery('#ad-participant-roles-display').html(ad_display_participant_roles);
+		jQuery('#ad-edit-participant-roles').show();
+		return false;		
+	});
+	
+	/**
+	 * Manipulate the DOM when the user hits "Cancel" on participant roles
+	 * In short, restore checkbox values and hide the list of options
+	 */
+	jQuery('#cancel-ad-participant-roles').click(function(){
+		jQuery('#ad-participant-roles-select').slideToggle();
+		// Restore checkbox values to what they were previously
+		jQuery("input[name='ad-participant-roles[]']").each(function(){
+			if (ad_current_participant_roles[jQuery(this).val()] == 'on') {
+				jQuery(this).attr('checked', 'checked');
+			} else {
+				jQuery(this).removeAttr('checked');
+			}
+		});		
+		jQuery('#ad-edit-participant-roles').show();
 		return false;
 	});
 	

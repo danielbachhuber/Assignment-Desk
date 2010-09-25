@@ -328,7 +328,7 @@ class ad_custom_taxonomies {
 		} else {
 	
 			foreach ( $user_roles as $user_role ) {
-				$user_roles_for_post[$user_role->term_id] = get_post_meta($post_id, "_ad_participant_role_$user_role->term_id", true);
+				$user_roles_for_post[$user_role->term_id] = get_post_meta($post_id, "_ad_participant_role_status_$user_role->term_id", true);
 				// If it's been set before, build the string of permitted roles
 				// Else, set all of the participant roles to 'on'
 				if ( $user_roles_for_post[$user_role->term_id] == 'on' ) {
