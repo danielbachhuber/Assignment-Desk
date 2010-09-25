@@ -82,7 +82,6 @@ if (!class_exists('assignment_desk')) {
             
             /**
              * Instantiate all of our classes before running initialization on each!
-             * @todo All initialization should be abstracted to an 'init' function instead of in the constructor
              */
             $this->custom_taxonomies = new ad_custom_taxonomies(); 
             $this->user = new ad_user();
@@ -110,7 +109,7 @@ if (!class_exists('assignment_desk')) {
          * Initialize various bits and pieces of functionality
          */
 		function init() {
-			
+
 			$this->custom_taxonomies->init();
             $this->user->init();
 			
@@ -146,19 +145,12 @@ if (!class_exists('assignment_desk')) {
         */
         function activate_plugin() {
             
-            // This is an upgrade or re-activation
-            if ( $this->general_options['ad_installed_once'] == 'on' ) {
-                // Custom Taxonomies
-                $this->custom_taxonomies->init();
-                $this->custom_taxonomies->activate();
-                
-                // Another Component
-            }
+            $this->custom_taxonomies->init();
+            $this->custom_taxonomies->activate();
+
             // This is the first time we've ever activated the plugin.
-            else {
+            if ( $this->general_options['ad_installed_once'] != 'on' ) {
                 // Custom Taxonomies
-                $this->custom_taxonomies->init();
-                $this->custom_taxonomies->activate();
                 $this->custom_taxonomies->activate_once();
                 $this->settings->setup_defaults();
                 
@@ -167,6 +159,7 @@ if (!class_exists('assignment_desk')) {
                 $this->general_options['ad_installed_once'] = 'on';
                 update_option($this->get_plugin_option_fullname('general'), $this->general_options);
             }
+
         }
 
 		/**
@@ -180,25 +173,16 @@ if (!class_exists('assignment_desk')) {
 		 * Helper method checks to see if Edit Flow is activated
 		 */
 		function edit_flow_exists() {
-			if ( class_exists('edit_flow') ) {
-				return true;
-			} else {
-				return false;
-			}
+			return class_exists('edit_flow');
 		}
 		
 		/**
 		 * Helper method checks to see if Co-Authors Plus is activated
 		 */
 		function coauthors_plus_exists() {
-			if ( class_exists('coauthors_plus') ) {
-				return true;
-			} else {
-				return false;
-			}
+			return  class_exists('coauthors_plus');
 		}
-		
-        
+
         /**
 	    * Adds our CSS to the admin pages
 	    */
@@ -212,9 +196,9 @@ if (!class_exists('assignment_desk')) {
 			wp_enqueue_script('wp-ajax-response');
 			wp_enqueue_script('ad-admin-js', ASSIGNMENT_DESK_URL .'js/admin.js', 
 	                             array('jquery'), ASSIGMENT_DESK_VERSION);
+
 	    }
-	    
-        
+
       	/**
 	     * Adds menu items for the plugin
 	     */
