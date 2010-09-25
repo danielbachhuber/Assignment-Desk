@@ -31,13 +31,16 @@ if ( !class_exists( 'ad_settings' ) ){
 		add_settings_field( 'assignment_email_template_subject', 'Subject template for notifications', array(&$this, 'assignment_email_template_subject_option'), $assignment_desk->top_level_page, 'assignment_management' );
 		add_settings_field( 'assignment_email_template', 'Template for notifications', array(&$this, 'assignment_email_template_option'), $assignment_desk->top_level_page, 'assignment_management' );
 		
-		register_setting( $assignment_desk->pitch_form_options_group, $assignment_desk->get_plugin_option_fullname('pitch_form') );
+		register_setting( $assignment_desk->pitch_form_options_group, $assignment_desk->get_plugin_option_fullname('pitch_form'), array($this, 'validate_pitch_form_settings') );
 		
 		/* Pitch form */
 		add_settings_section( 'story_pitches', 'Story Pitches', array(&$this, 'story_pitches_setting_section'), $assignment_desk->pitch_form_settings_page );
 		add_settings_field( 'pitch_form_enabled', 'Enable pitch forms', array(&$this, 'pitch_form_enabled_option'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );
 		add_settings_field( 'pitch_form_elements', 'Pitch form elements', array(&$this, 'pitch_form_elements_option'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );
-		add_settings_field( 'pitch_form_success_message', 'Success message', array(&$this, 'pitch_form_success_message_option'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );			
+		add_settings_field( 'pitch_form_success_message', 'Success message', array(&$this, 'pitch_form_success_message_option'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );
+		add_settings_field( 'pitch_form_notification_emails', 'Send email for new pitches', array(&$this, 'pitch_form_notification_emails'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );
+		add_settings_field( 'pitch_form_email_template_subject', 'Subject template for notifications', array(&$this, 'pitch_form_email_template_subject_option'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );
+		add_settings_field( 'pitch_form_email_template', 'Template for notifications', array(&$this, 'pitch_form_email_template_option'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );
 		
 		register_setting( $assignment_desk->public_facing_options_group, $assignment_desk->get_plugin_option_fullname('public_facing') );
 		
@@ -121,7 +124,18 @@ Blog Editor");
         $pitch_form_options['pitch_form_duedate_enabled']     = true;
         $pitch_form_options['pitch_form_location_enabled']    = true;
         $pitch_form_options['pitch_form_volunteer_enabled']   = true;
+		$pitch_form_options['pitch_form_email_template_subject']      = _("[%blogname%] A new pitch was submitted. %title%");
+		$pitch_form_options['pitch_form_email_template'] =
+_(
+"Hello,
+ 
+You've received a new pitch from %submitter_display_name%: %title%.
+Please login to %dashboard_link% to check it out.
 
+Once logged in you can view the pitch at %post_link%.
+
+Thanks
+%blogname%");
         update_option($assignment_desk->get_plugin_option_fullname('pitch_form'), $pitch_form_options);
          
     }
@@ -378,6 +392,36 @@ Blog Editor");
 		    ': %post_link%, %title%, %description%, %duedate%, and %location%.</p>';
 	}
 	
+	function pitch_form_notification_emails() {
+		global $assignment_desk;
+		$options = $assignment_desk->pitch_form_options;
+		echo '<input id="pitch_form_notification_emails" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_notification_emails]" type="text" value="'
+			. $options['pitch_form_notification_emails'] . '" size="100" />';
+		echo '<p class="description">' . 
+		    _('Enter a comma seperated list of email addresses who will receive an email. You can notify the submitter by adding %submitter_email%.') . '</p>';
+		
+	}
+	
+	function pitch_form_email_template_subject_option() {
+		global $assignment_desk;
+		$options = $assignment_desk->pitch_form_options;
+		echo '<input id="pitch_form_email_template_subject"'
+		 	. 'name="' . $assignment_desk->get_plugin_option_fullname('pitch_form')  . '[pitch_form_email_template_subject]"'
+			. 'size="60" maxlength="60" value="' . $options['pitch_form_email_template_subject'] . '">';
+    }
+    	
+	function pitch_form_email_template_option() {
+		global $assignment_desk;
+		$options = $assignment_desk->pitch_form_options;
+		
+		echo '<textarea id="pitch_form_email_template" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_email_template]" rows="8" cols="60">';
+		echo $options['pitch_form_email_template'];
+		echo '</textarea>';
+		echo '<p class="description">' . 
+		    _('Template supports the following tokens') . 
+		    ': %blogname%, %title%, %excerpt%, %description%, %duedate%, %submitter_email%, %submitter_display_name%, %location%, %post_link%, and %dashboard_link%.</p>';
+	}
+	
 	function public_facing_views_setting_section() {
 		global $assignment_desk;
 		echo "Enable public access to pitches and stories in progress by dropping <code>&#60;!--$assignment_desk->all_posts_key--&#62;</code> in a page.";
@@ -555,8 +599,22 @@ Blog Editor");
 	function assignment_desk_validate($input) {
 
 		// @todo Should we validate all settings elements?
-
 		$input['default_new_assignment_status'] = (int)$input['default_new_assignment_status'];
+		return $input;
+
+	}
+	
+	function validate_pitch_form_settings( $input ){
+		// Sanitize the list of email addresses that receive new pitch notififcations.
+		$email_addresses = explode(',', $input['pitch_form_notification_emails']);
+		$sanitized_email_addresses = array();
+		foreach ( $email_addresses as $email_address ) {
+			$email_address = str_replace(' ', '', $email_address); // remove spaces
+			if ( ($email_address == '%submitter_email%') || is_email($email_address) ){ // token of email address
+				$sanitized_email_addresses[] = $email_address;
+			}
+		}
+		$input['pitch_form_notification_emails'] = implode(', ', $sanitized_email_addresses);
 		return $input;
 	}
     

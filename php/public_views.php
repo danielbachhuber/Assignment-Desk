@@ -481,6 +481,8 @@ class ad_public_views {
     				}
     				update_post_meta($post_id, "_ad_participant_$sanitized_author", $sanitized_volunteer);
 				}
+				
+				$this->send_new_pitch_emails($post_id);
 			}
 			
 			$form_messages['success']['post_id'] = $post_id;
@@ -492,6 +494,51 @@ class ad_public_views {
 		
 	}
 	
+    /**
+     * Send an email to users accorindg to the pitch_form_notification_emails setting.
+     * @param $post_id int The ID of the new post. 
+     */
+    function send_new_pitch_emails( $post_id ) {
+        global $assignment_desk, $wpdb;
+        
+        $post = $wpdb->get_row("SELECT * FROM $wpdb->posts WHERE ID=$post_id");
+        $submitter = get_userdata((int)get_post_meta($post_id, '_ad_pitched_by_participant', true));
+        $search = array('%blogname%',
+                        '%title%',
+                        '%excerpt%',
+                        '%description%',
+                        '%duedate%',
+                        '%location%',
+                        '%post_link%',
+                        '%dashboard_link%',
+                        '%submitter_email%',
+                        '%submitter_display_name%',
+        );
+        $replace = array( get_option('blogname'),
+                        $post->post_title,
+                        $post->post_excerpt,
+                        get_post_meta($post_id, '_ef_description', true),
+                        ad_format_ef_duedate(get_post_meta($post_id, '_ef_duedate', true)),
+                        ad_format_ef_duedate(get_post_meta($post_id, '_ef_location', true)),
+                        get_permalink($post_id),
+                        admin_url(),
+                        $submitter->user_email,
+                        $submitter->display_name,
+        );
+
+        $email_addresses = str_replace('%submitter_email%', $submitter->user_email, $assignment_desk->pitch_form_options['pitch_form_notification_emails']);
+        $email_addresses = explode(',', $email_addresses);
+        $subject = str_replace($search, $replace, $assignment_desk->pitch_form_options['pitch_form_email_template_subject']);
+        $email_template = str_replace($search, $replace, $assignment_desk->pitch_form_options['pitch_form_email_template']);
+        
+        if ( $email_addresses ) {
+            foreach ( $email_addresses as $email_address ) {
+                $email_address = str_replace(' ', '', $email_address);
+                wp_mail($email_address, $subject, $email_template);
+            }
+        }
+    }
+
 	/**
 	 * Print a form giving the user the option to vote on an item
 	 * @param int $post_id The Post ID
