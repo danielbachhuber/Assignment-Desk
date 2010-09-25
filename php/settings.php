@@ -260,8 +260,8 @@ Thanks
 		echo '<label for="pitch_form_title_description">Description</label>';
 		echo '<input id="pitch_form_title_description" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_title_description]" type="text" value="'
 			. $options['pitch_form_title_description'] . '" size="35" />';	
-		echo '<span class="field"><input type="checkbox" disabled="disabled" checked="checked" />';
-		echo '<label for="pitch_form_title_required">Required</label></span>';
+		echo '<input type="checkbox" disabled="disabled" checked="checked" />';
+		echo '<label for="pitch_form_title_required">Required</label>';
 		echo '</span></li>';
 		// Description
 		if ($assignment_desk->edit_flow_exists()) {
