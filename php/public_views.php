@@ -174,6 +174,13 @@ class ad_public_views {
 						. $options['pitch_form_description_description']
 						. '</p>';
 			}
+			
+			if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors']['description']) ) {
+    			$pitch_form .= '<p class="error">'
+    						. $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['description']
+    						. '</p>';
+    		}
+    		
 			$pitch_form .= '</fieldset>';
 		}
 		
@@ -222,6 +229,11 @@ class ad_public_views {
 						. $options['pitch_form_categories_description']
 						. '</p>';
 			}
+			if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors']['categories']) ) {
+    			$pitch_form .= '<p class="error">'
+    						. $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['categories']
+    						. '</p>';
+    		}
 			$pitch_form .= '</fieldset>';
 		}		
 					
@@ -240,6 +252,11 @@ class ad_public_views {
 						. $options['pitch_form_tags_description']
 						. '</p>';
 			}
+			if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors']['tags']) ) {
+    			$pitch_form .= '<p class="error">'
+    						. $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['tags']
+    						. '</p>';
+    		}
 			$pitch_form .= '</fieldset>';
 		}
 		
@@ -258,6 +275,11 @@ class ad_public_views {
 						. $options['pitch_form_location_description']
 						. '</p>';
 			}
+			if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors']['location']) ) {
+    			$pitch_form .= '<p class="error">'
+    						. $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['location']
+    						. '</p>';
+    		}
 			$pitch_form .= '</fieldset>';
 		}
 		
@@ -289,6 +311,11 @@ class ad_public_views {
 						. $options['pitch_form_volunteer_description']
 						. '</p>';
 			}
+			if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors']['volunteer']) ) {
+    			$pitch_form .= '<p class="error">'
+    						. $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['volunteer']
+    						. '</p>';
+    		}
 			$pitch_form .= '</fieldset>';
 		}
 		
@@ -344,6 +371,8 @@ class ad_public_views {
 		global $assignment_desk;
 		$message = array();
 		$options = $assignment_desk->general_options;
+		$form_options = $assignment_desk->pitch_form_options;
+		
 		$user_types = $assignment_desk->custom_taxonomies->get_user_types();
 
 		if ($assignment_desk->edit_flow_exists()) {
@@ -389,11 +418,60 @@ class ad_public_views {
 					$sanitized_author = $user->ID;
 				}
 			}
-			$sanitized_description = wp_kses($_POST['assignment_desk_description'], $allowedposttags);
-			$sanitized_tags = $_POST['assignment_desk_tags'];
-			$sanitized_categories = (int)$_POST['assignment_desk_categories'];
-			$sanitized_location = wp_kses($_POST['assignment_desk_location'], $allowedposttags);
-			$sanitized_volunteer = $_POST['assignment_desk_volunteer'];
+
+			$sanitized_description = '';
+			if ( $_POST['assignment_desk_description']) {
+			    $sanitized_description = wp_kses($_POST['assignment_desk_description'], $allowedposttags);
+			}
+			else {
+			    if ( $form_options['pitch_form_description_required'] == 'on' ) {
+			        $form_messages['errors']['description'] = _('Description is required.');
+			    }
+			}
+			
+			$sanitized_location = '';
+			if ( $_POST['assignment_desk_location'] ) {
+			    $sanitized_location = wp_kses($_POST['assignment_desk_location'], $allowedposttags);
+			}
+			else {
+			    if ( $form_options['pitch_form_location_required'] == 'on' ) {
+			        $form_messages['errors']['location'] = _('Location is required.');
+			    }
+			}
+			
+			$sanitized_tags = '';
+			if ( $_POST['assignment_desk_tags'] ){
+			    $sanitized_tags = $_POST['assignment_desk_tags'];
+			}
+			else {
+			    if ( $form_options['pitch_form_tags_required'] ) {
+			        $form_messages['errors']['tags'] = _('Tags are required.');
+			    }
+			}
+			
+			$sanitized_categories = '';
+			if ( $_POST['assignment_desk_categories'] ){
+			    $sanitized_categories = (int)$_POST['assignment_desk_categories'];
+			}
+			else {
+			    if ( $form_options['pitch_form_categories_required'] ) {
+			        $form_messages['errors']['categories'] = _('Category is required.');
+			    }
+			}			
+
+			
+			$sanitized_volunteer = false;
+			if ( $_POST['assignment_desk_volunteer'] ){
+			    $sanitized_volunteer = $_POST['assignment_desk_volunteer'];
+			    if (! is_array($sanitized_volunteer) ) {
+			        $sanitized_volunteer = array((int)$sanitized_volunteer);
+			    }
+			}
+			else {
+			    if ( $form_options['pitch_form_volunteer_required'] ) {
+			        $form_messages['errors']['volunteer'] = _('Volunteering is required.');
+			    }
+			}
 			
 			if ( $_POST['assignment_desk_duedate'] ) {
     			// Sanitize the duedate
@@ -409,12 +487,17 @@ class ad_public_views {
     			    }
     			    $sanitized_duedate = strtotime($duedate_day . '-' . $duedate_month . '-' . $duedate_year);
     			    if ( !$sanitized_duedate ) {
-    			        $form_messages['errors']['duedate'] = 'Please enter a valid date of the form MM/DD/YYYY';
+    			        $form_messages['errors']['duedate'] = _('Please enter a valid date of the form MM/DD/YYYY');
     			    }
     			}
     			else {
-    			    $form_messages['errors']['duedate'] = 'Please enter a valid date of the form MM/DD/YYYY';
+    			    $form_messages['errors']['duedate'] = _('Please enter a valid date of the form MM/DD/YYYY');
     			}
+			}
+			else {
+			    if ( $form_options['pitch_form_duedate_required'] ) {
+			        $form_messages['errors']['duedate'] = _('Due date is required.');
+			    }
 			}
 			
 			// Don't process the form if any errors have been set
@@ -518,8 +601,8 @@ class ad_public_views {
                         $post->post_title,
                         $post->post_excerpt,
                         get_post_meta($post_id, '_ef_description', true),
-                        ad_format_ef_duedate(get_post_meta($post_id, '_ef_duedate', true)),
-                        ad_format_ef_duedate(get_post_meta($post_id, '_ef_location', true)),
+                        ad_format_ef_duedate((int)get_post_meta($post_id, '_ef_duedate', true)),
+                        ad_format_ef_duedate((int)get_post_meta($post_id, '_ef_location', true)),
                         get_permalink($post_id),
                         admin_url(),
                         $submitter->user_email,
