@@ -16,6 +16,7 @@ if ( !class_exists( 'ad_user' ) ) {
       
       add_action('edit_user_profile', array(&$this, 'profile_options'));
       add_action('show_user_profile', array(&$this, 'profile_options'));
+      add_action('show_user_profile', array(&$this, 'profile_statistics'));
       
       add_action('profile_update', array(&$this, 'save_profile_options'));
     
@@ -92,7 +93,7 @@ if ( !class_exists( 'ad_user' ) ) {
     function average_words( $user_id ) {
         $num_posts = get_usernumposts($user_id);
         if($num_posts){
-            return $this->count_total_words($user_id) / $num_posts;
+            return $this->total_words($user_id) / $num_posts;
         }
         return 0;
     }
@@ -106,7 +107,7 @@ if ( !class_exists( 'ad_user' ) ) {
      */
     function handle_ad_user_total_words_column( $default, $column_name, $user_id ) {
       if ( $column_name == __( '_ad_user_total_words' ) ) {
-        return $this->count_total_words($user_id);
+        return $this->total_words($user_id);
       }
       return $default;
     }
@@ -117,22 +118,23 @@ if ( !class_exists( 'ad_user' ) ) {
     * @param int $user_id The ID of the user
     * @return int The total words for all of the user's posts.
     */
-    function count_total_words($user_id){
+    function total_words($user_id){
         global $assignment_desk, $wpdb;
         
         $total_words = 0;
         $user = get_userdata($user_id);
         // Get post ID's and participant records the post is published
-        $post_id_results = $wpdb->get_results("SELECT $wpdb->posts.ID as post_id
-                                        FROM $wpdb->posts LEFT JOIN $wpdb->postmeta 
-                                                                ON ($wpdb->posts.ID = $wpdb->postmeta.post_id)
-                                        WHERE $wpdb->posts.post_status = 'publish'
-                                        AND $wpdb->postmeta.meta_key = '_ad_participant_$user->ID'", ARRAY_N);
+        $participant_posts = $wpdb->get_results("SELECT $wpdb->posts.ID
+                                                 FROM $wpdb->posts 
+                                                     LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id)
+                                                 WHERE $wpdb->posts.post_status = 'publish'
+                                                     AND $wpdb->posts.post_type = 'post' 
+                                                     AND $wpdb->postmeta.meta_key = '_ad_participant_$user->ID'", ARRAY_N);
         $post_ids = array();
-        if(!$post_id_results){
+        if(!$participant_posts){
             return  0;
         }
-        foreach($post_id_results as $p){
+        foreach($participant_posts as $p){
             $post_ids[] = $p[0];
         }
         
@@ -148,16 +150,29 @@ if ( !class_exists( 'ad_user' ) ) {
 
         // Accumulate post ids where this user is in the Writer role and they've accepted the assignment.
         $posts_to_consider = array();
-        foreach($participant_records as $record){
+        foreach ( $participant_records as $record ) {
             $roles = maybe_unserialize($record->meta_value);
-            if('accepted' == $roles[$user->user_login]){
+            if ( 'accepted' == $roles[$user->user_login] ) {
                 $posts_to_consider[]= $record->post_id;
             }
         }
         
+        $author_posts = $wpdb->get_results("SELECT ID FROM $wpdb->posts 
+                                              WHERE post_status = 'publish' 
+                                                AND post_type = 'post'
+                                                AND post_author = $user->ID");
+        
+        foreach( $author_posts as $post ) {
+            $posts_to_consider[]= $post->ID;
+        }
+        
         // Add up all of the word counts we stashed in the postmeta during save_post
-        foreach($posts_to_consider as $post_id){
-             $total_words += (int)get_post_meta($post_id, '_ad_word_count', true);
+        foreach( $posts_to_consider as $post_id ) {
+            $words = (int)get_post_meta($post_id, '_ad_word_count', true);
+            if ( !$words ) {
+                $words = str_word_count($wpdb->get_var("SELECT post_content FROM $wpdb->posts WHERE ID=$post_id"));
+            }
+            $total_words += $words;
         }
         return $total_words;
     }
@@ -172,14 +187,23 @@ if ( !class_exists( 'ad_user' ) ) {
     function handle_ad_user_volunteer_count_column( $default, $column_name, $user_id ) {
         global $assignment_desk, $wpdb;
         if ( $column_name == __( '_ad_user_volunteer_count' ) ) {
-            $count = 0;
-            $volunteered_for = get_usermeta($user_id, '_ad_volunteer');
-            if($volunteered_for){
-                $count = count($volunteered_for);
-            }
-            return $count;
+            return $this->volunteer_count($user_id);
         }
         return $default;
+    }
+    
+    /**
+     * Get the number of times a user has volunteered for a post.
+     * @param int $user_id The ID of the user
+     * @return int The number of times a user has volunteered for a post.
+     */
+    function volunteer_count( $user_id ) {
+        $count = 0;
+        $volunteered_for = get_usermeta($user_id, '_ad_volunteer');
+        if($volunteered_for){
+            $count = count($volunteered_for);
+        }
+        return $count;
     }
     
     /**
@@ -192,13 +216,23 @@ if ( !class_exists( 'ad_user' ) ) {
     function handle_ad_user_pitches_count_column( $default, $column_name, $user_id ) {
         global $assignment_desk, $wpdb;
         if ( $column_name == __( '_ad_user_pitch_count' ) ) {
-            $count = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->postmeta WHERE meta_key='_ad_pitched_by' AND meta_value='$user_id'");
-            if(!$count){
-                $count = 0;
-            }
-            return $count;
+            return $this->pitch_count($user_id);
         }
         return $default;
+    }
+    
+    /**
+     * Get the number of posts the user has pitched.
+     * @param int $user_id The ID of the user
+     * @return int The number of posts the user has pitched
+     */
+    function pitch_count( $user_id ) {
+        global $wpdb;
+        $count = $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->postmeta WHERE meta_key='_ad_pitched_by' AND meta_value='$user_id'");
+        if(!$count){
+            $count = 0;
+        }
+        return $count;
     }
     
     /**
@@ -246,6 +280,27 @@ if ( !class_exists( 'ad_user' ) ) {
 ?>
       </tr>
     </table>
+<?php
+    }
+    
+    function profile_statistics() {
+      global $profileuser, $assignment_desk;
+?>
+      <h3>Statistics</h3>
+      <table class="form-table">
+        <tr>
+      	  <th>Average Words</th><td><?php echo $this->average_words($profileuser->ID); ?></td>
+      	</tr>
+      	<tr>
+      	  <th>Total Words</th><td><?php echo $this->total_words($profileuser->ID); ?></td>
+      	</tr>
+      	<tr>
+      	  <th>Pitches</th><td><?php echo $this->pitch_count($profileuser->ID); ?></td>
+      	</tr>
+        <tr>
+      	  <th>Volunteered</th><td><?php echo $this->volunteer_count($profileuser->ID); ?></td>
+      	</tr>
+      </table>
 <?php
     }
 
