@@ -1036,8 +1036,8 @@ class ad_public_views {
 					}
 					$html .= '<p><label>Categories:</label> ' . rtrim( $categories_html, ', ' ) . '</p>';
 				}
-				if ( $options['public_facing_tags_enabled'] ) {
-					$tags = get_the_tags( $post_id );
+				$tags = get_the_tags( $post_id );
+				if ( $options['public_facing_tags_enabled'] && $tags ) {
 					$tags_html = '';
 					if ( $tags ) {
 					    foreach ( $tags as $tag ) {
