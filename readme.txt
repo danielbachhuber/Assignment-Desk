@@ -42,7 +42,14 @@ Hit us with questions in the forum http://wordpress.org/tags/assignment-desk
 
 == Changelog ==
 
-=======
+= 0.7 =
+* Editors can restrict the roles community members can volunteer for on a pitch by pitch basis
+* Pitches display post_status instead of the assignment status
+* Optional email notifications to user-defined recipients upon successful pitch form submission
+* Displays the user contribution stats on the user profile view
+* Bug fix: Hide the tags field on a pitch if its empty
+* Bug fix: No longer shows participant action buttons to contributors in the post meta box.
+
 = 0.6.1 =
 * Fix a duplicate function declaration ad_settings that caused an error.
 
