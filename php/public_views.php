@@ -339,6 +339,10 @@ class ad_public_views {
 						. '<br /><label for="">Password:</label> '
 						. '<input id="assignment_desk_password" name="assignment_desk_password" type="password" '
 						. '/>';
+			// Show a registration link if users can register
+			if ( get_option('users_can_register') ) {
+				$pitch_form .= '<p>If you need a username, you can <a href="' . site_url('wp-login.php?action=register', 'login') . '">' . _('register a new account') . '</a>';
+			}
 			if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors']['login']) ) {
    				$pitch_form .= '<p class="error">'
    							. $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['login']
