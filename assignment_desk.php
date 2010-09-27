@@ -120,7 +120,6 @@ if (!class_exists('assignment_desk')) {
 				$this->manage_posts->init();
 				$this->dashboard_widgets->init();
 				$this->post->init();
-
 			} else if ( !is_admin() ) {
 				$this->public_views->init();
 			}
@@ -128,14 +127,12 @@ if (!class_exists('assignment_desk')) {
 		}
 
 		/**
-		 * Initialize the plugin for the admin 
-		 * @todo This is unnecessary and could be moved to the init method
+		 * Initialize the plugin for the admin. 
 		 */
-		function admin_init() {
-			
-			$this->add_admin_assets();			
-			$this->settings->init();			
-			
+		function admin_init() {	
+		    // Registering settings requires the WP admin to be set up
+			$this->settings->init();
+			$this->add_admin_assets();
 		}
         
         /**
