@@ -1202,7 +1202,7 @@ class ad_public_views {
 			if ( $options['public_facing_no_pitches_message'] ) {
 				$no_pitches_message = $options['public_facing_no_pitches_message'];
 			} else {
-				$no_pitches_message = 'Sorry, there are currently no pitches listed.';
+				$no_pitches_message = _('Sorry, there are currently no pitches listed.');
 			}
 			$html .= '<div class="message alert">' . $no_pitches_message . '</div>';
 		}
