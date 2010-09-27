@@ -1199,7 +1199,7 @@ class ad_public_views {
 			} // END foreach
 			
 		} else {
-			if ( !$options['public_facing_no_pitches_message'] ) {
+			if ( $options['public_facing_no_pitches_message'] ) {
 				$no_pitches_message = $options['public_facing_no_pitches_message'];
 			} else {
 				$no_pitches_message = 'Sorry, there are currently no pitches listed.';
