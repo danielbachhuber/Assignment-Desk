@@ -18,7 +18,7 @@ if ( !class_exists( 'ad_settings' ) ){
 	function init() {
 		global $assignment_desk;
 		
-		register_setting( $assignment_desk->options_group, $assignment_desk->get_plugin_option_fullname('general'), array(&$this, 'assignment_desk_validate') );
+		register_setting( $assignment_desk->options_group, $assignment_desk->get_plugin_option_fullname('general'), array(&$this, 'validate_general_settings') );
 		
 		/* General */
 		add_settings_section( 'general', 'General', array(&$this, 'general_setting_section'), $assignment_desk->top_level_page );
@@ -42,7 +42,7 @@ if ( !class_exists( 'ad_settings' ) ){
 		add_settings_field( 'pitch_form_email_template_subject', 'Subject template for notifications', array(&$this, 'pitch_form_email_template_subject_option'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );
 		add_settings_field( 'pitch_form_email_template', 'Template for notifications', array(&$this, 'pitch_form_email_template_option'), $assignment_desk->pitch_form_settings_page, 'story_pitches' );
 		
-		register_setting( $assignment_desk->public_facing_options_group, $assignment_desk->get_plugin_option_fullname('public_facing') );
+		register_setting( $assignment_desk->public_facing_options_group, $assignment_desk->get_plugin_option_fullname('public_facing'), array($this, 'validate_public_facing_settings'));
 		
 		/* Public-facing */
 		add_settings_section( 'public_facing_views', 'Public-Facing Views', array(&$this, 'public_facing_views_setting_section'), $assignment_desk->public_facing_settings_page );
@@ -193,7 +193,6 @@ Thanks
 	function assignment_management_setting_section() {
 		global $assignment_desk;
 	}
-	
 	
 	function assignment_email_notifications_enabled_option() {
 		global $assignment_desk;
@@ -627,16 +626,18 @@ Thanks
 	}
 	
 	/**
-	 * Validation for all of our form elements
+	 * Validation for the general settings elements
 	 */
-	function assignment_desk_validate($input) {
-
-		// @todo Should we validate all settings elements?
+	function validate_general_settings($input) {
+	    // @todo - Validate other general settings elements
 		$input['default_new_assignment_status'] = (int)$input['default_new_assignment_status'];
 		return $input;
 
 	}
 	
+	/**
+	 * Validation for the pitch form settings elements
+	 */
 	function validate_pitch_form_settings( $input ){
 		// Sanitize the list of email addresses that receive new pitch notififcations.
 		$email_addresses = explode(',', $input['pitch_form_notification_emails']);
@@ -649,6 +650,14 @@ Thanks
 		}
 		$input['pitch_form_notification_emails'] = implode(', ', $sanitized_email_addresses);
 		return $input;
+	}
+	
+	/**
+	 * Validation for the public facing settings elements
+	 */
+	function validate_public_facing_settings( $input ){
+	    // @todo - Validate the public settings.
+	    return $input;
 	}
     
     function general_settings() {

@@ -133,7 +133,6 @@ class ad_post {
      * Print the assignment status form.
      * If there is no status the assignment is the default
 	 * If the post is not in the assignment status don't show the form.
-	 * @todo Check user editing permissions
      */
     function display_assignment_status(){
         global $post, $wpdb, $assignment_desk, $current_user;
@@ -367,7 +366,6 @@ class ad_post {
 
 	/**
      * Save Assignment Desk post meta data
-	 * @todo Might need a non
     */
     function save_post_meta_box($post_id, $post) {
         global $executed_already, $wpdb, $assignment_desk, $current_user, $ad_user_errors;
