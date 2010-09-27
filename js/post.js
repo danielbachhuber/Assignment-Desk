@@ -8,6 +8,24 @@ if ( typeof(String.prototype.trim) === "undefined" ) {
 }
 
 /**
+ * This function is attached to the click event of the "Remove" buttons.
+ * This removes the participant record from the next submission.
+ */
+function ad_instrument_remove_participant_buttons(){
+	jQuery('button.ad-remove-participant-button').click(function(){
+		// Hide the entire wrapper if its the last one
+		var remove_input = '<input type="hidden" name="ad-participant-remove[]" value="' + jQuery(this).val() + '">';
+		if ( jQuery(this).parents('div.ad-role-wrap').find('p').length == 1 ) {
+			jQuery(this).parents('div.ad-role-wrap').html(remove_input);
+		} else {
+			jQuery(this).parents('div.ad-role-wrap').append(remove_input)
+			jQuery(this).parents('p').remove();
+		}
+		return false;
+	});
+}
+
+/**
 * Take the user input and the selected role and add that user to the list 
 * of users assigned to a post with that role.
 * Take care to show the div that surrounds the role list of the div was initially hidden.
@@ -23,8 +41,7 @@ function ad_add_to_participants(user_id, user_nicename, role_id, role_name){
 						+ 'No user selected'
 						+ '</div>';
 	}
-	
-	var user_role_status = 'pending';
+
 	jQuery("#ad-participant-error-message").remove();
 	
 	var participant_record = jQuery('p#ad-participants-' + role_id + '-' + user_id);
@@ -37,32 +54,27 @@ function ad_add_to_participants(user_id, user_nicename, role_id, role_name){
 		}
 	};
 	
-	// Add it to the existing role wrap if that already exists
-	// Else, create a new one
-	if (jQuery("#ad-participant-role-" + role_id + "-wrap").length > 0 && !error_message) {
+	if ( !error_message ) {
+		
 		// create a new list item that hold a hidden form element.
 		var field_html = '<p id="ad-participants-' + role_id + '-' + user_id + '">'
 						+ '<input type="hidden" id="ad-participant-'+ user_id 
 							+ '" name="ad-participant-assign[]" value="'+ role_id + '|' + user_id + '"/>'
-						+ user_nicename + ' (pending)</p>';
-		// Append it to the list
-		jQuery("#ad-participant-role-" + role_id + "-wrap").append(field_html);
-	} else if (!error_message) {
-		jQuery('#ad-no-participants').remove();
-		var field_html = '<div id="ad-participant-role-' + role_id + '-wrap" class="ad-role-wrap">'
-						+ '<h5>' + role_name + '</h5>'
-						+ '<p id="ad-participants-' + role_id + '-' + user_id + '">';
-		field_html += '<input type="hidden"' 
-		                + '" name="ad-participant-assign[]"'
-						+ 'value="'+ role_id + '|' + user_id + '"/>'
-						+ user_nicename + ' (pending)';
-		field_html += '</p></div>';				
-		jQuery("#ad-participants-wrap").append(field_html);			
+						+ user_nicename + ' (pending) <span class="ad-participant-buttons">'
+						+ '<button class="button ad-remove-participant-button" name="ad-participant-remove[]" value="'
+						+ role_id + '|' + user_id + '">Remove</button></span></p>';
+
+		// Create a wrap for the role if it doesn't exist.
+		if (! jQuery("#ad-participant-role-" + role_id + "-wrap").length > 0 ) {
+			jQuery('#ad-no-participants').remove();
+			var field_html = '<div id="ad-participant-role-' + role_id + '-wrap" class="ad-role-wrap"><h5>' + role_name + '</h5>' + field_html + '</p></div>';
+		}
+		jQuery("#ad-participants-wrap").append(field_html);	
 	} else {
 		jQuery("#ad-assign-form").prepend(error_message);
 	}
+	ad_instrument_remove_participant_buttons();
 	return false;
-
 }
 
 jQuery(document).ready(function() {
@@ -165,21 +177,7 @@ jQuery(document).ready(function() {
 		});
 	});
 	
-	/**
-	 * This function is attached to the click event of the "Remove" buttons.
-	 * This removes the participant record from the next submission.
-	 */
-	jQuery('button.ad-remove-participant-button').click(function(){
-			// Hide the entire wrapper if its the last one
-			var remove_input = '<input type="hidden" name="ad-participant-remove[]" value="' + jQuery(this).val() + '">';
-			if ( jQuery(this).parents('div.ad-role-wrap').find('p').length == 1 ) {
-				jQuery(this).parents('div.ad-role-wrap').html(remove_input);
-			} else {
-				jQuery(this).parents('div.ad-role-wrap').append(remove_input)
-				jQuery(this).parents('p').remove();
-			}
-			return false;
-	});
+	ad_instrument_remove_participant_buttons();
 	
 	/* ============================ Assignment Status ============================ */
 	
