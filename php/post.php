@@ -315,7 +315,7 @@ class ad_post {
                 echo "<h5> $user_role->name </h5>";
                 foreach ($role_participants as $participant_id => $participant_status) {
 				    $participant = get_userdata((int)$participant_id);
-				    echo "<p id='ad-participant-{$user_role->term_id}-{$participant->ID}'>";
+				    echo "<p id='ad-participants-{$user_role->term_id}-{$participant->ID}'>";
 					// assignment-desk specific actions
                     if ( current_user_can($assignment_desk->define_editor_permissions) ) {
                         echo "<span class='ad-participant-buttons'>";

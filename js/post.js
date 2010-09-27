@@ -27,23 +27,23 @@ function ad_add_to_participants(user_id, user_nicename, role_id, role_name){
 	var user_role_status = 'pending';
 	jQuery("#ad-participant-error-message").remove();
 	
-	// @todo check to see whether use was already assigned in this role
-	// @todo Internationalize this message.
-	jQuery('input[name="ad-participant-role-' + role_id + '[]"]').each(function() {
-		spl = jQuery(this).val().split('|');
-		if ( spl[0] == user_id && spl[1] != 'volunteered' ) {
+	var participant_record = jQuery('p#ad-participants-' + role_id + '-' + user_id);
+	if ( participant_record.length != 0 ) {
+		if ( participant_record.html().indexOf('(volunteered)') == -1 ) {
+			// @todo Internationalize this message.
 			error_message = '<div id="ad-participant-error-message" class="message alert">'
 							+ user_nicename + ' has already been added as ' + role_name
 							+ '</div>';
 		}
-	})
+	};
 	
 	// Add it to the existing role wrap if that already exists
 	// Else, create a new one
 	if (jQuery("#ad-participant-role-" + role_id + "-wrap").length > 0 && !error_message) {
 		// create a new list item that hold a hidden form element.
-		var field_html = '<p id="ad-participants-' + role_id + '-' + user_id + '"><input type="hidden" id="ad-participant-'
-						+ user_id +'" name="ad-participant-assign[]" value="'+ role_id + '|' + user_id + '"/>'
+		var field_html = '<p id="ad-participants-' + role_id + '-' + user_id + '">'
+						+ '<input type="hidden" id="ad-participant-'+ user_id 
+							+ '" name="ad-participant-assign[]" value="'+ role_id + '|' + user_id + '"/>'
 						+ user_nicename + ' (pending)</p>';
 		// Append it to the list
 		jQuery("#ad-participant-role-" + role_id + "-wrap").append(field_html);
@@ -52,7 +52,7 @@ function ad_add_to_participants(user_id, user_nicename, role_id, role_name){
 		var field_html = '<div id="ad-participant-role-' + role_id + '-wrap" class="ad-role-wrap">'
 						+ '<h5>' + role_name + '</h5>'
 						+ '<p id="ad-participants-' + role_id + '-' + user_id + '">';
-		field_html += '<input type="hidden"' + user_id 
+		field_html += '<input type="hidden"' 
 		                + '" name="ad-participant-assign[]"'
 						+ 'value="'+ role_id + '|' + user_id + '"/>'
 						+ user_nicename + ' (pending)';
@@ -159,8 +159,8 @@ jQuery(document).ready(function() {
 		var user_nicename = spl[3];
 	
 		jQuery(button).click(function(){
-			ad_add_to_participants(user_id, user_nicename, role_id, role_name);
 			jQuery(button).parents('p').remove();
+			ad_add_to_participants(user_id, user_nicename, role_id, role_name);
 			return false;
 		});
 	});
