@@ -63,7 +63,8 @@ class ad_post {
     }
     
     /**
-    * Print out some global JS variables that we need to compose from PHPH variables so we can use them later.
+    * Print out some global JS variables.
+    * Useful for internationaliziong JS messages.
     */
     function javascript_variables(){
 		global $assignment_desk;
@@ -76,6 +77,9 @@ class ad_post {
 		} else {
 			echo "var coauthor_ajax_suggest_link = '';";
 		}
+		echo "var assignment_desk_no_user_selected = '" . _('No user selected') . "';";
+		echo "var assignment_desk_already_added = '" . _('has already been added as') . "';" ;
+		
 		echo "var wp_admin_url = '$admin_url';";
 		echo '</script>';
 
@@ -315,7 +319,7 @@ class ad_post {
                 echo "<h5> $user_role->name </h5>";
                 foreach ($role_participants as $participant_id => $participant_status) {
 				    $participant = get_userdata((int)$participant_id);
-				    echo "<p id='ad-participant-{$user_role->term_id}-{$participant->ID}'>";
+				    echo "<div class='ad-participant-row' id='ad-participant-{$user_role->term_id}-{$participant->ID}'>";
 					// assignment-desk specific actions
                     if ( current_user_can($assignment_desk->define_editor_permissions) ) {
                         echo "<span class='ad-participant-buttons'>";
@@ -328,7 +332,7 @@ class ad_post {
                     else {
 			            echo "$participant->user_nicename (" . _($participant_status) . ')';
                     }
-                    echo "</p>";
+                    echo "</div> <br style='clear:both'>";
 				}
                 echo "</div>";
             }

@@ -15,28 +15,22 @@ if ( typeof(String.prototype.trim) === "undefined" ) {
 function ad_add_to_participants(user_id, user_nicename, role_id, role_name){
 	var error_message = false;
 	
-	// @todo This check doesn't work all that well
-	// @todo Internationalize this message.
 	user_id = parseInt(user_id);
 	if ( !user_id ) {
 	    error_message = '<div id="ad-participant-error-message" class="message alert">'
-						+ 'No user selected'
+						+ assignment_desk_no_user_selected
 						+ '</div>';
 	}
 	
 	var user_role_status = 'pending';
 	jQuery("#ad-participant-error-message").remove();
 	
-	// @todo check to see whether use was already assigned in this role
-	// @todo Internationalize this message.
-	jQuery('input[name="ad-participant-role-' + role_id + '[]"]').each(function() {
-		spl = jQuery(this).val().split('|');
-		if ( spl[0] == user_id && spl[1] != 'volunteered' ) {
-			error_message = '<div id="ad-participant-error-message" class="message alert">'
-							+ user_nicename + ' has already been added as ' + role_name
-							+ '</div>';
-		}
-	})
+	if ( jQuery('#ad-participant-' + role_id + '-' + user_id).html() != null ) {
+		error_message = '<div id="ad-participant-error-message" class="message alert">'
+						+ user_nicename + ' ' + assignment_desk_already_added + ' ' + role_name
+						+ '</div>';
+	}
+	
 	
 	// Add it to the existing role wrap if that already exists
 	// Else, create a new one

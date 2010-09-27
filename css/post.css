@@ -36,6 +36,10 @@ div#ad-participant-types-select {
 	margin-top: 10px;
 }
 
+div.ad-participant-row {
+    margin-bottom: 5px;
+}
+
 div.ad-role-wrap span.ad-participant-buttons {
 	float: right;
 	margin-top: -5px;
