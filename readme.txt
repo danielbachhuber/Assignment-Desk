@@ -46,7 +46,9 @@ Hit us with questions in the forum http://wordpress.org/tags/assignment-desk
 * Editors can restrict the roles community members can volunteer for on a pitch by pitch basis
 * Pitches display post_status instead of the assignment status
 * Optional email notifications to user-defined recipients upon successful pitch form submission
+* All pitch form fields can be required if desired
 * Displays the user contribution stats on the user profile view
+* Shows a registration link on the pitch form if user registration is open
 * Bug fix: Hide the tags field on a pitch if its empty
 * Bug fix: No longer shows participant action buttons to contributors in the post meta box.
 
