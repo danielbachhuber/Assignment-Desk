@@ -48,7 +48,6 @@ class ad_custom_taxonomies {
 
 		// Register $user_role_taxonomy if it doesn't exist
 		if (!$this->ad_taxonomy_exists($this->user_role_label)) {
-		  // @todo Need to label the different text on the view
 		  $args = array('label' => 'User Roles',
 		                'public' => true,
 		                'show_ui' => false,
@@ -60,7 +59,6 @@ class ad_custom_taxonomies {
 			
 		// Register $user_type_taxonomy if it doesn't exist									
 		if (!$this->ad_taxonomy_exists($this->user_type_label)) {
-		  // @todo Need to label the different text on the view
 		  $args = array('label' => 'User Types',
 		                'public' => true,
 		                'show_ui' => false,

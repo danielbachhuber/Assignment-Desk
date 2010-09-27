@@ -371,16 +371,13 @@ class ad_public_views {
 		global $assignment_desk;
 		$message = array();
 		$options = $assignment_desk->general_options;
-		$form_options = $assignment_desk->pitch_form_options;
-		
+		$form_options = $assignment_desk->pitch_form_options;		
 		$user_types = $assignment_desk->custom_taxonomies->get_user_types();
 
 		if ($assignment_desk->edit_flow_exists()) {
 			global $edit_flow;
 		}
 
-		// @todo Sanitize all of the fields
-		// @todo Validate all of the fields
 		session_start();		
 
 		if ( $_POST && isset($_POST['assignment_desk_pitch_submit']) ) {

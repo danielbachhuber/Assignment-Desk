@@ -313,7 +313,7 @@ class ad_manage_posts {
     /**
      * Workaround for edit-flow (as of v0.5.2)
      * Query for all custom post_statuses if filtering for 'all'
-     * @todo - Check the edit-flow version and enable when <= 0.5.2
+     * @todo - When edit-flow includes this check the edit-flow version and enable/disable
      */ 
     function add_ef_custom_statuses_where_all_filter($where){
         global $wpdb, $edit_flow;
