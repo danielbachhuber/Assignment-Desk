@@ -65,9 +65,10 @@ function ad_add_to_participants(user_id, user_nicename, role_id, role_name){
 						+ role_id + '|' + user_id + '">Remove</button></span></p>';
 
 		// Create a wrap for the role if it doesn't exist.
-		if (! jQuery("#ad-participant-role-" + role_id + "-wrap").length > 0 ) {
+		if ( jQuery("#ad-participant-role-" + role_id + "-wrap > p").length == 0 ) {
 			jQuery('#ad-no-participants').remove();
-			var field_html = '<div id="ad-participant-role-' + role_id + '-wrap" class="ad-role-wrap"><h5>' + role_name + '</h5>' + field_html + '</p></div>';
+			jQuery("#ad-participant-role-" + role_id + "-wrap").remove();
+			field_html = '<div id="ad-participant-role-' + role_id + '-wrap" class="ad-role-wrap"><h5>' + role_name + '</h5>' + field_html + '</p></div>';
 		}
 		jQuery("#ad-participants-wrap").append(field_html);	
 	} else {
