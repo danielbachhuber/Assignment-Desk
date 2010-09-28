@@ -8,10 +8,13 @@ if ( typeof(String.prototype.trim) === "undefined" ) {
 }
 
 /**
- * This function is attached to the click event of the "Remove" buttons.
- * This removes the participant record from the next submission.
+ * Find all of the Remove participant buttons and bind a function to the click event.
  */
 function ad_instrument_remove_participant_buttons(){
+	/**
+	 * This function is attached to the click event of the "Remove" buttons.
+	 * This removes the participant record from the next submission.
+	 */
 	jQuery('button.ad-remove-participant-button').click(function(){
 		// Hide the entire wrapper if its the last one
 		var remove_input = '<input type="hidden" name="ad-participant-remove[]" value="' + jQuery(this).val() + '">';
