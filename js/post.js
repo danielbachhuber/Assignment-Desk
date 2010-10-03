@@ -16,14 +16,15 @@ function ad_instrument_remove_participant_buttons(){
 	 * This removes the participant record from the next submission.
 	 */
 	jQuery('button.ad-remove-participant-button').click(function(){
-		// Hide the entire wrapper if its the last one
-		var remove_input = '<input type="hidden" name="ad-participant-remove[]" value="' + jQuery(this).val() + '">';
+		// Hide the entire wrapper if we're removing the last participant
 		if ( jQuery(this).parents('div.ad-role-wrap').find('p').length == 1 ) {
-			jQuery(this).parents('div.ad-role-wrap').html(remove_input);
-		} else {
-			jQuery(this).parents('div.ad-role-wrap').append(remove_input)
-			jQuery(this).parents('p').remove();
+			jQuery(this).parents('div.ad-role-wrap').remove();
 		}
+		// Create a hidden form element so we can remove the participant duirng save_post
+		var remove_input = '<input type="hidden" name="ad-participant-remove[]" value="' + jQuery(this).val() + '">';
+		jQuery('div#ad-participants-wrap').append(remove_input);
+		// Remove the participant display
+		jQuery(this).parents('p').remove();
 		return false;
 	});
 }
@@ -37,43 +38,42 @@ function ad_add_to_participants(user_id, user_nicename, role_id, role_name){
 	var error_message = false;
 	
 	// @todo This check doesn't work all that well
-	// @todo Internationalize this message.
 	user_id = parseInt(user_id);
 	if ( !user_id ) {
 	    error_message = '<div id="ad-participant-error-message" class="message alert">'
-						+ 'No user selected'
+						+ assignment_desk_no_user_selected
 						+ '</div>';
 	}
 
 	jQuery("#ad-participant-error-message").remove();
 	
 	var participant_record = jQuery('p#ad-participants-' + role_id + '-' + user_id);
-	if ( participant_record.length != 0 ) {
+	if ( !error_message && participant_record.length != 0 ) {
 		if ( participant_record.html().indexOf('(volunteered)') == -1 ) {
-			// @todo Internationalize this message.
 			error_message = '<div id="ad-participant-error-message" class="message alert">'
-							+ user_nicename + ' has already been added as ' + role_name
+							+ user_nicename + ' ' + assignment_desk_already_added + ' ' + role_name
 							+ '</div>';
 		}
 	};
 	
 	if ( !error_message ) {
-		
-		// create a new list item that hold a hidden form element.
-		var field_html = '<p id="ad-participants-' + role_id + '-' + user_id + '">'
-						+ '<input type="hidden" id="ad-participant-'+ user_id 
-							+ '" name="ad-participant-assign[]" value="'+ role_id + '|' + user_id + '"/>'
-						+ user_nicename + ' (pending) <span class="ad-participant-buttons">'
-						+ '<button class="button ad-remove-participant-button" name="ad-participant-remove[]" value="'
-						+ role_id + '|' + user_id + '">Remove</button></span></p>';
-
+		jQuery('#ad-no-participants').remove();
+		var role_wrap = jQuery("#ad-participant-role-" + role_id + "-wrap");
 		// Create a wrap for the role if it doesn't exist.
-		if ( jQuery("#ad-participant-role-" + role_id + "-wrap > p").length == 0 ) {
-			jQuery('#ad-no-participants').remove();
-			jQuery("#ad-participant-role-" + role_id + "-wrap").remove();
-			field_html = '<div id="ad-participant-role-' + role_id + '-wrap" class="ad-role-wrap"><h5>' + role_name + '</h5>' + field_html + '</p></div>';
+		if ( role_wrap.length == 0 ) {
+			jQuery("div#ad-participants-wrap").append(
+				'<div id="ad-participant-role-' + role_id + '-wrap" class="ad-role-wrap"><h5>' + role_name + '</h5></div>'
+			);	
+			role_wrap = jQuery("#ad-participant-role-" + role_id + "-wrap");
 		}
-		jQuery("#ad-participants-wrap").append(field_html);	
+		// Append a new p that holds a hidden form element
+		role_wrap.append(
+			'<p id="ad-participants-' + role_id + '-' + user_id + '">'
+			+ '<input type="hidden" id="ad-participant-'+ user_id + '" name="ad-participant-assign[]" value="'+ role_id + '|' + user_id + '"/>'
+			+ user_nicename + ' (pending) <span class="ad-participant-buttons">'
+			+ '<button class="button ad-remove-participant-button" name="ad-participant-remove[]" value="'
+			+ role_id + '|' + user_id + '">Remove</button></span></p>'
+			);	
 	} else {
 		jQuery("#ad-assign-form").prepend(error_message);
 	}
@@ -152,14 +152,12 @@ jQuery(document).ready(function() {
 					}
 				}
 			});
-		} else {
-			var user_id = jQuery('#ad-assignee-dropdown option:selected').val();
-			var user_nicename = jQuery('#ad-assignee-dropdown option:selected').text();
 		}
 		if(valid_user){
-			var role_id = jQuery('#ad-participant-role-dropdown option:selected').val();
-			var role_name = jQuery('#ad-participant-role-dropdown option:selected').text();
+			role_id = jQuery('#ad-participant-role-dropdown option:selected').val();
+			role_name = jQuery('#ad-participant-role-dropdown option:selected').text();
 			ad_add_to_participants(user_id, user_nicename, role_id, role_name);
+			jQuery('#ad-assignee-search-user_id').val('');
 		}
 		return false;
 	});

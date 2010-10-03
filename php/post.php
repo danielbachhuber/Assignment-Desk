@@ -63,7 +63,7 @@ class ad_post {
     }
     
     /**
-    * Print out some global JS variables that we need to compose from PHPH variables so we can use them later.
+    * Print out some global JS variables.
     */
     function javascript_variables(){
 		global $assignment_desk;
@@ -76,9 +76,11 @@ class ad_post {
 		} else {
 			echo "var coauthor_ajax_suggest_link = '';";
 		}
+		
+		echo "var assignment_desk_no_user_selected = '" . _('No user selected') . "';";
+        echo "var assignment_desk_already_added = '" . _('has already been added as a') . "';" ;
 		echo "var wp_admin_url = '$admin_url';";
 		echo '</script>';
-
     }
 
 	/**
@@ -470,15 +472,17 @@ class ad_post {
     		        $role_id = (int)$pieces[0];
     		        $user_id = (int)$pieces[1];
     		        
-    		        // Remove from the post participants
-    		        unset($role_participants[$role_id][$user_id]);
+    		        if ( $role_id && $user_id ) {
+        		        // Remove from the post participants
+        		        unset($role_participants[$role_id][$user_id]);
     		        
-    		        // Remove corresponding user record
-    		        $user_participant = get_post_meta($post_id, "_ad_participant_$user_id", true);
-    		        if ( $user_participant and is_array($user_participant) ){
-    		            unset($user_participant[$role_id]);
-                        update_post_meta($post_id, "_ad_participant_$user_id", $user_participant);
-                        delete_usermeta($user_id, '_ad_volunteer', $post_id);
+        		        // Remove corresponding user record
+        		        $user_participant = get_post_meta($post_id, "_ad_participant_$user_id", true);
+        		        if ( $user_participant and is_array($user_participant) ){
+        		            unset($user_participant[$role_id]);
+                            update_post_meta($post_id, "_ad_participant_$user_id", $user_participant);
+                            delete_usermeta($user_id, '_ad_volunteer', $post_id);
+        		        }
     		        }
 		        }
 		    }
