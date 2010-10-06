@@ -96,7 +96,7 @@ Blog Editor");
                                            WHERE tt.taxonomy = '{$assignment_desk->custom_taxonomies->assignment_status_label}' 
                                            AND t.slug = 'approved' LIMIT 1");
         $approved_status = $approved_status[0];
-        $public_facing_options['public_facing_assignment_statuses'] = array($approved_status->term_id);
+        $public_facing_options['public_facing_assignment_statuses'] = array($approved_status->term_taxonomy_id);
 
         $public_facing_options['public_facing_post_status_enabled'] = true;
         $public_facing_options['public_facing_description_enabled'] = true;
@@ -147,8 +147,8 @@ Thanks
 		if ( count($assignment_statuses) ) {
 			echo '<select id="default_new_assignment_status" name="' . $assignment_desk->get_plugin_option_fullname('general') . '[default_new_assignment_status]">';
 			foreach ( $assignment_statuses as $assignment_status ) {
-				echo "<option value='$assignment_status->term_id'";
-				if ($options['default_new_assignment_status'] == $assignment_status->term_id) {
+				echo "<option value='$assignment_status->term_taxonomy_id'";
+				if ($options['default_new_assignment_status'] == $assignment_status->term_taxonomy_id) {
 					echo ' selected="selected"';
 				}
 				echo ">$assignment_status->name</option>";
@@ -473,13 +473,13 @@ Thanks
 	    echo "<ul>";
 	    foreach ($assignment_desk->custom_taxonomies->get_assignment_statuses() as $assignment_status){
 	        echo "<li>";
-	        echo "<input type='checkbox' id='ad-status-{$assignment_status->term_id}' value='{$assignment_status->term_id}' " .
+	        echo "<input type='checkbox' id='ad-status-{$assignment_status->term_taxonomy_id}' value='{$assignment_status->term_taxonomy_id}' " .
 	                     'name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_assignment_statuses][]"';
-	        if ( in_array($assignment_status->term_id, $public_statuses) ) {
+	        if ( in_array($assignment_status->term_taxonomy_id, $public_statuses) ) {
 	            echo ' checked="checked" ';
 	        } 
 	        echo '>';
-	        echo " <label for='ad-status-{$assignment_status->term_id}'>$assignment_status->name</label></li>";
+	        echo " <label for='ad-status-{$assignment_status->term_taxonomy_id}'>$assignment_status->name</label></li>";
 	    }
 	    echo "</ul>";
 	}
