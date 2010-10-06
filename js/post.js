@@ -121,43 +121,44 @@ jQuery(document).ready(function() {
 	 * Get the user search box, check if its a valid user, and add to the selected role.
  	 */
 	jQuery("a#ad-assign-button").click(function(){
-		var valid_user = true;
-		var user_id = '';
-		var user_nicename = '';
-		
-		if (jQuery('#ad-assignee-search-user_id').val() > 0) {
-			var search = jQuery('#ad-assignee-search-user_id').val();
-			var data = { action: 'user_check', q: search };
+		if (jQuery('#ad-assignee-search').val().length > 0) {
+			var user_id = jQuery('#ad-assignee-search-user_id').val();
+			var user_nicename = jQuery('#ad-assignee-search').val();
+			var data = { action: 'user_check', q: user_id };
 
-			// Call another JAX function verify the username
-			jQuery.ajax({
-				url: ajaxurl, 
-				data: data,
-				async: false, 
-				success: function(response){
-					// valid username returns user->ID > 0
-					if(parseInt(response) > 0){
-						user_id = search;
-						user_nicename = jQuery('#ad-assignee-search').val();
-						jQuery('#ad-assignee-search').val('');
-					}
-					else {
-						// flag the invalid_user and display an error message
-						valid_user = false;
-						jQuery('#ad-assignee-search-user_id').val(0);
-						jQuery('#ad-participant-error-message').remove();
-						error_message = '<div id="ad-participant-error-message" class="message alert">'+ 
-											search + ' is not a valid user </div>';
-						jQuery("#ad-assign-form").prepend(error_message);
-					}
-				}
-			});
+            // Call another JAX function verify the username
+            jQuery.ajax({
+                url: ajaxurl, 
+                data: data,
+                async: true, 
+                success: function(response){
+                    // valid username returns user->ID > 0
+                    if(parseInt(response) > 0){
+                        // Clear the text box and hidden id
+                        jQuery('#ad-assignee-search').val('');
+                        jQuery('#ad-assignee-search-user_id').val(0);
+                        // Fetch the role information
+                        role_id = jQuery('#ad-participant-role-dropdown option:selected').val();
+                        role_name = jQuery('#ad-participant-role-dropdown option:selected').text();
+                        ad_add_to_participants(user_id, user_nicename, role_id, role_name);
+                    }
+                    else {
+                        // flag the invalid_user and display an error message
+                        jQuery('#ad-assignee-search-user_id').val(0);
+                        jQuery('#ad-participant-error-message').remove();
+                        error_message = '<div id="ad-participant-error-message" class="message alert">'+ 
+                                            user_nicename + ' ' +  assignment_desk_invalid_user + '</div>';
+                        jQuery("#ad-assign-form").prepend(error_message);
+                    }
+                    return false;
+                }
+            });
 		}
-		if(valid_user){
-			role_id = jQuery('#ad-participant-role-dropdown option:selected').val();
-			role_name = jQuery('#ad-participant-role-dropdown option:selected').text();
-			ad_add_to_participants(user_id, user_nicename, role_id, role_name);
-			jQuery('#ad-assignee-search-user_id').val('');
+		else {
+			jQuery("#ad-participant-error-message").remove();
+			jQuery("#ad-assign-form").prepend(
+				'<div id="ad-participant-error-message" class="message alert">'
+					+ assignment_desk_no_user_selected + '</div>' );
 		}
 		return false;
 	});

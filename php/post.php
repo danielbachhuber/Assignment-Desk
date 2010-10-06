@@ -79,6 +79,7 @@ class ad_post {
 		
 		echo "var assignment_desk_no_user_selected = '" . _('No user selected') . "';";
         echo "var assignment_desk_already_added = '" . _('has already been added as a') . "';" ;
+        echo "var assignment_desk_invalid_user = '" . _('is not a valid user.') . "';" ;
 		echo "var wp_admin_url = '$admin_url';";
 		echo '</script>';
     }
