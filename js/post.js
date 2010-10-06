@@ -124,13 +124,10 @@ jQuery(document).ready(function() {
 		if (jQuery('#ad-assignee-search').val().length > 0) {
 			var user_id = jQuery('#ad-assignee-search-user_id').val();
 			var user_nicename = jQuery('#ad-assignee-search').val();
-			var data = { action: 'user_check', q: user_id };
-
-            // Call another JAX function verify the username
+            // Call AJAX function verify the username
             jQuery.ajax({
                 url: ajaxurl, 
-                data: data,
-                async: true, 
+                data: { action: 'user_check', q: user_id },
                 success: function(response){
                     // valid username returns user->ID > 0
                     if(parseInt(response) > 0){
@@ -146,7 +143,7 @@ jQuery(document).ready(function() {
                         // flag the invalid_user and display an error message
                         jQuery('#ad-assignee-search-user_id').val(0);
                         jQuery('#ad-participant-error-message').remove();
-                        error_message = '<div id="ad-participant-error-message" class="message alert">'+ 
+                        error_message = '<div id="ad-participant-error-message" class="message alert">' + 
                                             user_nicename + ' ' +  assignment_desk_invalid_user + '</div>';
                         jQuery("#ad-assign-form").prepend(error_message);
                     }
