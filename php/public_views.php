@@ -637,42 +637,82 @@ class ad_public_views {
 			global $post;
 			$post_id = $post->ID;
 		}
+			
+		wp_get_current_user();
+		$total_votes = (int)get_post_meta( $post_id, '_ad_votes_total', true );
 		
-		// Only show the voting form to logged-in users
-		if ( is_user_logged_in() ) {
-			
-			wp_get_current_user();
-			$all_votes = get_post_meta( $post_id, '_ad_votes_all', true );
-			$total_votes = (int)get_post_meta( $post_id, '_ad_votes_total', true );
-						
-			if ( !is_array($all_votes) ){
-			    $all_votes = array();
+		$user_id = $current_user->ID;
+		
+		/**
+		 * Only show the vote button if the user hasn't voted before
+		 * Text display is user-configurable but defaults to 'vote'
+		 */
+		if ( !$this->check_if_user_has_voted( $post_id, $user_id ) ) {
+			$voting_form = '<form method="post" class="assignment_desk_voting_form">'
+						. '<input type="hidden" name="assignment_desk_voting_user_id" value="' . $user_id . '" />'
+						. '<input type="hidden" name="assignment_desk_voting_post_id" value="' . $post_id . '" />';
+			if ( $options['public_facing_voting_button'] ) {
+				$voting_button = $options['public_facing_voting_button'];
+			} else {
+				$voting_button = 'Vote';
 			}
-			
-			$user_id = $current_user->ID;
-			
-			/**
-			 * Only show the vote button if the user hasn't voted before
-			 * Text display is user-configurable but defaults to 'vote'
-			 */
-			if ( !in_array( $user_id, $all_votes ) ) {
-				$voting_form = '<form method="post" class="assignment_desk_voting_form">'
-							. '<input type="hidden" name="assignment_desk_voting_user_id" value="' . $user_id . '" />'
-							. '<input type="hidden" name="assignment_desk_voting_post_id" value="' . $post_id . '" />';
-				if ( $options['public_facing_voting_button'] ) {
-					$voting_button = $options['public_facing_voting_button'];
-				} else {
-					$voting_button = 'Vote';
-				}
-				$voting_form .= '<input type="hidden" name="assignment_desk_voting_nonce" value="' 
-							. wp_create_nonce('assignment_desk_voting') . '" />';
-				$voting_form .= '<input type="submit" class="assignment_desk_voting_submit button"'
-							. ' name="assignment_desk_voting_submit" value="' . $voting_button . '" />'
-							. '</form>';
-				return $voting_form;			
-			}
-			
+			$voting_form .= '<input type="hidden" name="assignment_desk_voting_nonce" value="' 
+						. wp_create_nonce('assignment_desk_voting') . '" />';
+			$voting_form .= '<input type="submit" class="assignment_desk_voting_submit button"'
+						. ' name="assignment_desk_voting_submit" value="' . $voting_button . '" />'
+						. '</form>';
+			return $voting_form;			
 		}
+		
+	}
+	
+	/**
+	 * Check if the user has voted before
+	 * @param int $post_id The Post ID
+	 * @param int $user_id The User ID
+	 */
+	function check_if_user_has_voted( $post_id, $user_id ) {
+		global $assignment_desk, $wpdb;
+		
+		$query = "SELECT * FROM $assignment_desk->votes_table_name 
+						WHERE post_id=$post_id AND user_id=$user_id;";
+		$vote = $wpdb->get_results( $query, ARRAY_N );
+		
+		if ( isset( $vote ) ) {
+			return true;
+		} else {
+			return false;
+		}
+		
+	}
+	
+	/**
+	 * Get all of the votes for a post
+	 * @param int $post_id The Post ID
+	 * @return array $all_votes All vote data in an array
+	 */
+	function get_all_votes_for_post( $post_id ) {
+		global $assignment_desk, $wpdb;
+		
+		$query = "SELECT * FROM $assignment_desk->votes_table_name 
+						WHERE post_id=$post_id ORDER BY last_updated DESC;";
+		$all_votes = $wpdb->get_results( $query, ARRAY_N );
+		
+		if ( isset( $all_votes ) ) {
+			return $all_votes;
+		} else {
+			return array();
+		}
+		
+	}
+	
+	function update_user_vote_for_post( $post_id, $user_id ) {
+		global $assignment_desk, $wpdb;
+		
+		$query = "INSERT INTO $assignment_desk->votes_table_name (post_id, user_id)
+						VALUES( '" . $wpdb->escape($post_id) . "', " . $wpdb->escape($user_id) . ");";
+		$result = $wpdb->query( $query );
+		
 		
 	}
 	
@@ -689,10 +729,7 @@ class ad_public_views {
 			$post_id = $post->ID;
 		}
 		
-		$all_votes = get_post_meta( $post_id, '_ad_votes_all', true );
-		if ( !$all_votes ) {
-		    $all_votes = array();
-		}
+		$all_votes = $this->get_all_votes_for_post( $post_id );
 		$total_votes = (int)get_post_meta( $post_id, '_ad_votes_total', true );
 		
 		if ( !$total_votes ) {
@@ -701,8 +738,8 @@ class ad_public_views {
 			return $votes_html;
 		} else {
 			$votes_html = '<div class="ad_all_votes"><span class="ad_total_votes">' . $total_votes . '</span>';
-			foreach ( $all_votes as $user_id ) {
-				$votes_html .= get_avatar( $user_id, 40 );
+			foreach ( $all_votes as $vote ) {
+				$votes_html .= get_avatar( $vote['user_id'], 40 );
 			}
 			$votes_html .= '</div>';
 			return $votes_html;
@@ -733,22 +770,14 @@ class ad_public_views {
 			$sanitized_user_id = (int)$_POST['assignment_desk_voting_user_id'];
 			// Ensure the user saving is the same user who submitted the form 
 			if ( $sanitized_user_id != $current_user->ID ) {
+				$form_messages['error']['message'] = 'Are you two different people?';
 				return false;
 			}
 			
-			$all_votes = get_post_meta( $post_id, '_ad_votes_all', true );
-			$total_votes = (int)get_post_meta( $post_id, '_ad_votes_total', true );
-			
-			// Catch if $all_votes has been set yet
-			if ( !is_array($all_votes) ){
-			    $all_votes = array();
-			}
-			
-			// Check whether the user has voted on this post yet. Users can only vote once
-			if ( !in_array( $sanitized_user_id, $all_votes ) ) {
-				$all_votes[] = $sanitized_user_id;
-				update_post_meta( $post_id, '_ad_votes_all', $all_votes );
-				update_post_meta( $post_id, '_ad_votes_total', count($all_votes) );
+			if ( !$this->check_if_user_has_voted( $post_id, $sanitized_user_id ) ) {
+				$this->update_user_vote_for_post( $post_id, $sanitized_user_id );
+				$total_votes = $this->get_all_votes_for_post( $post_id );
+				update_post_meta( $post_id, '_ad_votes_total', count($total_votes) );
 				$form_messages['success']['message'] = 'Thanks for your vote!';
 			} else {
 				$form_messages['error']['message'] = 'Whoops, you already voted.';
@@ -1223,6 +1252,8 @@ class ad_public_views {
 	
 	/**
 	 * Prepend voting functionality to the beginning of a post's content
+	 * @param string $the_content Content of the post
+	 * @return string $the_content Content of the post
 	 */ 
 	function prepend_voting_to_post( $the_content ) {
 		global $post, $assignment_desk;
