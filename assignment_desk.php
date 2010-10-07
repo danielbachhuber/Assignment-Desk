@@ -55,7 +55,7 @@ if (!class_exists('assignment_desk')) {
 
 		var $options_group = 'assignment_desk_';
 		var $pitch_form_options_group = 'assignment_desk_pitch_form';
-		var $public_facing_options_group = 'assignment_desk_public_facing';		
+		var $public_facing_options_group = 'assignment_desk_public_facing';	
 		
 		var $top_level_page = 'assignment_desk';
 		var $pitch_form_settings_page = 'assignment_desk_pitch_form_settings';
@@ -106,6 +106,7 @@ if (!class_exists('assignment_desk')) {
 			/**
 			 * Create any custom tables we need
 			 */
+			$this->votes_table_name = $wpdb->prefix . 'ad_votes';	
 			$this->create_tables();
 			
         }
@@ -171,9 +172,8 @@ if (!class_exists('assignment_desk')) {
 			global $wpdb;
 
 			// Insert a new voting table if the table doesn't already exist
-			$voting_table = $wpdb->prefix . 'ad_votes';			
-			if ( $wpdb->get_var("SHOW TABLES LIKE '$voting_table'") != $voting_table ) {
-				$query = "CREATE TABLE $voting_table (
+			if ( $wpdb->get_var("SHOW TABLES LIKE '$this->votes_table_name'") != $this->votes_table_name ) {
+				$query = "CREATE TABLE $this->votes_table_name (
 							id int(11) unsigned NOT NULL AUTO_INCREMENT,
 							post_id int(11) DEFAULT NULL,
 							user_id int(11) DEFAULT NULL,							
