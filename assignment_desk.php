@@ -103,6 +103,11 @@ if (!class_exists('assignment_desk')) {
 			$this->pitch_form_options = get_option($this->get_plugin_option_fullname('pitch_form'));
 			$this->public_facing_options = get_option($this->get_plugin_option_fullname('public_facing'));
 			
+			/**
+			 * Create any custom tables we need
+			 */
+			$this->create_tables();
+			
         }
 
 		/**
@@ -158,6 +163,28 @@ if (!class_exists('assignment_desk')) {
             }
 
         }
+
+		/**
+		 * Create any custom tables we may need if they don't already exist
+		 */
+		function create_tables() {
+			global $wpdb;
+
+			// Insert a new voting table if the table doesn't already exist
+			$voting_table = $wpdb->prefix . 'ad_votes';			
+			if ( $wpdb->get_var("SHOW TABLES LIKE '$voting_table'") != $voting_table ) {
+				$query = "CREATE TABLE $voting_table (
+							id int(11) unsigned NOT NULL AUTO_INCREMENT,
+							post_id int(11) DEFAULT NULL,
+							user_id int(11) DEFAULT NULL,							
+							last_updated timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+							PRIMARY KEY  id (id)
+						);";
+				require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+				$returned = dbDelta($query);
+			}
+			
+		}
 
 		/**
 		 * Get the full name of a plugin options group
