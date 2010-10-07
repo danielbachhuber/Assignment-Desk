@@ -98,13 +98,15 @@ Blog Editor");
         $approved_status = $approved_status[0];
         $public_facing_options['public_facing_assignment_statuses'] = array($approved_status->term_taxonomy_id);
 
+        // Public facing pitch elements
         $public_facing_options['public_facing_post_status_enabled'] = true;
         $public_facing_options['public_facing_description_enabled'] = true;
         $public_facing_options['public_facing_duedate_enabled'] = true;
         $public_facing_options['public_facing_location_enabled'] = true;
         $public_facing_options['public_facing_categories_enabled'] = true;
         $public_facing_options['public_facing_tags_enabled'] = true;
-        
+        $public_facing_options['public_facing_pitched_by_enabled'] = true;
+
         $public_facing_options['public_facing_filtering_post_status_enabled'] = true;
         $public_facing_options['public_facing_filtering_participant_type_enabled'] = true;
         $public_facing_options['public_facing_filtering_sort_by_enabled'] = true;
@@ -520,9 +522,16 @@ Thanks
 			global $edit_flow;
 		}
 		$options = $assignment_desk->public_facing_options;
+		echo '<span class="description">Which elements of the pitch to show on the public pitch listing.';
 		echo '<ul>';
 		// Title
 		echo '<li><input type="checkbox" disabled="disabled" checked="checked" />&nbsp;<label for="public_facing_title">Title</label></li>';
+		// Submitter
+		echo '<li><input id="public_facing_pitched_by_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_pitched_by_enabled]" type="checkbox"';
+		if ($options['public_facing_pitched_by_enabled']) {
+			echo ' checked="checked"';
+		}
+		echo ' />&nbsp;<label for="public_facing_tags_enabled">Submitter</label></li>';
 		// Content
 		echo '<li><input id="public_facing_content_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_content_enabled]" type="checkbox"';
 		if ($options['public_facing_content_enabled']) {
@@ -578,6 +587,7 @@ Thanks
 			echo ' checked="checked"';
 		}
 		echo ' />&nbsp;<label for="public_facing_tags_enabled">Tags</label></li>';
+		
 		echo '</ul>';
 	}
 

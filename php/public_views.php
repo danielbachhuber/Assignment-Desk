@@ -1158,7 +1158,6 @@ class ad_public_views {
 				}
 				
 				$css_classes = $this->get_css_classes_for_pitch( $post_id );
-				
 			
 				$html .= '<div class="assignment-desk-pitch';
 				if ( $css_classes ) {
@@ -1170,7 +1169,28 @@ class ad_public_views {
 					$html .= $this->show_all_votes( $post_id );					
 					$html .= $this->voting_form( $post_id );
 				}
-			
+				
+                if ( $options['public_facing_pitched_by_enabled'] ) {
+                    $pitched_by = get_post_meta($pitch->ID, '_ad_pitched_by_participant', true);
+                    $user = get_userdata($pitched_by);
+                    if ( $pitched_by && $user ) { 
+                        $html .= '<p ><label>Pitched by:</label> ';
+                        $html .= get_avatar($user->ID, '32');
+                        $html .= ' ';
+                        // @todo - Link or overlay for the user name.
+                        if ( $user->display_name ){
+                            $html .=  $user->display_name;
+                        }
+                        else if ( $user->user_nicename ){
+                            $html .= $user->user_nicename;
+                        }
+                        else {
+                            $html .= $user->user_login;
+                        }
+                        $html .= '</p>';
+                    }
+                }
+				
 				if ( $options['public_facing_content_enabled'] && $pitch->post_content ) {
 					// @todo This method doesn't work
 					$html .= '<p>' . $pitch->post_content . '</p>';
