@@ -23,6 +23,7 @@ class ad_manage_posts {
 		if(current_user_can($assignment_desk->define_editor_permissions)){
 		    add_action('manage_posts_custom_column', array(&$this, 'handle_ad_user_type_column'), 10, 2);
     		add_action('manage_posts_custom_column', array(&$this, 'handle_ad_volunteers_column'), 10, 2);
+    		add_action('manage_posts_custom_column', array(&$this, 'handle_ad_pitched_by_timestamp_column'), 10, 2);
 		}
 		
 		// Filter by eligible contributor types
@@ -67,6 +68,7 @@ class ad_manage_posts {
 		}
 		if(current_user_can($assignment_desk->define_editor_permissions)){
 		    $custom_fields_to_add[_('_ad_user_type')] = _('Contributor Types');
+		    $custom_fields_to_add[_('_ad_pitched_by_timestamp')] = __('Age');
 		    $custom_fields_to_add[_('_ad_volunteers')] = __('Volunteers');
 	    }
 	    $custom_fields_to_add[_('_ad_votes_total')] = _('Votes');
@@ -81,19 +83,15 @@ class ad_manage_posts {
       global $assignment_desk;
       
       if ( $column_name == _( '_ad_user_type' ) ) {
-        
 		$participant_types = $assignment_desk->custom_taxonomies->get_user_types_for_post($post_id);
-
 		echo $participant_types['display'];
-          
       }
       
     }
     
     /**
-      *  Wordpress doesn't know how to resolve the column name to a post attribute 
-      *  so this function is called with the column name and the id of the post.
-    */
+     *  Display the Edit-Flow Due Date custom field in the manage_posts view.
+     */
     function handle_ef_duedate_column($column_name, $post_id){
         if ( $column_name == _('_ef_duedate') ){
             // Get the due date, format it and echo.
@@ -107,6 +105,9 @@ class ad_manage_posts {
         }
     }
 
+    /**
+     *  Display the Edit-Flow Location custom field in the manage_posts view.
+     */
 	function handle_ef_location_column($column_name, $post_id){
         if ( $column_name == _('_ef_location') ){
             // Get the due date, format it and echo.
@@ -121,7 +122,7 @@ class ad_manage_posts {
     }
     
     /**
-     * Add the assignment_status to the manage_posts view.
+     *  Display the assignment_status custom field in the manage_posts view.
      */
     function handle_ad_assignment_status_column($column_name, $post_id){
 		global $assignment_desk;
@@ -168,6 +169,24 @@ class ad_manage_posts {
             }
         }
     }
+    
+    /**
+     * Show the age of a post that started as a pitch.
+     */
+    function handle_ad_pitched_by_timestamp_column($column_name, $post_id){
+        global $assignment_desk, $wpdb;
+        $volunteers = 0;
+        if ( $column_name == _('_ad_pitched_by_timestamp') ) {
+            $timestamp = (int)get_post_meta($post_id, '_ad_pitched_by_timestamp', true);
+            if ( !$timestamp ) {
+                $age = _("Not a pitch.");
+            }
+            else {
+                $age = human_time_diff($timestamp, current_time('timestamp')) . ' ago';   
+            }
+            echo "<span class='_ad_pitched_by_timestamp'>$age</span>";
+        } 
+    }
 
     /**
      * Show users who have volunteered for this post.
@@ -185,6 +204,9 @@ class ad_manage_posts {
         } 
     }
     
+    /**
+     * Show the total votes for this post.
+     */
     function handle_ad_votes_total($column_name, $post_id){
         if ( $column_name == _('_ad_votes_total') ) {
             $votes = get_post_meta($post_id, '_ad_votes_total', true);
@@ -243,6 +265,7 @@ class ad_manage_posts {
         <label for"ad-sortby-select"><?php _e('Sort by'); ?>:</label>
         <select name='ad-sortby' id='ad-sortby-select' class='postform'>
             <option value="">None</option>
+            <option value="_ad_pitched_by_timestamp" <?php echo ($_GET['ad-sortby'] == '_ad_pitched_by_timestamp')? 'selected': ''?>>Age</option>
             <option value="votes" <?php echo ($_GET['ad-sortby'] == 'votes')? 'selected': ''?>>Votes</option>
             <option value="volunteers" <?php echo ($_GET['ad-sortby'] == 'volunteers')? 'selected': ''?>>Volunteers</option>
             <?php if( $assignment_desk->edit_flow_exists() ): ?>
@@ -271,6 +294,10 @@ class ad_manage_posts {
                 case '_ef_duedate':
                     $order = ($_GET['ad-sortby-reverse'])? 'DESC': 'ASC';
                     $meta_key = '_ef_duedate';
+                    break;
+                case '_ad_pitched_by_timestamp':
+                    $order = ($_GET['ad-sortby-reverse'])? 'DESC': 'ASC';
+                    $meta_key = '_ad_pitched_by_timestamp';
                     break;
             }
             if ( $meta_key ) {
