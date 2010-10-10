@@ -266,8 +266,8 @@ class ad_manage_posts {
         <select name='ad-sortby' id='ad-sortby-select' class='postform'>
             <option value="">None</option>
             <option value="_ad_pitched_by_timestamp" <?php echo ($_GET['ad-sortby'] == '_ad_pitched_by_timestamp')? 'selected': ''?>>Age</option>
-            <option value="votes" <?php echo ($_GET['ad-sortby'] == 'votes')? 'selected': ''?>>Votes</option>
-            <option value="volunteers" <?php echo ($_GET['ad-sortby'] == 'volunteers')? 'selected': ''?>>Volunteers</option>
+            <option value="_ad_votes_total" <?php echo ($_GET['ad-sortby'] == '_ad_votes_total')? 'selected': ''?>>Votes</option>
+            <option value="_ad_total_volunteers" <?php echo ($_GET['ad-sortby'] == '_ad_total_volunteers')? 'selected': ''?>>Volunteers</option>
             <?php if( $assignment_desk->edit_flow_exists() ): ?>
                 <option value="_ef_duedate" <?php echo ($_GET['ad-sortby'] == '_ef_duedate')? 'selected': ''?>>Due Date</option>
             <?php endif; ?>
@@ -279,32 +279,10 @@ class ad_manage_posts {
     function parse_query_sortby( $query ){
         global $pagenow;
         if (is_admin() && $pagenow == 'edit.php' && isset($_GET['ad-sortby'])  && $_GET['ad-sortby'] !='None')  {
-            $orderby = 'meta_value';
-            $meta_key = '';
-            $oder = '';
-            switch($_GET['ad-sortby']){
-                case 'votes':
-                    $order = ($_GET['ad-sortby-reverse'])? 'ASC': 'DESC';
-                    $meta_key = '_ad_votes_total';
-                    break;
-                case 'volunteers':
-                    $order = ($_GET['ad-sortby-reverse'])? 'ASC': 'DESC';
-                    $meta_key = '_ad_total_volunteers';
-                    break;
-                case '_ef_duedate':
-                    $order = ($_GET['ad-sortby-reverse'])? 'DESC': 'ASC';
-                    $meta_key = '_ef_duedate';
-                    break;
-                case '_ad_pitched_by_timestamp':
-                    $order = ($_GET['ad-sortby-reverse'])? 'DESC': 'ASC';
-                    $meta_key = '_ad_pitched_by_timestamp';
-                    break;
-            }
-            if ( $meta_key ) {
-                $query->query_vars['orderby'] = $orderby;
-                $query->query_vars['meta_key'] = $meta_key;
-                $query->query_vars['order'] = $order;
-            }
+            $order = ($_GET['ad-sortby-reverse'])? 'ASC': 'DESC';
+            $query->query_vars['orderby'] = 'meta_value';
+            $query->query_vars['meta_key'] = $_GET['ad-sortby'];
+            $query->query_vars['order'] = $order;
         }
     }
     
