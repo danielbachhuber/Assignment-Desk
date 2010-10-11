@@ -640,32 +640,40 @@ class ad_public_views {
 			
 		wp_get_current_user();
 		$total_votes = (int)get_post_meta( $post_id, '_ad_votes_total', true );
-		
 		$user_id = $current_user->ID;
 		
 		/**
 		 * Only show the vote button if the user hasn't voted before
 		 * Text display is user-configurable but defaults to 'vote'
 		 */
-		$voting_form = '<form method="post" class="assignment_desk_voting_form">'
-					. '<input type="hidden" name="assignment_desk_voting_user_id" value="' . $user_id . '" />'
-					. '<input type="hidden" name="assignment_desk_voting_post_id" value="' . $post_id . '" />';
-		if ( !$this->check_if_user_has_voted( $post_id, $user_id ) ) {		
+		if ( !$this->check_if_user_has_voted( $post_id, $user_id ) && is_user_logged_in() ) {
+			$voting_form = '<a class="assignment_desk_voting_submit assignment_desk_new_vote" ';			
+			$voting_form .= 'href="' . get_permalink($post_id) . '&action=vote&user_id=' . $user_id . '&post_id=' . $post_id;
+			$voting_form .= '&nonce=' . wp_create_nonce('assignment_desk_voting');
+			$voting_form .= '">';
 			if ( $options['public_facing_voting_button'] ) {
-				$voting_button = $options['public_facing_voting_button'] . '(' . $total_votes . ')';
+				$voting_button = $options['public_facing_voting_button'] . ' (' . $total_votes . ')';
 			} else {
 				$voting_button = 'Vote (' . $total_votes . ')';
 			}
-			$voting_form .= '<input type="hidden" name="assignment_desk_voting_nonce" value="' 
-						. wp_create_nonce('assignment_desk_voting') . '" />';
-			$voting_form .= '<input type="submit" class="assignment_desk_voting_submit assignment_desk_new_vote button"'
-						. ' name="assignment_desk_voting_submit" value="' . $voting_button . '" />'
-						. '</form>';
-			return $voting_form;		
+			$voting_form .= $voting_button . '</a>';
+		} else if ( $this->check_if_user_has_voted( $post_id, $user_id ) && is_user_logged_in() ) {
+			$voting_form = '<a class="assignment_desk_voting_submit assignment_desk_voted disabled" ';			
+			$voting_form .= 'href="' . get_permalink($post_id) . '&action=remove_vote&user_id=' . $user_id . '&post_id=' . $post_id;
+			$voting_form .= '&nonce=' . wp_create_nonce('assignment_desk_voting');
+			$voting_form .= '">';
+			$voting_button = 'Thanks! (' . $total_votes . ')';
+			$voting_form .= $voting_button . '</a>';
 		} else {
-			$voting_form .= '<input type="submit" class="assignment_desk_voting_submit assignment_desk_voted button"'
-						. ' name="assignment_desk_voting_submit" disabled="disabled" value="Thanks! (' . $total_votes . ')" />'
-						. '</form>';
+			$voting_form = '<a class="assignment_desk_voting_submit assignment_desk_new_vote" ';			
+			$voting_form .= 'href="' . get_permalink($post_id) . '&action=login_vote';
+			$voting_form .= '">';
+			if ( $options['public_facing_voting_button'] ) {
+				$voting_button = $options['public_facing_voting_button'] . ' (' . $total_votes . ')';
+			} else {
+				$voting_button = 'Vote (' . $total_votes . ')';
+			}
+			$voting_form .= $voting_button . '</a>';
 		}
 		return $voting_form;		
 		
@@ -728,6 +736,7 @@ class ad_public_views {
 	 */
 	function show_all_voting_avatars( $post_id = null ) {
 		global $assignment_desk, $current_user;
+		$options = $assignment_desk->public_facing_options;
 		
 		if ( !$post_id ) {
 			global $post;
@@ -740,8 +749,13 @@ class ad_public_views {
 		// Only show avatars if there are lots of votes
 		if ( $total_votes ) {
 			$votes_html = '<div class="ad_all_votes">';
+			$i = 0;
 			foreach ( $all_votes as $vote ) {
+				if ( $i >= $options['public_facing_voting_avatars'] ) {
+					break;
+				}
 				$votes_html .= get_avatar( $vote['user_id'], 40 );
+				$i++;
 			}
 			$votes_html .= '</div>';
 			return $votes_html;
@@ -1167,7 +1181,7 @@ class ad_public_views {
 				}
 				$html .= '"><h3><a href="' . get_permalink( $post_id ) . '">' . get_the_title( $post_id ) . '</a></h3>';
 				// Only show voting if it's enabled
-				if ( $options['public_facing_voting_enabled'] ) {
+				if ( $options['public_facing_voting_enabled'] && $options['public_facing_voting_avatars'] ) {
 					$html .= $this->show_all_voting_avatars( $post_id );
 				}
 				
@@ -1237,7 +1251,7 @@ class ad_public_views {
 				
 				$action_links = '';
 				if ( $options['public_facing_voting_enabled'] ) {
-					$html .= $this->voting_form( $post_id );
+					$action_links .= $this->voting_form( $post_id ) . ' | ';
 				}
 				if ( $options['public_facing_volunteering_enabled'] ) {
 					//$html .= $this->show_all_volunteers( $post_id );
@@ -1246,7 +1260,7 @@ class ad_public_views {
 				if ( $options['public_facing_commenting_enabled'] ) {
 					$action_links .= '<a href="' . get_permalink( $post_id ) . '#respond">Comment</a> |';
 				}
-				if ( $options['public_facing_volunteering_enabled'] || $options['public_facing_commenting_enabled'] ) {
+				if ( $options['public_facing_voting_enabled'] || $options['public_facing_volunteering_enabled'] || $options['public_facing_commenting_enabled'] ) {
 					$html .= '<div class="links">';
 					$html .= rtrim( $action_links, ' |' );
 					$html .= '</div>';					
