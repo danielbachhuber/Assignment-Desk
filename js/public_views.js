@@ -8,9 +8,19 @@ jQuery(document).ready(function() {
 			url: link.attr('href'),
 			success: function(data) {
 				if ( data.indexOf('added') != -1 ) {
+					var new_href = link.attr('href').replace('assignment_desk_add_vote', 'assignment_desk_delete_vote');
+					link.attr('href', new_href);
 					link.find('span.assignment_desk_voting_text').html('Thanks!');
-				} else {
-					link.find('span.assignment_desk_voting_text').html('Vote');
+					var votes = parseFloat(link.find('span.assignment_desk_voting_votes').html());
+					votes = votes + 1;
+					link.find('span.assignment_desk_voting_votes').html(votes);
+				} else if (data.indexOf('deleted') != -1) {
+					var new_href = link.attr('href').replace('assignment_desk_delete_vote', 'assignment_desk_add_vote');
+					link.attr('href', new_href);					
+					link.find('span.assignment_desk_voting_text').html('Vote'); // @todo Use custom voting text
+					var votes = parseFloat(link.find('span.assignment_desk_voting_votes').html());
+					votes = votes - 1;
+					link.find('span.assignment_desk_voting_votes').html(votes);
 				}
 			}
 		})

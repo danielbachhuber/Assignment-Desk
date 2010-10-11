@@ -659,7 +659,7 @@ class ad_public_views {
 			$voting_form .= $voting_button . '</a>';
 		} else if ( $this->check_if_user_has_voted( $post_id, $user_id ) && is_user_logged_in() ) {
 			$voting_form = '<a class="assignment_desk_voting_submit assignment_desk_voted disabled" ';			
-			$voting_form .= 'href="' . get_permalink($post_id) . '&action=assignment_desk_remove_vote&user_id=' . $user_id . '&post_id=' . $post_id;
+			$voting_form .= 'href="' . get_permalink($post_id) . '&action=assignment_desk_delete_vote&user_id=' . $user_id . '&post_id=' . $post_id;
 			$voting_form .= '&nonce=' . wp_create_nonce('assignment_desk_voting');
 			$voting_form .= '">';
 			$voting_button = '<span class="assignment_desk_voting_text">Thanks!</span> (<span class="assignment_desk_voting_votes">' . $total_votes . '</span>)';
@@ -802,13 +802,17 @@ class ad_public_views {
 					$total_votes = $this->get_all_votes_for_post( $post_id );
 					update_post_meta( $post_id, '_ad_votes_total', count($total_votes) );
 					$ajax_message = 'added';					
+				} else {
+					$ajax_message = 'add_error';
 				}
-			} else if ( $_GET['action'] == 'assignment_desk_remove_vote' ) {
+			} else if ( $_GET['action'] == 'assignment_desk_delete_vote' ) {
 				if ( $this->check_if_user_has_voted( $post_id, $sanitized_user_id ) ) {
 					$this->update_user_vote_for_post( $post_id, $sanitized_user_id, 'remove' );
 					$total_votes = $this->get_all_votes_for_post( $post_id );
 					update_post_meta( $post_id, '_ad_votes_total', count($total_votes) );
 					$ajax_message = 'deleted';
+				} else {
+					$ajax_message = 'delete_error';
 				}
 			}
 			
