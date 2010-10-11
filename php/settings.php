@@ -614,7 +614,14 @@ Thanks
 		if ( !$options['public_facing_voting_enabled'] ) {
 			echo ' hidden';
 		}
-		echo '"><label for="public_facing_voting_button">Button text</label>';
+		echo '">';
+		echo '<label for="public_facing_voting_avatars">Show avatars?</label>';
+		echo '<input id="public_facing_voting_avatars" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_voting_avatars]" type="checkbox"';
+		if ( $options['public_facing_voting_avatars'] ) {
+			 echo ' checked="checked"';
+		}
+		echo ' />';
+		echo '<label for="public_facing_voting_button">Button text</label>';
 		echo '<input id="public_facing_voting_button" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_voting_button]" type="text" value="'
 			. $options['public_facing_voting_button'] . '" size="15" />';
 		echo '</span></li>';
