@@ -42,7 +42,7 @@ class ad_public_views {
 		// Only add volunteering if its enabled
 		if ( $public_facing_options['public_facing_volunteering_enabled'] ) {
 		    $_REQUEST['assignment_desk_messages']['volunteer_form'] = $this->save_volunteer_form();
-			add_filter( 'the_content', array(&$this, 'append_volunteering_to_post') );		
+			add_filter( 'the_content', array(&$this, 'append_actions_to_post') );		
 		}
 		// Only show pitch forms if the functionality is enabled
 		if ( $pitch_form_options['pitch_form_enabled'] ) {
@@ -1339,7 +1339,7 @@ class ad_public_views {
 	}
 	
 	/**
-	 * Prepend voting functionality to the beginning of a post's content
+	 * Prepend vote avatars to the beginning of a post's content
 	 * @param string $the_content Content of the post
 	 * @return string $the_content Content of the post
 	 */ 
@@ -1347,8 +1347,7 @@ class ad_public_views {
 		global $post, $assignment_desk;
 		
 		if ( is_single() && $post->post_status != 'publish' ) {
-			$the_content = $this->voting_button() . $the_content;
-			$the_content = $this->show_all_votes() . $the_content;
+			$the_content = $this->show_all_voting_avatars() . $the_content;
 		}
 		
 		return $the_content;
@@ -1415,12 +1414,12 @@ class ad_public_views {
 	/**
 	 * Appending volunteering functionality to the ending of a post's content
 	 */
-	function append_volunteering_to_post( $the_content ) {
+	function append_actions_to_post( $the_content ) {
 		global $post, $assignment_desk, $current_user;
 		wp_get_current_user();
 		
 		if ( is_single() && $post->post_status != 'publish' ) {
-			$the_content .= $this->show_all_volunteers( $post->ID );
+			$the_content .= $this->get_action_links( $post->ID );
 			
 			$current_user_type = (int)get_usermeta( $current_user->ID, 'ad_user_type' );
 			// Do not equal negative if someone created a new user type on us that
