@@ -94,25 +94,26 @@ class ad_post {
     function display_assignment_info(){
        	global $post, $wpdb, $assignment_desk;
        	
-       	if(! current_user_can($assignment_desk->define_editor_permissions)){
+       	if( !current_user_can($assignment_desk->define_editor_permissions) ){
        	    return;
        	}
        	
-       	$pitched_by = get_post_meta($post->ID, '_ad_pitched_by_participant', true);
-       	$pitched_by_user = get_userdata($pitched_by);
+       	$pitched_by = get_post_meta( $post->ID, '_ad_pitched_by_participant', true );
+		$pitched_by_user = get_userdata( $pitched_by );
+       	$pitched_by_timestamp = get_post_meta( $post->ID, '_ad_pitched_by_timestamp', true );
+		
      ?>
         <div id="ad-pitched-by-participant" class="misc-pub-section">
             <label for="ad-pitched-by-participant-select">Pitched by:</label>
             <span id="ad-pitched-by-participant-display">
         <?php
-            if( $pitched_by_user ) { 
+            if( $pitched_by ) { 
                 echo "<a href='" . admin_url() . "user-edit.php?user_id=$pitched_by'>$pitched_by_user->display_name</a>";
             }
             else {
                 _e('None');
             }
-        ?>
-            </span>
+        ?></span><?php if ( $pitched_by_timestamp ) : ?><span class="ad-pitched-by-timestamp">, <?php echo human_time_diff( $pitched_by_timestamp, current_time('timestamp') ); ?> ago</span><?php endif; ?>
             <a id="ad-edit-pitched-by-participant" class="hide-if-no-js" href="#pitched-by-participant">Edit</a>
 
             <div id="ad-pitched-by-participant-select" class="hide-if-js">        
