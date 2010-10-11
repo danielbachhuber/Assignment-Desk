@@ -615,12 +615,17 @@ Thanks
 			echo ' hidden';
 		}
 		echo '">';
-		echo '<label for="public_facing_voting_avatars">Show avatars?</label>';
-		echo '<input id="public_facing_voting_avatars" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_voting_avatars]" type="checkbox"';
-		if ( $options['public_facing_voting_avatars'] ) {
-			 echo ' checked="checked"';
+		echo '<label for="public_facing_voting_avatars">Maximum avatars?</label>';
+		echo '<select id="public_facing_voting_avatars" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_voting_avatars]">';
+		$avatar_numbers = array( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50 );
+		foreach ( $avatar_numbers as $avatar_number ) {
+			echo '<option value="' . $avatar_number . '"';
+			if ( $avatar_number == $options['public_facing_voting_avatars'] ) {
+				echo ' selected="selected"';
+			}
+			echo '>' . $avatar_number . '</option>';
 		}
-		echo ' />';
+		echo '</select>&nbsp;&nbsp;';
 		echo '<label for="public_facing_voting_button">Button text</label>';
 		echo '<input id="public_facing_voting_button" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_voting_button]" type="text" value="'
 			. $options['public_facing_voting_button'] . '" size="15" />';
