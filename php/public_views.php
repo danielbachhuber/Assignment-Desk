@@ -671,7 +671,7 @@ class ad_public_views {
 			$voting_form .= $voting_button . '</a>';
 		} else {
 			$voting_form = '<a class="assignment_desk_voting_submit assignment_desk_new_vote" ';			
-			$voting_form .= 'href="' . get_permalink($post_id) . '&action=login_vote';
+			$voting_form .= 'href="' . get_permalink($post_id) . '&action=assignment_desk_login_vote';
 			$voting_form .= '">';
 			if ( $options['public_facing_voting_button'] ) {
 				$voting_button = '<span class="assignment_desk_voting_text">' . $options['public_facing_voting_button'] . '</span> (<span class="assignment_desk_voting_votes">' . $total_votes . '</span>)';
@@ -824,6 +824,15 @@ class ad_public_views {
 				}
 			}
 			
+			// Give a plain message if its an AJAX request
+			if ( !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' ) { 
+			  die( $ajax_message );
+			} else {
+				return $form_messages;
+			}
+			
+		} else if ( isset($_GET['action']) && !is_user_logged_in() && ( $_GET['action'] == 'assignment_desk_delete_vote' || $_GET['action'] == 'assignment_desk_add_vote' || $_GET['action'] == 'assignment_desk_login_vote' ) ) {
+			$ajax_message = 'auth_error';
 			// Give a plain message if its an AJAX request
 			if ( !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' ) { 
 			  die( $ajax_message );
@@ -1291,7 +1300,7 @@ class ad_public_views {
 					$action_links .= '<a href="' . get_permalink( $post_id ) . '#respond">Comment</a> |';
 				}
 				if ( $options['public_facing_voting_enabled'] || $options['public_facing_volunteering_enabled'] || $options['public_facing_commenting_enabled'] ) {
-					$html .= '<div class="links">';
+					$html .= '<div class="assignment-desk-action-links">';
 					$html .= rtrim( $action_links, ' |' );
 					$html .= '</div>';					
 				}
