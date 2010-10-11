@@ -627,9 +627,8 @@ class ad_public_views {
 	 * Print a form giving the user the option to vote on an item
 	 * @param int $post_id The Post ID
 	 * @return string the voting form HTML.
-	 * @todo Functionality to remove a vote
 	 */
-	function voting_form( $post_id = null ) {
+	function voting_button( $post_id = null ) {
 		global $assignment_desk, $current_user;
 		$options = $assignment_desk->public_facing_options;
 		
@@ -1282,7 +1281,7 @@ class ad_public_views {
 				
 				$action_links = '';
 				if ( $options['public_facing_voting_enabled'] ) {
-					$action_links .= $this->voting_form( $post_id ) . ' | ';
+					$action_links .= $this->voting_button( $post_id ) . ' | ';
 				}
 				if ( $options['public_facing_volunteering_enabled'] ) {
 					//$html .= $this->show_all_volunteers( $post_id );
@@ -1328,7 +1327,7 @@ class ad_public_views {
 		global $post, $assignment_desk;
 		
 		if ( is_single() && $post->post_status != 'publish' ) {
-			$the_content = $this->voting_form() . $the_content;
+			$the_content = $this->voting_button() . $the_content;
 			$the_content = $this->show_all_votes() . $the_content;
 		}
 		
