@@ -1288,22 +1288,7 @@ class ad_public_views {
 				    $html .= '</div>';
 				}
 				
-				$action_links = '';
-				if ( $options['public_facing_voting_enabled'] ) {
-					$action_links .= $this->voting_button( $post_id ) . ' | ';
-				}
-				if ( $options['public_facing_volunteering_enabled'] ) {
-					//$html .= $this->show_all_volunteers( $post_id );
-					$action_links .= '<a href="' . get_permalink( $post_id ) . '#assignment_desk_volunteer_form">Volunteer</a> | ';
-			    }
-				if ( $options['public_facing_commenting_enabled'] ) {
-					$action_links .= '<a href="' . get_permalink( $post_id ) . '#respond">Comment</a> |';
-				}
-				if ( $options['public_facing_voting_enabled'] || $options['public_facing_volunteering_enabled'] || $options['public_facing_commenting_enabled'] ) {
-					$html .= '<div class="assignment-desk-action-links">';
-					$html .= rtrim( $action_links, ' |' );
-					$html .= '</div>';					
-				}
+				$html .= $this->get_action_links( $post_id );
 				$html .= "</div>";
 			
 			} // END foreach
@@ -1325,6 +1310,32 @@ class ad_public_views {
 		$post = $parent_post;
 		
         return $the_content;
+	}
+	
+	/**
+	 * Get the voting, volunteering, and commenting action links if enabled
+	 * @param int $post_id The post ID
+	 * @return string $action_links_html An HTML string of the action links
+	 */ 
+	function get_action_links( $post_id ) {
+		global $assignment_desk;
+		$options = $assignment_desk->public_facing_options;
+		$action_links = '';
+		if ( $options['public_facing_voting_enabled'] ) {
+			$action_links .= $this->voting_button( $post_id ) . ' | ';
+		}
+		if ( $options['public_facing_volunteering_enabled'] ) {
+			$action_links .= '<a href="' . get_permalink( $post_id ) . '#assignment_desk_volunteer_form">Volunteer</a> | ';
+	    }
+		if ( $options['public_facing_commenting_enabled'] ) {
+			$action_links .= '<a href="' . get_permalink( $post_id ) . '#respond">Comment</a> |';
+		}
+		if ( $options['public_facing_voting_enabled'] || $options['public_facing_volunteering_enabled'] || $options['public_facing_commenting_enabled'] ) {
+			$action_links_html = '<div class="assignment-desk-action-links">';
+			$action_links_html .= rtrim( $action_links, ' |' );
+			$action_links_html .= '</div>';					
+		}
+		return $action_links_html;
 	}
 	
 	/**
