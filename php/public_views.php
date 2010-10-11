@@ -656,6 +656,9 @@ class ad_public_views {
 			} else {
 				$voting_button = '<span class="assignment_desk_voting_text">Vote</span> (<span class="assignment_desk_voting_votes">' . $total_votes . '</span>)';
 			}
+			if ( $options['public_facing_voting_button'] ) {
+				$voting_button .= '<span class="assignment_desk_voting_text_custom" style="display:none;">' . $options['public_facing_voting_button'] . '</span>';
+			}
 			$voting_form .= $voting_button . '</a>';
 		} else if ( $this->check_if_user_has_voted( $post_id, $user_id ) && is_user_logged_in() ) {
 			$voting_form = '<a class="assignment_desk_voting_submit assignment_desk_voted disabled" ';			
@@ -663,6 +666,9 @@ class ad_public_views {
 			$voting_form .= '&nonce=' . wp_create_nonce('assignment_desk_voting');
 			$voting_form .= '">';
 			$voting_button = '<span class="assignment_desk_voting_text">Thanks!</span> (<span class="assignment_desk_voting_votes">' . $total_votes . '</span>)';
+			if ( $options['public_facing_voting_button'] ) {
+				$voting_button .= '<span class="assignment_desk_voting_text_custom" style="display:none;">' . $options['public_facing_voting_button'] . '</span>';
+			}
 			$voting_form .= $voting_button . '</a>';
 		} else {
 			$voting_form = '<a class="assignment_desk_voting_submit assignment_desk_new_vote" ';			
@@ -672,6 +678,9 @@ class ad_public_views {
 				$voting_button = '<span class="assignment_desk_voting_text">' . $options['public_facing_voting_button'] . '</span> (<span class="assignment_desk_voting_votes">' . $total_votes . '</span>)';
 			} else {
 				$voting_button = '<span class="assignment_desk_voting_text">Vote</span> (<span class="assignment_desk_voting_votes">' . $total_votes . '</span>)';
+			}
+			if ( $options['public_facing_voting_button'] ) {
+				$voting_button .= '<span class="assignment_desk_voting_text_custom" style="display:none;">' . $options['public_facing_voting_button'] . '</span>';
 			}
 			$voting_form .= $voting_button . '</a>';
 		}

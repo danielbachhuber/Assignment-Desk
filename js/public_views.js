@@ -16,8 +16,14 @@ jQuery(document).ready(function() {
 					link.find('span.assignment_desk_voting_votes').html(votes);
 				} else if (data.indexOf('deleted') != -1) {
 					var new_href = link.attr('href').replace('assignment_desk_delete_vote', 'assignment_desk_add_vote');
-					link.attr('href', new_href);					
-					link.find('span.assignment_desk_voting_text').html('Vote'); // @todo Use custom voting text
+					link.attr('href', new_href);
+					var custom_text = link.find('.assignment_desk_voting_text_custom').html()
+					if ( custom_text ) {
+						var button_text = custom_text;
+					} else {
+						var button_text = 'Vote';
+					}
+					link.find('span.assignment_desk_voting_text').html(button_text); // @todo Use custom voting text
 					var votes = parseFloat(link.find('span.assignment_desk_voting_votes').html());
 					votes = votes - 1;
 					link.find('span.assignment_desk_voting_votes').html(votes);
