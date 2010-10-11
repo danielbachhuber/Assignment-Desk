@@ -36,6 +36,7 @@ require_once('php/settings.php');
 require_once('php/manage_posts.php');
 require_once('php/custom_taxonomies.php');
 require_once('php/public_views.php');
+require_once('php/upgrade.php');
 
 if (!class_exists('assignment_desk')) {
     
@@ -90,6 +91,7 @@ if (!class_exists('assignment_desk')) {
 			$this->settings = new ad_settings();
             $this->public_views = new ad_public_views();
             $this->dashboard_widgets = new ad_dashboard_widgets();
+			$this->upgrade = new ad_upgrade();
 
 			/**
 			 * Store form messages
@@ -136,6 +138,8 @@ if (!class_exists('assignment_desk')) {
 		 * Initialize the plugin for the admin. 
 		 */
 		function admin_init() {	
+			
+			
 		    // Registering settings requires the WP admin to be set up
 			$this->settings->init();
 			$this->add_admin_assets();
