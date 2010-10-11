@@ -522,7 +522,7 @@ Thanks
 			global $edit_flow;
 		}
 		$options = $assignment_desk->public_facing_options;
-		echo '<span class="description">Which elements of the pitch to show on the public pitch listing.';
+		echo '<span class="description">Which elements of the pitch to show on the public pitch listing.</span>';
 		echo '<ul>';
 		// Title
 		echo '<li><input type="checkbox" disabled="disabled" checked="checked" />&nbsp;<label for="public_facing_title">Title</label></li>';
