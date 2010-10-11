@@ -648,30 +648,30 @@ class ad_public_views {
 		 */
 		if ( !$this->check_if_user_has_voted( $post_id, $user_id ) && is_user_logged_in() ) {
 			$voting_form = '<a class="assignment_desk_voting_submit assignment_desk_new_vote" ';			
-			$voting_form .= 'href="' . get_permalink($post_id) . '&action=vote&user_id=' . $user_id . '&post_id=' . $post_id;
+			$voting_form .= 'href="' . get_permalink($post_id) . '&action=assignment_desk_add_vote&user_id=' . $user_id . '&post_id=' . $post_id;
 			$voting_form .= '&nonce=' . wp_create_nonce('assignment_desk_voting');
 			$voting_form .= '">';
 			if ( $options['public_facing_voting_button'] ) {
-				$voting_button = $options['public_facing_voting_button'] . ' (' . $total_votes . ')';
+				$voting_button = '<span class="assignment_desk_voting_text">' . $options['public_facing_voting_button'] . '</span> (<span class="assignment_desk_voting_votes">' . $total_votes . '</span>)';
 			} else {
-				$voting_button = 'Vote (' . $total_votes . ')';
+				$voting_button = '<span class="assignment_desk_voting_text">Vote</span> (<span class="assignment_desk_voting_votes">' . $total_votes . '</span>)';
 			}
 			$voting_form .= $voting_button . '</a>';
 		} else if ( $this->check_if_user_has_voted( $post_id, $user_id ) && is_user_logged_in() ) {
 			$voting_form = '<a class="assignment_desk_voting_submit assignment_desk_voted disabled" ';			
-			$voting_form .= 'href="' . get_permalink($post_id) . '&action=remove_vote&user_id=' . $user_id . '&post_id=' . $post_id;
+			$voting_form .= 'href="' . get_permalink($post_id) . '&action=assignment_desk_remove_vote&user_id=' . $user_id . '&post_id=' . $post_id;
 			$voting_form .= '&nonce=' . wp_create_nonce('assignment_desk_voting');
 			$voting_form .= '">';
-			$voting_button = 'Thanks! (' . $total_votes . ')';
+			$voting_button = '<span class="assignment_desk_voting_text">Thanks!</span> (<span class="assignment_desk_voting_votes">' . $total_votes . '</span>)';
 			$voting_form .= $voting_button . '</a>';
 		} else {
 			$voting_form = '<a class="assignment_desk_voting_submit assignment_desk_new_vote" ';			
 			$voting_form .= 'href="' . get_permalink($post_id) . '&action=login_vote';
 			$voting_form .= '">';
 			if ( $options['public_facing_voting_button'] ) {
-				$voting_button = $options['public_facing_voting_button'] . ' (' . $total_votes . ')';
+				$voting_button = '<span class="assignment_desk_voting_text">' . $options['public_facing_voting_button'] . '</span> (<span class="assignment_desk_voting_votes">' . $total_votes . '</span>)';
 			} else {
-				$voting_button = 'Vote (' . $total_votes . ')';
+				$voting_button = '<span class="assignment_desk_voting_text">Vote</span> (<span class="assignment_desk_voting_votes">' . $total_votes . '</span>)';
 			}
 			$voting_form .= $voting_button . '</a>';
 		}
@@ -719,12 +719,17 @@ class ad_public_views {
 		
 	}
 	
-	function update_user_vote_for_post( $post_id, $user_id ) {
+	function update_user_vote_for_post( $post_id, $user_id, $action = 'add' ) {
 		global $assignment_desk, $wpdb;
 		
-		$query = "INSERT INTO $assignment_desk->votes_table_name (post_id, user_id)
-						VALUES( '" . $wpdb->escape($post_id) . "', " . $wpdb->escape($user_id) . ");";
-		$result = $wpdb->query( $query );
+		if ( $action == 'add' ) {
+			$query = "INSERT INTO $assignment_desk->votes_table_name (post_id, user_id)
+							VALUES( '" . $wpdb->escape($post_id) . "', " . $wpdb->escape($user_id) . ");";
+			$result = $wpdb->query( $query );
+		} else if ( $action == 'remove' ) {
+			$query = "DELETE FROM $assignment_desk->votes_table_name WHERE post_id=" . $wpdb->escape($post_id) . " AND user_id=" . $wpdb->escape($user_id) . ";";
+			$result = $wpdb->query( $query );
+		}
 		
 		
 	}
@@ -772,34 +777,47 @@ class ad_public_views {
 		global $assignment_desk, $current_user;
 	    
 		// Only logged-in users have the ability to vote
-		if ( isset($_POST['assignment_desk_voting_submit']) && is_user_logged_in() ) {
+		if ( isset($_GET['action']) && is_user_logged_in() ) {
 			$form_messages = array();
 			
+			wp_get_current_user();			
 			// Ensure that it was the user who submitted the form, not a darn bot
-			if ( !wp_verify_nonce($_POST['assignment_desk_voting_nonce'], 'assignment_desk_voting') ) {
+			if ( !wp_verify_nonce($_GET['nonce'], 'assignment_desk_voting') ) {
 				return $form_messages['error']['nonce'] = true;
 			}
-	    
-			wp_get_current_user();
-	    
-		    $post_id = (int)$_POST['assignment_desk_voting_post_id'];
-			$sanitized_user_id = (int)$_POST['assignment_desk_voting_user_id'];
+			
+			$post_id = (int)$_GET['post_id'];
+			$sanitized_user_id = (int)$_GET['user_id'];			
+			
 			// Ensure the user saving is the same user who submitted the form 
 			if ( $sanitized_user_id != $current_user->ID ) {
 				$form_messages['error']['message'] = 'Are you two different people?';
 				return false;
 			}
 			
-			if ( !$this->check_if_user_has_voted( $post_id, $sanitized_user_id ) ) {
-				$this->update_user_vote_for_post( $post_id, $sanitized_user_id );
-				$total_votes = $this->get_all_votes_for_post( $post_id );
-				update_post_meta( $post_id, '_ad_votes_total', count($total_votes) );
-				$form_messages['success']['message'] = 'Thanks for your vote!';
-			} else {
-				$form_messages['error']['message'] = 'Whoops, you already voted.';
+			if ( $_GET['action'] == 'assignment_desk_add_vote' ) {
+			
+				if ( !$this->check_if_user_has_voted( $post_id, $sanitized_user_id ) ) {
+					$this->update_user_vote_for_post( $post_id, $sanitized_user_id, 'add' );
+					$total_votes = $this->get_all_votes_for_post( $post_id );
+					update_post_meta( $post_id, '_ad_votes_total', count($total_votes) );
+					$ajax_message = 'added';					
+				}
+			} else if ( $_GET['action'] == 'assignment_desk_remove_vote' ) {
+				if ( $this->check_if_user_has_voted( $post_id, $sanitized_user_id ) ) {
+					$this->update_user_vote_for_post( $post_id, $sanitized_user_id, 'remove' );
+					$total_votes = $this->get_all_votes_for_post( $post_id );
+					update_post_meta( $post_id, '_ad_votes_total', count($total_votes) );
+					$ajax_message = 'deleted';
+				}
 			}
 			
-			return $form_messages;
+			// Give a plain message if its an AJAX request
+			if ( !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' ) { 
+			  die( $ajax_message );
+			} else {
+				return $form_messages;
+			}
 			
 		}
 		
