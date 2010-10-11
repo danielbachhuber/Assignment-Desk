@@ -647,22 +647,27 @@ class ad_public_views {
 		 * Only show the vote button if the user hasn't voted before
 		 * Text display is user-configurable but defaults to 'vote'
 		 */
-		if ( !$this->check_if_user_has_voted( $post_id, $user_id ) ) {
-			$voting_form = '<form method="post" class="assignment_desk_voting_form">'
-						. '<input type="hidden" name="assignment_desk_voting_user_id" value="' . $user_id . '" />'
-						. '<input type="hidden" name="assignment_desk_voting_post_id" value="' . $post_id . '" />';
+		$voting_form = '<form method="post" class="assignment_desk_voting_form">'
+					. '<input type="hidden" name="assignment_desk_voting_user_id" value="' . $user_id . '" />'
+					. '<input type="hidden" name="assignment_desk_voting_post_id" value="' . $post_id . '" />';
+		if ( !$this->check_if_user_has_voted( $post_id, $user_id ) ) {		
 			if ( $options['public_facing_voting_button'] ) {
-				$voting_button = $options['public_facing_voting_button'];
+				$voting_button = $options['public_facing_voting_button'] . '(' . $total_votes . ')';
 			} else {
-				$voting_button = 'Vote';
+				$voting_button = 'Vote (' . $total_votes . ')';
 			}
 			$voting_form .= '<input type="hidden" name="assignment_desk_voting_nonce" value="' 
 						. wp_create_nonce('assignment_desk_voting') . '" />';
-			$voting_form .= '<input type="submit" class="assignment_desk_voting_submit button"'
+			$voting_form .= '<input type="submit" class="assignment_desk_voting_submit assignment_desk_new_vote button"'
 						. ' name="assignment_desk_voting_submit" value="' . $voting_button . '" />'
 						. '</form>';
-			return $voting_form;			
+			return $voting_form;		
+		} else {
+			$voting_form .= '<input type="submit" class="assignment_desk_voting_submit assignment_desk_voted button"'
+						. ' name="assignment_desk_voting_submit" disabled="disabled" value="Thanks! (' . $total_votes . ')" />'
+						. '</form>';
 		}
+		return $voting_form;		
 		
 	}
 	
@@ -717,11 +722,11 @@ class ad_public_views {
 	}
 	
 	/**
-	 * Display the number of votes and avatars for the users who have voted on the item.
+	 * Display the avatars for the users who have voted on the item.
 	 * @param int $post_id The Post ID
  	 * @return string the voting results in HTML.
 	 */
-	function show_all_votes( $post_id = null ) {
+	function show_all_voting_avatars( $post_id = null ) {
 		global $assignment_desk, $current_user;
 		
 		if ( !$post_id ) {
@@ -730,14 +735,11 @@ class ad_public_views {
 		}
 		
 		$all_votes = $this->get_all_votes_for_post( $post_id );
-		$total_votes = (int)get_post_meta( $post_id, '_ad_votes_total', true );
+		$total_votes = (int)get_post_meta( $post_id, '_ad_votes_total', true );		
 		
-		if ( !$total_votes ) {
-			$total_votes = 0;
-			$votes_html = '<div class="ad_all_votes"><span class="ad_total_votes">' . $total_votes . '</span></div>';
-			return $votes_html;
-		} else {
-			$votes_html = '<div class="ad_all_votes"><span class="ad_total_votes">' . $total_votes . '</span>';
+		// Only show avatars if there are lots of votes
+		if ( $total_votes ) {
+			$votes_html = '<div class="ad_all_votes">';
 			foreach ( $all_votes as $vote ) {
 				$votes_html .= get_avatar( $vote['user_id'], 40 );
 			}
@@ -1166,8 +1168,7 @@ class ad_public_views {
 				$html .= '"><h3><a href="' . get_permalink( $post_id ) . '">' . get_the_title( $post_id ) . '</a></h3>';
 				// Only show voting if it's enabled
 				if ( $options['public_facing_voting_enabled'] ) {
-					$html .= $this->show_all_votes( $post_id );					
-					$html .= $this->voting_form( $post_id );
+					$html .= $this->show_all_voting_avatars( $post_id );
 				}
 				
                 if ( $options['public_facing_pitched_by_enabled'] ) {
@@ -1234,9 +1235,12 @@ class ad_public_views {
 				    $html .= '</div>';
 				}
 				
-				$action_links = '';				
+				$action_links = '';
+				if ( $options['public_facing_voting_enabled'] ) {
+					$html .= $this->voting_form( $post_id );
+				}
 				if ( $options['public_facing_volunteering_enabled'] ) {
-				    $html .= $this->show_all_volunteers( $post_id );
+					//$html .= $this->show_all_volunteers( $post_id );
 					$action_links .= '<a href="' . get_permalink( $post_id ) . '#assignment_desk_volunteer_form">Volunteer</a> | ';
 			    }
 				if ( $options['public_facing_commenting_enabled'] ) {
