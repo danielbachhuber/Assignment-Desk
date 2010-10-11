@@ -182,7 +182,7 @@ class ad_manage_posts {
                 $age = _("Not a pitch.");
             }
             else {
-                $age = human_time_diff($timestamp, current_time('timestamp')) . ' ago';   
+                $age = human_time_diff($timestamp, current_time('timestamp'));   
             }
             echo "<span class='_ad_pitched_by_timestamp'>$age</span>";
         } 
