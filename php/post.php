@@ -384,6 +384,10 @@ class ad_post {
         // The user who pitched this story
         if ( current_user_can( $assignment_desk->define_editor_permissions ) ) {
 		    update_post_meta($post_id, '_ad_pitched_by_participant', (int)$_POST['ad-pitched-by-participant']);
+			// Save the pitch time if it doesn't already exist
+			if ( !get_post_meta( $post_id, '_ad_pitched_by_timestamp', true ) ) {
+				update_post_meta($post_id, '_ad_pitched_by_timestamp', date_i18n('U'));
+			}
 	    }
        
  		// If current user can edit assignment status, let them
