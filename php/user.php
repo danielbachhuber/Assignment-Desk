@@ -131,8 +131,10 @@ if ( !class_exists( 'ad_user' ) ) {
                                                      AND $wpdb->posts.post_type = 'post' 
                                                      AND $wpdb->postmeta.meta_key = '_ad_participant_$user->ID'", ARRAY_N);
         $post_ids = array();
-        foreach($participant_posts as $p){
-            $post_ids[] = $p[0];
+        if ( $participant_posts ) {
+            foreach($participant_posts as $p){
+                $post_ids[] = $p[0];
+            }
         }
         
         // @todo - Make this configurable.
