@@ -42,6 +42,14 @@ Hit us with questions in the forum http://wordpress.org/tags/assignment-desk
 
 == Changelog ==
 
+= 0.8 =
+* Re-wrote voting to store data in a custom table. This will make for easier lookups and calculations. Vote button is now an AJAX-y link, a la Quora, and degrades gracefully. Error message appears if the user isn't logged in.
+* Only avatars appear under the headline. Option to disable vote avatars by setting the number to display to zero.
+* Post meta box includes the age of the pitch
+* Sort pitches by age in the manage_posts view
+* Internationalized JS messages
+* Customizable message to logged out users when viewing a single pitch
+
 = 0.7 =
 * Editors can restrict the roles community members can volunteer for on a pitch by pitch basis
 * Pitches display post_status instead of the assignment status
