@@ -139,10 +139,15 @@ if (!class_exists('assignment_desk')) {
 		 */
 		function admin_init() {	
 			
-			
 		    // Registering settings requires the WP admin to be set up
 			$this->settings->init();
 			$this->add_admin_assets();
+			
+			$saved_version = get_option( $this->get_plugin_option_fullname('version') );
+			// Only run the upgrade methods if the saved version is less than the declared version
+			if ( $saved_version < ASSIGMENT_DESK_VERSION ) {
+				$this->upgrade->run_upgrade( $previous_version );
+			}
 		}
         
         /**
