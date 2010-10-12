@@ -123,7 +123,7 @@ if ( !class_exists( 'ad_user' ) ) {
         
         $total_words = 0;
         $user = get_userdata($user_id);
-        // Get post ID's and participant records the post is published
+        // Get post ID's where this user is a participant
         $participant_posts = $wpdb->get_results("SELECT $wpdb->posts.ID
                                                  FROM $wpdb->posts 
                                                      LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id)
@@ -131,11 +131,10 @@ if ( !class_exists( 'ad_user' ) ) {
                                                      AND $wpdb->posts.post_type = 'post' 
                                                      AND $wpdb->postmeta.meta_key = '_ad_participant_$user->ID'", ARRAY_N);
         $post_ids = array();
-        if(!$participant_posts){
-            return  0;
-        }
-        foreach($participant_posts as $p){
-            $post_ids[] = $p[0];
+        if ( $participant_posts ) {
+            foreach($participant_posts as $p){
+                $post_ids[] = $p[0];
+            }
         }
         
         // @todo - Make this configurable.
@@ -165,6 +164,8 @@ if ( !class_exists( 'ad_user' ) ) {
         foreach( $author_posts as $post ) {
             $posts_to_consider[]= $post->ID;
         }
+
+        error_log('posts ' . $posts_to_consider);
         
         // Add up all of the word counts we stashed in the postmeta during save_post
         foreach( $posts_to_consider as $post_id ) {
