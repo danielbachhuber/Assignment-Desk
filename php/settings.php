@@ -680,6 +680,8 @@ Thanks
 				$sanitized_email_addresses[] = $email_address;
 			}
 		}
+		// De-dupe the email addresses
+		$sanitized_email_addresses = array_unique( $sanitized_email_addresses );
 		$input['pitch_form_notification_emails'] = implode(', ', $sanitized_email_addresses);
 		return $input;
 	}
