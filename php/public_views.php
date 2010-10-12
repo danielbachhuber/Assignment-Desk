@@ -922,10 +922,7 @@ class ad_public_views {
 		    return $volunteer_form;
 		
 		} else {
-			
-			$volunteer_message = '<div class="message alert">Sorry, you must be logged in to volunteer.</div>';
-			return $volunteer_message;
-			
+			return false;
 		}
 	}
 	
@@ -1421,17 +1418,23 @@ class ad_public_views {
 	 */
 	function append_actions_to_post( $the_content ) {
 		global $post, $assignment_desk, $current_user;
-		wp_get_current_user();
+		$public_facing_options = $assignment_desk->public_facing_options;
 		
 		if ( is_single() && $post->post_status != 'publish' ) {
 			$the_content .= $this->get_action_links( $post->ID );
 			
-			$current_user_type = (int)get_usermeta( $current_user->ID, 'ad_user_type' );
-			// Do not equal negative if someone created a new user type on us that
-			// hasn't been saved in association with the post
-			if ( get_post_meta( $post->ID, "_ad_participant_type_$current_user_type" , true ) != 'off' ) {
-				$the_content .= $this->volunteer_form( $post->ID );
+			if ( is_user_logged_in() ) {
+				wp_get_current_user();				
+				$current_user_type = (int)get_usermeta( $current_user->ID, 'ad_user_type' );
+				// Do not equal negative if someone created a new user type on us that
+				// hasn't been saved in association with the post
+				if ( get_post_meta( $post->ID, "_ad_participant_type_$current_user_type" , true ) != 'off' ) {
+					$the_content .= $this->volunteer_form( $post->ID );
+				}
+			} else if ( $public_facing_options['public_facing_logged_out_message'] ) {
+				$the_content .= '<div class="message alert">' . $public_facing_options['public_facing_logged_out_message'] . '</div>';
 			}
+		
 		}
 		
 		return $the_content;		

@@ -20,6 +20,7 @@ class ad_upgrade {
 	function upgrade_08() {
 		global $assignment_desk, $wpdb;
 		
+		// Migrate all of the prior vote data to the new custom table we're using
 		$query = "SELECT * FROM $wpdb->postmeta WHERE meta_key='_ad_votes_all';";
 		$results = $wpdb->get_results( $query );
 		if ( $results ) {
@@ -32,6 +33,12 @@ class ad_upgrade {
 				$wpdb->get_results( $query );
 			}
 		}
+		
+		// Add a default value for the public-facing logged out message setting
+		$public_facing_options = $assignment_desk->public_facing_options;
+		$public_facing_options['public_facing_logged_out_message'] = _('Sorry, you must be logged in to vote or volunteer.');
+        update_option($assignment_desk->get_plugin_option_fullname('public_facing'), $public_facing_options);
+		$assignment_desk->public_facing_options = $public_facing_options;
 		
 		update_option( $assignment_desk->get_plugin_option_fullname('version'), '0.8' );
 	}

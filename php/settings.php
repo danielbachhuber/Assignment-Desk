@@ -51,6 +51,7 @@ if ( !class_exists( 'ad_settings' ) ){
 		add_settings_field( 'public_facing_elements', 'Public-facing elements', array(&$this, 'public_facing_elements_option'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );
 		add_settings_field( 'public_facing_functionality', 'Public-facing functionality', array(&$this, 'public_facing_functionality_option'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );	
 		add_settings_field( 'public_facing_no_pitches_message', 'Message to show if no pitches', array(&$this, 'public_facing_no_pitches_message_option'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );	
+		add_settings_field( 'public_facing_logged_out_message', 'Message to show if logged out', array(&$this, 'public_facing_logged_out_message_option'), $assignment_desk->public_facing_settings_page, 'public_facing_views' );	
 			
 	}
 	
@@ -115,6 +116,7 @@ Blog Editor");
         $public_facing_options['public_facing_voting_enabled'] = true;
         $public_facing_options['public_facing_commenting_enabled'] = true;
         $public_facing_options['public_facing_no_pitches_message'] = _('No stories right now.');
+        $public_facing_options['public_facing_logged_out_message'] = _('Sorry, you must be logged in to vote or volunteer.');
         update_option($assignment_desk->get_plugin_option_fullname('public_facing'), $public_facing_options);
          
         // Pitch form defaults
@@ -645,6 +647,14 @@ Thanks
 		echo '<input id="public_facing_no_pitches_message"'
 		 	. 'name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_no_pitches_message]"'
 			. ' size="60" maxlength="120" value="' . $options['public_facing_no_pitches_message'] . '">';
+	}
+	
+	function public_facing_logged_out_message_option() {
+		global $assignment_desk;
+		$options = $assignment_desk->public_facing_options;
+		echo '<input id="public_facing_logged_out_message"'
+		 	. 'name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_logged_out_message]"'
+			. ' size="60" maxlength="120" value="' . $options['public_facing_logged_out_message'] . '">';
 	}
 	
 	/**
