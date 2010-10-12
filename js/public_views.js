@@ -29,8 +29,8 @@ jQuery(document).ready(function() {
 					link.find('span.assignment_desk_voting_votes').html(votes);
 				} else if ( data.indexOf('auth_error') != -1 ) {
 					var message = '<div class="message alert">You must be logged in to vote</div>';
-					jQuery('.assignment-desk-action-links div.message.alert').remove();
-					link.parent('.assignment-desk-action-links').prepend(message);
+					jQuery('div.message.alert').remove();
+					link.parent('.assignment-desk-action-links').append(message);
 				}
 			}
 		})
