@@ -1325,7 +1325,12 @@ class ad_public_views {
 			$action_links .= $this->voting_button( $post_id ) . ' | ';
 		}
 		if ( $options['public_facing_volunteering_enabled'] ) {
-			$action_links .= '<a href="' . get_permalink( $post_id ) . '#assignment_desk_volunteer_form">Volunteer</a> | ';
+			$total_volunteers = get_post_meta( $post_id, '_ad_total_volunteers', true );
+			$action_links .= '<a href="' . get_permalink( $post_id ) . '#assignment_desk_volunteer_form">Volunteer (';
+			if ( !$total_volunteers ) {
+				$total_volunteers = 0;
+			}
+			$action_links .= $total_volunteers . ')</a> | ';
 	    }
 		if ( $options['public_facing_commenting_enabled'] ) {
 			$action_links .= '<a href="' . get_permalink( $post_id ) . '#respond">Comment</a> |';
