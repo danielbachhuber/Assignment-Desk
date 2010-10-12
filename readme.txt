@@ -3,7 +3,7 @@ Contributors: efroese, danielbachhuber
 Tags: editorial workflow, journalism, crowdsourcing, assignment management
 Requires at least: 2.9.2
 Tested up to: 3.0.1
-Stable tag: 0.7
+Stable tag: 0.8
 
 Empower the users to participate in the journalism being done at your site and guide them along the way.
 
@@ -43,7 +43,7 @@ Hit us with questions in the forum http://wordpress.org/tags/assignment-desk
 == Changelog ==
 
 = 0.8 =
-* Re-wrote voting to store data in a custom table. This will make for easier lookups and calculations. Vote button is now an AJAX-y link, a la Quora, and degrades gracefully. Error message appears if the user isn't logged in.
+* Re-wrote voting to store data in a custom table. This will make for easier lookups and help address performance issues when scaling. Vote button is now an AJAX-y link, a la Quora, and degrades gracefully. Error message appears if the user isn't logged in.
 * Only avatars appear under the headline. Option to disable vote avatars by setting the number to display to zero.
 * Post meta box includes the age of the pitch
 * Sort pitches by age in the manage_posts view

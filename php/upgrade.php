@@ -11,12 +11,18 @@ class ad_upgrade {
 		
 	}
 	
+	/**
+	 * Run through the upgrade process depending on prior version number
+	 */
 	function run_upgrade( $previous ) {
 		
 		if ( $previous < 0.8) $this->upgrade_08();
 		
 	}
 	
+	/**
+	 * Upgrade to v0.8
+	 */
 	function upgrade_08() {
 		global $assignment_desk, $wpdb;
 		
