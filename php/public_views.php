@@ -626,7 +626,7 @@ class ad_public_views {
 	/**
 	 * Print a form giving the user the option to vote on an item
 	 * @param int $post_id The Post ID
-	 * @return string the voting form HTML.
+	 * @return string $voting_form The voting button in HTML
 	 */
 	function voting_button( $post_id = null ) {
 		global $assignment_desk, $current_user;
@@ -641,48 +641,40 @@ class ad_public_views {
 		$total_votes = (int)get_post_meta( $post_id, '_ad_votes_total', true );
 		$user_id = $current_user->ID;
 		
-		/**
-		 * Only show the vote button if the user hasn't voted before
-		 * Text display is user-configurable but defaults to 'vote'
-		 */
+		$voting_form = '<span class="assignment_desk_voting_form">';
+		// Save all of the data we need available in the DOM as hidden input fields
+		$voting_form .= '<input type="hidden" class="assignment_desk_user_id" name="assignment_desk_user_id" value="' . $user_id . '" />';
+		$voting_form .= '<input type="hidden" class="assignment_desk_post_id" name="assignment_desk_post_id" value="' . $post_id . '" />';
+		$voting_form .= '<input type="hidden" class="assignment_desk_voting_text_custom" name="assignment_desk_voting_text_custom" value="' . $options['public_facing_voting_button'] . '" />';
+		$voting_form .= '<input type="hidden" class="assignment_desk_voting_nonce" name="assignment_desk_voting_nonce" value="' . wp_create_nonce('assignment_desk_voting') . '" />';
+		// Button to display if the user is logged in and hasn't voted
 		if ( !$this->check_if_user_has_voted( $post_id, $user_id ) && is_user_logged_in() ) {
-			$voting_form = '<a class="assignment_desk_voting_submit assignment_desk_new_vote" ';			
-			$voting_form .= 'href="' . get_permalink($post_id) . '&action=assignment_desk_add_vote&user_id=' . $user_id . '&post_id=' . $post_id;
-			$voting_form .= '&nonce=' . wp_create_nonce('assignment_desk_voting');
-			$voting_form .= '">';
+			$voting_form .= '<input type="hidden" class="assignment_desk_action" name="assignment_desk_action" value="assignment_desk_add_vote" />';
+			$voting_form .= '<a class="assignment_desk_voting_submit" href="#">';
 			if ( $options['public_facing_voting_button'] ) {
-				$voting_button = '<span class="assignment_desk_voting_text">' . $options['public_facing_voting_button'] . '</span> (<span class="assignment_desk_voting_votes">' . $total_votes . '</span>)';
+				$voting_button = '<span class="assignment_desk_voting_text">' . $options['public_facing_voting_button'] . '</span>';
 			} else {
-				$voting_button = '<span class="assignment_desk_voting_text">Vote</span> (<span class="assignment_desk_voting_votes">' . $total_votes . '</span>)';
+				$voting_button = '<span class="assignment_desk_voting_text">Vote</span>';
 			}
-			if ( $options['public_facing_voting_button'] ) {
-				$voting_button .= '<span class="assignment_desk_voting_text_custom" style="display:none;">' . $options['public_facing_voting_button'] . '</span>';
-			}
+			$voting_button .= ' (<span class="assignment_desk_voting_votes">' . $total_votes . '</span>)';
 			$voting_form .= $voting_button . '</a>';
 		} else if ( $this->check_if_user_has_voted( $post_id, $user_id ) && is_user_logged_in() ) {
-			$voting_form = '<a class="assignment_desk_voting_submit assignment_desk_voted disabled" ';			
-			$voting_form .= 'href="' . get_permalink($post_id) . '&action=assignment_desk_delete_vote&user_id=' . $user_id . '&post_id=' . $post_id;
-			$voting_form .= '&nonce=' . wp_create_nonce('assignment_desk_voting');
-			$voting_form .= '">';
+			$voting_form .= '<input type="hidden" class="assignment_desk_action" name="assignment_desk_action" value="assignment_desk_delete_vote" />';
+			$voting_form .= '<a class="assignment_desk_voting_submit" href="#">';
 			$voting_button = '<span class="assignment_desk_voting_text">Thanks!</span> (<span class="assignment_desk_voting_votes">' . $total_votes . '</span>)';
-			if ( $options['public_facing_voting_button'] ) {
-				$voting_button .= '<span class="assignment_desk_voting_text_custom" style="display:none;">' . $options['public_facing_voting_button'] . '</span>';
-			}
 			$voting_form .= $voting_button . '</a>';
 		} else {
-			$voting_form = '<a class="assignment_desk_voting_submit assignment_desk_new_vote" ';			
-			$voting_form .= 'href="' . get_permalink($post_id) . '&action=assignment_desk_login_vote';
-			$voting_form .= '">';
+			$voting_form .= '<input type="hidden" class="assignment_desk_action" name="assignment_desk_action" value="login_to_vote" />';
+			$voting_form .= '<a class="assignment_desk_voting_submit" href="#">';
 			if ( $options['public_facing_voting_button'] ) {
-				$voting_button = '<span class="assignment_desk_voting_text">' . $options['public_facing_voting_button'] . '</span> (<span class="assignment_desk_voting_votes">' . $total_votes . '</span>)';
+				$voting_button = '<span class="assignment_desk_voting_text">' . $options['public_facing_voting_button'] . '</span>';
 			} else {
-				$voting_button = '<span class="assignment_desk_voting_text">Vote</span> (<span class="assignment_desk_voting_votes">' . $total_votes . '</span>)';
+				$voting_button = '<span class="assignment_desk_voting_text">Vote</span>';
 			}
-			if ( $options['public_facing_voting_button'] ) {
-				$voting_button .= '<span class="assignment_desk_voting_text_custom" style="display:none;">' . $options['public_facing_voting_button'] . '</span>';
-			}
+			$voting_button .= ' (<span class="assignment_desk_voting_votes">' . $total_votes . '</span>)';
 			$voting_form .= $voting_button . '</a>';
 		}
+		$voting_form .= '</span>';
 		return $voting_form;		
 		
 	}
