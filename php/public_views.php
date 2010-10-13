@@ -691,7 +691,7 @@ class ad_public_views {
 						WHERE post_id=$post_id AND user_id=$user_id;";
 		$vote = $wpdb->get_results( $query, ARRAY_N );
 		
-		if ( isset( $vote ) ) {
+		if ( count( $vote ) ) {
 			return true;
 		} else {
 			return false;
