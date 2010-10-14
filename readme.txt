@@ -42,6 +42,10 @@ Hit us with questions in the forum http://wordpress.org/tags/assignment-desk
 
 == Changelog ==
 
+= 0.8.1 =
+* Bug fix: Voting system now pulls values from hidden inputs and jQuery generates the entire request
+* Bug fix: Voting text displays properly based on the number of votes
+
 = 0.8 =
 * Re-wrote voting to store data in a custom table. This will make for easier lookups and help address performance issues when scaling. Vote button is now an AJAX-y link, a la Quora, and degrades gracefully. Error message appears if the user isn't logged in.
 * Only avatars appear under the headline. Option to disable vote avatars by setting the number to display to zero.
