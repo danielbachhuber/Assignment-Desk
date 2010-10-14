@@ -4,7 +4,7 @@ Plugin Name: Assignment Desk
 Plugin URI: http://openassignment.org/
 Description: News pitch and story tools for local news blogs.
 Author: Erik Froese, Daniel Bachhuber
-Version: 0.8
+Version: 0.8.1
 Author URI: http://openassignment.org/
 */   
    
@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 define('ASSIGNMENT_DESK_FILE_PATH', __FILE__);
 define('ASSIGNMENT_DESK_URL', plugins_url(plugin_basename(dirname(__FILE__)) .'/'));
-define('ASSIGMENT_DESK_VERSION', '0.8');
+define('ASSIGMENT_DESK_VERSION', '0.8.1');
 
 require_once('php/user.php');
 require_once('php/dashboard_widgets.php');
@@ -145,7 +145,7 @@ if (!class_exists('assignment_desk')) {
 			
 			$saved_version = get_option( $this->get_plugin_option_fullname('version') );
 			// Only run the upgrade methods if the saved version is less than the declared version
-			if ( $saved_version < ASSIGMENT_DESK_VERSION ) {
+			if ( version_compare( $saved_version, ASSIGMENT_DESK_VERSION, '<') ) {
 				$this->upgrade->run_upgrade( $previous_version );
 			}
 		}
