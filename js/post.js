@@ -121,9 +121,30 @@ jQuery(document).ready(function() {
 	 * Get the user search box, check if its a valid user, and add to the selected role.
  	 */
 	jQuery("a#ad-assign-button").click(function(){
-		if (jQuery('#ad-assignee-search').val().length > 0) {
-			var user_id = jQuery('#ad-assignee-search-user_id').val();
-			var user_nicename = jQuery('#ad-assignee-search').val();
+		
+		var data_exists = false;
+		
+		if ( jQuery('#ad-assignee-search').length ) {
+			
+			if (jQuery('#ad-assignee-search').val().length > 0) {
+				var user_id = jQuery('#ad-assignee-search-user_id').val();
+				var user_nicename = jQuery('#ad-assignee-search').val();
+				data_exists = true;
+			} else {
+				jQuery("#ad-participant-error-message").remove();
+				jQuery("#ad-assign-form").prepend(
+					'<div id="ad-participant-error-message" class="message alert">'
+						+ assignment_desk_no_user_selected + '</div>' );
+			}
+			
+		} else {
+			var user_id = jQuery('select#ad-assignee-dropdown option:selected').val();
+			var user_nicename = jQuery('select#ad-assignee-dropdown option:selected').html();
+			data_exists = true;	
+		}
+		
+		if ( data_exists ) {
+			
             // Call AJAX function verify the username
             jQuery.ajax({
                 url: ajaxurl, 
@@ -132,8 +153,10 @@ jQuery(document).ready(function() {
                     // valid username returns user->ID > 0
                     if(parseInt(response) > 0){
                         // Clear the text box and hidden id
-                        jQuery('#ad-assignee-search').val('');
-                        jQuery('#ad-assignee-search-user_id').val(0);
+						if ( jQuery('#ad-assignee-search').length ) {
+                        	jQuery('#ad-assignee-search').val('');
+                        	jQuery('#ad-assignee-search-user_id').val(0);
+						}
                         // Fetch the role information
                         role_id = jQuery('#ad-participant-role-dropdown option:selected').val();
                         role_name = jQuery('#ad-participant-role-dropdown option:selected').text();
@@ -141,7 +164,9 @@ jQuery(document).ready(function() {
                     }
                     else {
                         // flag the invalid_user and display an error message
-                        jQuery('#ad-assignee-search-user_id').val(0);
+						if ( jQuery('#ad-assignee-search').length ) {
+                        	jQuery('#ad-assignee-search-user_id').val(0);
+						}
                         jQuery('#ad-participant-error-message').remove();
                         error_message = '<div id="ad-participant-error-message" class="message alert">' + 
                                             user_nicename + ' ' +  assignment_desk_invalid_user + '</div>';
@@ -150,12 +175,6 @@ jQuery(document).ready(function() {
                     return false;
                 }
             });
-		}
-		else {
-			jQuery("#ad-participant-error-message").remove();
-			jQuery("#ad-assign-form").prepend(
-				'<div id="ad-participant-error-message" class="message alert">'
-					+ assignment_desk_no_user_selected + '</div>' );
 		}
 		return false;
 	});
