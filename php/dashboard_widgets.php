@@ -253,9 +253,9 @@ class ad_dashboard_widgets {
 
            // Are we waiting for a response from this user for this post/role?
            if ( $participant_record && $participant_record[$current_user->ID] == 'pending' ) {
-               $participant_record[$current_user->ID] = $response;
 
                if ( $response == 'Accept' ) {
+	               $participant_record[$current_user->ID] = 'accepted';
                    // Add as a coauthor
                    if ( $assignment_desk->coauthors_plus_exists() ) {
                        $coauthors_plus->add_coauthors($post_id, array($current_user->user_login), true);
@@ -271,8 +271,9 @@ class ad_dashboard_widgets {
                    }
                    $user_participant[] = $role_id;
                    update_post_meta($post_id, "_ad_participant_$current_user->ID", $user_participant);
-               } else if( $response == 'Decline' ) {
-                   $_REQUEST['ad-dashboard-assignment-messages'][] = _("Sorry.");
+				} else if( $response == 'Decline' ) {
+					$participant_record[$current_user->ID] = 'declined';
+					$_REQUEST['ad-dashboard-assignment-messages'][] = _("Sorry.");
                }
            }
            update_post_meta($post_id, "_ad_participant_role_$role_id", $participant_record);
