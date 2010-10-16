@@ -195,13 +195,15 @@ class ad_dashboard_widgets {
             echo "<div class='table'><table><tbody>";
             foreach($pending_posts as $pending) {
                 $post = get_post($pending[0]);
-                echo "<tr>";
+                echo "<tr><form action='' method='POST'>";
                 echo "<td>{$post->post_title} | {$pending[1]->name}</td>";
-                echo "<td><a class='button' href='" . admin_url() . "index.php?participant_response=accepted&post_id=$post->ID&role_id={$pending[1]->term_id}'>Accept</a> ";
-                echo "<a class='button' href='" . admin_url() . "index.php?participant_response=declined&post_id=$post->ID&role_id={$pending[1]->term_id}'>Decline</a> ";
+				echo "<input type='hidden' name='post_id' value='$post->ID' />";
+				echo "<input type='hidden' name='role_id' value='{$pending[1]->term_id}' />";				
+                echo "<td><input type='submit' name='assignment_desk_response' class='button' value='Accept' /> ";
+                echo "<input type='submit' name='assignment_desk_response' class='button' value='Decline' />";
                 
                 echo "<a onclick=\"javascript:jQuery('#ad-{$post->ID}-summary').slideToggle();\">Details</a></td>";
-                echo "</tr>";
+                echo "</form></tr>";
                 echo "<tr><td colspan='2'>";
                 echo "<div id='ad-{$post->ID}-summary' style='display:none'>";
 
@@ -236,9 +238,9 @@ class ad_dashboard_widgets {
    function respond_to_story_invite(){
        global $current_user, $assignment_desk, $coauthors_plus, $user_ID;
        
-       $response = $_GET['participant_response'];
-       $post_id = (int)$_GET['post_id'];
-       $role_id = (int)$_GET['role_id'];
+       $response = $_POST['assignment_desk_response'];
+       $post_id = (int)$_POST['post_id'];
+       $role_id = (int)$_POST['role_id'];
           
        get_currentuserinfo();
        if ( !$current_user->ID || !$user_ID || !$post_id || !$role_id ) {
@@ -253,7 +255,7 @@ class ad_dashboard_widgets {
            if ( $participant_record && $participant_record[$current_user->ID] == 'pending' ) {
                $participant_record[$current_user->ID] = $response;
 
-               if ( $response == 'accepted' ) {
+               if ( $response == 'Accept' ) {
                    // Add as a coauthor
                    if ( $assignment_desk->coauthors_plus_exists() ) {
                        $coauthors_plus->add_coauthors($post_id, array($current_user->user_login), true);
@@ -269,8 +271,7 @@ class ad_dashboard_widgets {
                    }
                    $user_participant[] = $role_id;
                    update_post_meta($post_id, "_ad_participant_$current_user->ID", $user_participant);
-               }
-               else if($response == 'declined'){
+               } else if( $response == 'Decline' ) {
                    $_REQUEST['ad-dashboard-assignment-messages'][] = _("Sorry.");
                }
            }
