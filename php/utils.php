@@ -124,6 +124,10 @@ function ad_get_all_public_posts( $args = null ) {
 	if ( $args['sort_by'] == 'ranking' ) {
 		$query .= " LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id AND $wpdb->postmeta.meta_key = '_ad_votes_total')";		
 	}
+	// Join the postmeta table so we can sort by the meta_value column restricted to '_ad_votes_total'
+	if ( $args['sort_by'] == 'volunteers' ) {
+		$query .= " LEFT JOIN $wpdb->postmeta ON ($wpdb->posts.ID = $wpdb->postmeta.post_id AND $wpdb->postmeta.meta_key = '_ad_total_volunteers')";		
+	}
 	
 	$query .= " WHERE $wpdb->posts.post_type = 'post' 
 						AND $wpdb->posts.post_status != 'publish'
@@ -154,6 +158,8 @@ function ad_get_all_public_posts( $args = null ) {
 	} else if ( $args['sort_by'] == 'due_date' ) {
 		$query .= " ORDER BY $wpdb->postmeta.meta_value ASC";
 	} else if ( $args['sort_by'] == 'ranking' ) {
+		$query .= " ORDER BY $wpdb->postmeta.meta_value DESC";		
+	} else if ( $args['sort_by'] == 'volunteers' ) {
 		$query .= " ORDER BY $wpdb->postmeta.meta_value DESC";		
 	}
 	

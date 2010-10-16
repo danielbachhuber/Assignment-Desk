@@ -1078,7 +1078,7 @@ class ad_public_views {
 		
 		$html = '<div class="assignment-desk assignment-desk-all-pitches">';
 		
-		if ( $_POST['sort_by'] == 'ranking' || $_POST['sort_by'] == 'post_date' || $_POST['sort_by'] == 'due_date' ) {
+		if ( $_POST['sort_by'] == 'ranking' || $_POST['sort_by'] == 'post_date' || $_POST['sort_by'] == 'due_date' || $_POST['sort_by'] == 'volunteers' ) {
 			$sort_by = $_POST['sort_by'];
 		} else {
 			$sort_by = 'post_date';
@@ -1158,6 +1158,14 @@ class ad_public_views {
 				$html .= ' selected="selected"';
 			}
 			$html .= '>Post date</option>';
+			// Only show the sort by volunteers option if volunteering is enabled
+			if ( $options['public_facing_volunteering_enabled'] ) {
+				$html .= '<option value="volunteers"';
+				if ( $sort_by == 'volunteers' ) {
+					$html .= ' selected="selected"';
+				}
+				$html .= '>Volunteers</option>';
+			}
 			// Only show the sort by rank option if voting is enabled
 			if ( $options['public_facing_voting_enabled'] ) {
 				$html .= '<option value="ranking"';
