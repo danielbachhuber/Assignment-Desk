@@ -19,8 +19,12 @@ ul.ad_elements span.copy input { margin-right: 10px; }
 #ad_assignments p.sub { color: #777; font-family: Georgia, 'Times New Roman', 'Bitstream Charter', Times, serif; font-size: 13px; font-style: italic; margin: 0px; }
 
 /* Manage Posts */
-th.column-_ad_assignment_status { word-wrap: normal; }
-th.column-_ef_location { word-wrap: normal; }
+th.column-title { width: 10% !important; }
+th.column-tags, th.column-categories { width: 8% !important; }
+th.column-date { width: 7% !important; }
+th.column-status { width: 6% !important; }
+th.column-_ad_assignment_status { word-wrap: normal; width: 5%; }
+th.column-_ef_location { word-wrap: normal; width: 5%; }
 th.column-_ad_participants { word-wrap: normal; }
 th.column-_ad_user_type { word-wrap: normal; }
 th.column-_ad_volunteers { word-wrap: normal; }
