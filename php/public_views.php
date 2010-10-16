@@ -1084,6 +1084,12 @@ class ad_public_views {
 			$sort_by = 'post_date';
 		}
 		
+		if ( isset($_POST['sort_by_reverse']) && $_POST['sort_by_reverse'] == 'on' ) {
+			$sort_by_reverse = true;
+		} else {
+			$sort_by_reverse = false;
+		}
+		
 		if ( isset($_POST['user_types']) && $_POST['user_types'] != 'all' ) {
 			$user_type_filter = (int)$_POST['user_types'];
 		} else {
@@ -1099,7 +1105,8 @@ class ad_public_views {
 		$args = array(
 					'post_status' => $post_status_filter,
 					'user_types' => $user_type_filter,
-					'sort_by' => $sort_by
+					'sort_by' => $sort_by,
+					'sort_by_reverse' => $sort_by_reverse
 					);
 		$all_pitches = ad_get_all_public_posts( $args );
 		
@@ -1151,7 +1158,14 @@ class ad_public_views {
 		
 		// Sorting functionality is optional and configured by the admin
 		if ( $options['public_facing_filtering_sort_by_enabled'] ) {
-			$html .= '<span class="right">';			
+			$html .= '<span class="right">';
+			$html .= '<input type="hidden" name="sort_by_reverse" value="';
+			if ( $sort_by_reverse ) {
+				$html .= 'off';
+			} else {
+				$html .= 'on';
+			}
+			$html .= '" />';
 			$html .= '<select name="sort_by" class="assignment-desk-sort-by">'
 				. '<option value="post_date"';
 			if ( $sort_by == 'post_date' ) {

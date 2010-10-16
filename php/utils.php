@@ -153,14 +153,30 @@ function ad_get_all_public_posts( $args = null ) {
 		$query .= " AND ( $wpdb->posts.ID = $wpdb->postmeta.post_id AND $wpdb->postmeta.meta_key = '_ad_participant_type_$user_types' AND $wpdb->postmeta.meta_value = 'on' )";
 	}
 
-	if ( $args['sort_by'] == 'post_date' ) {
-		$query .= " ORDER BY $wpdb->posts.post_date DESC";
-	} else if ( $args['sort_by'] == 'due_date' ) {
-		$query .= " ORDER BY $wpdb->postmeta.meta_value ASC";
-	} else if ( $args['sort_by'] == 'ranking' ) {
-		$query .= " ORDER BY $wpdb->postmeta.meta_value DESC";		
-	} else if ( $args['sort_by'] == 'volunteers' ) {
-		$query .= " ORDER BY $wpdb->postmeta.meta_value DESC";		
+	if ( $args['sort_by_reverse'] ) {
+		$sort_by = 'DESC';
+	} else {
+		$sort_by = 'ASC';
+	}
+	switch ( $args['sort_by'] ) {
+		case 'post_date':
+			$query .= " ORDER BY $wpdb->posts.post_date $sort_by";
+			break;
+		case 'ranking':
+			$query .= " ORDER BY $wpdb->postmeta.meta_value $sort_by";
+			break;
+		case 'volunteers':
+			$query .= " ORDER BY $wpdb->postmeta.meta_value $sort_by";
+			break;
+		case 'due_date':
+			if ( $args['sort_by_reverse'] ) {
+				$query .= " ORDER BY $wpdb->postmeta.meta_value DESC";
+			} else {
+				$query .= " ORDER BY $wpdb->postmeta.meta_value ASC";
+			}
+			break;
+		default:
+			break;
 	}
 	
 	$query .= " LIMIT " . $args['showposts'];
