@@ -97,6 +97,83 @@ class ad_dashboard_widgets {
                 echo "<div class='message info'>$message</div>";
             }
         }
+
+		 $pending_posts = array();
+
+	        // Find all of the posts this user participates in.
+	        $participant_posts = $wpdb->get_results("SELECT post_id FROM $wpdb->postmeta 
+	                                                  WHERE meta_key = '_ad_participant_{$current_user->ID}'
+	                                                  ORDER BY post_id");
+
+	        if ( !$participant_posts ){
+	            $participant_posts = array();
+	        }
+
+	        $roles = $assignment_desk->custom_taxonomies->get_user_roles();
+	        $max_pending = 5;
+
+	        foreach( $participant_posts as $post ){
+	            foreach( $roles as $user_role ) {
+	                // Get all of the roles this user has for this post
+	                $participant_record = get_post_meta($post->post_id, "_ad_participant_role_$user_role->term_id", true);
+	                if($participant_record) {
+	                    foreach ($participant_record as $user_id => $status ){
+	                        if( $user_id == $current_user->ID && $status == 'pending' ){
+	                           $pending_posts[] = array($post->post_id, $user_role);
+	                           $max_pending--;
+	                        }
+	                    }
+	                }
+	            }
+	            if(!$max_pending){
+	                break;
+	            }
+	        }
+	        $count_pending = count($pending_posts);
+	        if ( $count_pending ) {
+	            echo "<br>";
+	            echo "<p class='sub'>$count_pending pending assignment";
+	            echo ($count_pending != 1)? 's': ''; 
+	            echo "</p>";
+	            echo "<div class='table'><table><tbody>";
+	            foreach($pending_posts as $pending) {
+	                $post = get_post($pending[0]);
+	                echo "<tr><form action='' method='POST'>";
+	                echo "<td>{$post->post_title} | {$pending[1]->name}</td>";
+					echo "<input type='hidden' name='post_id' value='$post->ID' />";
+					echo "<input type='hidden' name='role_id' value='{$pending[1]->term_id}' />";				
+	                echo "<td><input type='submit' name='assignment_desk_response' class='button' value='Accept' /> ";
+	                echo "<input type='submit' name='assignment_desk_response' class='button' value='Decline' />";
+
+	                echo "<a onclick=\"javascript:jQuery('#ad-{$post->ID}-summary').slideToggle();\">Details</a></td>";
+	                echo "</form></tr>";
+	                echo "<tr><td colspan='2'>";
+	                echo "<div id='ad-{$post->ID}-summary' style='display:none'>";
+
+	                $summary = get_post_meta($post->ID, '_ef_description', true);
+	                if ( !$summary && $post->post_excerpt ) {
+	                    $summary = $post->post_excerpt;
+	                }
+	                if ( !$summary && $post->post_content ) {
+	                    $summary = $post->post_content;
+	                }
+	                echo "<p>" . _('Summary') . ": $summary</p>";
+
+	                if ( $assignment_desk->edit_flow_exists() ){
+	                    $duedate = get_post_meta($post->ID, '_ef_duedate', true);
+	                    if ( $duedate ) {
+	                        $duedate = ad_format_ef_duedate($duedate);
+	                    }
+	                    else {
+	                        $duedate = _('None assigned');
+	                    }
+	                    echo "<p>" . _('Due Date ') . ": $duedate</p>";
+	                }
+	                echo "</div></td></tr>";
+	            }
+	            echo "</table></div>";
+	        }
+
         ?>
         <p class="sub"><?php _e('By assignment status'); ?></p>
         <div class="table">
@@ -155,81 +232,7 @@ class ad_dashboard_widgets {
         <?php endif; ?>
 <?php
        
-        $pending_posts = array();
-
-        // Find all of the posts this user participates in.
-        $participant_posts = $wpdb->get_results("SELECT post_id FROM $wpdb->postmeta 
-                                                  WHERE meta_key = '_ad_participant_{$current_user->ID}'
-                                                  ORDER BY post_id");
-        
-        if ( !$participant_posts ){
-            $participant_posts = array();
-        }
-        
-        $roles = $assignment_desk->custom_taxonomies->get_user_roles();
-        $max_pending = 5;
-        
-        foreach( $participant_posts as $post ){
-            foreach( $roles as $user_role ) {
-                // Get all of the roles this user has for this post
-                $participant_record = get_post_meta($post->post_id, "_ad_participant_role_$user_role->term_id", true);
-                if($participant_record) {
-                    foreach ($participant_record as $user_id => $status ){
-                        if( $user_id == $current_user->ID && $status == 'pending' ){
-                           $pending_posts[] = array($post->post_id, $user_role);
-                           $max_pending--;
-                        }
-                    }
-                }
-            }
-            if(!$max_pending){
-                break;
-            }
-        }
-        $count_pending = count($pending_posts);
-        if ( $count_pending ) {
-            echo "<br>";
-            echo "<p class='sub'>$count_pending pending assignment";
-            echo ($count_pending != 1)? 's': ''; 
-            echo "</p>";
-            echo "<div class='table'><table><tbody>";
-            foreach($pending_posts as $pending) {
-                $post = get_post($pending[0]);
-                echo "<tr><form action='' method='POST'>";
-                echo "<td>{$post->post_title} | {$pending[1]->name}</td>";
-				echo "<input type='hidden' name='post_id' value='$post->ID' />";
-				echo "<input type='hidden' name='role_id' value='{$pending[1]->term_id}' />";				
-                echo "<td><input type='submit' name='assignment_desk_response' class='button' value='Accept' /> ";
-                echo "<input type='submit' name='assignment_desk_response' class='button' value='Decline' />";
-                
-                echo "<a onclick=\"javascript:jQuery('#ad-{$post->ID}-summary').slideToggle();\">Details</a></td>";
-                echo "</form></tr>";
-                echo "<tr><td colspan='2'>";
-                echo "<div id='ad-{$post->ID}-summary' style='display:none'>";
-
-                $summary = get_post_meta($post->ID, '_ef_description', true);
-                if ( !$summary && $post->post_excerpt ) {
-                    $summary = $post->post_excerpt;
-                }
-                if ( !$summary && $post->post_content ) {
-                    $summary = $post->post_content;
-                }
-                echo "<p>" . _('Summary') . ": $summary</p>";
-                
-                if ( $assignment_desk->edit_flow_exists() ){
-                    $duedate = get_post_meta($post->ID, '_ef_duedate', true);
-                    if ( $duedate ) {
-                        $duedate = ad_format_ef_duedate($duedate);
-                    }
-                    else {
-                        $duedate = _('None assigned');
-                    }
-                    echo "<p>" . _('Due Date ') . ": $duedate</p>";
-                }
-                echo "</div></td></tr>";
-            }
-            echo "</table></div>";
-        }
+       
    }
    
    /**
