@@ -540,7 +540,8 @@ class ad_post {
     		    if ( empty($coauthors) ) { 
     		        $coauthors[] = $current_user->user_login;
     		    }
-        		$_POST['coauthors'] = $coauthors;
+				// Merge the values we want to add to Co-Authors so we don't lose the data in the Co-Authors form
+        		$_POST['coauthors'] = array_merge( $_POST['coauthors'], $coauthors );
 			}
 
             // Update the participants for this role 
