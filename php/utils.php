@@ -110,7 +110,12 @@ function ad_get_all_public_posts( $args = null ) {
 				
 	$args = array_merge( $defaults, $args );
 
-	$query = "SELECT $wpdb->posts.* FROM ($wpdb->posts, $wpdb->term_relationships";
+	$to_select = "$wpdb->posts.*";
+    if ( isset($args['count']) and $args['count'] ){
+        $to_select = "COUNT(*) as count";
+    }
+  
+    $query = "SELECT $to_select FROM ($wpdb->posts, $wpdb->term_relationships";
 	if ( $args['user_types'] != 'all' ) {
 		$query .= ", $wpdb->postmeta";
 	}
@@ -179,10 +184,17 @@ function ad_get_all_public_posts( $args = null ) {
 			break;
 	}
 	
-	$query .= " LIMIT " . $args['showposts'];
-	
-	$offset = $args['page'] * $args['showposts'];
-	$query .= " OFFSET " . $offset . ";";
+    // Only use LIMIT and OFFSET if we're not counting all the posts.
+    if ( !$args['count']) {
+        $query .= " LIMIT " . $args['showposts'];
+        $offset = 0;
+        $page = (int)$args['page'];
+        // Compute offset if we're beyond page 1.
+        if( $page > 1 ){
+            $offset = ($args['page'] - 1) * $args['showposts'];
+        }
+        $query .= " OFFSET " . $offset . ";";
+    }
 
 	$results = $wpdb->get_results( $query );
 	
@@ -193,4 +205,118 @@ function ad_get_all_public_posts( $args = null ) {
 }
 }
 
+if ( !function_exists('ad_count_all_public_posts')){
+function ad_count_all_public_posts($args){
+    $args['count'] = true;
+    $results = ad_get_all_public_posts($args);
+    if ( $results ){
+        return $results[0]->count;
+    }
+    else {
+        return 0;
+    }
+}
+}
+
+if ( !class_exists('ad_paginator') ){
+
+/**
+ * Handle pagination for the all public pitches page.
+ */
+class ad_paginator {
+
+    /**
+     * @param array $args An array of args to sent to ad_get_all_public_posts
+     * @param int $total_pitches The number of pitches eligible to be shown on the public page.
+     */
+    function __construct( $args, $total_pitches ) {
+        if ( !isset($args['page']) ) {
+            $page = 1;
+            if ( $_GET['page'] ){
+                $page = $_GET['page'];
+            }
+            $args['page'] = (int)$page;
+        }
+
+        if ( !isset($args['showposts']) ) {
+            $showposts = 10;
+            if ( isset($_GET['showposts']) ){
+                $showposts = $_GET['showposts'];
+            }
+            $args['showposts'] = (int)$showposts;
+        }
+
+        $this->args = $args;
+        $this->total_pitches = $total_pitches * 1.0;
+    }
+
+    /**
+     * Create a link for the pagination navigation.
+     * @param int $page The page index.
+     * @param string $text Optional text to put in the link. If not present it defaults to $page.
+     */
+    function make_link( $page, $text=false ) {
+        // Sanitize inputs
+        if( !$text ){ $text = $page; }
+        $page = max(1, $page);
+
+        $link = '';
+        if ( $this->args['page'] == (int)$page ) {  
+            $link = " <span class='ad-pagination-current'>$text</span>";
+        }
+        else {          
+            // Parse the QUERY_STRING into an array.
+            $query_variables = array();
+            parse_str($_SERVER['QUERY_STRING'], $query_variables);
+            $desintation = '';
+            // If permalinks are enabled add a /page/$page/
+            if ( get_option('permalink_structure') ) {
+                $uri = $_SERVER['REDIRECT_URL'];
+                $page_pos_in_permalink = strpos($uri, '/page/');
+                $desintation = "{$uri}page/$page/";
+                if ( $page_pos_in_permalink ) {
+                    $before = substr($uri, 0, $page_pos_in_permalink + 6);
+                    $after = substr($uri, $page_pos_in_permalink + 7);
+                    $desintation = $before . $page . $after;
+                }
+            }
+            // No permalinks. Add page to the query_string
+            else {
+                $query_variables['page'] = $page;
+            }
+            // Add showposts and flatten the $query_variables into a QUERY_STRING
+            $query_variables['showposts'] = $this->args['showposts'];
+            $desintation .= '?' . http_build_query($query_variables);
+            $link = " <a class='ad-pagination-link' href='$desintation'>$text</a>";
+        }
+        return $link;
+    }
+
+    /**
+     * @return HTML for the pagination navigation
+     */
+    function navigation() {
+        $links_html = "<div class='ad-pagination-links'>" . _('Page');
+
+        if ( $this->args['page'] > 1 ) {
+            $links_html .= $this->make_link($this->args['page'] - 1, '&lt; ' . _('Previous'));
+        }
+
+        $pages = ceil($this->total_pitches / $this->args['showposts']);
+        $start = 1;
+        if ( $pages > 1 ){
+            for ($i = $start; $i <= $pages; $i++ ){
+                $links_html .= $this->make_link($i);
+            }
+        }
+
+        if ( $this->args['page'] < $pages ) {
+            $links_html .= $this->make_link($this->args['page'] + 1, _('Next') . ' &gt;');
+        }
+
+        $links_html .= "</div>";
+        return $links_html;
+    }
+}
+}
 ?>

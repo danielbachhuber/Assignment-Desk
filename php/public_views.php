@@ -1108,7 +1108,19 @@ class ad_public_views {
 					'sort_by' => $sort_by,
 					'sort_by_reverse' => $sort_by_reverse
 					);
-		$all_pitches = ad_get_all_public_posts( $args );
+        
+        $permalinks_enabled = false;
+        if ( get_option('permalink_structure') ) {
+            $permalinks_enabled = true; 
+            $page_in_permalink = strpos($_SERVER['REQUEST_URI'], '/page/');
+            if ( $page_in_permalink ) {
+                $page = substr($_SERVER['REQUEST_URI'], $page_in_permalink + 6, 1);
+                $args['page'] = (int)$page;
+            }
+        }
+
+        $paginator = new ad_paginator($args, ad_count_all_public_posts($args));
+        $all_pitches = ad_get_all_public_posts($paginator->args);
 		
 		$html .= '<form class="assignment-desk-filter-form" method="POST">';
 		
@@ -1202,6 +1214,8 @@ class ad_public_views {
 			$html .= '</span>';	
 		}
 		$html .= '</form>';
+		
+		$html .= $paginator->navigation();
 			
  		if ( is_array($all_pitches) ) {
 		
