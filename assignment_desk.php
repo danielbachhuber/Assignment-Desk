@@ -146,7 +146,7 @@ if (!class_exists('assignment_desk')) {
 			$saved_version = get_option( $this->get_plugin_option_fullname('version') );
 			// Only run the upgrade methods if the saved version is less than the declared version
 			if ( version_compare( $saved_version, ASSIGMENT_DESK_VERSION, '<') ) {
-				$this->upgrade->run_upgrade( $previous_version );
+				$this->upgrade->run_upgrade( $saved_version );
 			}
 		}
         
