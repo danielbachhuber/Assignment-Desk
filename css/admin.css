@@ -50,12 +50,12 @@ div#assignment-desk-post-list div.assignment-desk-item p {
 	margin-bottom: 5px;
 }
 
-div#assignment-desk-post-list div.assignment-desk-item p.summary {
-	
-}
-
 div#assignment-desk-post-list div.assignment-desk-item p.meta {
 	color: #999999;
+}
+
+div#assignment-desk-post-list div.assignment-desk-item p.meta span.ad-role {
+	color: #333333;
 }
 
 div#assignment-desk-post-list div.assignment-desk-item p.row-actions {

@@ -171,7 +171,7 @@ class ad_dashboard_widgets {
 							$max_pending--;
 							$max_upcoming--;
 	                    } else if ( $user_id == $current_user->ID && $status == 'accepted' && $max_upcoming ) {
-								$upcoming_posts[] = array($post->post_id, $user_role);
+								$upcoming_posts[$post->post_id]['roles'] = $user_role;
 								$max_upcoming--;
 						}
 					}
@@ -213,6 +213,7 @@ class ad_dashboard_widgets {
 				if ( $description || $duedate || $location ) {
 				    echo '<p class="meta">';
 				}
+				echo '<span class="ad-role">Role: ' . $pending[1]->name . '</span>&nbsp;&nbsp;&nbsp;';
 				if ( $duedate ) {
 				    echo '<span class="duedate">Due date: ' . $duedate . '</span>&nbsp;&nbsp;&nbsp;';	
 				}
@@ -230,9 +231,9 @@ class ad_dashboard_widgets {
             }
         }
 		if ( $upcoming_posts ) {
-            foreach ( $upcoming_posts as $upcoming ) {
+            foreach ( $upcoming_posts as $post_id => $roles ) {
 				echo "<div id='post-{$pending[0]}' class='accepted post assignment-desk-item'>";
-                $post = get_post($upcoming[0]);
+                $post = get_post( $post_id );
 				if ( $assignment_desk->edit_flow_exists() ) {
 					$post_status_object = get_term_by( 'slug', $post->post_status, 'post_status' );
 					$post_status = $post_status_object->name;
@@ -263,6 +264,12 @@ class ad_dashboard_widgets {
 				if ( $description || $duedate || $location ) {
 				    echo '<p class="meta">';
 				}
+				echo '<span class="ad-roles">Role(s): ';
+				$all_roles = '';
+				foreach ( $roles as $role ) {
+					$all_roles .= $role->name;
+				}
+				echo rtrim( $all_roles, ', ' ) . '</span>&nbsp;&nbsp;&nbsp;';
 				if ( $duedate ) {
 				    echo '<span class="ef-duedate">Due date: ' . $duedate . '</span>&nbsp;&nbsp;&nbsp;';	
 				}
