@@ -300,19 +300,16 @@ class ad_paginator {
         $pages = ceil($this->total_pitches / $this->args['showposts']);
         if ( $pages > 1 ){
             $nav_html .= _('Page') . ' ';
+            if ( $this->args['page'] > 1 ) {
+                $nav_html .= $this->make_link($this->args['page'] - 1, '&lt; ' . _('Previous'));
+            }
         }
-        if ( $this->args['page'] > 1 ) {
-            $nav_html .= $this->make_link($this->args['page'] - 1, '&lt; ' . _('Previous'));
-        }
-
-        
         $start = 1;
         if ( $pages > 1 ){
             for ($i = $start; $i <= $pages; $i++ ){
                 $nav_html .= $this->make_link($i);
             }
         }
-
         if ( $this->args['page'] < $pages ) {
             $nav_html .= $this->make_link($this->args['page'] + 1, _('Next') . ' &gt;');
         }
