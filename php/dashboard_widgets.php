@@ -144,82 +144,124 @@ class ad_dashboard_widgets {
         $assignment_statuses = $assignment_desk->custom_taxonomies->get_assignment_statuses();
 
 		$pending_posts = array();
+		$upcoming_posts = array();
+		$max_pending = 5;
+		$max_upcoming = 5;
 
-	        // Find all of the posts this user participates in.
-	        $participant_posts = $wpdb->get_results("SELECT post_id FROM $wpdb->postmeta 
-	                                                  WHERE meta_key = '_ad_participant_{$current_user->ID}'
-	                                                  ORDER BY post_id");
+		// Find all of the posts this user participates in.
+		$participant_posts = $wpdb->get_results("SELECT * FROM $wpdb->postmeta 
+													WHERE meta_key = '_ad_participant_{$current_user->ID}'
+													ORDER BY post_id LIMIT 20;");
 
-	        if ( !$participant_posts ){
-	            $participant_posts = array();
-	        }
+		if ( !$participant_posts ){
+			$participant_posts = array();
+		}
 
-	        $roles = $assignment_desk->custom_taxonomies->get_user_roles();
-	        $max_pending = 5;
+		$roles = $assignment_desk->custom_taxonomies->get_user_roles();
 
-	        foreach( $participant_posts as $post ){
-	            foreach( $roles as $user_role ) {
-	                // Get all of the roles this user has for this post
-	                $participant_record = get_post_meta($post->post_id, "_ad_participant_role_$user_role->term_id", true);
-	                if($participant_record) {
-	                    foreach ($participant_record as $user_id => $status ){
-	                        if( $user_id == $current_user->ID && $status == 'pending' ){
-	                           $pending_posts[] = array($post->post_id, $user_role);
-	                           $max_pending--;
-	                        }
-	                    }
-	                }
-	            }
-	            if(!$max_pending){
-	                break;
-	            }
-	        }
-	        $count_pending = count($pending_posts);
-	        if ( $count_pending ) {
-	            echo "<br>";
-	            echo "<p class='sub'>$count_pending pending assignment";
-	            echo ($count_pending != 1)? 's': ''; 
-	            echo "</p>";
-	            echo "<div class='table'><table><tbody>";
-	            foreach($pending_posts as $pending) {
-	                $post = get_post($pending[0]);
-	                echo "<tr><form action='' method='POST'>";
-	                echo "<td>{$post->post_title} | {$pending[1]->name}</td>";
-					echo "<input type='hidden' name='post_id' value='$post->ID' />";
-					echo "<input type='hidden' name='role_id' value='{$pending[1]->term_id}' />";				
-	                echo "<td><input type='submit' name='assignment_desk_response' class='button' value='Accept' /> ";
-	                echo "<input type='submit' name='assignment_desk_response' class='button' value='Decline' />";
+		// 
+		foreach ( $participant_posts as $post ) {
+			foreach ( $roles as $user_role ) {
+				// Get all of the roles this user has for this post
+				$participant_record = get_post_meta($post->post_id, "_ad_participant_role_$user_role->term_id", true);
+				if ( $participant_record ) {
+					foreach ( $participant_record as $user_id => $status ) {
+						if ( $user_id == $current_user->ID && $status == 'pending' && $max_pending ) {
+							$pending_posts[] = array($post->post_id, $user_role);
+							$max_pending--;
+							$max_upcoming--;
+	                    } else if ( $user_id == $current_user->ID && $status == 'accepted' && $max_upcoming ) {
+								$upcoming_posts[] = array($post->post_id, $user_role);
+								$max_upcoming--;
+						}
+					}
+				}
+			}
+		}
+		echo "<div id='assignment-desk-post-list'>";
+        if ( $pending_posts ) {
+            foreach ( $pending_posts as $pending ) {
+				echo "<div id='post-{$pending[0]}' class='pending post assignment-desk-item'>";
+                $post = get_post($pending[0]);
+				if ( $assignment_desk->edit_flow_exists() ) {
+					$post_status_object = get_term_by( 'slug', $post->post_status, 'post_status' );
+					$post_status = $post_status_object->name;
+				} else {
+					if ( $pitch->post_status == 'draft' ) {
+						$post_status = 'Draft';
+					} else if ( $pitch->post_status == 'pending' ) {
+						$post_status = 'Pending Review';
+					}
+				}
+                echo "<h4><a href='" . admin_url() . "post.php?action=edit&post={$post->ID}'>{$post->post_title}</a> <span class='pending'>[{$post_status}]</span></h4>";
+				$summary = get_post_meta($post->ID, '_ef_description', true);
+                if ( !$summary ) {
+					if ( $post->excerpt ) {
+						$summary = $post->post_excerpt;
+					} else if ( $post->post_content ) {
+						$summary = substr( $post->post_content, 0, 155 ) . ' ...';
+					}
+                }
+				if ( $summary ) {
+					echo "<p class='summary'>$summary</p>";
+				}
+				
+				echo "<input type='hidden' name='post_id' value='{$post->ID}' />";
+				echo "<input type='hidden' name='role_id' value='{$pending[1]->term_id}' />";				
+                echo "<p class='row-actions'><span class='approve'><a class='assignment_desk_response assignment_desk_approve' href='#'>Accept</a></span> | <span class='decline'><a class='assignment_desk_response assignment_desk_decline' href='#'>Decline</a></span></p>";
+                //echo "<input type='submit' name='assignment_desk_response' class='button' value='Decline' />";
 
-	                echo "<a onclick=\"javascript:jQuery('#ad-{$post->ID}-summary').slideToggle();\">Details</a></td>";
-	                echo "</form></tr>";
-	                echo "<tr><td colspan='2'>";
-	                echo "<div id='ad-{$post->ID}-summary' style='display:none'>";
+                //echo "<a onclick=\"javascript:jQuery('#ad-{$post->ID}-summary').slideToggle();\">Details</a></td>";
 
-	                $summary = get_post_meta($post->ID, '_ef_description', true);
-	                if ( !$summary && $post->post_excerpt ) {
-	                    $summary = $post->post_excerpt;
-	                }
-	                if ( !$summary && $post->post_content ) {
-	                    $summary = $post->post_content;
-	                }
-	                echo "<p>" . _('Summary') . ": $summary</p>";
-
-	                if ( $assignment_desk->edit_flow_exists() ){
-	                    $duedate = get_post_meta($post->ID, '_ef_duedate', true);
-	                    if ( $duedate ) {
-	                        $duedate = ad_format_ef_duedate($duedate);
-	                    }
-	                    else {
-	                        $duedate = _('None assigned');
-	                    }
-	                    echo "<p>" . _('Due Date ') . ": $duedate</p>";
-	                }
-	                echo "</div></td></tr>";
-	            }
-	            echo "</table></div>";
-	        }
+                /* echo "<tr><td colspan='2'>";
+                echo "<div id='ad-{$post->ID}-summary' style='display:none'>";
+                if ( $assignment_desk->edit_flow_exists() ){
+                    $duedate = get_post_meta($post->ID, '_ef_duedate', true);
+                    if ( $duedate ) {
+                        $duedate = ad_format_ef_duedate($duedate);
+                    }
+                    else {
+                        $duedate = _('None assigned');
+                    }
+                    echo "<p>" . _('Due Date ') . ": $duedate</p>";
+                }
+                echo "</div></td></tr>"; */
+				echo '</div>';
+            }
+        }
+		if ( $upcoming_posts ) {
+            foreach ( $upcoming_posts as $upcoming ) {
+				echo "<div id='post-{$pending[0]}' class='accepted post assignment-desk-item'>";
+                $post = get_post($upcoming[0]);
+				if ( $assignment_desk->edit_flow_exists() ) {
+					$post_status_object = get_term_by( 'slug', $post->post_status, 'post_status' );
+					$post_status = $post_status_object->name;
+				} else {
+					if ( $pitch->post_status == 'draft' ) {
+						$post_status = 'Draft';
+					} else if ( $pitch->post_status == 'pending' ) {
+						$post_status = 'Pending Review';
+					}
+				}
+                echo "<h4><a href='" . admin_url() . "post.php?action=edit&post={$post->ID}'>{$post->post_title}</a> <span class='accepted'>[{$post_status}]</span></h4>";
+				$summary = get_post_meta($post->ID, '_ef_description', true);
+                if ( !$summary ) {
+					if ( $post->excerpt ) {
+						$summary = $post->post_excerpt;
+					} else if ( $post->post_content ) {
+						$summary = substr( $post->post_content, 0, 155 ) . ' ...';
+					}
+                }
+				if ( $summary ) {
+					echo "<p class='summary'>$summary</p>";
+				}
+				echo '</div>';
+            }
+        }
+		echo "</div>";
 
         ?>
+		<?php /*
         <p class="sub"><?php _e('By assignment status'); ?></p>
         <div class="table">
         <table>
@@ -228,9 +270,9 @@ class ad_dashboard_widgets {
             $counts = array();
             $total_unpublished_assignments = 0;
             
-            /* If the $current_user is editor or higher display the total count for each assignment_status across the whole blog.
-             * If they don't have editor permissions show the number of posts assigned to the $current_user.
-             */
+             If the $current_user is editor or higher display the total count for each assignment_status across the whole blog.
+             If they don't have editor permissions show the number of posts assigned to the $current_user.
+            
 
             foreach ( $assignment_statuses as $assignment_status ) {
                 if ( current_user_can($assignment_desk->define_editor_permissions) ) {
@@ -272,11 +314,11 @@ class ad_dashboard_widgets {
                 echo "<td class='b t'><a href='$this_month_url'>" . __('Published this month') . "</a></td></tr>";
 ?>
             </tbody>
-        </table>
+        </table> */ ?>
+		<p class="textright"><a class="button" href="edit.php?author=<?php echo $current_user->ID; ?>">View all</a></p>
         </div>
-        <?php endif; ?>
 <?php
-       
+	
        
    }
    
