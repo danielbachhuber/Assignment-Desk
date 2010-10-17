@@ -82,6 +82,57 @@ class ad_dashboard_widgets {
 	    return $count;
 	    
 	}
+	
+	/**
+	 * Get the most recent unpublished posts for the current user
+	 * @author danielbachhuber
+	 * @return object $the_posts All of the posts
+	 */
+	function get_user_upcoming_posts( $args = null ) {
+		global $current_user, $wpdb, $assignment_desk;
+		
+	    get_currentuserinfo();
+			
+		$defaults = array(
+						'user_id' => $current_user->ID,
+						'user_login' => $current_user->user_login,
+						'showposts' => 5,
+					);
+		if ( $args ) {
+			$args = array_merge( $defaults, $args );
+		} else {
+			$args = $defaults;
+		}
+		
+		if ( $assignment_desk->coauthors_plus_exists() ){
+            $the_posts = $wpdb->get_results("SELECT * FROM $wpdb->posts 
+	                                LEFT JOIN $wpdb->term_relationships ON($wpdb->posts.ID = $wpdb->term_relationships.object_id)
+                                    LEFT JOIN $wpdb->term_taxonomy 
+                                        ON($wpdb->term_taxonomy.term_taxonomy_id = $wpdb->term_relationships.term_taxonomy_id)
+                                    LEFT JOIN $wpdb->terms ON($wpdb->terms.term_id = $wpdb->term_taxonomy.term_id)
+                	                WHERE $wpdb->posts.post_status != 'publish'
+                                      AND $wpdb->posts.post_status != 'inherit' 
+                                      AND $wpdb->posts.post_status != 'trash'
+                    				  AND $wpdb->posts.post_status != 'auto-draft'
+                    				  AND $wpdb->term_taxonomy.taxonomy = 'author'
+                                      AND $wpdb->terms.name = '{$args['user_login']}' LIMIT {$args['showposts']};");
+		} else {
+	        $the_posts = $wpdb->get_var("SELECT * FROM $wpdb->posts
+                                    LEFT JOIN $wpdb->term_relationships ON($wpdb->posts.ID = $wpdb->term_relationships.object_id)
+                                    LEFT JOIN $wpdb->term_taxonomy 
+                                        ON($wpdb->term_taxonomy.term_taxonomy_id = $wpdb->term_relationships.term_taxonomy_id)
+                                    WHERE $wpdb->posts.post_author = '{$args['user_id']}' 
+                                     AND $wpdb->posts.post_status != 'publish'
+                                     AND $wpdb->posts.post_status != 'inherit' 
+                                     AND $wpdb->posts.post_status != 'trash'
+             						 AND $wpdb->posts.post_status != 'auto-draft'
+                                     AND $wpdb->term_taxonomy.taxonomy = '{$assignment_desk->custom_taxonomies->assignment_status_label}'
+                                     AND $wpdb->term_taxonomy.term_id = $status->term_id LIMIT {$args['showposts']};");
+	    }
+	
+		return $the_posts;
+		
+	}
    
     /**
     * Display the Assignment Desk dashboard widget.
@@ -92,13 +143,7 @@ class ad_dashboard_widgets {
         get_currentuserinfo();
         $assignment_statuses = $assignment_desk->custom_taxonomies->get_assignment_statuses();
 
-		if ( $_REQUEST['ad-dashboard-assignment-messages'] ) {
-            foreach( $_REQUEST['ad-dashboard-assignment-messages'] as $message ) {
-                echo "<div class='message info'>$message</div>";
-            }
-        }
-
-		 $pending_posts = array();
+		$pending_posts = array();
 
 	        // Find all of the posts this user participates in.
 	        $participant_posts = $wpdb->get_results("SELECT post_id FROM $wpdb->postmeta 
