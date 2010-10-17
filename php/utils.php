@@ -296,26 +296,29 @@ class ad_paginator {
      * @return HTML for the pagination navigation
      */
     function navigation() {
-        $links_html = "<div class='ad-pagination-links'>" . _('Page');
-
+        $nav_html = "<div class='ad-pagination-links'>";
+        $pages = ceil($this->total_pitches / $this->args['showposts']);
+        if ( $pages > 1 ){
+            $nav_html .= _('Page') . ' ';
+        }
         if ( $this->args['page'] > 1 ) {
-            $links_html .= $this->make_link($this->args['page'] - 1, '&lt; ' . _('Previous'));
+            $nav_html .= $this->make_link($this->args['page'] - 1, '&lt; ' . _('Previous'));
         }
 
-        $pages = ceil($this->total_pitches / $this->args['showposts']);
+        
         $start = 1;
         if ( $pages > 1 ){
             for ($i = $start; $i <= $pages; $i++ ){
-                $links_html .= $this->make_link($i);
+                $nav_html .= $this->make_link($i);
             }
         }
 
         if ( $this->args['page'] < $pages ) {
-            $links_html .= $this->make_link($this->args['page'] + 1, _('Next') . ' &gt;');
+            $nav_html .= $this->make_link($this->args['page'] + 1, _('Next') . ' &gt;');
         }
 
-        $links_html .= "</div>";
-        return $links_html;
+        $nav_html .= "</div>";
+        return $nav_html;
     }
 }
 }
