@@ -205,27 +205,27 @@ class ad_dashboard_widgets {
 				if ( $summary ) {
 					echo "<p class='summary'>$summary</p>";
 				}
-				
+				// All of the relevant editorial metadata
+				$description = get_post_meta( $post->ID, '_ef_description', true );
+				$location = get_post_meta( $post->ID, '_ef_location', true );
+				$duedate = get_post_meta( $post->ID, '_ef_duedate', true );
+				$duedate = date_i18n( 'M d, Y', $duedate );
+				if ( $description || $duedate || $location ) {
+				    echo '<p class="meta">';
+				}
+				if ( $duedate ) {
+				    echo '<span class="duedate">Due date: ' . $duedate . '</span>&nbsp;&nbsp;&nbsp;';	
+				}
+				if ( $location ) {
+				    echo '<span class="location">Location: ' . $location . '</span> ';	
+				}
+				if ( $description || $duedate || $location ) {
+				    echo '</p>';
+				}
 				echo "<input type='hidden' name='post_id' value='{$post->ID}' />";
 				echo "<input type='hidden' name='role_id' value='{$pending[1]->term_id}' />";				
                 echo "<p class='row-actions'><span class='approve'><a class='assignment_desk_response assignment_desk_approve' href='#'>Accept</a></span> | <span class='decline'><a class='assignment_desk_response assignment_desk_decline' href='#'>Decline</a></span></p>";
-                //echo "<input type='submit' name='assignment_desk_response' class='button' value='Decline' />";
 
-                //echo "<a onclick=\"javascript:jQuery('#ad-{$post->ID}-summary').slideToggle();\">Details</a></td>";
-
-                /* echo "<tr><td colspan='2'>";
-                echo "<div id='ad-{$post->ID}-summary' style='display:none'>";
-                if ( $assignment_desk->edit_flow_exists() ){
-                    $duedate = get_post_meta($post->ID, '_ef_duedate', true);
-                    if ( $duedate ) {
-                        $duedate = ad_format_ef_duedate($duedate);
-                    }
-                    else {
-                        $duedate = _('None assigned');
-                    }
-                    echo "<p>" . _('Due Date ') . ": $duedate</p>";
-                }
-                echo "</div></td></tr>"; */
 				echo '</div>';
             }
         }
@@ -254,6 +254,23 @@ class ad_dashboard_widgets {
                 }
 				if ( $summary ) {
 					echo "<p class='summary'>$summary</p>";
+				}
+				// All of the relevant editorial metadata
+				$description = get_post_meta( $post->ID, '_ef_description', true );
+				$location = get_post_meta( $post->ID, '_ef_location', true );
+				$duedate = get_post_meta( $post->ID, '_ef_duedate', true );
+				$duedate = date_i18n( 'M d, Y', $duedate );
+				if ( $description || $duedate || $location ) {
+				    echo '<p class="meta">';
+				}
+				if ( $duedate ) {
+				    echo '<span class="ef-duedate">Due date: ' . $duedate . '</span>&nbsp;&nbsp;&nbsp;';	
+				}
+				if ( $location ) {
+				    echo '<span class="ef-location">Location: ' . $location . '</span> ';	
+				}
+				if ( $description || $duedate || $location ) {
+				    echo '</p>';
 				}
 				echo '</div>';
             }

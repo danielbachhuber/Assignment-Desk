@@ -54,6 +54,10 @@ div#assignment-desk-post-list div.assignment-desk-item p.summary {
 	
 }
 
+div#assignment-desk-post-list div.assignment-desk-item p.meta {
+	color: #999999;
+}
+
 div#assignment-desk-post-list div.assignment-desk-item p.row-actions {
 	visibility: visible;
 	margin-bottom: 5px;
