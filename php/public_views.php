@@ -381,7 +381,10 @@ class ad_public_views {
 		if ($assignment_desk->edit_flow_exists()) {
 			global $edit_flow;
 		}
-
+        
+        do_action('ad_alternate_authentication');
+		get_currentuserinfo();
+		
 		session_start();		
 
 		if ( $_POST && isset($_POST['assignment_desk_pitch_submit']) ) {
@@ -775,6 +778,9 @@ class ad_public_views {
 	 */
 	function save_voting_form() {
 		global $assignment_desk, $current_user;
+		
+		do_action('ad_alternate_authentication');
+		get_currentuserinfo();
 	    
 		// Only logged-in users have the ability to vote
 		if ( isset($_GET['action']) && is_user_logged_in() ) {
@@ -850,7 +856,10 @@ class ad_public_views {
 			global $post;
 			$post_id = $post->ID;
 		}
-	
+		
+		do_action('ad_alternate_authentication');
+		get_currentuserinfo();
+
 		// Only logged-in users can volunteer on assignments
 		if ( is_user_logged_in() ) {
 	
@@ -949,7 +958,10 @@ class ad_public_views {
 	 */
 	function save_volunteer_form() {
 	    global $assignment_desk, $current_user, $wpdb;
-	    
+
+	    do_action('ad_alternate_authentication');
+		get_currentuserinfo();
+
 		if ( isset($_POST['assignment_desk_volunteer_submit']) && is_user_logged_in() ) {
 	    
 			$form_messages = array();
@@ -958,6 +970,7 @@ class ad_public_views {
 			if ( !wp_verify_nonce($_POST['assignment_desk_volunteering_nonce'], 'assignment_desk_volunteering') ) {
 				return $form_messages['error']['nonce'];
 			}
+			// @todo Is this necessary?
 			wp_get_current_user();
 	    
 		    $post_id = (int)$_POST['assignment_desk_volunteer_post_id'];
