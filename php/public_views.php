@@ -638,6 +638,9 @@ class ad_public_views {
 			global $post;
 			$post_id = $post->ID;
 		}
+		
+		// Allow alternate form of authentication
+		do_action( 'ad_alternate_authentication' );
 			
 		wp_get_current_user();
 		$total_votes = (int)get_post_meta( $post_id, '_ad_votes_total', true );
