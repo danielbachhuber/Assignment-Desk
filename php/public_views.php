@@ -848,6 +848,9 @@ class ad_public_views {
 			global $post;
 			$post_id = $post->ID;
 		}
+		
+		// Allow an alternate form of authentication when the volunteer form is loaded
+		do_action( 'ad_alternate_authentication', 'volunteer_form_load' );
 	
 		// Only logged-in users can volunteer on assignments
 		if ( is_user_logged_in() ) {
@@ -902,8 +905,7 @@ class ad_public_views {
 						. $pitch_form_options['pitch_form_volunteer_description']
 						. '</p>';
 			}
-			$volunteer_form .= '</fieldset>';
-		    $volunteer_form .= "<input type='hidden' name='assignment_desk_volunteer_user_id' value='$current_user->ID' />";	
+			$volunteer_form .= '</fieldset>';	
 		    $volunteer_form .= "<input type='hidden' name='assignment_desk_volunteer_post_id' value='$post_id' />";	
 			$volunteer_form .= '<input type="hidden" name="assignment_desk_volunteering_nonce" value="' 
 							. wp_create_nonce('assignment_desk_volunteering') . '" />';	
@@ -948,7 +950,7 @@ class ad_public_views {
 	function save_volunteer_form() {
 	    global $assignment_desk, $current_user, $wpdb;
 	    
-		if ( isset($_POST['assignment_desk_volunteer_submit']) && is_user_logged_in() ) {
+		if ( isset($_POST['assignment_desk_volunteer_submit']) ) {
 	    
 			$form_messages = array();
 	
@@ -956,15 +958,19 @@ class ad_public_views {
 			if ( !wp_verify_nonce($_POST['assignment_desk_volunteering_nonce'], 'assignment_desk_volunteering') ) {
 				return $form_messages['error']['nonce'];
 			}
+			
+			// Allow an alternate form of authentication when the volunteer form is saved
+			do_action( 'ad_alternate_authentication', 'volunteer_form_save' );
+			
+			if ( !is_user_logged_in() ) {
+				return false;
+			}
+			
 			wp_get_current_user();
 	    
 		    $post_id = (int)$_POST['assignment_desk_volunteer_post_id'];
 			$sanitized_roles = $_POST['assignment_desk_volunteer_roles'];
-			$sanitized_user_id = (int)$_POST['assignment_desk_volunteer_user_id'];
-			// Ensure the user saving is the same user who submitted the form 
-			if ( $sanitized_user_id != $current_user->ID ) {
-				return false;
-			}
+			$sanitized_user_id = $current_user->ID;
 	    
 		    // Filter the roles to make sure they're valid.
 		    $user_roles = $assignment_desk->custom_taxonomies->get_user_roles();
