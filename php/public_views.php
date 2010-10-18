@@ -327,7 +327,6 @@ class ad_public_views {
 			$pitch_form .= '<fieldset class="standard assignment-desk-user">'
 						. '<label>You are currently logged in as:</label> '
 						. $current_user->display_name . ' &#60;' . $current_user->user_email . '&#62;'
-						. '<input type="hidden" id="assignment_desk_author" name="assignment_desk_author" value="' . $current_user->ID . '" />'
 						. '</fieldset>';
 					
 		} else {
@@ -403,9 +402,12 @@ class ad_public_views {
 			if ( !$sanitized_title ) {
 				$form_messages['errors']['title'] = 'Please add a title to this pitch.';
 			}
+			
+			do_action( 'ad_alternate_authentication' );
+			
 			if ( is_user_logged_in() ) {
 				global $current_user;
-				$sanitized_author = (int)$_POST['assignment_desk_author'];
+				$sanitized_author = $current_user->ID;
 			} else {
 				require_once(ABSPATH . WPINC . '/registration.php');
 				$credentials['user_login'] = $_POST['assignment_desk_username'];
