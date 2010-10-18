@@ -135,7 +135,10 @@ class ad_dashboard_widgets {
 	}
    
     /**
-    * Display the Assignment Desk dashboard widget.
+    * Display the Assignment Desk dashboard widget
+	* @todo Historical data
+	* @todo $_GET implementation
+	* @todo AJAX implementation
     */
     function widget() {
         global $assignment_desk, $current_user, $wpdb;
@@ -284,65 +287,33 @@ class ad_dashboard_widgets {
         }
 		echo "</div>";
 
-        ?>
-		<?php /*
-        <p class="sub"><?php _e('By assignment status'); ?></p>
-        <div class="table">
-        <table>
-            <tbody>
-            <?php
-            $counts = array();
-            $total_unpublished_assignments = 0;
-            
-             If the $current_user is editor or higher display the total count for each assignment_status across the whole blog.
-             If they don't have editor permissions show the number of posts assigned to the $current_user.
-            
-
-            foreach ( $assignment_statuses as $assignment_status ) {
-                if ( current_user_can($assignment_desk->define_editor_permissions) ) {
-                    // Count all posts with a certain status
-                    $counts[$assignment_status->term_id] = $this->count_posts_by_assignment_status($assignment_status);
-                }
-                else {
-                    // Count all posts that this user can edit with a certain status
-                    $counts[$assignment_status->term_id] = $this->count_user_posts_by_assignment_status($assignment_status);
-                }
-                $total_unpublished_assignments += $counts[$assignment_status->term_id];
-            }
-            if ( $total_unpublished_assignments ) {
-                foreach ( $assignment_statuses as $assignment_status ) {
-                    // if ( $counts[$assignment_status->term_id] ) {
-                        $url = admin_url() . "edit.php?ad-assignment-status=$assignment_status->term_id";
-                        echo "<tr><td class='b'><a href='$url'>" . $counts[$assignment_status->term_id] . "</a></td>";
-                        echo "<td class='b t'><a href='$url'>$assignment_status->name</a></td></tr>";
-                    // }
-                }
-            }
-            else {
-                echo "<tr><td>" . _('No assigned stories.') . "</td><td></td></tr>";
-            }
-            ?>
-            </tbody>
-        </table>
-        </div>
-
-        <?php if ( current_user_can($assignment_desk->define_editor_permissions) ) : ?>
-        <p class="sub"><?php _e('Historical'); ?></p>
-        <div class="table">
-        <table>
-            <tbody>
-<?php
-                $this_month_url = admin_url() . 'edit.php?post_status=publish&monthnum=' . date('M');
-                $q = new WP_Query( array('post_status' => 'publish', 'monthnum' => date('M')));
-                echo "<tr><td class='b'><a href='$this_month_url'>$q->found_posts</a></td>";
-                echo "<td class='b t'><a href='$this_month_url'>" . __('Published this month') . "</a></td></tr>";
-?>
-            </tbody>
-        </table> */ ?>
-		<p class="textright"><a class="button" href="edit.php?author=<?php echo $current_user->ID; ?>">View all</a></p>
-        </div>
-<?php
-	
+     	$historical = '';
+		$counts = array();
+		$total_unpublished_assignments = 0;
+        
+		foreach ( $assignment_statuses as $assignment_status ) {
+			if ( current_user_can($assignment_desk->define_editor_permissions) ) {
+				// Count all posts with a certain status
+				$counts[$assignment_status->term_id] = $this->count_posts_by_assignment_status($assignment_status);
+			} else {
+				// Count all posts that this user can edit with a certain status
+				$counts[$assignment_status->term_id] = $this->count_user_posts_by_assignment_status($assignment_status);
+			}
+			$total_unpublished_assignments += $counts[$assignment_status->term_id];
+		}
+		foreach ( $assignment_statuses as $assignment_status ) {
+				$url = admin_url() . "edit.php?ad-assignment-status=$assignment_status->term_id";
+ 				$historical .= "$assignment_status->name: <a href='$url'>" . $counts[$assignment_status->term_id] . "</a>, ";
+		}
+		$historical .= rtrim( $historical, ', ' );
+		// @todo Month view
+		if ( current_user_can($assignment_desk->define_editor_permissions) ) {
+			$this_month_url = admin_url() . 'edit.php?post_status=publish&monthnum=' . date('M');
+			$q = new WP_Query( array('post_status' => 'publish', 'monthnum' => date('M')));
+			echo "<tr><td class='b'><a href='$this_month_url'>$q->found_posts</a></td>";
+			echo "<td class='b t'><a href='$this_month_url'>" . __('Published this month') . "</a></td></tr>";
+		}
+		echo '<p class="historical">' . $historical . '<a class="button textright" href="edit.php?author=' . $current_user->ID .'">View all</a></p></div>';
        
    }
    
