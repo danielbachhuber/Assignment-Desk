@@ -226,9 +226,10 @@ class ad_dashboard_widgets {
 				if ( $description || $duedate || $location ) {
 				    echo '</p>';
 				}
-				echo "<input type='hidden' name='post_id' value='{$post->ID}' />";
-				echo "<input type='hidden' name='role_id' value='{$pending[1]->term_id}' />";				
-                echo "<p class='row-actions'><span class='approve'><a class='assignment_desk_response assignment_desk_approve' href='#'>Accept</a></span> | <span class='decline'><a class='assignment_desk_response assignment_desk_decline' href='#'>Decline</a></span></p>";
+                echo "<p class='row-actions'>";				
+				echo "<input type='hidden' class='assignment_desk_post_id' name='assignment_desk_post_id' value='{$post->ID}' />";
+				echo "<input type='hidden' class='assignment_desk_role_id' name='assignment_desk_role_id' value='{$pending[1]->term_id}' />";
+				echo "<span class='approve'><a class='assignment_desk_response assignment_desk_accept' href='" . admin_url() . "?action=assignment_desk_accept&post_id={$post->ID}&role_id={$pending[1]->term_id}'>Accept</a></span> | <span class='decline'><a class='assignment_desk_response assignment_desk_decline' href='" . admin_url() . "?action=assignment_desk_decline&post_id={$post->ID}&role_id={$pending[1]->term_id}'>Decline</a></span></p>";
 
 				echo '</div>';
             }
@@ -317,52 +318,74 @@ class ad_dashboard_widgets {
        
    }
    
-   /**
-    * Confirm or decline a story assignment.
-    */
-   function respond_to_story_invite(){
-       global $current_user, $assignment_desk, $coauthors_plus, $user_ID;
+   	/**
+     * Confirm or decline a story assignment.
+     */
+	function respond_to_story_invite(){
+		global $current_user, $assignment_desk, $coauthors_plus, $user_ID;
        
-       $response = $_POST['assignment_desk_response'];
-       $post_id = (int)$_POST['post_id'];
-       $role_id = (int)$_POST['role_id'];
-          
-       get_currentuserinfo();
-       if ( !$current_user->ID || !$user_ID || !$post_id || !$role_id ) {
-           $_REQUEST['ad-dashboard-assignment-messages'][] = _('Unauthorized assignment response. This is fishy.');
-       }
-       $_REQUEST['ad-dashboard-assignment-messages'] = array();
+		$active_request = false;
+		$response_message = false;
+		if ( isset($_POST['action']) && isset($_POST['post_id']) && isset($_POST['role_id']) ) {
+			$active_request = 'ajax';
+			$action = $_POST['action'];
+			$post_id = (int)$_POST['post_id'];
+			$role_id = (int)$_POST['role_id'];
+		} else if ( isset($_GET['action']) && isset($_GET['post_id']) && isset($_GET['role_id']) ) {
+			$active_request = 'normal';
+			$action = $_GET['action'];
+			$post_id = (int)$_GET['post_id'];
+			$role_id = (int)$_GET['role_id'];
+		}
+
+		$_REQUEST['ad-dashboard-assignment-messages'] = array();
        
-       if ( $response && $post_id && $role_id ) {
-           $participant_record = get_post_meta($post_id, "_ad_participant_role_$role_id", true);
+		if ( $active_request ) {
+	
+			if ( !is_user_logged_in() ) {
+				$response_message = 'auth_error';
+			}
+			get_currentuserinfo();
+	
+			$participant_record = get_post_meta( $post_id, "_ad_participant_role_$role_id", true );
 
-           // Are we waiting for a response from this user for this post/role?
-           if ( $participant_record && $participant_record[$current_user->ID] == 'pending' ) {
+			// Are we waiting for a response from this user for this post/role?
+			if ( $participant_record && $participant_record[$current_user->ID] == 'pending' ) {
 
-               if ( $response == 'Accept' ) {
-	               $participant_record[$current_user->ID] = 'accepted';
-                   // Add as a coauthor
-                   if ( $assignment_desk->coauthors_plus_exists() ) {
-                       $coauthors_plus->add_coauthors($post_id, array($current_user->user_login), true);
-                   }
-                   // Add as author
-                   else {
-                       wp_update_post(array( 'ID' => $post_id, $author => $current_user->user_login ));
-                   }
-                   $_REQUEST['ad-dashboard-assignment-messages'][] = _('Thank you.');
-                   $user_participant = get_post_meta($post_id, "_ad_participant_$current_user->ID", true);
-                   if ( !$user_participant ) {
-                       $user_participant = array();
-                   }
-                   $user_participant[] = $role_id;
-                   update_post_meta($post_id, "_ad_participant_$current_user->ID", $user_participant);
-				} else if( $response == 'Decline' ) {
+				if ( $action == 'assignment_desk_accept' ) {
+					$participant_record[$current_user->ID] = 'accepted';
+					update_post_meta($post_id, "_ad_participant_role_$role_id", $participant_record);
+					// Add as a coauthor
+					if ( $assignment_desk->coauthors_plus_exists() ) {
+						$coauthors_plus->add_coauthors($post_id, array($current_user->user_login), true);
+					}
+					// Add as author
+					else {
+						wp_update_post(array( 'ID' => $post_id, $author => $current_user->user_login ));
+					}
+					$user_participant = get_post_meta($post_id, "_ad_participant_$current_user->ID", true);
+					if ( !$user_participant ) {
+						$user_participant = array();
+					}
+					$user_participant[] = $role_id;
+					update_post_meta($post_id, "_ad_participant_$current_user->ID", $user_participant);
+					$response_message = 'accepted';
+				} else if ( $action == 'assignment_desk_decline' ) {
 					$participant_record[$current_user->ID] = 'declined';
-					$_REQUEST['ad-dashboard-assignment-messages'][] = _("Sorry.");
+					update_post_meta($post_id, "_ad_participant_role_$role_id", $participant_record);
+					$response_message = 'declined';					
                }
            }
-           update_post_meta($post_id, "_ad_participant_role_$role_id", $participant_record);
-       }
+
+		}
+
+		if ( $active_request == 'ajax' ) {
+			die( $response_message );
+		} else {
+			return $response_message;
+		}
+
+		
    }
 }
 ?>
