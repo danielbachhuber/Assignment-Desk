@@ -184,7 +184,7 @@ class ad_dashboard_widgets {
 		echo "<div id='assignment-desk-post-list'>";
         if ( $pending_posts ) {
             foreach ( $pending_posts as $pending ) {
-				echo "<div id='post-{$pending[0]}' class='pending post assignment-desk-item'>";
+				echo "<div id='pending-assignment-{$pending[0]}' class='pending post assignment-desk-item'>";
                 $post = get_post($pending[0]);
 				if ( $assignment_desk->edit_flow_exists() ) {
 					$post_status_object = get_term_by( 'slug', $post->post_status, 'post_status' );
@@ -226,10 +226,10 @@ class ad_dashboard_widgets {
 				if ( $description || $duedate || $location ) {
 				    echo '</p>';
 				}
-                echo "<p class='row-actions'>";				
+                echo "<p class='row-actions'>";	
 				echo "<input type='hidden' class='assignment_desk_post_id' name='assignment_desk_post_id' value='{$post->ID}' />";
 				echo "<input type='hidden' class='assignment_desk_role_id' name='assignment_desk_role_id' value='{$pending[1]->term_id}' />";
-				echo "<span class='approve'><a class='assignment_desk_response assignment_desk_accept' href='" . admin_url() . "?action=assignment_desk_accept&post_id={$post->ID}&role_id={$pending[1]->term_id}'>Accept</a></span> | <span class='decline'><a class='assignment_desk_response assignment_desk_decline' href='" . admin_url() . "?action=assignment_desk_decline&post_id={$post->ID}&role_id={$pending[1]->term_id}'>Decline</a></span></p>";
+				echo "<a class='assignment_desk_response assignment_desk_accept' href='" . admin_url() . "?action=assignment_desk_accept&post_id={$post->ID}&role_id={$pending[1]->term_id}'>Accept</a> | <a class='assignment_desk_response assignment_desk_decline' href='" . admin_url() . "?action=assignment_desk_decline&post_id={$post->ID}&role_id={$pending[1]->term_id}'>Decline</a></p>";
 
 				echo '</div>';
             }

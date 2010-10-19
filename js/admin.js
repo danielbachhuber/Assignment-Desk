@@ -24,9 +24,8 @@ jQuery(document).ready(function() {
 		} else if ( link.hasClass('assignment_desk_decline') ) {
 			var action = 'assignment_desk_decline';
 		}
-		var role_id = link.parent().sibling('.assignment_desk_role_id').val();
-		var post_id = link.closest('input').val();
-		alert(role_id);
+		var role_id = jQuery(this).siblings('input.assignment_desk_role_id').val();
+		var post_id = jQuery(this).siblings('input.assignment_desk_post_id').val();	
 		jQuery.ajax({
 			type: 'POST',
 			data: {
@@ -35,7 +34,14 @@ jQuery(document).ready(function() {
 				action: action,
 			},
 			success: function(data) {
-				//alert(data);
+				if ( data == 'accepted' ) {
+					
+				} else if ( data == 'declined' ) {
+					var title = jQuery('div#pending-assignment-'+post_id+' h4 a').html();
+					var message = 'The <strong>'+title+'</strong> assignment has been declined.';
+					jQuery('div#pending-assignment-'+post_id).empty().removeClass('pending').addClass('declined');
+					jQuery('div#pending-assignment-'+post_id).html(message);
+				}
 			},
 		});
 		return false;

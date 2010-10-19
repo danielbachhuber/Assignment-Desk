@@ -64,20 +64,25 @@ div#assignment-desk-post-list div.assignment-desk-item p.row-actions {
 	font-size: 10px;
 }
 
-div#assignment-desk-post-list div.assignment-desk-item p.row-actions span {
-	display: inline;
-}
-
-div#assignment-desk-post-list div.assignment-desk-item p.row-actions span.approve a {
+div#assignment-desk-post-list div.assignment-desk-item p.row-actions a.assignment_desk_accept {
 	color: #006505;
 }
 
-div#assignment-desk-post-list div.assignment-desk-item p.row-actions span.decline a {
+div#assignment-desk-post-list div.assignment-desk-item p.row-actions a.assignment_desk_decline {
 	color: #BC0B0B;
 }
 
 div#assignment-desk-post-list .pending {
 	background-color: #FFFFE0;
+}
+
+div#assignment-desk-post-list .declined {
+	background-color: #F4F4F4;
+	font-size: 11px;
+	padding-top: 10px;
+	padding-left: 5px;
+	padding-right: 5px;
+	padding-bottom: 5px;
 }
 
 /* Manage Posts */
