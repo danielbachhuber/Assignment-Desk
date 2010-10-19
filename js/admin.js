@@ -35,7 +35,9 @@ jQuery(document).ready(function() {
 			},
 			success: function(data) {
 				if ( data == 'accepted' ) {
-					
+					jQuery('div#pending-assignment-'+post_id).removeClass('pending').addClass('accepted');
+					jQuery('div#pending-assignment-'+post_id).find('p.row-actions').remove()
+					jQuery('div#pending-assignment-'+post_id).find('h4 span').removeClass('pending').addClass('accepted');
 				} else if ( data == 'declined' ) {
 					var title = jQuery('div#pending-assignment-'+post_id+' h4 a').html();
 					var message = 'The <strong>'+title+'</strong> assignment has been declined.';
