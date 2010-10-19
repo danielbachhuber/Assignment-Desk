@@ -292,6 +292,7 @@ class ad_dashboard_widgets {
 		$counts = array();
 		$total_unpublished_assignments = 0;
         
+        echo "<div id='ad-assignment-statuses'>";
 		foreach ( $assignment_statuses as $assignment_status ) {
 			if ( current_user_can($assignment_desk->define_editor_permissions) ) {
 				// Count all posts with a certain status
@@ -306,7 +307,8 @@ class ad_dashboard_widgets {
 				$url = admin_url() . "edit.php?ad-assignment-status=$assignment_status->term_id";
  				$historical .= "$assignment_status->name: <a href='$url'>" . $counts[$assignment_status->term_id] . "</a>, ";
 		}
-		$historical .= rtrim( $historical, ', ' );
+        $historical = rtrim( $historical, ', ' );
+        $historical .= "</div>";
 		// @todo Month view
 		if ( current_user_can($assignment_desk->define_editor_permissions) ) {
 			$this_month_url = admin_url() . 'edit.php?post_status=publish&monthnum=' . date('M');
