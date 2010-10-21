@@ -338,7 +338,7 @@ class ad_public_views {
 						. '<label for="assignment_desk_username">Username:</label> '
 						. '<input id="assignment_desk_username" name="assignment_desk_username" type="text" '
 						. 'value="' . $this->return_if_set($_POST['assignment_desk_username']) . '" />'							
-						. '<br /><label for="">Password:</label> '
+						. '<br /><label for="assignment_desk_password">Password:</label> '
 						. '<input id="assignment_desk_password" name="assignment_desk_password" type="password" '
 						. '/>';
 			// Show a registration link if users can register
