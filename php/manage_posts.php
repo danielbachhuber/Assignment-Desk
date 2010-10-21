@@ -155,7 +155,7 @@ class ad_manage_posts {
                             $at_least_one_user = true;
                             $user = get_userdata($user);
                             $user_name = ($user->display_name)? $user->display_name : $user->user_login;
-                            $links .= "<a href='" . admin_url() . "/user-edit.php?user_id=$user->ID'>$user_name</a> ";
+                            $links .= "<a href='" . admin_url() . "user-edit.php?user_id=$user->ID'>$user_name</a> ";
                         }
                     }
                     // Print the role header and user links

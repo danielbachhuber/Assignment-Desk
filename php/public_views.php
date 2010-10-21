@@ -302,7 +302,7 @@ class ad_public_views {
 							. ' /><label for="assignment_desk_volunteer_'
 							. $user_role->term_id .'">' . $user_role->name
 							. '</label>';
-				$pitch_form .= '<br /><span class="description">' . $user_role->description . '</span>';
+				$pitch_form .= '<span class="description">' . $user_role->description . '</span>';
 				$pitch_form .= '</li>';
 			}
 			$pitch_form .= '</ul>';
@@ -319,6 +319,9 @@ class ad_public_views {
 			$pitch_form .= '</fieldset>';
 		}
 		
+		// Allow an alternate form of authentication when the pitch form is loaded
+		do_action( 'ad_alternate_authentication', 'pitch_form_load' );
+		
 		if ( is_user_logged_in() ) {
 			global $current_user;
 			wp_get_current_user();			
@@ -327,7 +330,6 @@ class ad_public_views {
 			$pitch_form .= '<fieldset class="standard assignment-desk-user">'
 						. '<label>You are currently logged in as:</label> '
 						. $current_user->display_name . ' &#60;' . $current_user->user_email . '&#62;'
-						. '<input type="hidden" id="assignment_desk_author" name="assignment_desk_author" value="' . $current_user->ID . '" />'
 						. '</fieldset>';
 					
 		} else {
@@ -336,7 +338,7 @@ class ad_public_views {
 						. '<label for="assignment_desk_username">Username:</label> '
 						. '<input id="assignment_desk_username" name="assignment_desk_username" type="text" '
 						. 'value="' . $this->return_if_set($_POST['assignment_desk_username']) . '" />'							
-						. '<br /><label for="">Password:</label> '
+						. '<br /><label for="assignment_desk_password">Password:</label> '
 						. '<input id="assignment_desk_password" name="assignment_desk_password" type="password" '
 						. '/>';
 			// Show a registration link if users can register
@@ -406,9 +408,13 @@ class ad_public_views {
 			if ( !$sanitized_title ) {
 				$form_messages['errors']['title'] = 'Please add a title to this pitch.';
 			}
+			
+			// Allow an alternate form of authentication when the pitch form is saved
+			do_action( 'ad_alternate_authentication', 'pitch_form_save' );
+			
 			if ( is_user_logged_in() ) {
 				global $current_user;
-				$sanitized_author = (int)$_POST['assignment_desk_author'];
+				$sanitized_author = $current_user->ID;
 			} else {
 				require_once(ABSPATH . WPINC . '/registration.php');
 				$credentials['user_login'] = $_POST['assignment_desk_username'];
@@ -639,6 +645,9 @@ class ad_public_views {
 			global $post;
 			$post_id = $post->ID;
 		}
+		
+		// Allow alternate form of authentication when voting button is loaded
+		do_action( 'ad_alternate_authentication', 'voting_load' );
 			
 		wp_get_current_user();
 		$total_votes = (int)get_post_meta( $post_id, '_ad_votes_total', true );
@@ -646,7 +655,6 @@ class ad_public_views {
 		
 		$voting_form = '<span class="assignment_desk_voting_form">';
 		// Save all of the data we need available in the DOM as hidden input fields
-		$voting_form .= '<input type="hidden" class="assignment_desk_user_id" name="assignment_desk_user_id" value="' . $user_id . '" />';
 		$voting_form .= '<input type="hidden" class="assignment_desk_post_id" name="assignment_desk_post_id" value="' . $post_id . '" />';
 		$voting_form .= '<input type="hidden" class="assignment_desk_voting_text_custom" name="assignment_desk_voting_text_custom" value="' . $options['public_facing_voting_button'] . '" />';
 		$voting_form .= '<input type="hidden" class="assignment_desk_voting_nonce" name="assignment_desk_voting_nonce" value="' . wp_create_nonce('assignment_desk_voting') . '" />';
@@ -667,7 +675,7 @@ class ad_public_views {
 			$voting_button = '<span class="assignment_desk_voting_text">Thanks!</span> (<span class="assignment_desk_voting_votes">' . $total_votes . '</span>)';
 			$voting_form .= $voting_button . '</a>';
 		} else {
-			$voting_form .= '<input type="hidden" class="assignment_desk_action" name="assignment_desk_action" value="login_to_vote" />';
+			$voting_form .= '<input type="hidden" class="assignment_desk_action" name="assignment_desk_action" value="assignment_desk_add_vote" />';
 			$voting_form .= '<a class="assignment_desk_voting_submit" href="#">';
 			if ( $options['public_facing_voting_button'] ) {
 				$voting_button = '<span class="assignment_desk_voting_text">' . $options['public_facing_voting_button'] . '</span>';
@@ -782,60 +790,50 @@ class ad_public_views {
 		do_action('ad_alternate_authentication');
 		get_currentuserinfo();
 	    
-		// Only logged-in users have the ability to vote
-		if ( isset($_GET['action']) && is_user_logged_in() ) {
-			$form_messages = array();
-			
-			wp_get_current_user();			
+		if ( isset($_GET['action']) && ( $_GET['action'] == 'assignment_desk_add_vote' || $_GET['action'] == 'assignment_desk_delete_vote') ) {
+					
 			// Ensure that it was the user who submitted the form, not a darn bot
-			if ( !wp_verify_nonce($_GET['nonce'], 'assignment_desk_voting') ) {
-				return $form_messages['error']['nonce'] = true;
+			if ( !wp_verify_nonce( $_GET['nonce'], 'assignment_desk_voting' ) ) {
+				$response_message = 'nonce_error';
+			}
+			
+			// Allow alternate form of authentication on voting save
+			do_action( 'ad_alternate_authentication', 'voting_save' );
+			
+			wp_get_current_user();
+			if ( !is_user_logged_in() ) {
+				$response_message = 'auth_error';
 			}
 			
 			$post_id = (int)$_GET['post_id'];
-			$sanitized_user_id = (int)$_GET['user_id'];			
+			$sanitized_user_id = $current_user->ID;
 			
-			// Ensure the user saving is the same user who submitted the form 
-			if ( $sanitized_user_id != $current_user->ID ) {
-				$form_messages['error']['message'] = 'Are you two different people?';
-				return false;
-			}
-			
-			if ( $_GET['action'] == 'assignment_desk_add_vote' ) {
+			if ( $_GET['action'] == 'assignment_desk_add_vote' && $sanitized_user_id ) {
 			
 				if ( !$this->check_if_user_has_voted( $post_id, $sanitized_user_id ) ) {
 					$this->update_user_vote_for_post( $post_id, $sanitized_user_id, 'add' );
 					$total_votes = $this->get_all_votes_for_post( $post_id );
 					update_post_meta( $post_id, '_ad_votes_total', count($total_votes) );
-					$ajax_message = 'added';					
+					$response_message = 'added';					
 				} else {
-					$ajax_message = 'add_error';
+					$response_message = 'add_error';
 				}
-			} else if ( $_GET['action'] == 'assignment_desk_delete_vote' ) {
+			} else if ( $_GET['action'] == 'assignment_desk_delete_vote' && $sanitized_user_id ) {
 				if ( $this->check_if_user_has_voted( $post_id, $sanitized_user_id ) ) {
 					$this->update_user_vote_for_post( $post_id, $sanitized_user_id, 'remove' );
 					$total_votes = $this->get_all_votes_for_post( $post_id );
 					update_post_meta( $post_id, '_ad_votes_total', count($total_votes) );
-					$ajax_message = 'deleted';
+					$response_message = 'deleted';
 				} else {
-					$ajax_message = 'delete_error';
+					$response_message = 'delete_error';
 				}
 			}
 			
 			// Give a plain message if its an AJAX request
 			if ( !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' ) { 
-			  die( $ajax_message );
+				die( $response_message );
 			} else {
-				return $form_messages;
-			}
-			
-		} else if ( isset($_GET['action']) && !is_user_logged_in() && ( $_GET['action'] == 'assignment_desk_delete_vote' || $_GET['action'] == 'assignment_desk_add_vote' || $_GET['action'] == 'assignment_desk_login_vote' ) ) {
-			$ajax_message = 'auth_error';
-			// Give a plain message if its an AJAX request
-			if ( !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' ) { 
-			  die( $ajax_message );
-			} else {
-				return $form_messages;
+				return $response_message;
 			}
 			
 		}
@@ -856,10 +854,10 @@ class ad_public_views {
 			global $post;
 			$post_id = $post->ID;
 		}
-		
-		do_action('ad_alternate_authentication');
-		get_currentuserinfo();
 
+		// Allow an alternate form of authentication when the volunteer form is loaded
+		do_action( 'ad_alternate_authentication', 'volunteer_form_load' );
+	
 		// Only logged-in users can volunteer on assignments
 		if ( is_user_logged_in() ) {
 	
@@ -903,7 +901,7 @@ class ad_public_views {
 				$volunteer_form .= ' /><label for="assignment_desk_post_' . $post_id
 								. '_volunteer_' . $user_role->term_id .'">' . $user_role->name
 								. '</label>';
-				$volunteer_form .= '<br /><span class="description">' . $user_role->description . '</span>';								
+				$volunteer_form .= '<span class="description">' . $user_role->description . '</span>';								
 				$volunteer_form .= '</li>';
 				}
 			}
@@ -913,8 +911,7 @@ class ad_public_views {
 						. $pitch_form_options['pitch_form_volunteer_description']
 						. '</p>';
 			}
-			$volunteer_form .= '</fieldset>';
-		    $volunteer_form .= "<input type='hidden' name='assignment_desk_volunteer_user_id' value='$current_user->ID' />";	
+			$volunteer_form .= '</fieldset>';	
 		    $volunteer_form .= "<input type='hidden' name='assignment_desk_volunteer_post_id' value='$post_id' />";	
 			$volunteer_form .= '<input type="hidden" name="assignment_desk_volunteering_nonce" value="' 
 							. wp_create_nonce('assignment_desk_volunteering') . '" />';	
@@ -962,7 +959,7 @@ class ad_public_views {
 	    do_action('ad_alternate_authentication');
 		get_currentuserinfo();
 
-		if ( isset($_POST['assignment_desk_volunteer_submit']) && is_user_logged_in() ) {
+		if ( isset($_POST['assignment_desk_volunteer_submit']) ) {
 	    
 			$form_messages = array();
 	
@@ -970,16 +967,20 @@ class ad_public_views {
 			if ( !wp_verify_nonce($_POST['assignment_desk_volunteering_nonce'], 'assignment_desk_volunteering') ) {
 				return $form_messages['error']['nonce'];
 			}
+
 			// @todo Is this necessary?
+			// Allow an alternate form of authentication when the volunteer form is saved
+			do_action( 'ad_alternate_authentication', 'volunteer_form_save' );
+			
+			if ( !is_user_logged_in() ) {
+				return false;
+			}
+
 			wp_get_current_user();
 	    
 		    $post_id = (int)$_POST['assignment_desk_volunteer_post_id'];
 			$sanitized_roles = $_POST['assignment_desk_volunteer_roles'];
-			$sanitized_user_id = (int)$_POST['assignment_desk_volunteer_user_id'];
-			// Ensure the user saving is the same user who submitted the form 
-			if ( $sanitized_user_id != $current_user->ID ) {
-				return false;
-			}
+			$sanitized_user_id = $current_user->ID;
 	    
 		    // Filter the roles to make sure they're valid.
 		    $user_roles = $assignment_desk->custom_taxonomies->get_user_roles();

@@ -11,12 +11,79 @@ ul.ad_elements span.copy label { margin-right: 5px; }
 ul.ad_elements span.copy input { margin-right: 10px; }
 
 /* Dashboard */
-#ad_assignments { font-size: 16px; }
-#ad_assignments table td{ border-top:#ececec 1px solid;padding:3px 0;white-space:nowrap; }
-#ad_assignments table tr.first td{ border-top:none; }
-#ad_assignments .t { color: #777;  padding-right: 12px; padding-top: 6px; width: 100%; }
-#ad_assignments .b { padding-right: 6px; padding-top: 6px; }
-#ad_assignments p.sub { color: #777; font-family: Georgia, 'Times New Roman', 'Bitstream Charter', Times, serif; font-size: 13px; font-style: italic; margin: 0px; }
+
+div#ad_assignments .inside {
+
+}
+
+div#assignment-desk-post-list {
+	margin-top: -10px;
+}
+
+div#assignment-desk-post-list div.assignment-desk-item {
+	padding-top: 15px;
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-bottom: 10px;
+	margin-left: -10px;
+	margin-right: -10px;
+	border-top: 1px solid #DFDFDF;
+}
+
+div#assignment-desk-post-list div.assignment-desk-item:first-child {
+	border-top: none;
+}
+
+div#assignment-desk-post-list div.assignment-desk-item h4 {
+	font-weight: normal;
+}
+
+div#assignment-desk-post-list div.assignment-desk-item h4 span {
+	font-family:"Lucida Grande",Verdana,Arial,"Bitstream Vera Sans",sans-serif;
+	font-size:10px;
+	font-style:italic;
+	color: #999999;
+}
+
+div#assignment-desk-post-list div.assignment-desk-item p {
+	margin-top:5px;
+	margin-bottom: 5px;
+}
+
+div#assignment-desk-post-list div.assignment-desk-item p.meta {
+	color: #999999;
+}
+
+div#assignment-desk-post-list div.assignment-desk-item p.meta span.ad-role {
+	color: #333333;
+}
+
+div#assignment-desk-post-list div.assignment-desk-item p.row-actions {
+	visibility: visible;
+	margin-bottom: 5px;
+	font-size: 10px;
+}
+
+div#assignment-desk-post-list div.assignment-desk-item p.row-actions a.assignment_desk_accept {
+	color: #006505;
+}
+
+div#assignment-desk-post-list div.assignment-desk-item p.row-actions a.assignment_desk_decline {
+	color: #BC0B0B;
+}
+
+div#assignment-desk-post-list .pending {
+	background-color: #FFFFE0;
+}
+
+div#assignment-desk-post-list .declined {
+	background-color: #F4F4F4;
+	font-size: 11px;
+	padding-top: 10px;
+	padding-left: 5px;
+	padding-right: 5px;
+	padding-bottom: 5px;
+}
 
 /* Manage Posts */
 th.column-title { width: 10% !important; }
