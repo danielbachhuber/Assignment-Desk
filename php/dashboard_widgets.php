@@ -294,7 +294,7 @@ class ad_dashboard_widgets {
         
         echo "<div id='ad-assignment-statuses'>";
 		foreach ( $assignment_statuses as $assignment_status ) {
-			if ( current_user_can($assignment_desk->define_editor_permissions) ) {
+			if ( current_user_can( $assignment_desk->define_editor_permissions ) ) {
 				// Count all posts with a certain status
 				$counts[$assignment_status->term_id] = $this->count_posts_by_assignment_status($assignment_status);
 			} else {
@@ -305,18 +305,16 @@ class ad_dashboard_widgets {
 		}
 		foreach ( $assignment_statuses as $assignment_status ) {
 				$url = admin_url() . "edit.php?ad-assignment-status=$assignment_status->term_id";
+				if ( !current_user_can( $assignment_desk->define_editor_permissions ) ) {
+					$url .= '&author=' . $current_user->ID;
+				}
  				$historical .= "$assignment_status->name: <a href='$url'>" . $counts[$assignment_status->term_id] . "</a>, ";
 		}
         $historical = rtrim( $historical, ', ' );
-        $historical .= "</div>";
-		// @todo Month view
-		if ( current_user_can($assignment_desk->define_editor_permissions) ) {
-			$this_month_url = admin_url() . 'edit.php?post_status=publish&monthnum=' . date('M');
-			$q = new WP_Query( array('post_status' => 'publish', 'monthnum' => date('M')));
-			echo "<tr><td class='b'><a href='$this_month_url'>$q->found_posts</a></td>";
-			echo "<td class='b t'><a href='$this_month_url'>" . __('Published this month') . "</a></td></tr>";
-		}
-		echo '<p class="historical">' . $historical . '<a class="button textright" href="edit.php?author=' . $current_user->ID .'">View all</a></p></div>';
+		$published_url = admin_url() . 'edit.php?post_status=publish&author=' . $current_user->ID;
+		$q = new WP_Query( array('post_status' => 'publish', 'author' => $current_user->ID ));
+		$published_text = " - Published: <a href='$published_url'>$q->found_posts</a>";
+		echo '<div class="historical"><a class="button textright" href="edit.php?author=' . $current_user->ID .'">View all</a>' . $historical . $published_text . '</div></div>';
        
    }
    
