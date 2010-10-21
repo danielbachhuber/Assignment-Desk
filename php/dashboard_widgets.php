@@ -160,11 +160,11 @@ class ad_dashboard_widgets {
 			$participant_posts = array();
 		}
 
-		$roles = $assignment_desk->custom_taxonomies->get_user_roles();
+		$default_roles = $assignment_desk->custom_taxonomies->get_user_roles();
 
 		// 
 		foreach ( $participant_posts as $post ) {
-			foreach ( $roles as $user_role ) {
+			foreach ( $default_roles as $user_role ) {
 				// Get all of the roles this user has for this post
 				$participant_record = get_post_meta($post->post_id, "_ad_participant_role_$user_role->term_id", true);
 				if ( $participant_record ) {
@@ -184,7 +184,7 @@ class ad_dashboard_widgets {
 		echo "<div id='assignment-desk-post-list'>";
         if ( $pending_posts ) {
             foreach ( $pending_posts as $pending ) {
-				echo "<div id='pending-assignment-{$pending[0]}' class='pending post assignment-desk-item'>";
+				echo "<div id='pending-assignment-{$pending[0]}-role-{$pending[1]->term_id}' class='pending post assignment-desk-item'>";
                 $post = get_post($pending[0]);
 				if ( $assignment_desk->edit_flow_exists() ) {
 					$post_status_object = get_term_by( 'slug', $post->post_status, 'post_status' );
@@ -235,8 +235,8 @@ class ad_dashboard_widgets {
             }
         }
 		if ( $upcoming_posts ) {
-            foreach ( $upcoming_posts as $post_id => $roles ) {
-				echo "<div id='post-{$pending[0]}' class='accepted post assignment-desk-item'>";
+            foreach ( $upcoming_posts as $post_id => $upcoming_roles ) {
+				echo "<div id='post-{$post_id}' class='accepted post assignment-desk-item'>";
                 $post = get_post( $post_id );
 				if ( $assignment_desk->edit_flow_exists() ) {
 					$post_status_object = get_term_by( 'slug', $post->post_status, 'post_status' );
@@ -270,7 +270,7 @@ class ad_dashboard_widgets {
 				}
 				echo '<span class="ad-roles">Role(s): ';
 				$all_roles = '';
-				foreach ( $roles as $role ) {
+				foreach ( $upcoming_roles as $role ) {
 					$all_roles .= $role->name;
 				}
 				echo rtrim( $all_roles, ', ' ) . '</span>&nbsp;&nbsp;&nbsp;';
