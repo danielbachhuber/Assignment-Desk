@@ -140,9 +140,13 @@ if ( !class_exists( 'ad_user' ) ) {
         // @todo - Make this configurable.
         $writer_role = get_term_by('name', _('Writer'), $assignment_desk->custom_taxonomies->user_role_label);
         // Of all the posts where this user is a participant, which have writers associated with them?
-        $participant_records = $wpdb->get_results("SELECT * FROM $wpdb->postmeta
-                                                    WHERE post_id IN (" . implode(', ', $post_ids) . ")
-                                                    AND meta_key = '_ad_participant_role_$writer_role->term_id'");
+        $participant_records = array();
+        if ( $post_ids ) {
+            $participant_records = $wpdb->get_results("SELECT * FROM $wpdb->postmeta
+                                                        WHERE post_id IN (" . implode(', ', $post_ids) . ")
+                                                            AND meta_key = '_ad_participant_role_{$writer_role->term_id}'");
+        }
+
         if(!$writer_role){
             return 0;
         }
