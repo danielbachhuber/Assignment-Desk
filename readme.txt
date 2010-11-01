@@ -11,7 +11,7 @@ Empower the users to participate in the journalism being done at your site and g
 
 Assignment Desk is an editorial tool for news organizations using WordPress as their content management system. The goal of the plug-in is to make community engagement with the news production process easier and more efficient.
 
-The plug-in allows community members to submit tips or story ideas to the news organization, and volunteer to help with the story in various ways, while preserving editorial oversight.
+The plugin allows community members to submit tips or story ideas to the news organization, and volunteer to help with the story in various ways, while preserving editorial oversight.
 
 Once story ideas have been approved, Assignment Desk allows users to participate in the reporting of a particular story. An editor may assign specific roles (e.g. photographer, writer) to the user as well as limit those eligible to contribute by user type (e.g. first time contributor, regular contributor, professional journalist).
 
@@ -41,6 +41,16 @@ Hit us with questions in the forum http://wordpress.org/tags/assignment-desk
 == Screenshots ==
 
 == Changelog ==
+
+= 0.9 =
+* Redesigned dashboard widget to more closely follow WordPress UI
+* Cleaned up columns spacing on Manage Posts view
+* Sorting on the all pitches public-facing view alternates between ascending and descending values
+* Sort all pitches by the number of volunteers
+* Pagination appears if there are more than 10 public story pitches to view
+* Various hooks before load and before form save for alternate forms of authentication
+* Bug fix: Users can now add a Co-Author when Assignment Desk is enabled
+* Bug fix: Editors can now add participants when Co-Authors is disabled
 
 = 0.8.1 =
 * Bug fix: Voting system now pulls values from hidden inputs and jQuery generates the entire request
