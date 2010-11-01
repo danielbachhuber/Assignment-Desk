@@ -4,7 +4,7 @@ Plugin Name: Assignment Desk
 Plugin URI: http://openassignment.org/
 Description: News pitch and story tools for local news blogs.
 Author: Erik Froese, Daniel Bachhuber
-Version: 0.8.1
+Version: 0.9
 Author URI: http://openassignment.org/
 */   
    
