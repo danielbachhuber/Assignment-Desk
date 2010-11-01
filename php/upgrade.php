@@ -16,7 +16,7 @@ class ad_upgrade {
 	 */
 	function run_upgrade( $previous ) {
 		
-		if ( $previous < 0.8) $this->upgrade_08();
+		if ( version_compare( $previous, '0.8', '<' ) ) $this->upgrade_08();
 		
 	}
 	
