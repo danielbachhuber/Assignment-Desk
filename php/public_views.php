@@ -1229,7 +1229,13 @@ class ad_public_views {
 				$description = get_post_meta( $post_id, '_ef_description', true );
 				$location = get_post_meta( $post_id, '_ef_location', true );
 				$duedate = get_post_meta( $post_id, '_ef_duedate', true );
-				$duedate = date_i18n( 'M d, Y', $duedate );
+				
+				if ( $duedate ){
+				    $duedate = date_i18n( 'M d, Y', $duedate );
+			    }
+			    else {
+			        $duedate = _('None');
+			    }
 				if ( $assignment_desk->edit_flow_exists() ) {
 					$post_status_object = get_term_by( 'slug', $pitch->post_status, 'post_status' );
 					$post_status = $post_status_object->name;
