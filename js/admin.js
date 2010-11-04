@@ -17,6 +17,11 @@ jQuery(document).ready(function() {
 		}
 	});
 	
+	/**
+	 * Handle a user's response to their story assignments
+	 * @todo Clean up the animations. They should match WordPress UI exactly
+	 * @todo Add the role to an existing assignment listing if the user has already accepted one role
+	 */
 	jQuery('a.assignment_desk_response').click(function() {
 		var link = jQuery(this);
 		if ( link.hasClass('assignment_desk_accept') ) {
@@ -25,7 +30,8 @@ jQuery(document).ready(function() {
 			var action = 'assignment_desk_decline';
 		}
 		var role_id = jQuery(this).siblings('input.assignment_desk_role_id').val();
-		var post_id = jQuery(this).siblings('input.assignment_desk_post_id').val();	
+		var post_id = jQuery(this).siblings('input.assignment_desk_post_id').val();
+		var post_div = jQuery('div#pending-assignment-'+post_id+'-role-'+role_id)
 		jQuery.ajax({
 			type: 'POST',
 			data: {
@@ -35,14 +41,16 @@ jQuery(document).ready(function() {
 			},
 			success: function(data) {
 				if ( data == 'accepted' ) {
-					jQuery('div#pending-assignment-'+post_id).removeClass('pending').addClass('accepted');
-					jQuery('div#pending-assignment-'+post_id).find('p.row-actions').remove()
-					jQuery('div#pending-assignment-'+post_id).find('h4 span').removeClass('pending').addClass('accepted');
+					post_div.find('p.row-actions').remove();
+					post_div.animate( { 'backgroundColor':'#CCEEBB' }, 350 ).animate( { 'backgroundColor': '#FFFFFF' }, 350 );
+					post_div.removeClass('pending').addClass('accepted');					
+					post_div.find('h4 span').removeClass('pending').addClass('accepted');
 				} else if ( data == 'declined' ) {
-					var title = jQuery('div#pending-assignment-'+post_id+' h4 a').html();
+					var title = post_div.find('h4 a').html();
 					var message = 'The <strong>'+title+'</strong> assignment has been declined.';
-					jQuery('div#pending-assignment-'+post_id).empty().removeClass('pending').addClass('declined');
-					jQuery('div#pending-assignment-'+post_id).html(message);
+					/* post_div.animate( { 'backgroundColor':'#ceb' }, 350 ).animate( { 'backgroundColor': '#F4F4F4' }, 350 ); */
+					post_div.empty().removeClass('pending').addClass('declined');
+					post_div.html(message);
 				}
 			},
 		});

@@ -16,6 +16,15 @@ div#ad_assignments .inside {
 
 }
 
+div#ad_assignments .historical {
+	font-size: 11px;
+}
+
+div#ad_assignments .historical .textright {
+	float: right;
+	margin-top: -8px;
+}
+
 div#assignment-desk-post-list {
 	margin-top: -10px;
 }
