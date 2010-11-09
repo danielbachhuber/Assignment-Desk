@@ -3,7 +3,7 @@ Contributors: efroese, danielbachhuber
 Tags: editorial workflow, journalism, crowdsourcing, assignment management
 Requires at least: 2.9.2
 Tested up to: 3.0.1
-Stable tag: 0.9
+Stable tag: 0.9.1
 
 Empower the users to participate in the journalism being done at your site and guide them along the way.
 
@@ -41,6 +41,9 @@ Hit us with questions in the forum http://wordpress.org/tags/assignment-desk
 == Screenshots ==
 
 == Changelog ==
+
+= 0.9.1 =
+* Bug fix: Check if due date is set before trying to convert it to a string
 
 = 0.9 =
 * Redesigned dashboard widget to more closely follow WordPress UI
