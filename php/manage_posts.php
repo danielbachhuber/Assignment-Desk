@@ -12,10 +12,11 @@ class ad_manage_posts {
 		add_action('manage_posts_custom_column', array(&$this, 'handle_ad_assignment_status_column'), 10, 2);
 		add_action('manage_posts_custom_column', array(&$this, 'handle_ad_votes_total'), 10, 2);
 		
+		/* Disabled 11/11/10 until we can find a better way to manage which metadata appears in columns ^DB
 		if ($assignment_desk->edit_flow_exists()) {
         	add_action('manage_posts_custom_column', array(&$this, 'handle_ef_duedate_column'), 10, 2);
 			add_action('manage_posts_custom_column', array(&$this, 'handle_ef_location_column'), 10, 2);
-		}
+		} */
 		if ($assignment_desk->coauthors_plus_exists()) {
 		    add_action('manage_posts_custom_column', array(&$this, 'handle_ad_participants_column'), 10, 2);
 		}
@@ -59,10 +60,11 @@ class ad_manage_posts {
         $custom_fields_to_add = array();
         $custom_fields_to_add[_('_ad_assignment_status')] = _('Assignment Status');
 
+		/* Disabled 11/11/10 until we can find a better way to manage which metadata appears in columns ^DB
 		if ($assignment_desk->edit_flow_exists()) {
 			$custom_fields_to_add[_('_ef_duedate')] = __('Due Date');
 			$custom_fields_to_add[_('_ef_location')] = __('Location');
-		}
+		} */
 		if($assignment_desk->coauthors_plus_exists()){
 		    $custom_fields_to_add[_('_ad_participants')] = __('Participants');
 		}
