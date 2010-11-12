@@ -18,6 +18,8 @@ class ad_upgrade {
 		
 		if ( version_compare( $previous, '0.8', '<' ) ) $this->upgrade_08();
 		
+		// @todo Upgrade to version 0.9.2
+		
 	}
 	
 	/**
@@ -49,6 +51,16 @@ class ad_upgrade {
 		update_option( $assignment_desk->get_plugin_option_fullname('version'), '0.8' );
 	}
 	
+	/**
+	 * Upgrade to v0.9.2
+	 */
+	function upgrade_092() {
+	
+		// @todo Migrate options for pitch form on editorial metadata
+		
+		//update_option( $assignment_desk->get_plugin_option_fullname('version'), '0.9.2' );
+		
+	}
 	
 }
 
