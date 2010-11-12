@@ -181,7 +181,7 @@ class ad_manage_posts {
         if ( $column_name == _('_ad_pitched_by_timestamp') ) {
             $timestamp = (int)get_post_meta($post_id, '_ad_pitched_by_timestamp', true);
             if ( !$timestamp ) {
-                $age = _("Not a pitch.");
+                $age = _("Not a pitch");
             }
             else {
                 $age = human_time_diff($timestamp, current_time('timestamp'));   
