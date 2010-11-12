@@ -530,53 +530,61 @@ Thanks
 		echo '<li><input type="checkbox" disabled="disabled" checked="checked" />&nbsp;<label for="public_facing_title">Title</label></li>';
 		// Submitter
 		echo '<li><input id="public_facing_pitched_by_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_pitched_by_enabled]" type="checkbox"';
-		if ($options['public_facing_pitched_by_enabled']) {
+		if ( isset( $options['public_facing_pitched_by_enabled'] ) && $options['public_facing_pitched_by_enabled'] ) {
 			echo ' checked="checked"';
 		}
 		echo ' />&nbsp;<label for="public_facing_tags_enabled">Submitter</label></li>';
 		// Content
 		echo '<li><input id="public_facing_content_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_content_enabled]" type="checkbox"';
-		if ($options['public_facing_content_enabled']) {
+		if ( isset( $options['public_facing_content_enabled'] ) && $options['public_facing_content_enabled'] ) {
 			echo ' checked="checked"';
 		}
 		echo ' />&nbsp;<label for="public_facing_content_enabled">Content</label></li>';
 		// Post Status
 		echo '<li><input id="public_facing_post_status_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_post_status_enabled]" type="checkbox"';
-		if ($options['public_facing_post_status_enabled']) {
+		if ( isset( $options['public_facing_post_status_enabled'] ) && $options['public_facing_post_status_enabled'] ) {
 			echo ' checked="checked"';
 		}
-		echo ' />&nbsp;<label for="public_facing_post_status_enabled">Post Status</label></li>';		
-		// Description
-		if ($assignment_desk->edit_flow_exists()) {
-			echo '<li><input id="public_facing_description_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_description_enabled]" type="checkbox"';
-			if ($options['public_facing_description_enabled']) {
-				echo ' checked="checked"';
+		echo ' />&nbsp;<label for="public_facing_post_status_enabled">Post Status</label></li>';
+		
+		if ( $assignment_desk->edit_flow_exists() ) {
+			// Edit Flow v0.6 and higher offers custom editorial metadata. We should give the option to add those fields
+			if ( version_compare( '0.6', EDIT_FLOW_VERSION, '>=' ) ) {
+				
+				$editorial_metadata = $edit_flow->editorial_metadata->get_editorial_metadata_terms();
+				foreach ( $editorial_metadata as $term ) {
+					$key = 'public_facing_' . $term->slug . '_enabled';
+					echo '<li><input id="' . $key . '" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[' . $key . ']" type="checkbox"';
+					if ( isset( $options[$key] ) && $options[$key] ) {
+						echo ' checked="checked"';
+					}
+					echo ' />&nbsp;<label for="' . $key . '">' . $term->name . '</label></li>';
+				}
+				
+			} else {
+				// Description
+				echo '<li><input id="public_facing_description_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_description_enabled]" type="checkbox"';
+				if ( $options['public_facing_description_enabled'] ) {
+					echo ' checked="checked"';
+				}
+				echo ' />&nbsp;<label for="public_facing_description_enabled">Description</label></li>';
+				// Due date
+				echo '<li><input id="public_facing_duedate_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_duedate_enabled]" type="checkbox"';
+				if ( $options['public_facing_duedate_enabled'] ) {
+					echo ' checked="checked"';
+				}
+				echo ' />&nbsp;<label for="public_facing_duedate_enabled">Due Date</label></li>';
+				// Location
+				echo '<li><input id="public_facing_location_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_location_enabled]" type="checkbox"';
+				if ( $options['public_facing_location_enabled'] ) {
+					echo ' checked="checked"';
+				}
+				echo ' />&nbsp;<label for="public_facing_location_enabled">Location</label></li>';
 			}
-			echo ' />&nbsp;<label for="public_facing_description_enabled">Description</label></li>';
 		} else {
-				echo '<li>Please enable Edit Flow to allow description field.</li>';
+			echo '<li>Please enable Edit Flow to allow editorial metadata.</li>';
 		}
-		// Due date
-		if ($assignment_desk->edit_flow_exists()) {
-			echo '<li><input id="public_facing_duedate_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_duedate_enabled]" type="checkbox"';
-			if ($options['public_facing_duedate_enabled']) {
-				echo ' checked="checked"';
-			}
-			echo ' />&nbsp;<label for="public_facing_duedate_enabled">Due Date</label></li>';
-		} else {
-				echo '<li>Please enable Edit Flow to allow due date field.</li>';
-		}
-		// Location
-		if ($assignment_desk->edit_flow_exists()) {
-			echo '<li><input id="public_facing_location_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_location_enabled]" type="checkbox"';
-			if ($options['public_facing_location_enabled']) {
-				echo ' checked="checked"';
-			}
-			echo ' />&nbsp;<label for="public_facing_location_enabled">Location</label></li>';
-			
-		} else {
-			echo '<li>Please enable Edit Flow to allow location field.</li>';
-		}
+		
 		// Categories
 		echo '<li><input id="public_facing_categories_enabled" name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_categories_enabled]" type="checkbox"';
 		if ($options['public_facing_categories_enabled']) {
