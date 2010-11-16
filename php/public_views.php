@@ -1501,10 +1501,10 @@ class ad_public_views {
 						    $html .= '<p><label>Location:</label> ' . $location . '</p>';	
 						}
 					
-					}
+					} // END - Check if Edit Flow v0.6+
 					
 					
-				}
+				} // END - if ( $assignment_desk->edit_flow_exists() )
 				
 	
 				if ( $options['public_facing_categories_enabled'] ) {
@@ -1610,12 +1610,8 @@ class ad_public_views {
 		$new_content = '';
 		if ( is_single() && $post->post_status != 'publish' ) {
 			
-			$description = get_post_meta( $post_id, '_ef_description', true );
-			$location = get_post_meta( $post_id, '_ef_location', true );
-			$duedate = get_post_meta( $post_id, '_ef_duedate', true );
-			$duedate = date_i18n( 'M d, Y', $duedate );
-			
 			if ( $assignment_desk->edit_flow_exists() ) {
+				global $edit_flow;
 				$post_status_object = get_term_by( 'slug', $post->post_status, 'post_status' );
 				$post_status = $post_status_object->name;
 			} else {
@@ -1630,24 +1626,79 @@ class ad_public_views {
 				$new_content .= $the_content;
 			}
 			
-			if ( $description || $duedate || $location ) {
-			    $new_content .= '<div class="meta">';
-			}
+			$new_content .= '<div class="meta">';
+			
 			if ( $options['public_facing_post_status_enabled'] && $post_status ) {
 			    $new_content .= '<p><label>Status:</label> ' . $post_status . '</p>';
 			}
-			if ( $options['public_facing_description_enabled'] && $description ) {
-			    $new_content .= '<p><label>Description:</label> ' . $description . '</p>';
-			}
-			if ( $options['public_facing_duedate_enabled'] && $duedate ) {
-			    $new_content .= '<p><label>Due date:</label> ' . $duedate . '</p>';	
-			}
-			if ( $options['public_facing_location_enabled'] && $location ) {
-			    $new_content .= '<p><label>Location:</label> ' . $location . '</p>';	
-			}
-			if ( $description || $duedate || $location ) {
-			    $new_content .= '</div>';
-			}
+			
+			if ( $assignment_desk->edit_flow_exists() ) {
+				
+				// Edit Flow v0.6 and higher offers custom editorial metadata. Otherwise, fall back on old
+				if ( version_compare( '0.6', EDIT_FLOW_VERSION, '>=' ) ) {
+
+					$terms = $edit_flow->editorial_metadata->get_editorial_metadata_terms();
+					foreach ( $terms as $term ) {
+						$form_key = $edit_flow->editorial_metadata->get_postmeta_key( $term );
+						$enabled_key = 'public_facing_' . $term->slug . '_enabled';
+						
+						$saved_value = get_post_meta( $post_id, $form_key, true );					
+						if ( $options[$enabled_key] && $saved_value ) {
+							$html_value = '';								
+							// Give us different inputs based on the metadata type
+							switch ( $term_type = $edit_flow->editorial_metadata->get_metadata_type( $term ) ) {
+								case 'checkbox':
+									$html_value = ( $saved_value ) ? 'Yes' : 'No';
+									break;
+								case 'date':
+									$html_value = date_i18n( get_option( 'date_format' ), $saved_value );
+									break;
+								case 'location':
+									$html_value = $saved_value;
+									break;
+								case 'paragraph':
+									$html_value = $saved_value;
+									break;
+								case 'text':
+									$html_value = $saved_value;
+									break;
+								case 'user':
+									$html_value = get_the_author_meta( 'display_name', $saved_value );
+									break;
+								default:
+									$html_input = '';
+									break;
+							}
+							$new_content .= '<p><label>' . $term->name . ':</label> ' . $html_value . '</p>';
+						}
+
+					}
+
+				} else {
+					$description = get_post_meta( $post_id, '_ef_description', true );
+					$location = get_post_meta( $post_id, '_ef_location', true );
+					$duedate = get_post_meta( $post_id, '_ef_duedate', true );
+
+					if ( $duedate ){
+					    $duedate = date_i18n( 'M d, Y', $duedate );
+				    }
+				
+					if ( $options['public_facing_description_enabled'] && $description ) {
+					    $new_content .= '<p><label>Description:</label> ' . $description . '</p>';
+					}
+					if ( $options['public_facing_duedate_enabled'] && $duedate ) {
+					    $new_content .= '<p><label>Due date:</label> ' . $duedate . '</p>';	
+					}
+					if ( $options['public_facing_location_enabled'] && $location ) {
+					    $new_content .= '<p><label>Location:</label> ' . $location . '</p>';	
+					}
+				
+				} // END - Check if Edit Flow v0.6+
+				
+				
+			} // END - if ( $assignment_desk->edit_flow_exists() )
+			
+			$new_content .= '</div>'; // END - .meta
 			
 		} else {
 			$new_content = $the_content;
