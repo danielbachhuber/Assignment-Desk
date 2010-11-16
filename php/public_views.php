@@ -24,13 +24,14 @@ class ad_public_views {
 		wp_enqueue_script('ad-public-views', ASSIGNMENT_DESK_URL . 'js/public_views.js', array('jquery', 'jquery-datepicker-js'));
 		wp_enqueue_style('ad-public', ASSIGNMENT_DESK_URL . 'css/public.css');
 		
-		add_filter( 'the_content', array(&$this, 'show_all_posts') );
-		add_filter( 'the_posts', array(&$this, 'show_single_post') );
-		add_filter( 'the_content', array(&$this, 'handle_single_post_metadata') );		
+		add_filter( 'the_content', array( &$this, 'show_all_posts' ) );
+		add_filter( 'the_posts', array( &$this, 'show_single_post' ) );
+		add_filter( 'the_content', array( &$this, 'handle_single_post_metadata' ) );		
+		
+		add_action(	'parse_request', array( &$this, 'process_form_submissions' ) );
 		
 		// Only add voting if its enabled
 		if ( $public_facing_options['public_facing_voting_enabled'] ) {
-            $this->save_voting_form();
 			add_filter( 'the_content', array(&$this, 'prepend_voting_to_post') );		
 		}
 		// Only add commenting if its enabled
@@ -41,12 +42,10 @@ class ad_public_views {
 		
 		// Only add volunteering if its enabled
 		if ( $public_facing_options['public_facing_volunteering_enabled'] ) {
-		    $_REQUEST['assignment_desk_messages']['volunteer_form'] = $this->save_volunteer_form();
 			add_filter( 'the_content', array(&$this, 'append_actions_to_post') );		
 		}
 		// Only show pitch forms if the functionality is enabled
 		if ( $pitch_form_options['pitch_form_enabled'] ) {
-		    $_REQUEST['assignment_desk_messages']['pitch_form'] = $this->save_pitch_form();
 			add_filter( 'the_content', array(&$this, 'show_pitch_form') );
 		}
 	}
@@ -57,6 +56,28 @@ class ad_public_views {
 	 */
 	function activate_once() {
 		
+	}
+	
+	/**
+	 * Process any form saves
+	 */
+	function process_form_submissions() {
+		global $assignment_desk;
+		$pitch_form_options = $assignment_desk->pitch_form_options;		
+		$public_facing_options = $assignment_desk->public_facing_options;
+				
+		// Only process voting if its enabled
+		if ( $public_facing_options['public_facing_voting_enabled'] ) {
+            $this->save_voting_form();
+		}
+		// Only process volunteering if its enabled
+		if ( $public_facing_options['public_facing_volunteering_enabled'] ) {
+		    $_REQUEST['assignment_desk_messages']['volunteer_form'] = $this->save_volunteer_form();	
+		}
+		// Only process pitch forms if the functionality is enabled
+		if ( $pitch_form_options['pitch_form_enabled'] ) {
+		    $_REQUEST['assignment_desk_messages']['pitch_form'] = $this->save_pitch_form();
+		}
 	}
 	
 	/**
@@ -229,7 +250,7 @@ class ad_public_views {
 										. $html_description
 										. '</p>';
 							}
-							if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors'][$form_key]) ) {
+							if ( isset( $_REQUEST['assignment_desk_messages']['pitch_form']['errors'][$form_key] ) ) {
 				    			$pitch_form .= '<p class="error">'
 				    						. $_REQUEST['assignment_desk_messages']['pitch_form']['errors'][$form_key]
 				    						. '</p>';
@@ -470,7 +491,7 @@ class ad_public_views {
 		$form_options = $assignment_desk->pitch_form_options;		
 		$user_types = $assignment_desk->custom_taxonomies->get_user_types();
 
-		if ($assignment_desk->edit_flow_exists()) {
+		if ( $assignment_desk->edit_flow_exists() ) {
 			global $edit_flow;
 		}
 
@@ -515,26 +536,103 @@ class ad_public_views {
 					$sanitized_author = $user->ID;
 				}
 			}
-
-			$sanitized_description = '';
-			if ( $_POST['assignment_desk_description']) {
-			    $sanitized_description = wp_kses($_POST['assignment_desk_description'], $allowedposttags);
-			}
-			else {
-			    if ( $form_options['pitch_form_description_required'] == 'on' ) {
-			        $form_messages['errors']['description'] = _('Description is required.');
-			    }
-			}
 			
-			$sanitized_location = '';
-			if ( $_POST['assignment_desk_location'] ) {
-			    $sanitized_location = wp_kses($_POST['assignment_desk_location'], $allowedposttags);
+			if ( $assignment_desk->edit_flow_exists() ) {
+				
+				// Edit Flow v0.6 and higher offers custom editorial metadata. Otherwise, fall back on old
+				if ( version_compare( '0.6', EDIT_FLOW_VERSION, '>=' ) ) {
+					
+					$terms = $edit_flow->editorial_metadata->get_editorial_metadata_terms();
+					$all_editorial_metadata = array();				
+
+					foreach ( $terms as $term ) {
+						// Setup the key for this editorial metadata term (same as what's in $_POST)
+						$form_key = $edit_flow->editorial_metadata->get_postmeta_key( $term );
+						$required_key = 'pitch_form_' . $term->slug . '_required';
+						$editorial_metadata = isset( $_POST[$form_key] ) ? $_POST[$form_key] : '';
+						
+						$type = $edit_flow->editorial_metadata->get_metadata_type( $term );
+						// Process date formats
+						if ( $type == 'date' ) {
+							$duedate_split = split( '/', $editorial_metadata );
+			    			if ( count( $duedate_split ) == 3) {
+			    			    $duedate_month = (int)$duedate_split[0];
+			    			    $duedate_day = (int)$duedate_split[1];
+			    			    $duedate_year = (int)$duedate_split[2];
+			    			    // Zero pad for strtime
+			    			    if ( $duedate_month < 10 ) {
+			    			        $duedate_month = "0$duedate_month";
+			    			    }
+			    			    $editorial_metadata = strtotime($duedate_day . '-' . $duedate_month . '-' . $duedate_year);
+			    			    if ( !$editorial_metadata ) {
+			    			        $form_messages['errors'][$form_key] = _('Please enter a valid date of the form MM/DD/YYYY');
+									continue;
+			    			    }
+			    			}
+						}
+
+						$editorial_metadata = strip_tags( $editorial_metadata );
+						// Ensure there's a value if the field is required
+						if ( !$editorial_metadata && $form_options[$required_key] == 'on' ) {
+							$form_messages['errors'][$form_key] = _( $term->name . ' is required.' );
+						} else {
+							$all_editorial_metadata[$form_key] = $editorial_metadata;
+						}
+						
+					}
+				} else {
+					// Description
+					$sanitized_description = '';
+					if ( $_POST['assignment_desk_description']) {
+					    $sanitized_description = wp_kses($_POST['assignment_desk_description'], $allowedposttags);
+					}
+					else {
+					    if ( $form_options['pitch_form_description_required'] == 'on' ) {
+					        $form_messages['errors']['description'] = _('Description is required.');
+					    }
+					}
+					// Location
+					$sanitized_location = '';
+					if ( $_POST['assignment_desk_location'] ) {
+					    $sanitized_location = wp_kses($_POST['assignment_desk_location'], $allowedposttags);
+					}
+					else {
+					    if ( $form_options['pitch_form_location_required'] == 'on' ) {
+					        $form_messages['errors']['location'] = _('Location is required.');
+					    }
+					}
+					// Due date
+					if ( $_POST['assignment_desk_duedate'] ) {
+		    			// Sanitize the duedate
+		    			$sanitized_duedate = false;
+		    			$duedate_split = split('/', $_POST['assignment_desk_duedate']);
+		    			if ( count($duedate_split) == 3) {
+		    			    $duedate_month = (int)$duedate_split[0];
+		    			    $duedate_day = (int)$duedate_split[1];
+		    			    $duedate_year = (int)$duedate_split[2];
+		    			    // Zero pad for strtime
+		    			    if ( $duedate_month < 10 ) {
+		    			        $duedate_month = "0$duedate_month";
+		    			    }
+		    			    $sanitized_duedate = strtotime($duedate_day . '-' . $duedate_month . '-' . $duedate_year);
+		    			    if ( !$sanitized_duedate ) {
+		    			        $form_messages['errors']['duedate'] = _('Please enter a valid date of the form MM/DD/YYYY');
+		    			    }
+		    			}
+		    			else {
+		    			    $form_messages['errors']['duedate'] = _('Please enter a valid date of the form MM/DD/YYYY');
+		    			}
+					}
+					else {
+					    if ( $form_options['pitch_form_duedate_required'] ) {
+					        $form_messages['errors']['duedate'] = _('Due date is required.');
+					    }
+					}
+					
+				}
+				
 			}
-			else {
-			    if ( $form_options['pitch_form_location_required'] == 'on' ) {
-			        $form_messages['errors']['location'] = _('Location is required.');
-			    }
-			}
+
 			
 			$sanitized_tags = '';
 			if ( $_POST['assignment_desk_tags'] ){
@@ -570,33 +668,6 @@ class ad_public_views {
 			    }
 			}
 			
-			if ( $_POST['assignment_desk_duedate'] ) {
-    			// Sanitize the duedate
-    			$sanitized_duedate = false;
-    			$duedate_split = split('/', $_POST['assignment_desk_duedate']);
-    			if ( count($duedate_split) == 3) {
-    			    $duedate_month = (int)$duedate_split[0];
-    			    $duedate_day = (int)$duedate_split[1];
-    			    $duedate_year = (int)$duedate_split[2];
-    			    // Zero pad for strtime
-    			    if ( $duedate_month < 10 ) {
-    			        $duedate_month = "0$duedate_month";
-    			    }
-    			    $sanitized_duedate = strtotime($duedate_day . '-' . $duedate_month . '-' . $duedate_year);
-    			    if ( !$sanitized_duedate ) {
-    			        $form_messages['errors']['duedate'] = _('Please enter a valid date of the form MM/DD/YYYY');
-    			    }
-    			}
-    			else {
-    			    $form_messages['errors']['duedate'] = _('Please enter a valid date of the form MM/DD/YYYY');
-    			}
-			}
-			else {
-			    if ( $form_options['pitch_form_duedate_required'] ) {
-			        $form_messages['errors']['duedate'] = _('Due date is required.');
-			    }
-			}
-			
 			// Don't process the form if any errors have been set
 			if ( count($form_messages['errors']) ) {
 				return $form_messages;
@@ -619,28 +690,30 @@ class ad_public_views {
 			// Once the pitch is saved, we can save data to custom fields
 			if ( $post_id ) {
 				
-				// Only handle description if Edit Flow exists
+				// Only handle editorial metadata if Edit Flow exists
 				if ( $assignment_desk->edit_flow_exists() ) {
-					update_post_meta($post_id, '_ef_description', $sanitized_description);
-				}
-				
-				// Only handle duedate if Edit Flow exists
-				if ( $sanitized_duedate && $assignment_desk->edit_flow_exists() ) {
-    				update_post_meta($post_id, '_ef_duedate', $sanitized_duedate);
-				}
-				
-				// Only handle location if Edit Flow exists
-				if ( $assignment_desk->edit_flow_exists() ) {
-					update_post_meta($post_id, '_ef_location', $sanitized_location);
+					
+					// Edit Flow v0.6 and higher offers custom editorial metadata. Otherwise, fall back on old
+					if ( version_compare( '0.6', EDIT_FLOW_VERSION, '>=' ) ) {
+						foreach ( $all_editorial_metadata as $key => $value ) {
+							update_post_meta( $post_id, $key, $value );
+						}
+					} else {
+						// Old way of saving post meta
+						update_post_meta( $post_id, '_ef_description', $sanitized_description );
+						update_post_meta( $post_id, '_ef_duedate', $sanitized_duedate );
+						update_post_meta( $post_id, '_ef_location', $sanitized_location );
+					}
+					
 				}
 				
 				// Save pitched_by_participant and pitched_by_date information
-				update_post_meta($post_id, '_ad_pitched_by_participant', $sanitized_author);
-				update_post_meta($post_id, '_ad_pitched_by_timestamp', date_i18n('U'));
+				update_post_meta( $post_id, '_ad_pitched_by_participant', $sanitized_author );
+				update_post_meta( $post_id, '_ad_pitched_by_timestamp', date_i18n('U') );
 				
 				// Set assignment status to default setting
 				$default_status = $assignment_desk->custom_taxonomies->get_default_assignment_status();
-				wp_set_object_terms($post_id, (int)$default_status->term_id, $assignment_desk->custom_taxonomies->assignment_status_label);
+				wp_set_object_terms( $post_id, (int)$default_status->term_id, $assignment_desk->custom_taxonomies->assignment_status_label );
 				
 				// All User Types can participate in a new assignment by default
 				foreach ( $user_types as $user_type ) {
