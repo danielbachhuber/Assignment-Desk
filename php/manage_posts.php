@@ -270,9 +270,6 @@ class ad_manage_posts {
             <option value="_ad_pitched_by_timestamp" <?php echo ($_GET['ad-sortby'] == '_ad_pitched_by_timestamp')? 'selected': ''?>>Age</option>
             <option value="_ad_votes_total" <?php echo ($_GET['ad-sortby'] == '_ad_votes_total')? 'selected': ''?>>Votes</option>
             <option value="_ad_total_volunteers" <?php echo ($_GET['ad-sortby'] == '_ad_total_volunteers')? 'selected': ''?>>Volunteers</option>
-            <?php if( $assignment_desk->edit_flow_exists() ): ?>
-                <option value="_ef_duedate" <?php echo ($_GET['ad-sortby'] == '_ef_duedate')? 'selected': ''?>>Due Date</option>
-            <?php endif; ?>
         </select>
         <input type="hidden" name="ad-sortby-reverse" value="<?php echo ($_GET['ad-sortby-reverse'])? '': '1'; ?>">
 <?php
