@@ -275,11 +275,11 @@ class ad_dashboard_widgets {
 
 				} // END - if ( $assignment_desk->edit_flow_exists() )
 				echo '</p>';
-                echo "<p class='row-actions'>";	
+                echo "<p class='row-actions'><span class='accept-decline-actions'>";	
 				echo "<input type='hidden' class='assignment_desk_post_id' name='assignment_desk_post_id' value='{$post->ID}' />";
 				echo "<input type='hidden' class='assignment_desk_role_id' name='assignment_desk_role_id' value='{$pending[1]->term_id}' />";
 				echo "<a class='assignment_desk_response assignment_desk_accept' href='" . admin_url() . "?action=assignment_desk_accept&post_id={$post->ID}&role_id={$pending[1]->term_id}'>Accept</a> | <a class='assignment_desk_response assignment_desk_decline' href='" . admin_url() . "?action=assignment_desk_decline&post_id={$post->ID}&role_id={$pending[1]->term_id}'>Decline</a>";
-				echo " | <a href='#' class='assignment_desk_view_details'>View Details</a>";
+				echo " | </span><a href='#' class='assignment_desk_view_details'>View Details</a>";
 				echo "</p>";
 
 				echo '</div>';

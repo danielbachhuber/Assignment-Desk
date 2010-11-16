@@ -41,13 +41,10 @@ jQuery(document).ready(function() {
 			},
 			success: function(data) {
 				if ( data == 'accepted' ) {
-					post_div.find('p.row-actions').remove();
-					post_div.find('p.post-details').hide();
+					post_div.find('span.accept-decline-actions').remove();
 					post_div.animate( { 'backgroundColor':'#CCEEBB' }, 350 ).animate( { 'backgroundColor': '#FFFFFF' }, 350 );
 					post_div.removeClass('pending').addClass('accepted');					
 					post_div.find('h4 span').removeClass('pending').addClass('accepted');
-					var view_details = "<p class='row-actions'><a href='#' class='assignment_desk_view_details'>View Details</a></p>";
-					post_div.append(view_details);
 				} else if ( data == 'declined' ) {
 					var title = post_div.find('h4 a').html();
 					var message = 'The <strong>'+title+'</strong> assignment has been declined.';
