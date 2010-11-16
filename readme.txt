@@ -42,6 +42,11 @@ Hit us with questions in the forum http://wordpress.org/tags/assignment-desk
 
 == Changelog ==
 
+= 0.9.2 =
+* Support for Edit Flow v0.6 and custom editorial metadata: http://www.editflow.org/2010/11/10/edit-flow-v0-6-custom-editorial-metadata-and-the-story-budget/
+* Bug fix: Show all accepted user roles on upcoming assignments dashboard widget
+* Temporarily disabled sorting by due date on manage posts view and all pitches view
+
 = 0.9.1 =
 * Bug fix: Check if due date is set before trying to convert it to a string
 
