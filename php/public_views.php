@@ -172,12 +172,15 @@ class ad_public_views {
 					$description_key = 'pitch_form_' . $term->slug . '_description';
 					$required_key = 'pitch_form_' . $term->slug . '_required';
 					
+					// Only show the field if it's enabled
 					if ( $options[$enabled_key] ) {
 						
+						// Build the label and description field
 						$html_label = ( $options[$label_key] ) ? $options[$label_key] : $term->name;
 						$html_description = ( $options[$description_key] ) ? $options[$description_key] : '';						
 						$html_input = '';
 						
+						// Give us different inputs based on the metadata type
 						switch ( $term_type = $edit_flow->editorial_metadata->get_metadata_type( $term ) ) {
 							case 'checkbox':
 								$html_input = '<input type="checkbox" id="' . $form_key . '" name="' . $form_key . '" ';
@@ -213,23 +216,26 @@ class ad_public_views {
 								$html_input = wp_dropdown_users( $user_dropdown_args );
 								break;
 							default:
+								$html_input = '';
 								break;
 						}
 						
 						
-						$pitch_form .= '<fieldset class="standard"><label for="' . $form_key . '">' . $html_label . '</label>';
-						$pitch_form .= $html_input;
-						if ( $html_description ) {
-						$pitch_form .= '<p class="description">'
-									. $html_description
-									. '</p>';
+						if ( $html_input ) {
+							$pitch_form .= '<fieldset class="standard"><label for="' . $form_key . '">' . $html_label . '</label>';
+							$pitch_form .= $html_input;
+							if ( $html_description ) {
+							$pitch_form .= '<p class="description">'
+										. $html_description
+										. '</p>';
+							}
+							if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors'][$form_key]) ) {
+				    			$pitch_form .= '<p class="error">'
+				    						. $_REQUEST['assignment_desk_messages']['pitch_form']['errors'][$form_key]
+				    						. '</p>';
+				    		}
+							$pitch_form .= '</fieldset>';
 						}
-						if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors'][$form_key]) ) {
-			    			$pitch_form .= '<p class="error">'
-			    						. $_REQUEST['assignment_desk_messages']['pitch_form']['errors'][$form_key]
-			    						. '</p>';
-			    		}
-						$pitch_form .= '</fieldset>';
 						
 					}
 					
