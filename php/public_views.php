@@ -163,6 +163,77 @@ class ad_public_views {
 			// Edit Flow v0.6 and higher offers custom editorial metadata. Otherwise, fall back on old
 			if ( version_compare( '0.6', EDIT_FLOW_VERSION, '>=' ) ) {
 				
+				// Build pitch form with custom editorial metadata
+				$editorial_metadata = $edit_flow->editorial_metadata->get_editorial_metadata_terms();
+				foreach ( $editorial_metadata as $term ) {
+					$form_key = $edit_flow->editorial_metadata->get_postmeta_key( $term );
+					$enabled_key = 'pitch_form_' . $term->slug . '_enabled';
+					$label_key = 'pitch_form_' . $term->slug . '_label';	
+					$description_key = 'pitch_form_' . $term->slug . '_description';
+					$required_key = 'pitch_form_' . $term->slug . '_required';
+					
+					if ( $options[$enabled_key] ) {
+						
+						$html_label = ( $options[$label_key] ) ? $options[$label_key] : $term->name;
+						$html_description = ( $options[$description_key] ) ? $options[$description_key] : '';						
+						$html_input = '';
+						
+						switch ( $term_type = $edit_flow->editorial_metadata->get_metadata_type( $term ) ) {
+							case 'checkbox':
+								$html_input = '<input type="checkbox" id="' . $form_key . '" name="' . $form_key . '" ';
+								if ( $this->return_if_set( $_POST[$form_key] ) ) $html_input = ' checked="checked"';
+								$html_input .= ' />';
+								break;
+							case 'date':
+								$html_input = '<input type="text" id="' . $form_key . '" name="' . $form_key . '" ';
+								$html_input .= 'value="' . $this->return_if_set( $_POST[$form_key] ) . '" ';
+								$html_input .= ' class="ad_datepicker" size="12" />';
+								break;
+							case 'location':
+								$html_input = '<input type="text" id="' . $form_key . '" name="' . $form_key . '" ';
+								$html_input .= 'value="' . $this->return_if_set( $_POST[$form_key] ) . '"/>';
+								break;
+							case 'paragraph':
+								$html_input = '<textarea id="' . $form_key . '" name="' . $form_key . '">';
+								$html_input .= $this->return_if_set( $_POST[$form_key] );
+								$html_input .= '</textarea>';
+								break;
+							case 'text':
+								$html_input = '<input type="text" id="' . $form_key . '" name="' . $form_key . '" ';
+								$html_input .= 'value="' . $this->return_if_set( $_POST[$form_key] ) . '"/>';
+								break;
+							case 'user':
+								$selected = ( $this->return_if_set( $_POST[$form_key] ) ) ? $this->return_if_set( $_POST[$form_key] ) : false;
+								$user_dropdown_args = array( 
+										'show_option_all' => __( '- Select user -', 'assignment-desk' ), 
+										'name'     => $form_key,
+										'selected' => $selected,
+										'echo' 	=> 0,
+									); 
+								$html_input = wp_dropdown_users( $user_dropdown_args );
+								break;
+							default:
+								break;
+						}
+						
+						
+						$pitch_form .= '<fieldset class="standard"><label for="' . $form_key . '">' . $html_label . '</label>';
+						$pitch_form .= $html_input;
+						if ( $html_description ) {
+						$pitch_form .= '<p class="description">'
+									. $html_description
+									. '</p>';
+						}
+						if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors'][$form_key]) ) {
+			    			$pitch_form .= '<p class="error">'
+			    						. $_REQUEST['assignment_desk_messages']['pitch_form']['errors'][$form_key]
+			    						. '</p>';
+			    		}
+						$pitch_form .= '</fieldset>';
+						
+					}
+					
+				}
 		
 			} else {
 		
