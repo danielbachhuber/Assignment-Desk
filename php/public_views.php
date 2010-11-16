@@ -157,53 +157,89 @@ class ad_public_views {
 		}
 		$pitch_form	.= '</fieldset>';
 		
-		// Edit Flow Description
-		if ( $options['pitch_form_description_enabled'] && $assignment_desk->edit_flow_exists() ) {
-			if ( $options['pitch_form_description_label'] ) {
-				$description_label = $options['pitch_form_description_label'];
-			} else {
-				$description_label = 'Description';
-			}
-			$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_description">' . $description_label . '</label>'
-						. '<textarea id="assignment_desk_description"'
-						. ' name="assignment_desk_description">';
-			$pitch_form .= $this->return_if_set($_POST['assignment_desk_description']);
-			$pitch_form .= '</textarea>';
-			if ( $options['pitch_form_description_description'] ) {
-			$pitch_form .= '<p class="description">'
-						. $options['pitch_form_description_description']
-						. '</p>';
-			}
-			
-			if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors']['description']) ) {
-    			$pitch_form .= '<p class="error">'
-    						. $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['description']
-    						. '</p>';
-    		}
-    		
-			$pitch_form .= '</fieldset>';
-		}
 		
-		// Edit Flow Due Date
-		if ( $options['pitch_form_duedate_enabled'] && $assignment_desk->edit_flow_exists() ) {
-			if ( $options['pitch_form_duedate_label'] ) {
-				$duedate_label = $options['pitch_form_duedate_label'];
+		if ( $assignment_desk->edit_flow_exists() ) {
+		
+			// Edit Flow v0.6 and higher offers custom editorial metadata. Otherwise, fall back on old
+			if ( version_compare( '0.6', EDIT_FLOW_VERSION, '>=' ) ) {
+				
+		
 			} else {
-				$duedate_label = 'Due Date';
-			}	
-			$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_duedate">' . $duedate_label . '</label>';
-			$pitch_form .= '<input type="text" size="12" name="assignment_desk_duedate" id="assignment_desk_duedate" ';
-			$pitch_form .= 'value="' . $this->return_if_set($_POST['assignment_desk_duedate']) . '"/>';
-			if ( $options['pitch_form_duedate_description'] ) {
-			    $pitch_form .= '<p class="description">' . $options['pitch_form_dudedate_description'] . '</p>';
-			}
-			if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors']['duedate']) ) {
-   				$pitch_form .= '<p class="error">'
-   							. $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['duedate']
-   							. '</p>';
-   			}
-			$pitch_form .= '</fieldset>';
-		}
+		
+				// Description
+				if ( isset( $options['pitch_form_description_enabled'] ) && $options['pitch_form_description_enabled'] ) {
+					if ( $options['pitch_form_description_label'] ) {
+						$description_label = $options['pitch_form_description_label'];
+					} else {
+						$description_label = 'Description';
+					}
+					$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_description">' . $description_label . '</label>'
+								. '<textarea id="assignment_desk_description"'
+								. ' name="assignment_desk_description">';
+					$pitch_form .= $this->return_if_set($_POST['assignment_desk_description']);
+					$pitch_form .= '</textarea>';
+					if ( $options['pitch_form_description_description'] ) {
+					$pitch_form .= '<p class="description">'
+								. $options['pitch_form_description_description']
+								. '</p>';
+					}
+			
+					if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors']['description']) ) {
+		    			$pitch_form .= '<p class="error">'
+		    						. $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['description']
+		    						. '</p>';
+		    		}
+    		
+					$pitch_form .= '</fieldset>';
+				}
+		
+				// Due date
+				if ( $options['pitch_form_duedate_enabled'] ) {
+					if ( $options['pitch_form_duedate_label'] ) {
+						$duedate_label = $options['pitch_form_duedate_label'];
+					} else {
+						$duedate_label = 'Due Date';
+					}	
+					$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_duedate">' . $duedate_label . '</label>';
+					$pitch_form .= '<input type="text" size="12" name="assignment_desk_duedate" id="assignment_desk_duedate" ';
+					$pitch_form .= 'value="' . $this->return_if_set($_POST['assignment_desk_duedate']) . '" class="ad_datepicker"/>';
+					if ( $options['pitch_form_duedate_description'] ) {
+					    $pitch_form .= '<p class="description">' . $options['pitch_form_dudedate_description'] . '</p>';
+					}
+					if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors']['duedate']) ) {
+		   				$pitch_form .= '<p class="error">'
+		   							. $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['duedate']
+		   							. '</p>';
+		   			}
+					$pitch_form .= '</fieldset>';
+				}
+				
+				// Location
+				if ( isset( $options['pitch_form_location_enabled'] ) && $options['pitch_form_location_enabled'] ) {
+					if ( $options['pitch_form_location_label'] ) {
+						$location_label = $options['pitch_form_location_label'];
+					} else {
+						$location_label = 'Location';
+					}
+					$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_location">' . $location_label . '</label>'
+								. '<input type="text" id="assignment_desk_location" name="assignment_desk_location" ';
+					$pitch_form .= 'value="' . $this->return_if_set($_POST['assignment_desk_location']) . '"/>';
+					if ( $options['pitch_form_location_description'] ) {
+					$pitch_form .= '<p class="description">'
+								. $options['pitch_form_location_description']
+								. '</p>';
+					}
+					if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors']['location']) ) {
+		    			$pitch_form .= '<p class="error">'
+		    						. $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['location']
+		    						. '</p>';
+		    		}
+					$pitch_form .= '</fieldset>';
+				}
+				
+			} // END - Check if Edit Flow > v0.6
+			
+		} // END - if ( $assignment_desk->edit_flow_exists() )
 		
 		// Categories
 		if ( $options['pitch_form_categories_enabled'] ) {
@@ -255,29 +291,6 @@ class ad_public_views {
 			if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors']['tags']) ) {
     			$pitch_form .= '<p class="error">'
     						. $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['tags']
-    						. '</p>';
-    		}
-			$pitch_form .= '</fieldset>';
-		}
-		
-		// Edit Flow Location
-		if ( $options['pitch_form_location_enabled'] && $assignment_desk->edit_flow_exists() ) {
-			if ( $options['pitch_form_location_label'] ) {
-				$location_label = $options['pitch_form_location_label'];
-			} else {
-				$location_label = 'Location';
-			}
-			$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_location">' . $location_label . '</label>'
-						. '<input type="text" id="assignment_desk_location" name="assignment_desk_location" ';
-			$pitch_form .= 'value="' . $this->return_if_set($_POST['assignment_desk_location']) . '"/>';
-			if ( $options['pitch_form_location_description'] ) {
-			$pitch_form .= '<p class="description">'
-						. $options['pitch_form_location_description']
-						. '</p>';
-			}
-			if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors']['location']) ) {
-    			$pitch_form .= '<p class="error">'
-    						. $_REQUEST['assignment_desk_messages']['pitch_form']['errors']['location']
     						. '</p>';
     		}
 			$pitch_form .= '</fieldset>';

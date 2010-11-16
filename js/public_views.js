@@ -1,6 +1,6 @@
 jQuery(document).ready(function() {
 	
-	jQuery("#assignment_desk_duedate").datepicker();
+	jQuery(".ad_datepicker").datepicker();
 	
 	/**
 	 * Handle all AJAX voting requests
