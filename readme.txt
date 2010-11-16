@@ -47,10 +47,10 @@ Hit us with questions in the forum http://wordpress.org/tags/assignment-desk
 * Bug fix: Show all accepted user roles on upcoming assignments dashboard widget
 * Temporarily disabled sorting by due date on manage posts view and all pitches view
 
-= 0.9.1 =
+= 0.9.1 (Nov. 9, 2010) =
 * Bug fix: Check if due date is set before trying to convert it to a string
 
-= 0.9 =
+= 0.9 (Oct. 31, 2010) =
 * Redesigned dashboard widget to more closely follow WordPress UI
 * Cleaned up columns spacing on Manage Posts view
 * Sorting on the all pitches public-facing view alternates between ascending and descending values
@@ -60,11 +60,11 @@ Hit us with questions in the forum http://wordpress.org/tags/assignment-desk
 * Bug fix: Users can now add a Co-Author when Assignment Desk is enabled
 * Bug fix: Editors can now add participants when Co-Authors is disabled
 
-= 0.8.1 =
+= 0.8.1 (Oct. 14, 2010) =
 * Bug fix: Voting system now pulls values from hidden inputs and jQuery generates the entire request
 * Bug fix: Voting text displays properly based on the number of votes
 
-= 0.8 =
+= 0.8 (Oct. 11, 2010) =
 * Re-wrote voting to store data in a custom table. This will make for easier lookups and help address performance issues when scaling. Vote button is now an AJAX-y link, a la Quora, and degrades gracefully. Error message appears if the user isn't logged in.
 * Only avatars appear under the headline. Option to disable vote avatars by setting the number to display to zero.
 * Post meta box includes the age of the pitch
@@ -72,7 +72,7 @@ Hit us with questions in the forum http://wordpress.org/tags/assignment-desk
 * Internationalized JS messages
 * Customizable message to logged out users when viewing a single pitch
 
-= 0.7 =
+= 0.7 (Sept. 27, 2010)=
 * Editors can restrict the roles community members can volunteer for on a pitch by pitch basis
 * Pitches display post_status instead of the assignment status
 * Optional email notifications to user-defined recipients upon successful pitch form submission
@@ -82,10 +82,10 @@ Hit us with questions in the forum http://wordpress.org/tags/assignment-desk
 * Bug fix: Hide the tags field on a pitch if its empty
 * Bug fix: No longer shows participant action buttons to contributors in the post meta box.
 
-= 0.6.1 =
+= 0.6.1 (Sept. 16, 2010) =
 * Fix a duplicate function declaration ad_settings that caused an error.
 
-= 0.6 =
+= 0.6 (Sept. 12, 2010) =
 * Pitch form shows to all visitors by default. If user isn't logged in, a username and password field appears at the bottom. Pitch form also has customizable success message, and saves form data if submission is invalid.
 * Volunteering form moved to single post page and includes descriptions for each user role.
 * Pitch metadata appears in initial assignment email to end user.
@@ -93,7 +93,7 @@ Hit us with questions in the forum http://wordpress.org/tags/assignment-desk
 * Bug fix: Assignment notification emails are no longer sent multiple times in a row.
 * Bug fix: Users can now comment on posts with status of 'draft' or 'pending'. Ability to enable or disable the comment form on unpublished posts is now functional as well.
 
-= 0.5 =
+= 0.5 (Sept. 7, 2010) =
 * Hide Assignment Desk functionality if post is published
 * Ability to show or hide the_content for a story in progress
 * Logged-out users can now properly see posts which haven't been published
@@ -104,7 +104,7 @@ Hit us with questions in the forum http://wordpress.org/tags/assignment-desk
 * Styled the listing of contributors in the post meta box and improved markup
 * Setting for changing the text of the voting button
 
-= 0.4 =
+= 0.4 (Aug. 24, 2010) =
 * Pitch form offers customizable labels and descriptions for every field
 * Pitch form supports Edit Flow due date field with jQuery datepicker
 * Voting functionality built; admin has ability to define text for vote button; avatars shown for those who have voted
