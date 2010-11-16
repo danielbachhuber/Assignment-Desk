@@ -197,35 +197,17 @@ class ad_dashboard_widgets {
 					}
 				}
                 echo "<h4><a href='" . admin_url() . "post.php?action=edit&post={$post->ID}'>{$post->post_title}</a> <span class='pending'>[{$post_status}]</span></h4>";
-				$summary = get_post_meta($post->ID, '_ef_description', true);
-                if ( !$summary ) {
-					if ( $post->excerpt ) {
-						$summary = $post->post_excerpt;
-					} else if ( $post->post_content ) {
-						$summary = substr( $post->post_content, 0, 155 ) . ' ...';
-					}
-                }
+				if ( $post->excerpt ) {
+					$summary = $post->post_excerpt;
+				} else if ( $post->post_content ) {
+					$summary = substr( $post->post_content, 0, 155 ) . ' ...';
+				}
 				if ( $summary ) {
 					echo "<p class='summary'>$summary</p>";
 				}
-				// All of the relevant editorial metadata
-				$description = get_post_meta( $post->ID, '_ef_description', true );
-				$location = get_post_meta( $post->ID, '_ef_location', true );
-				$duedate = get_post_meta( $post->ID, '_ef_duedate', true );
-				$duedate = date_i18n( 'M d, Y', $duedate );
-				if ( $description || $duedate || $location ) {
-				    echo '<p class="meta">';
-				}
-				echo '<span class="ad-role">Role: ' . $pending[1]->name . '</span>&nbsp;&nbsp;&nbsp;';
-				if ( $duedate ) {
-				    echo '<span class="duedate">Due date: ' . $duedate . '</span>&nbsp;&nbsp;&nbsp;';	
-				}
-				if ( $location ) {
-				    echo '<span class="location">Location: ' . $location . '</span> ';	
-				}
-				if ( $description || $duedate || $location ) {
-				    echo '</p>';
-				}
+				echo '<p class="meta">';
+				echo '<span class="ad-roles">Role: <span class="ad-role">' . $pending[1]->name . '</span>&nbsp;&nbsp;&nbsp;';
+				echo '</p>';
                 echo "<p class='row-actions'>";	
 				echo "<input type='hidden' class='assignment_desk_post_id' name='assignment_desk_post_id' value='{$post->ID}' />";
 				echo "<input type='hidden' class='assignment_desk_role_id' name='assignment_desk_role_id' value='{$pending[1]->term_id}' />";
@@ -249,40 +231,23 @@ class ad_dashboard_widgets {
 					}
 				}
                 echo "<h4><a href='" . admin_url() . "post.php?action=edit&post={$post->ID}'>{$post->post_title}</a> <span class='accepted'>[{$post_status}]</span></h4>";
-				$summary = get_post_meta($post->ID, '_ef_description', true);
-                if ( !$summary ) {
-					if ( $post->excerpt ) {
-						$summary = $post->post_excerpt;
-					} else if ( $post->post_content ) {
-						$summary = substr( $post->post_content, 0, 155 ) . ' ...';
-					}
-                }
+			
+				if ( $post->excerpt ) {
+					$summary = $post->post_excerpt;
+				} else if ( $post->post_content ) {
+					$summary = substr( $post->post_content, 0, 155 ) . ' ...';
+				}
 				if ( $summary ) {
 					echo "<p class='summary'>$summary</p>";
 				}
-				// All of the relevant editorial metadata
-				$description = get_post_meta( $post->ID, '_ef_description', true );
-				$location = get_post_meta( $post->ID, '_ef_location', true );
-				$duedate = get_post_meta( $post->ID, '_ef_duedate', true );
-				$duedate = date_i18n( 'M d, Y', $duedate );
-				if ( $description || $duedate || $location ) {
-				    echo '<p class="meta">';
-				}
+				echo '<p class="meta">';
 				echo '<span class="ad-roles">Role(s): ';
 				$all_roles = '';
 				foreach ( $upcoming_roles as $role ) {
-					$all_roles .= $role->name;
+					$all_roles .= '<span class="ad-role">' . $role->name . '</span>';
 				}
-				echo rtrim( $all_roles, ', ' ) . '</span>&nbsp;&nbsp;&nbsp;';
-				if ( $duedate ) {
-				    echo '<span class="ef-duedate">Due date: ' . $duedate . '</span>&nbsp;&nbsp;&nbsp;';	
-				}
-				if ( $location ) {
-				    echo '<span class="ef-location">Location: ' . $location . '</span> ';	
-				}
-				if ( $description || $duedate || $location ) {
-				    echo '</p>';
-				}
+				echo rtrim( $all_roles, ', ' ) . '</span>';
+				echo '</p>';
 				echo '</div>';
             }
         }
