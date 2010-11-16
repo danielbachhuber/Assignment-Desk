@@ -1381,16 +1381,6 @@ class ad_public_views {
 			foreach ( $all_pitches as $pitch ) {
 			
 				$post_id = $pitch->ID;
-				$description = get_post_meta( $post_id, '_ef_description', true );
-				$location = get_post_meta( $post_id, '_ef_location', true );
-				$duedate = get_post_meta( $post_id, '_ef_duedate', true );
-				
-				if ( $duedate ){
-				    $duedate = date_i18n( 'M d, Y', $duedate );
-			    }
-			    else {
-			        $duedate = _('None');
-			    }
 				if ( $assignment_desk->edit_flow_exists() ) {
 					$post_status_object = get_term_by( 'slug', $pitch->post_status, 'post_status' );
 					$post_status = $post_status_object->name;
@@ -1440,22 +1430,83 @@ class ad_public_views {
 					$html .= '<p>' . $pitch->post_content . '</p>';
 				}
 			
-				if ( $description || $duedate || $location ) {
-				    $html .= '<div class="meta">';
-				}
+ 				$html .= '<div class="meta">';
 				
 				if ( $options['public_facing_post_status_enabled'] && $post_status ) {
 				    $html .= '<p><label>Status:</label> ' . $post_status . '</p>';
 				}
-				if ( $options['public_facing_description_enabled'] && $description ) {
-				    $html .= '<p><label>Description:</label> ' . $description . '</p>';
+				
+				
+				if ( $assignment_desk->edit_flow_exists() ) {
+					
+					// Edit Flow v0.6 and higher offers custom editorial metadata. Otherwise, fall back on old
+					if ( version_compare( '0.6', EDIT_FLOW_VERSION, '>=' ) ) {
+
+						$terms = $edit_flow->editorial_metadata->get_editorial_metadata_terms();
+						foreach ( $terms as $term ) {
+							$form_key = $edit_flow->editorial_metadata->get_postmeta_key( $term );
+							$enabled_key = 'public_facing_' . $term->slug . '_enabled';
+							
+							$saved_value = get_post_meta( $post_id, $form_key, true );					
+							if ( $options[$enabled_key] && $saved_value ) {
+								$html_value = '';								
+								// Give us different inputs based on the metadata type
+								switch ( $term_type = $edit_flow->editorial_metadata->get_metadata_type( $term ) ) {
+									case 'checkbox':
+										$html_value = ( $saved_value ) ? 'Yes' : 'No';
+										break;
+									case 'date':
+										$html_value = date_i18n( get_option( 'date_format' ), $saved_value );
+										break;
+									case 'location':
+										$html_value = $saved_value;
+										break;
+									case 'paragraph':
+										$html_value = $saved_value;
+										break;
+									case 'text':
+										$html_value = $saved_value;
+										break;
+									case 'user':
+										$html_value = get_the_author_meta( 'display_name', $saved_value );
+										break;
+									default:
+										$html_input = '';
+										break;
+								}
+								$html .= '<p><label>' . $term->name . ':</label> ' . $html_value . '</p>';
+							}
+
+						}
+
+					} else {
+						$description = get_post_meta( $post_id, '_ef_description', true );
+						$location = get_post_meta( $post_id, '_ef_location', true );
+						$duedate = get_post_meta( $post_id, '_ef_duedate', true );
+
+						if ( $duedate ){
+						    $duedate = date_i18n( 'M d, Y', $duedate );
+					    }
+					    else {
+					        $duedate = _('None');
+					    }
+					
+						if ( $options['public_facing_description_enabled'] && $description ) {
+						    $html .= '<p><label>Description:</label> ' . $description . '</p>';
+						}
+						if ( $options['public_facing_duedate_enabled'] && $duedate ) {
+						    $html .= '<p><label>Due date:</label> ' . $duedate . '</p>';	
+						}
+						if ( $options['public_facing_location_enabled'] && $location ) {
+						    $html .= '<p><label>Location:</label> ' . $location . '</p>';	
+						}
+					
+					}
+					
+					
 				}
-				if ( $options['public_facing_duedate_enabled'] && $duedate ) {
-				    $html .= '<p><label>Due date:</label> ' . $duedate . '</p>';	
-				}
-				if ( $options['public_facing_location_enabled'] && $location ) {
-				    $html .= '<p><label>Location:</label> ' . $location . '</p>';	
-				}
+				
+	
 				if ( $options['public_facing_categories_enabled'] ) {
 					$categories = get_the_category( $post_id );
 					$categories_html = '';
@@ -1474,9 +1525,8 @@ class ad_public_views {
 				    }
 					$html .= '<p><label>Tags:</label> ' . rtrim( $tags_html, ', ' ) . '</p>';
 				}
-				if ( $description || $duedate || $location ) {
-				    $html .= '</div>';
-				}
+
+				$html .= '</div>'; // END - .meta
 				
 				$html .= $this->get_action_links( $post_id );
 				$html .= "</div>";
