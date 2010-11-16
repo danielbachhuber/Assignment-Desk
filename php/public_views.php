@@ -1367,14 +1367,6 @@ class ad_public_views {
 				}
 				$html .= '>Ranking</option>';
 			}
-			// Only show the due_date option if Edit Flow exists and display of data is 'on'
-			if ( $assignment_desk->edit_flow_exists() && $options['public_facing_duedate_enabled'] ) {
-				$html .= '<option value="due_date"';
-				if ( $sort_by == 'due_date' ) {
-					$html .= ' selected="selected"';
-				}
-				$html .= '>Due date</option>';
-			}
 			
 			$html .= '</select>';
 			$html .= '<input type="submit" name="assignment-desk-sort-button" class="assignment-desk-sort-button" value="Sort" />';
