@@ -190,14 +190,14 @@ class ad_dashboard_widgets {
 					$post_status_object = get_term_by( 'slug', $post->post_status, 'post_status' );
 					$post_status = $post_status_object->name;
 				} else {
-					if ( $pitch->post_status == 'draft' ) {
+					if ( $post->post_status == 'draft' ) {
 						$post_status = 'Draft';
-					} else if ( $pitch->post_status == 'pending' ) {
+					} else if ( $post->post_status == 'pending' ) {
 						$post_status = 'Pending Review';
 					}
 				}
                 echo "<h4><a href='" . admin_url() . "post.php?action=edit&post={$post->ID}'>{$post->post_title}</a> <span class='pending'>[{$post_status}]</span></h4>";
-				if ( $post->excerpt ) {
+				if ( $post->post_excerpt ) {
 					$summary = $post->post_excerpt;
 				} else if ( $post->post_content ) {
 					$summary = substr( $post->post_content, 0, 155 ) . ' ...';
@@ -208,10 +208,79 @@ class ad_dashboard_widgets {
 				echo '<p class="meta">';
 				echo '<span class="ad-roles">Role: <span class="ad-role">' . $pending[1]->name . '</span>&nbsp;&nbsp;&nbsp;';
 				echo '</p>';
+				echo '<p class="post-details">';
+				if ( $assignment_desk->edit_flow_exists() ) {
+					global $edit_flow;
+
+					// Edit Flow v0.6 and higher offers custom editorial metadata. Otherwise, fall back on old
+					if ( version_compare( '0.6', EDIT_FLOW_VERSION, '>=' ) ) {
+
+						$terms = $edit_flow->editorial_metadata->get_editorial_metadata_terms();
+						foreach ( $terms as $term ) {
+							$form_key = $edit_flow->editorial_metadata->get_postmeta_key( $term );
+
+							$saved_value = get_post_meta( $post->ID, $form_key, true );					
+							if ( $saved_value ) {
+								$html_value = '';								
+								// Give us different inputs based on the metadata type
+								switch ( $term_type = $edit_flow->editorial_metadata->get_metadata_type( $term ) ) {
+									case 'checkbox':
+										$html_value = ( $saved_value ) ? 'Yes' : 'No';
+										break;
+									case 'date':
+										$html_value = date_i18n( get_option( 'date_format' ), $saved_value );
+										break;
+									case 'location':
+										$html_value = $saved_value;
+										break;
+									case 'paragraph':
+										$html_value = $saved_value;
+										break;
+									case 'text':
+										$html_value = $saved_value;
+										break;
+									case 'user':
+										$html_value = get_the_author_meta( 'display_name', $saved_value );
+										break;
+									default:
+										$html_input = '';
+										break;
+								}
+								echo '<span class="' . $form_key . ' label">' . $term->name . ':</span> <span class="value">' . $html_value . '</span><br />';
+							}
+
+						}
+
+					} else {
+						$description = get_post_meta( $post->ID, '_ef_description', true );
+						$location = get_post_meta( $post->ID, '_ef_location', true );
+						$duedate = get_post_meta( $post->ID, '_ef_duedate', true );
+
+						if ( $duedate ){
+						    $duedate = date_i18n( get_option( 'date_format' ), $duedate );
+					    }
+
+						if ( $description ) {
+						    echo '<span class="label">Description:</span> <span class="value">' . $description . '</span><br />';
+						}
+						if ( $duedate ) {
+						    echo '<span class="label">Due date:</span> <span class="value">' . $duedate . '</span><br />';	
+						}
+						if ( $location ) {
+						    echo '<span class="label">Location:</span> <span class="value">' . $location . '</span><br />';	
+						}
+
+					} // END - Check if Edit Flow v0.6+
+
+
+				} // END - if ( $assignment_desk->edit_flow_exists() )
+				echo '</p>';
                 echo "<p class='row-actions'>";	
 				echo "<input type='hidden' class='assignment_desk_post_id' name='assignment_desk_post_id' value='{$post->ID}' />";
 				echo "<input type='hidden' class='assignment_desk_role_id' name='assignment_desk_role_id' value='{$pending[1]->term_id}' />";
-				echo "<a class='assignment_desk_response assignment_desk_accept' href='" . admin_url() . "?action=assignment_desk_accept&post_id={$post->ID}&role_id={$pending[1]->term_id}'>Accept</a> | <a class='assignment_desk_response assignment_desk_decline' href='" . admin_url() . "?action=assignment_desk_decline&post_id={$post->ID}&role_id={$pending[1]->term_id}'>Decline</a></p>";
+				echo "<a class='assignment_desk_response assignment_desk_accept' href='" . admin_url() . "?action=assignment_desk_accept&post_id={$post->ID}&role_id={$pending[1]->term_id}'>Accept</a> | <a class='assignment_desk_response assignment_desk_decline' href='" . admin_url() . "?action=assignment_desk_decline&post_id={$post->ID}&role_id={$pending[1]->term_id}'>Decline</a>";
+				echo " | <a href='#' class='assignment_desk_view_details'>View Details</a>";
+				echo "</p>";
 
 				echo '</div>';
             }
@@ -232,7 +301,7 @@ class ad_dashboard_widgets {
 				}
                 echo "<h4><a href='" . admin_url() . "post.php?action=edit&post={$post->ID}'>{$post->post_title}</a> <span class='accepted'>[{$post_status}]</span></h4>";
 			
-				if ( $post->excerpt ) {
+				if ( $post->post_excerpt ) {
 					$summary = $post->post_excerpt;
 				} else if ( $post->post_content ) {
 					$summary = substr( $post->post_content, 0, 155 ) . ' ...';
@@ -248,6 +317,76 @@ class ad_dashboard_widgets {
 				}
 				echo rtrim( $all_roles, ', ' ) . '</span>';
 				echo '</p>';
+				echo '<p class="post-details">';
+				if ( $assignment_desk->edit_flow_exists() ) {
+					global $edit_flow;
+
+					// Edit Flow v0.6 and higher offers custom editorial metadata. Otherwise, fall back on old
+					if ( version_compare( '0.6', EDIT_FLOW_VERSION, '>=' ) ) {
+
+						$terms = $edit_flow->editorial_metadata->get_editorial_metadata_terms();
+						foreach ( $terms as $term ) {
+							$form_key = $edit_flow->editorial_metadata->get_postmeta_key( $term );
+
+							$saved_value = get_post_meta( $post->ID, $form_key, true );					
+							if ( $saved_value ) {
+								$html_value = '';								
+								// Give us different inputs based on the metadata type
+								switch ( $term_type = $edit_flow->editorial_metadata->get_metadata_type( $term ) ) {
+									case 'checkbox':
+										$html_value = ( $saved_value ) ? 'Yes' : 'No';
+										break;
+									case 'date':
+										$html_value = date_i18n( get_option( 'date_format' ), $saved_value );
+										break;
+									case 'location':
+										$html_value = $saved_value;
+										break;
+									case 'paragraph':
+										$html_value = $saved_value;
+										break;
+									case 'text':
+										$html_value = $saved_value;
+										break;
+									case 'user':
+										$html_value = get_the_author_meta( 'display_name', $saved_value );
+										break;
+									default:
+										$html_input = '';
+										break;
+								}
+								echo '<span class="' . $form_key . ' label">' . $term->name . ':</span> <span class="value">' . $html_value . '</span><br />';
+							}
+
+						}
+
+					} else {
+						$description = get_post_meta( $post->ID, '_ef_description', true );
+						$location = get_post_meta( $post->ID, '_ef_location', true );
+						$duedate = get_post_meta( $post->ID, '_ef_duedate', true );
+
+						if ( $duedate ){
+						    $duedate = date_i18n( get_option( 'date_format' ), $duedate );
+					    }
+
+						if ( $description ) {
+						    echo '<span class="label">Description:</span> <span class="value">' . $description . '</span><br />';
+						}
+						if ( $duedate ) {
+						    echo '<span class="label">Due date:</span> <span class="value">' . $duedate . '</span><br />';	
+						}
+						if ( $location ) {
+						    echo '<span class="label">Location:</span> <span class="value">' . $location . '</span><br />';	
+						}
+
+					} // END - Check if Edit Flow v0.6+
+
+
+				} // END - if ( $assignment_desk->edit_flow_exists() )
+				echo '</p>';
+				echo "<p class='row-actions'>";
+				echo "<a href='#' class='assignment_desk_view_details'>View Details</a>";
+				echo "</p>";
 				echo '</div>';
             }
         }

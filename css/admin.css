@@ -73,12 +73,23 @@ div#assignment-desk-post-list div.assignment-desk-item p.row-actions {
 	font-size: 10px;
 }
 
+div#assignment-desk-post-list div.assignment-desk-item p.post-details {
+	display: none;
+}
+
+div#assignment-desk-post-list div.assignment-desk-item p.post-details span.label {
+	color: #999999;	
+}
+
 div#assignment-desk-post-list div.assignment-desk-item p.row-actions a.assignment_desk_accept {
 	color: #006505;
 }
 
 div#assignment-desk-post-list div.assignment-desk-item p.row-actions a.assignment_desk_decline {
 	color: #BC0B0B;
+}
+div#assignment-desk-post-list div.assignment-desk-item p.row-actions a.assignment_desk_view_details {
+	color: #21759B;
 }
 
 div#assignment-desk-post-list .pending {
