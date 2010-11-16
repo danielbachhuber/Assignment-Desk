@@ -149,7 +149,7 @@ class ad_dashboard_widgets {
 		$pending_posts = array();
 		$upcoming_posts = array();
 		$max_pending = 5;
-		$max_upcoming = 5;
+		$max_upcoming = 10;
 
 		// Find all of the posts this user participates in.
 		$participant_posts = $wpdb->get_results("SELECT * FROM $wpdb->postmeta 
@@ -174,7 +174,7 @@ class ad_dashboard_widgets {
 							$max_pending--;
 							$max_upcoming--;
 	                    } else if ( $user_id == $current_user->ID && $status == 'accepted' && $max_upcoming ) {
-								$upcoming_posts[$post->post_id]['roles'] = $user_role;
+								$upcoming_posts[$post->post_id]['roles'][] = $user_role;
 								$max_upcoming--;
 						}
 					}
@@ -243,8 +243,8 @@ class ad_dashboard_widgets {
 				echo '<p class="meta">';
 				echo '<span class="ad-roles">Role(s): ';
 				$all_roles = '';
-				foreach ( $upcoming_roles as $role ) {
-					$all_roles .= '<span class="ad-role">' . $role->name . '</span>';
+				foreach ( $upcoming_roles['roles'] as $role ) {
+					$all_roles .= '<span class="ad-role">' . $role->name . '</span>, ';
 				}
 				echo rtrim( $all_roles, ', ' ) . '</span>';
 				echo '</p>';
