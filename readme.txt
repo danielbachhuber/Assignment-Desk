@@ -51,6 +51,7 @@ Support for Edit Flow v0.6's custom editorial metadata while keeping backwards-c
 * Support for Edit Flow v0.6 and custom editorial metadata: http://www.editflow.org/2010/11/10/edit-flow-v0-6-custom-editorial-metadata-and-the-story-budget/
 * Bug fix: Show all accepted user roles on upcoming assignments dashboard widget
 * Temporarily disabled sorting by due date on manage posts view and all pitches view
+* Disabled display of Edit Flow editorial metadata in manage posts columns
 
 = 0.9.1 (Nov. 9, 2010) =
 * Bug fix: Check if due date is set before trying to convert it to a string
