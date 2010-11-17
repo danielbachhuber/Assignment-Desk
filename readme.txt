@@ -40,6 +40,11 @@ Hit us with questions in the forum http://wordpress.org/tags/assignment-desk
 
 == Screenshots ==
 
+== Upgrade Notice ==
+
+== 0.9.2 == 
+Support for Edit Flow v0.6's custom editorial metadata while keeping backwards-compatibility with prior versions.
+
 == Changelog ==
 
 = 0.9.2 =
