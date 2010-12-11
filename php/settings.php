@@ -258,18 +258,24 @@ Thanks
 		// Title
 		echo '<li><span class="field"><input type="checkbox" disabled="disabled" checked="checked" />&nbsp;<label for="pitch_form_title">Title</label></span>';
 		echo '<span class="copy"><label for="pitch_form_title_label">Label</label>';
-		echo '<input id="pitch_form_title_label" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_title_label]" type="text" value="'
-			. $options['pitch_form_title_label'] . '" size="15" />';
+		echo '<input id="pitch_form_title_label" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_title_label]" type="text" value="';
+		if ( isset( $options['pitch_form_title_label'] ) ) {
+			echo $options['pitch_form_title_label'];
+		}
+		echo '" size="15" />';
 		echo '<label for="pitch_form_title_description">Description</label>';
-		echo '<input id="pitch_form_title_description" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_title_description]" type="text" value="'
-			. $options['pitch_form_title_description'] . '" size="35" />';	
+		echo '<input id="pitch_form_title_description" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_title_description]" type="text" value="';
+		if ( isset( $options['pitch_form_title_description'] ) ) {
+			echo $options['pitch_form_title_description'];
+		}
+		echo '" size="35" />';	
 		echo '<input type="checkbox" disabled="disabled" checked="checked" />';
 		echo '<label for="pitch_form_title_required">Required</label>';
 		echo '</span></li>';
 		// Description
 		if ($assignment_desk->edit_flow_exists()) {
 			echo '<li><span class="field"><input id="pitch_form_description_enabled" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_description_enabled]" type="checkbox"';
-			if ($options['pitch_form_description_enabled']) {
+			if ( isset( $options['pitch_form_description_enabled'] ) && $options['pitch_form_description_enabled'] ) {
 				echo ' checked="checked"';
 			}
 			echo ' />&nbsp;<label for="pitch_form_description_enabled">Description</label></span>';
@@ -278,11 +284,17 @@ Thanks
 				echo ' hidden';
 			}
 			echo '"><label for="pitch_form_description_label">Label</label>';
-			echo '<input id="pitch_form_description_label" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_description_label]" type="text" value="'
-				. $options['pitch_form_description_label'] . '" size="15" />';
+			echo '<input id="pitch_form_description_label" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_description_label]" type="text" value="';
+			if ( isset( $options['pitch_form_description_label'] ) ) {
+				echo $options['pitch_form_description_label'];
+			}
+			echo '" size="15" />';
 			echo '<label for="pitch_form_description_description">Description</label>';
-			echo '<input id="pitch_form_description_description" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_description_description]" type="text" value="'
-				. $options['pitch_form_description_description'] . '" size="35" />';	
+			echo '<input id="pitch_form_description_description" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_description_description]" type="text" value="';
+			if ( isset( $options['pitch_form_description_description'] ) ) {
+				echo $options['pitch_form_description_description'];
+			}
+			echo '" size="35" />';	
 			echo '<input id="pitch_form_description_required" type="checkbox" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_description_required]"';
 			if ( isset( $options['pitch_form_description_required'] ) && $options['pitch_form_description_required'] == 'on'){
 			    echo 'checked="checked"';
@@ -303,11 +315,17 @@ Thanks
 			echo ' hidden';
 		}
 		echo '"><label for="pitch_form_categories_label">Label</label>';
-		echo '<input id="pitch_form_categories_label" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_categories_label]" type="text" value="'
-			. $options['pitch_form_categories_label'] . '" size="15" />';
+		echo '<input id="pitch_form_categories_label" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_categories_label]" type="text" value="';
+		if ( isset( $options['pitch_form_categories_label'] ) ) {
+			echo $options['pitch_form_categories_label'];
+		}
+		echo '" size="15" />';
 		echo '<label for="pitch_form_categories_description">Description</label>';
-		echo '<input id="pitch_form_categories_description" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_categories_description]" type="text" value="'
-			. $options['pitch_form_categories_description'] . '" size="35" />';	
+		echo '<input id="pitch_form_categories_description" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_categories_description]" type="text" value="';
+		if ( isset( $options['pitch_form_categories_description'] ) ) {
+			echo $options['pitch_form_categories_description'];
+		}
+		echo '" size="35" />';	
 		echo '<input id="pitch_form_categories_required" type="checkbox" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_categories_required]"';
 		if ( isset( $options['pitch_form_categories_required'] ) && $options['pitch_form_categories_required'] == 'on'){
 		    echo 'checked="checked"';
@@ -325,11 +343,17 @@ Thanks
 			echo ' hidden';
 		}
 		echo '"><label for="pitch_form_tags_label">Label</label>';
-		echo '<input id="pitch_form_tags_label" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_tags_label]" type="text" value="'
-			. $options['pitch_form_tags_label'] . '" size="15" />';
+		echo '<input id="pitch_form_tags_label" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_tags_label]" type="text" value="';
+		if ( isset( $options['pitch_form_tags_label'] ) ) {
+			echo $options['pitch_form_tags_label'];
+		}
+		echo '" size="15" />';
 		echo '<label for="pitch_form_tags_description">Description</label>';
-		echo '<input id="pitch_form_tags_description" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_tags_description]" type="text" value="'
-			. $options['pitch_form_tags_description'] . '" size="35" />';
+		echo '<input id="pitch_form_tags_description" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_tags_description]" type="text" value="';
+		if ( isset( $options['pitch_form_tags_description'] ) ) {
+			echo $options['pitch_form_tags_description'];
+		}
+		echo '" size="35" />';
 		echo '<input id="pitch_form_tags_required" type="checkbox" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_tags_required]"';
 		if ( isset( $options['pitch_form_tags_required'] ) && $options['pitch_form_tags_required'] == 'on' ) {
 		    echo 'checked="checked"';
@@ -358,11 +382,17 @@ Thanks
 						echo ' hidden';
 					}
 					echo '"><label for="' . $label_key . '">Label</label>';
-					echo '<input id="' . $label_key . '" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[' . $label_key . ']" type="text" value="'
-						. $options[$label_key] . '" size="15" />';
+					echo '<input id="' . $label_key . '" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[' . $label_key . ']" type="text" value="';
+					if ( isset( $options[$label_key] ) ) {
+						echo $options[$label_key];
+					}
+					echo '" size="15" />';
 					echo '<label for="' . $description_key . '">Description</label>';
-					echo '<input id="' . $description_key . '" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[' . $description_key . ']" type="text" value="'
-						. $options[$description_key] . '" size="35" />';	
+					echo '<input id="' . $description_key . '" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[' . $description_key . ']" type="text" value="';
+					if ( isset( $options[$description_key] ) ) {
+						echo $options[$description_key];
+					}
+					echo '" size="35" />';	
 					echo '<input id="' . $required_key . '" type="checkbox" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[' . $required_key . ']"';
 					if ( isset( $options[$required_key] ) && $options[$required_key] ) {
 					    echo 'checked="checked"';
@@ -431,11 +461,17 @@ Thanks
 			echo ' hidden';
 		}
 		echo '"><label for="pitch_form_volunteer_label">Label</label>';
-		echo '<input id="pitch_form_volunteer_label" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_volunteer_label]" type="text" value="'
-			. $options['pitch_form_volunteer_label'] . '" size="15" />';
+		echo '<input id="pitch_form_volunteer_label" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_volunteer_label]" type="text" value="';
+		if ( isset( $options['pitch_form_volunteer_label'] ) ) {
+			echo $options['pitch_form_volunteer_label'];
+		}
+		echo '" size="15" />';
 		echo '<label for="pitch_form_volunteer_description">Description</label>';
-		echo '<input id="pitch_form_volunteer_description" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_volunteer_description]" type="text" value="'
-			. $options['pitch_form_volunteer_description'] . '" size="35" />';
+		echo '<input id="pitch_form_volunteer_description" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_volunteer_description]" type="text" value="';
+		if ( isset( $options['pitch_form_volunteer_description'] ) ) {
+			echo $options['pitch_form_volunteer_description'];
+		}
+		echo '" size="35" />';
 		echo '<input id="pitch_form_volunteer_required" type="checkbox" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_volunteer_required]"';
 		if ( isset( $options['pitch_form_volunteer_required'] ) && $options['pitch_form_volunteer_required'] == 'on'){
 		    echo 'checked="checked"';
