@@ -272,38 +272,7 @@ Thanks
 		echo '<input type="checkbox" disabled="disabled" checked="checked" />';
 		echo '<label for="pitch_form_title_required">Required</label>';
 		echo '</span></li>';
-		// Description
-		if ($assignment_desk->edit_flow_exists()) {
-			echo '<li><span class="field"><input id="pitch_form_description_enabled" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_description_enabled]" type="checkbox"';
-			if ( isset( $options['pitch_form_description_enabled'] ) && $options['pitch_form_description_enabled'] ) {
-				echo ' checked="checked"';
-			}
-			echo ' />&nbsp;<label for="pitch_form_description_enabled">Description</label></span>';
-			echo '<span class="copy';
-			if ( isset( $options['pitch_form_description_enabled'] ) && !$options['pitch_form_description_enabled'] ) {
-				echo ' hidden';
-			}
-			echo '"><label for="pitch_form_description_label">Label</label>';
-			echo '<input id="pitch_form_description_label" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_description_label]" type="text" value="';
-			if ( isset( $options['pitch_form_description_label'] ) ) {
-				echo $options['pitch_form_description_label'];
-			}
-			echo '" size="15" />';
-			echo '<label for="pitch_form_description_description">Description</label>';
-			echo '<input id="pitch_form_description_description" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_description_description]" type="text" value="';
-			if ( isset( $options['pitch_form_description_description'] ) ) {
-				echo $options['pitch_form_description_description'];
-			}
-			echo '" size="35" />';	
-			echo '<input id="pitch_form_description_required" type="checkbox" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_description_required]"';
-			if ( isset( $options['pitch_form_description_required'] ) && $options['pitch_form_description_required'] == 'on'){
-			    echo 'checked="checked"';
-			}
-			echo ' /><label for="pitch_form_description_required">Required</label></span>';
-			echo '</span></li>';
-		} else {
-				echo '<li>Please enable Edit Flow to allow description field.</li>';
-		}
+	
 		// Categories
 		echo '<li><span class="field"><input id="pitch_form_categories_enabled" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_categories_enabled]" type="checkbox"';
 		if ( isset( $options['pitch_form_categories_enabled'] ) && $options['pitch_form_categories_enabled']) {
@@ -401,6 +370,34 @@ Thanks
 					echo '</span></li>';
 				}
 			} else {
+				// Description
+				echo '<li><span class="field"><input id="pitch_form_description_enabled" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_description_enabled]" type="checkbox"';
+				if ( isset( $options['pitch_form_description_enabled'] ) && $options['pitch_form_description_enabled'] ) {
+					echo ' checked="checked"';
+				}
+				echo ' />&nbsp;<label for="pitch_form_description_enabled">Description</label></span>';
+				echo '<span class="copy';
+				if ( isset( $options['pitch_form_description_enabled'] ) && !$options['pitch_form_description_enabled'] ) {
+					echo ' hidden';
+				}
+				echo '"><label for="pitch_form_description_label">Label</label>';
+				echo '<input id="pitch_form_description_label" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_description_label]" type="text" value="';
+				if ( isset( $options['pitch_form_description_label'] ) ) {
+					echo $options['pitch_form_description_label'];
+				}
+				echo '" size="15" />';
+				echo '<label for="pitch_form_description_description">Description</label>';
+				echo '<input id="pitch_form_description_description" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_description_description]" type="text" value="';
+				if ( isset( $options['pitch_form_description_description'] ) ) {
+					echo $options['pitch_form_description_description'];
+				}
+				echo '" size="35" />';	
+				echo '<input id="pitch_form_description_required" type="checkbox" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_description_required]"';
+				if ( isset( $options['pitch_form_description_required'] ) && $options['pitch_form_description_required'] == 'on'){
+				    echo 'checked="checked"';
+				}
+				echo ' /><label for="pitch_form_description_required">Required</label></span>';
+				echo '</span></li>';
 				// Due date
 				echo '<li><span class="field"><input id="pitch_form_duedate_enabled" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_duedate_enabled]" type="checkbox"';
 				if ( isset( $options['pitch_form_duedate_enabled'] ) && $options['pitch_form_duedate_enabled'] ) {
