@@ -1175,20 +1175,20 @@ class ad_public_views {
 	 * Hook into the WP_Query object to show unpublished posts
 	 * Will only show the post if it has a 'public' (defined in settings) assignment status
 	 */
-	function show_single_post( $all_posts ) {
+	function show_single_post( $the_post ) {
 		
-		if ( empty($posts) && is_single() ) {
+		if ( empty( $the_post ) && is_single() ) {
 			$args = array(
 					'post_id' => $_GET['p'],
 					'showposts' => 1
 					);
 			$results = ad_get_all_public_posts( $args );
-			if ( !empty($results) ) {
-				$all_posts = $results;
+			if ( !empty( $results ) ) {
+				$the_post = $results;
 			}
 		}
 		
-		return $all_posts;
+		return $the_post;
 	}
 	
 	/**
