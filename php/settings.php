@@ -486,7 +486,11 @@ Thanks
 		$options = $assignment_desk->pitch_form_options;
 		echo '<textarea id="pitch_form_success_message"'
 		 	. 'name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_success_message]"'
-			. ' cols="45" rows="4">' . $options['pitch_form_success_message'] . '</textarea>';
+			. ' cols="45" rows="4">';
+		if ( isset( $options['pitch_form_success_message'] ) ) {
+			echo $options['pitch_form_success_message'];
+		}
+		echo '</textarea>';
 		echo '<p class="description">'
 			. _('Optional: Enter a custom success message')
 			. '</p>';
@@ -498,8 +502,11 @@ Thanks
 	function pitch_form_notification_emails_option() {
 		global $assignment_desk;
 		$options = $assignment_desk->pitch_form_options;
-		echo '<input id="pitch_form_notification_emails" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_notification_emails]" type="text" value="'
-			. $options['pitch_form_notification_emails'] . '" size="100" />';
+		echo '<input id="pitch_form_notification_emails" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_notification_emails]" type="text" value="';
+		if ( isset( $options['pitch_form_notification_emails'] ) ) {
+			echo $options['pitch_form_notification_emails'];
+		}
+		echo '" size="100" />';
 		echo '<p class="description">' . 
 		    _('Enter comma separated list of email addresses to receive notifications on form submissions. You can notify the submitter by adding %submitter_email%') . '</p>';
 		
@@ -510,7 +517,11 @@ Thanks
 		$options = $assignment_desk->pitch_form_options;
 		echo '<input id="pitch_form_email_template_subject"'
 		 	. 'name="' . $assignment_desk->get_plugin_option_fullname('pitch_form')  . '[pitch_form_email_template_subject]"'
-			. 'size="60" maxlength="60" value="' . $options['pitch_form_email_template_subject'] . '">';
+			. 'size="60" maxlength="60" value="';
+		if ( isset( $options['pitch_form_email_template_subject'] ) ) {
+			echo $options['pitch_form_email_template_subject'];
+		}
+		echo '">';
     }
     	
 	function pitch_form_email_template_option() {
@@ -518,7 +529,9 @@ Thanks
 		$options = $assignment_desk->pitch_form_options;
 		
 		echo '<textarea id="pitch_form_email_template" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_email_template]" rows="8" cols="60">';
-		echo $options['pitch_form_email_template'];
+		if ( isset( $options['pitch_form_email_template'] ) ) {
+			echo $options['pitch_form_email_template'];
+		}
 		echo '</textarea>';
 		echo '<p class="description">' . 
 		    _('Template supports the following tokens') . 
