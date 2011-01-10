@@ -8,6 +8,16 @@ class ad_manage_posts {
 
 	function init() {
 		global $assignment_desk, $pagenow;
+
+		// Only show filtering on edit posts view, not other post types
+		if ( $pagenow != 'edit.php' ) {
+			return false;
+		} else {
+			if ( isset( $_GET['post_type'] ) && $_GET['post_type'] != 'post' ) {
+				return false;
+			}
+		}
+		
 		add_filter('manage_posts_columns', array(&$this, 'add_manage_post_columns'));
 		add_action('manage_posts_custom_column', array(&$this, 'handle_ad_assignment_status_column'), 10, 2);
 		add_action('manage_posts_custom_column', array(&$this, 'handle_ad_votes_total'), 10, 2);
