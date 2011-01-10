@@ -2,7 +2,7 @@
 Contributors: efroese, danielbachhuber
 Tags: editorial workflow, journalism, crowdsourcing, assignment management
 Requires at least: 2.9.2
-Tested up to: 3.0.1
+Tested up to: 3.0.4
 Stable tag: 0.9.2
 
 Empower the users to participate in the journalism being done at your site and guide them along the way.
@@ -28,7 +28,7 @@ This section describes how to install and configure the Assignment Desk.
 1. Download the plugin from WordPress.org
 2. Upload it to the wp-contents/plugins directory of your website. 
 3. Activate it. The first time you activate the plugin, the Assignment Desk will install a default set of contributor types, contributor roles, and assignment statuses.
-5. Optionally install Edit-Flow. Assignment Desk has been tested with 0.5.2. Edit-Flow gives us several editorial tools with enable a fully integrated newsroom workflow. Installation of this plugin is highly recommended.
+5. Optionally install Edit-Flow. Assignment Desk has been tested with 0.6.1. Edit-Flow gives us several editorial tools with enable a fully integrated newsroom workflow. Installation of this plugin is highly recommended.
 4. Optionally install Co-Authors Plus. Assignment Desk has been tested with 2.1.1. Co-Authors Plus allows us to assign multiple users to a post as authors. Multiple authors can then edit the post. Installation of this plugin is highly recommended.
 6. Optionally install Adminimize. Assignment Desk has been tested with 1.7.7. Adminimize allows you the ability to hide certain boxes on the post edit screen based on the users user type. The Assignment Desk is not dependent on this plugin.
 
@@ -42,10 +42,18 @@ Hit us with questions in the forum http://wordpress.org/tags/assignment-desk
 
 == Upgrade Notice ==
 
+== 0.9.3 ==
+
+
 == 0.9.2 == 
 Support for Edit Flow v0.6's custom editorial metadata while keeping backwards-compatibility with prior versions.
 
 == Changelog ==
+
+= 0.9.3 (Jan. 10, 2011) =
+* Bug fix: In WP 3.0+, Assignment Desk metadata filtering shouldn't show up on the manage pages view.
+* Bug fix: Unpublished pitches shouldn't override published posts with certain permalink settings.
+* Bug fix: Properly check for Edit Flow version for users who are still on v0.5.3
 
 = 0.9.2 (Nov. 17, 2010) =
 * Support for Edit Flow v0.6 and custom editorial metadata: http://www.editflow.org/2010/11/10/edit-flow-v0-6-custom-editorial-metadata-and-the-story-budget/
