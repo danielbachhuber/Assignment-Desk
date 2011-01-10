@@ -182,7 +182,7 @@ class ad_public_views {
 		if ( $assignment_desk->edit_flow_exists() ) {
 		
 			// Edit Flow v0.6 and higher offers custom editorial metadata. Otherwise, fall back on old
-			if ( version_compare( '0.6', EDIT_FLOW_VERSION, '>=' ) ) {
+			if ( version_compare( EDIT_FLOW_VERSION, '0.6', '>=' ) ) {
 				
 				// Build pitch form with custom editorial metadata
 				$editorial_metadata = $edit_flow->editorial_metadata->get_editorial_metadata_terms();
@@ -540,7 +540,7 @@ class ad_public_views {
 			if ( $assignment_desk->edit_flow_exists() ) {
 				
 				// Edit Flow v0.6 and higher offers custom editorial metadata. Otherwise, fall back on old
-				if ( version_compare( '0.6', EDIT_FLOW_VERSION, '>=' ) ) {
+				if ( version_compare( EDIT_FLOW_VERSION, '0.6', '>=' ) ) {
 					
 					$terms = $edit_flow->editorial_metadata->get_editorial_metadata_terms();
 					$all_editorial_metadata = array();				
@@ -694,7 +694,7 @@ class ad_public_views {
 				if ( $assignment_desk->edit_flow_exists() ) {
 					
 					// Edit Flow v0.6 and higher offers custom editorial metadata. Otherwise, fall back on old
-					if ( version_compare( '0.6', EDIT_FLOW_VERSION, '>=' ) ) {
+					if ( version_compare( EDIT_FLOW_VERSION, '0.6', '>=' ) ) {
 						foreach ( $all_editorial_metadata as $key => $value ) {
 							update_post_meta( $post_id, $key, $value );
 						}
@@ -1440,7 +1440,7 @@ class ad_public_views {
 				if ( $assignment_desk->edit_flow_exists() ) {
 					
 					// Edit Flow v0.6 and higher offers custom editorial metadata. Otherwise, fall back on old
-					if ( version_compare( '0.6', EDIT_FLOW_VERSION, '>=' ) ) {
+					if ( version_compare( EDIT_FLOW_VERSION, '0.6', '>=' ) ) {
 
 						$terms = $edit_flow->editorial_metadata->get_editorial_metadata_terms();
 						foreach ( $terms as $term ) {
@@ -1635,7 +1635,7 @@ class ad_public_views {
 			if ( $assignment_desk->edit_flow_exists() ) {
 				
 				// Edit Flow v0.6 and higher offers custom editorial metadata. Otherwise, fall back on old
-				if ( version_compare( '0.6', EDIT_FLOW_VERSION, '>=' ) ) {
+				if ( version_compare( EDIT_FLOW_VERSION, '0.6', '>=' ) ) {
 
 					$terms = $edit_flow->editorial_metadata->get_editorial_metadata_terms();
 					foreach ( $terms as $term ) {

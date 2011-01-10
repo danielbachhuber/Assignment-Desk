@@ -333,7 +333,8 @@ Thanks
 		if ( $assignment_desk->edit_flow_exists() ) {
 			
 			// Edit Flow v0.6 and higher offers custom editorial metadata. We should give the option to add those fields
-			if ( version_compare( '0.6', EDIT_FLOW_VERSION, '>=' ) ) {
+			if ( version_compare( EDIT_FLOW_VERSION, '0.6', '>=' ) ) {
+				
 				// Get the custom editorial metadata terms
 				$editorial_metadata = $edit_flow->editorial_metadata->get_editorial_metadata_terms();
 				foreach ( $editorial_metadata as $term ) {
@@ -626,7 +627,7 @@ Thanks
 		
 		if ( $assignment_desk->edit_flow_exists() ) {
 			// Edit Flow v0.6 and higher offers custom editorial metadata. We should give the option to add those fields
-			if ( version_compare( '0.6', EDIT_FLOW_VERSION, '>=' ) ) {
+			if ( version_compare( EDIT_FLOW_VERSION, '0.6', '>=' ) ) {
 				
 				$editorial_metadata = $edit_flow->editorial_metadata->get_editorial_metadata_terms();
 				foreach ( $editorial_metadata as $term ) {
