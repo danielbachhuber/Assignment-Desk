@@ -37,7 +37,7 @@ class ad_custom_taxonomies {
 			$args = array(	'label' => false,
 							'labels' => $labels,
 							'public' => false,
-			                'show_ui' => true,
+			                'show_ui' => false,
 			                'show_tagcloud' => false,
 							'rewrite' => false
 							);
@@ -364,12 +364,13 @@ class ad_custom_taxonomies {
 	
 	/**
 	 * Get default assignment status
-	 * @return string
+	 * @return object
 	 */
 	function get_default_assignment_status( ) {
 		global $assignment_desk;
 		$options = $assignment_desk->general_options;
-		return get_term_by( 'id', $options['default_new_assignment_status'], $this->assignment_status_label);
+		$default_assignment_status = get_term_by( 'id', $options['default_new_assignment_status'], $this->assignment_status_label);
+		return $default_assignment_status;
 	}
     
     /**
