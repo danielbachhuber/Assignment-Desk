@@ -42,13 +42,16 @@ Hit us with questions in the forum http://wordpress.org/tags/assignment-desk
 
 == Upgrade Notice ==
 
-== 0.9.3 ==
+== 0.9.4 ==
 
 
 == 0.9.2 == 
 Support for Edit Flow v0.6's custom editorial metadata while keeping backwards-compatibility with prior versions.
 
 == Changelog ==
+
+= 0.9.4 (???) =
+* Bug fix: Don't apply Assignment Desk functionality when a writer is previewing a post
 
 = 0.9.3 (Jan. 10, 2011) =
 * Bug fix: In WP 3.0+, Assignment Desk metadata filtering shouldn't show up on the manage pages view.
