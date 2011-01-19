@@ -712,8 +712,7 @@ class ad_public_views {
 				update_post_meta( $post_id, '_ad_pitched_by_timestamp', date_i18n('U') );
 				
 				// Set assignment status to default setting
-				$default_status = $assignment_desk->custom_taxonomies->get_default_assignment_status();
-				wp_set_object_terms( $post_id, (int)$default_status->term_id, $assignment_desk->custom_taxonomies->assignment_status_label );
+				wp_set_object_terms( $post_id, $options['default_new_assignment_status'], $assignment_desk->custom_taxonomies->assignment_status_label, false );
 				
 				// All User Types can participate in a new assignment by default
 				foreach ( $user_types as $user_type ) {
@@ -1591,7 +1590,7 @@ class ad_public_views {
 	function prepend_voting_to_post( $the_content ) {
 		global $post, $assignment_desk;
 		
-		if ( is_single() && $post->post_status != 'publish' ) {
+		if ( is_single() && $post->post_status != 'publish' && !isset( $_GET['preview'] ) ) {
 			$the_content = $this->show_all_voting_avatars() . $the_content;
 		}
 		
@@ -1608,7 +1607,7 @@ class ad_public_views {
 		$post_id = $post->ID;
 		
 		$new_content = '';
-		if ( is_single() && $post->post_status != 'publish' ) {
+		if ( is_single() && $post->post_status != 'publish' && !isset( $_GET['preview'] ) ) {
 			
 			if ( $assignment_desk->edit_flow_exists() ) {
 				global $edit_flow;
@@ -1714,7 +1713,7 @@ class ad_public_views {
 		global $post, $assignment_desk, $current_user;
 		$public_facing_options = $assignment_desk->public_facing_options;
 		
-		if ( is_single() && $post->post_status != 'publish' ) {
+		if ( is_single() && $post->post_status != 'publish' && !isset( $_GET['preview'] ) ) {
 			$the_content .= $this->get_action_links( $post->ID );
 			
 			if ( is_user_logged_in() ) {
@@ -1742,7 +1741,7 @@ class ad_public_views {
 		$public_facing_options = $assignment_desk->public_facing_options;
 		
 		// Only alter commenting preferences on single posts that are unpublished
-		if ( is_single() && $post->post_status != 'publish' ) {		
+		if ( is_single() && $post->post_status != 'publish' && !isset( $_GET['preview'] ) ) {		
 			if ( $public_facing_options['public_facing_commenting_enabled'] ) {
 				return true;
 			} else {
