@@ -84,7 +84,7 @@ class ad_public_views {
 	 * Helper function which returns a value if the variable is set
 	 */
 	function return_if_set( $var = null ) {
-		if ( isset($var) ) {
+		if ( isset( $var ) ) {
 			return $var;
 		} else {
 			return null;
@@ -121,7 +121,7 @@ class ad_public_views {
 
 		// Messages to the User appear at the top of the form
 
-		if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['success']) ) {
+		if ( isset( $_GET['success'] ) ) {
 			if ( $options['pitch_form_success_message'] ) {
 		        $search = array( '%title%', 
                                  '%duedate%',
@@ -129,13 +129,14 @@ class ad_public_views {
                                  '%post_link%',
                                  '%location%',
                                );
-                $replace = array( $_REQUEST['assignment_desk_title'],
+				$post_id = get_permalink( $_GET['post_id'] );
+                $replace = array( get_the_title( $post_id ),
                                   $_REQUEST['assignment_desk_duedate'],
                                   $_REQUEST['assignment_desk_description'],
-                                  get_permalink($_REQUEST['assignment_desk_messages']['pitch_form']['success']['post_id']),
+                                  get_permalink( $post_id ),
                                   $_REQUEST['assignment_desk_location'],
                                  );
-                $success_message = str_replace($search, $replace, $options['pitch_form_success_message']);
+                $success_message = str_replace( $search, $replace, $options['pitch_form_success_message'] );
 			} else {
 				$success_message = _('Pitch submitted successfully. Thanks!');
 			}
@@ -165,7 +166,7 @@ class ad_public_views {
 		}
 		$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_title">' . $title_label . '</label>'
 					. '<input type="text" id="assignment_desk_title" name="assignment_desk_title" ';
-		$pitch_form .= 'value="' . $this->return_if_set($_POST['assignment_desk_title']) . '"/>';
+		$pitch_form .= 'value="' . $this->return_if_set( $_POST['assignment_desk_title'] ) . '"/>';
 		if ( $options['pitch_form_title_description'] ) {
 		$pitch_form .= '<p class="description">'
 					. $options['pitch_form_title_description']
@@ -730,10 +731,16 @@ class ad_public_views {
 				$this->send_new_pitch_emails($post_id);
 			}
 			
-			$form_messages['success']['post_id'] = $post_id;
-			unset($_POST);
 			// Redirect to the URL so users can't submit the form twice if successful
-			wp_redirect( $_POST['assignment_desk_pitch_form_url'] );
+			$redirect_url = $_POST['assignment_desk_pitch_form_url'];			
+			if ( strpos( $redirect_url, '?' ) ) {
+				$redirect_url .= '&success=true&post_id=' . $post_id;
+			} else {
+				$redirect_url .= '?success=true&post_id=' . $post_id;
+			}
+			unset( $_POST );
+			wp_redirect( $redirect_url );
+			exit;
 		}
 		
 		return null;
