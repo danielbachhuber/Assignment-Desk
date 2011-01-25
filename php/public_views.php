@@ -95,7 +95,7 @@ class ad_public_views {
 	 * Show the pitch form on post or pages with template tag if enabled
 	 */
 	function show_pitch_form( $the_content ) {
-		global $assignment_desk;
+		global $assignment_desk, $post;
 
 		$options = $assignment_desk->pitch_form_options;		
 		
@@ -467,9 +467,9 @@ class ad_public_views {
 		
 		$pitch_form .= '<fieldset class="submit">';
 					
-		// Set a random one-time token in the form to prevent duplicate submissions.
-		$_SESSION['assignment_desk_pitch_form_secret'] = md5(uniqid(rand(), true));
-		$pitch_form .= "<input type='hidden' name='assignment_desk_pitch_form_secret' id='assignment_desk_pitch_form_secret' value='{$_SESSION['assignment_desk_pitch_form_secret']}' />";
+		// Get the current URL to redirect to later
+		$pitch_form_url = get_permalink( $post->ID );
+		$pitch_form .= "<input type='hidden' name='assignment_desk_pitch_form_url' id='assignment_desk_pitch_form_url' value='{$pitch_form_url}' />";
 					
 		$pitch_form .= '<input type="hidden" name="assignment_desk_pitch_nonce" value="' 
 					. wp_create_nonce('assignment_desk_pitch') . '" />';
@@ -499,13 +499,6 @@ class ad_public_views {
 
 		if ( $_POST && isset($_POST['assignment_desk_pitch_submit']) ) {
 		    $form_messages = array();
-
-			// Check to see whether this is the second time the form has been submitted
-		    $form_secret = $_POST['assignment_desk_pitch_form_secret'];
-            if ( !isset( $_SESSION['assignment_desk_pitch_form_secret'] ) || 
-                 strcasecmp($form_secret, $_SESSION['assignment_desk_pitch_form_secret']) != 0 ) {
-                $form_messages['errors']['secret'] = __('Form invalidates when you refresh your browser. Please start over.');
-            }
 
 			// Ensure that it was the user who submitted the form, not a bot
 			if ( !wp_verify_nonce($_POST['assignment_desk_pitch_nonce'], 'assignment_desk_pitch') ) {
@@ -739,7 +732,8 @@ class ad_public_views {
 			
 			$form_messages['success']['post_id'] = $post_id;
 			unset($_POST);
-			return $form_messages;
+			// Redirect to the URL so users can't submit the form twice if successful
+			wp_redirect( $_POST['assignment_desk_pitch_form_url'] );
 		}
 		
 		return null;
