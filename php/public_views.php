@@ -496,8 +496,6 @@ class ad_public_views {
 			global $edit_flow;
 		}
 
-		session_start();		
-
 		if ( $_POST && isset($_POST['assignment_desk_pitch_submit']) ) {
 		    $form_messages = array();
 
@@ -706,7 +704,8 @@ class ad_public_views {
 				update_post_meta( $post_id, '_ad_pitched_by_timestamp', date_i18n('U') );
 				
 				// Set assignment status to default setting
-				wp_set_object_terms( $post_id, $options['default_new_assignment_status'], $assignment_desk->custom_taxonomies->assignment_status_label, false );
+				$default_assignment_status = get_term_by( 'id', $options['default_new_assignment_status'], $assignment_desk->custom_taxonomies->assignment_status_label );
+				wp_set_object_terms( $post_id, $default_assignment_status->name, $assignment_desk->custom_taxonomies->assignment_status_label, false );
 				
 				// All User Types can participate in a new assignment by default
 				foreach ( $user_types as $user_type ) {
