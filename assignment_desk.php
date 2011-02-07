@@ -25,18 +25,19 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-define('ASSIGNMENT_DESK_FILE_PATH', __FILE__);
-define('ASSIGNMENT_DESK_URL', plugins_url(plugin_basename(dirname(__FILE__)) .'/'));
-define('ASSIGMENT_DESK_VERSION', '0.9.3');
+define( 'ASSIGNMENT_DESK_ROOT' , dirname(__FILE__) );	
+define( 'ASSIGNMENT_DESK_FILE_PATH' , ASSIGNMENT_DESK_ROOT . '/' . basename(__FILE__) );
+define( 'ASSIGNMENT_DESK_URL', plugins_url(plugin_basename(dirname(__FILE__)) .'/') );
+define( 'ASSIGMENT_DESK_VERSION', '0.9.3' );
 
-require_once('php/user.php');
-require_once('php/dashboard_widgets.php');
-require_once('php/post.php');
-require_once('php/settings.php');
-require_once('php/manage_posts.php');
-require_once('php/custom_taxonomies.php');
-require_once('php/public_views.php');
-require_once('php/upgrade.php');
+require_once( ASSIGNMENT_DESK_ROOT . '/' . 'php/user.php');
+require_once( ASSIGNMENT_DESK_ROOT . '/' . 'php/dashboard_widgets.php');
+require_once( ASSIGNMENT_DESK_ROOT . '/' . 'php/post.php');
+require_once( ASSIGNMENT_DESK_ROOT . '/' . 'php/settings.php');
+require_once( ASSIGNMENT_DESK_ROOT . '/' . 'php/manage_posts.php');
+require_once( ASSIGNMENT_DESK_ROOT . '/' . 'php/custom_taxonomies.php');
+require_once( ASSIGNMENT_DESK_ROOT . '/' . 'php/public_views.php');
+require_once( ASSIGNMENT_DESK_ROOT . '/' . 'php/upgrade.php');
 
 if (!class_exists('assignment_desk')) {
     
@@ -213,7 +214,7 @@ if (!class_exists('assignment_desk')) {
 		 * Helper method checks to see if Co-Authors Plus is activated
 		 */
 		function coauthors_plus_exists() {
-			return  class_exists('coauthors_plus');
+			return class_exists('coauthors_plus');
 		}
 
         /**
