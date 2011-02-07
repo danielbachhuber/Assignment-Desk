@@ -112,6 +112,10 @@ if (!class_exists('assignment_desk')) {
 			$this->votes_table_name = $wpdb->prefix . 'ad_votes';	
 			$this->create_tables();
 			
+			// Core hooks to initialize the plugin
+			add_action( 'init', array(&$this,'init') );
+			add_action( 'admin_init', array(&$this,'admin_init') );
+			
         }
 
 		/**
@@ -326,10 +330,6 @@ if (!class_exists('assignment_desk')) {
 
 global $assignment_desk;
 $assignment_desk = new assignment_desk();
-
-// Core hooks to initialize the plugin
-add_action( 'init', array(&$assignment_desk,'init') );
-add_action( 'admin_init', array(&$assignment_desk,'admin_init') );
 
 // Hook to perform action when plugin activated
 register_activation_hook( ASSIGNMENT_DESK_FILE_PATH, array(&$assignment_desk, 'activate_plugin') );
