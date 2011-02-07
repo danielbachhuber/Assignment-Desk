@@ -495,7 +495,7 @@ Thanks
 			. '</p>';
 		echo '<p class="description">' . 
 		    _('Message supports the following tokens') . 
-		    ': %post_link%, %title%, %description%, %duedate%, and %location%.</p>';
+		    ': %title%.</p>';
 	}
 	
 	function pitch_form_notification_emails_option() {

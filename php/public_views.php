@@ -123,19 +123,13 @@ class ad_public_views {
 
 		if ( isset( $_GET['success'] ) ) {
 			if ( $options['pitch_form_success_message'] ) {
-		        $search = array( '%title%', 
-                                 '%duedate%',
-                                 '%description%',
-                                 '%post_link%',
-                                 '%location%',
-                               );
-				$post_id = get_permalink( $_GET['post_id'] );
-                $replace = array( get_the_title( $post_id ),
-                                  $_REQUEST['assignment_desk_duedate'],
-                                  $_REQUEST['assignment_desk_description'],
-                                  get_permalink( $post_id ),
-                                  $_REQUEST['assignment_desk_location'],
-                                 );
+		        $search = array(
+						'%title%',
+					);
+				$post_id = $_GET['post_id'];
+                $replace = array(
+						get_the_title( $post_id ),
+					);
                 $success_message = str_replace( $search, $replace, $options['pitch_form_success_message'] );
 			} else {
 				$success_message = _('Pitch submitted successfully. Thanks!');
@@ -733,10 +727,11 @@ class ad_public_views {
 			// Redirect to the URL so users can't submit the form twice if successful
 			$redirect_url = $_POST['assignment_desk_pitch_form_url'];			
 			if ( strpos( $redirect_url, '?' ) ) {
-				$redirect_url .= '&success=true&post_id=' . $post_id;
+				$redirect_url .= '&success=true';
 			} else {
-				$redirect_url .= '?success=true&post_id=' . $post_id;
+				$redirect_url .= '?success=true';
 			}
+			if ( $form_options['pitch_form_success_message'] ) $redirect_url .= '&post_id=' . $post_id;
 			unset( $_POST );
 			wp_redirect( $redirect_url );
 			exit;
