@@ -669,7 +669,7 @@ class ad_public_views {
 			$new_pitch['post_title'] = $sanitized_title;
 			$new_pitch['post_author'] = $sanitized_author;
 			$new_pitch['post_content'] = '';
-			if ( $assignment_desk->edit_flow_enabled() ) {
+			if ( $assignment_desk->edit_flow_enabled( 'custom_post_statuses' ) ) {
 				$default_status = get_term_by('term_id', $options['default_workflow_status'], 'post_status');
 				$new_pitch['post_status'] = $default_status->slug;
 			} else {

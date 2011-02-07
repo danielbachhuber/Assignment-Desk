@@ -164,12 +164,13 @@ Thanks
 	}
 	
 	/**
+	 * default_workflow_status_option()
 	 * Define post status for newly submitted pitches
 	 * @requires Edit Flow
 	 */
 	function default_workflow_status_option() {
 		global $assignment_desk;
-		if ( $assignment_desk->edit_flow_enabled() ) {
+		if ( $assignment_desk->edit_flow_enabled( 'custom_post_statuses' ) ) {
 			global $edit_flow;
 			$options = $assignment_desk->general_options;
 			$post_statuses = $edit_flow->custom_status->get_custom_statuses();
@@ -187,7 +188,7 @@ Thanks
 			echo 'Please enable Edit Flow to define custom workflow statuses. Without Edit Flow, new pitches will be saved with a post status of "draft"';
 		}
 		
-	}
+	} // END default_workflow_status_option()
 	
 	
     function general_setting_section() {

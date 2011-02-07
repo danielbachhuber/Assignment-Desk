@@ -213,10 +213,26 @@ if (!class_exists('assignment_desk')) {
 		function edit_flow_enabled( $functionality = null ) {
 			
 			$enabled = false;
-			if ( $functionality ) {
-				
+			if ( !class_exists( 'edit_flow' ) ) {
+				return $enabled;
 			} else {
-				$enabled = class_exists('edit_flow');
+				global $edit_flow;
+			}
+			
+			switch( $functionality ) {
+				case 'custom_post_statuses':
+					if ( version_compare( EDIT_FLOW_VERSION, '0.6.1', '>=' ) ) {
+						$enabled = $edit_flow->post_type_supports( 'post', 'ef_custom_statuses' );
+					} else {
+						$enabled = (bool) $edit_flow->get_plugin_option( 'custom_statuses_enabled' );
+					}
+					break;
+				case null:
+					$enabled = class_exists( 'edit_flow' );
+					break;
+				default:
+					$enabled = false;
+					break;
 			}
 			return $enabled;
 			
