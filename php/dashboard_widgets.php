@@ -186,7 +186,7 @@ class ad_dashboard_widgets {
             foreach ( $pending_posts as $pending ) {
 				echo "<div id='pending-assignment-{$pending[0]}-role-{$pending[1]->term_id}' class='pending post assignment-desk-item'>";
                 $post = get_post($pending[0]);
-				if ( $assignment_desk->edit_flow_exists() ) {
+				if ( $assignment_desk->edit_flow_enabled() ) {
 					$post_status_object = get_term_by( 'slug', $post->post_status, 'post_status' );
 					$post_status = $post_status_object->name;
 				} else {
@@ -209,7 +209,7 @@ class ad_dashboard_widgets {
 				echo '<span class="ad-roles">Role: <span class="ad-role">' . $pending[1]->name . '</span>&nbsp;&nbsp;&nbsp;';
 				echo '</p>';
 				echo '<p class="post-details">';
-				if ( $assignment_desk->edit_flow_exists() ) {
+				if ( $assignment_desk->edit_flow_enabled() ) {
 					global $edit_flow;
 
 					// Edit Flow v0.6 and higher offers custom editorial metadata. Otherwise, fall back on old
@@ -273,7 +273,7 @@ class ad_dashboard_widgets {
 					} // END - Check if Edit Flow v0.6+
 
 
-				} // END - if ( $assignment_desk->edit_flow_exists() )
+				} // END - if ( $assignment_desk->edit_flow_enabled() )
 				echo '</p>';
                 echo "<p class='row-actions'><span class='accept-decline-actions'>";	
 				echo "<input type='hidden' class='assignment_desk_post_id' name='assignment_desk_post_id' value='{$post->ID}' />";
@@ -289,7 +289,7 @@ class ad_dashboard_widgets {
             foreach ( $upcoming_posts as $post_id => $upcoming_roles ) {
 				echo "<div id='post-{$post_id}' class='accepted post assignment-desk-item'>";
                 $post = get_post( $post_id );
-				if ( $assignment_desk->edit_flow_exists() ) {
+				if ( $assignment_desk->edit_flow_enabled() ) {
 					$post_status_object = get_term_by( 'slug', $post->post_status, 'post_status' );
 					$post_status = $post_status_object->name;
 				} else {
@@ -318,7 +318,7 @@ class ad_dashboard_widgets {
 				echo rtrim( $all_roles, ', ' ) . '</span>';
 				echo '</p>';
 				echo '<p class="post-details">';
-				if ( $assignment_desk->edit_flow_exists() ) {
+				if ( $assignment_desk->edit_flow_enabled() ) {
 					global $edit_flow;
 
 					// Edit Flow v0.6 and higher offers custom editorial metadata. Otherwise, fall back on old
@@ -382,7 +382,7 @@ class ad_dashboard_widgets {
 					} // END - Check if Edit Flow v0.6+
 
 
-				} // END - if ( $assignment_desk->edit_flow_exists() )
+				} // END - if ( $assignment_desk->edit_flow_enabled() )
 				echo '</p>';
 				echo "<p class='row-actions'>";
 				echo "<a href='#' class='assignment_desk_view_details'>View Details</a>";

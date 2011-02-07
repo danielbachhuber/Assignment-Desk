@@ -204,11 +204,33 @@ if (!class_exists('assignment_desk')) {
 		}
 		
 		/**
+		 * edit_flow_enabled()
 		 * Helper method checks to see if Edit Flow is activated
+		 *
+		 * @param string $functionality Functionality to check to see if enabled
+		 * @return bool $enabled Whether it's enabled or not
 		 */
-		function edit_flow_exists() {
-			return class_exists('edit_flow');
-		}
+		function edit_flow_enabled( $functionality = null ) {
+			
+			$enabled = false;
+			if ( $functionality ) {
+				
+			} else {
+				$enabled = class_exists('edit_flow');
+			}
+			return $enabled;
+			
+		} // END edit_flow_enabled()
+		
+		/**
+		 * edit_flow_custom_post_statuses_enabled()
+		 * Helper method checks to see whether Edit Flow's custom post statuses are enabled
+		 *
+		 * @return bool $custom_post_statuses_enabled Whether they're enabled or not
+		 */
+		function edit_flow_custom_post_statuses_enabled() {
+			
+		} // END edit_flow_custom_post_statuses_enabled()
 		
 		/**
 		 * Helper method checks to see if Co-Authors Plus is activated

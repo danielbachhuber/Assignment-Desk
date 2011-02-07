@@ -99,7 +99,7 @@ class ad_public_views {
 
 		$options = $assignment_desk->pitch_form_options;		
 		
-		if ( $assignment_desk->edit_flow_exists() ) {
+		if ( $assignment_desk->edit_flow_enabled() ) {
 			global $edit_flow;
 		}
 	
@@ -180,7 +180,7 @@ class ad_public_views {
 		$pitch_form	.= '</fieldset>';
 		
 		
-		if ( $assignment_desk->edit_flow_exists() ) {
+		if ( $assignment_desk->edit_flow_enabled() ) {
 		
 			// Edit Flow v0.6 and higher offers custom editorial metadata. Otherwise, fall back on old
 			if ( version_compare( EDIT_FLOW_VERSION, '0.6', '>=' ) ) {
@@ -338,7 +338,7 @@ class ad_public_views {
 				
 			} // END - Check if Edit Flow > v0.6
 			
-		} // END - if ( $assignment_desk->edit_flow_exists() )
+		} // END - if ( $assignment_desk->edit_flow_enabled() )
 		
 		// Categories
 		if ( $options['pitch_form_categories_enabled'] ) {
@@ -492,7 +492,7 @@ class ad_public_views {
 		$form_options = $assignment_desk->pitch_form_options;		
 		$user_types = $assignment_desk->custom_taxonomies->get_user_types();
 
-		if ( $assignment_desk->edit_flow_exists() ) {
+		if ( $assignment_desk->edit_flow_enabled() ) {
 			global $edit_flow;
 		}
 
@@ -529,7 +529,7 @@ class ad_public_views {
 				}
 			}
 			
-			if ( $assignment_desk->edit_flow_exists() ) {
+			if ( $assignment_desk->edit_flow_enabled() ) {
 				
 				// Edit Flow v0.6 and higher offers custom editorial metadata. Otherwise, fall back on old
 				if ( version_compare( EDIT_FLOW_VERSION, '0.6', '>=' ) ) {
@@ -669,7 +669,7 @@ class ad_public_views {
 			$new_pitch['post_title'] = $sanitized_title;
 			$new_pitch['post_author'] = $sanitized_author;
 			$new_pitch['post_content'] = '';
-			if ( $assignment_desk->edit_flow_exists() ) {
+			if ( $assignment_desk->edit_flow_enabled() ) {
 				$default_status = get_term_by('term_id', $options['default_workflow_status'], 'post_status');
 				$new_pitch['post_status'] = $default_status->slug;
 			} else {
@@ -683,7 +683,7 @@ class ad_public_views {
 			if ( $post_id ) {
 				
 				// Only handle editorial metadata if Edit Flow exists
-				if ( $assignment_desk->edit_flow_exists() ) {
+				if ( $assignment_desk->edit_flow_enabled() ) {
 					
 					// Edit Flow v0.6 and higher offers custom editorial metadata. Otherwise, fall back on old
 					if ( version_compare( EDIT_FLOW_VERSION, '0.6', '>=' ) ) {
@@ -1299,7 +1299,7 @@ class ad_public_views {
 		if ( $options['public_facing_filtering_post_status_enabled'] ) {
 			$html .= '<select name="post_status" class="assignment-desk-filter-post-statuses">';
 			$html .= '<option value="all">Show all post statuses</options>';
-			if ( $assignment_desk->edit_flow_exists() ) {
+			if ( $assignment_desk->edit_flow_enabled() ) {
 				$custom_statuses = $edit_flow->custom_status->get_custom_statuses();
 				foreach ( $custom_statuses as $custom_status ) {
 					$html .= '<option value="' . $custom_status->slug . '"';
@@ -1380,7 +1380,7 @@ class ad_public_views {
 			foreach ( $all_pitches as $pitch ) {
 			
 				$post_id = $pitch->ID;
-				if ( $assignment_desk->edit_flow_exists() ) {
+				if ( $assignment_desk->edit_flow_enabled() ) {
 					$post_status_object = get_term_by( 'slug', $pitch->post_status, 'post_status' );
 					$post_status = $post_status_object->name;
 				} else {
@@ -1436,7 +1436,7 @@ class ad_public_views {
 				}
 				
 				
-				if ( $assignment_desk->edit_flow_exists() ) {
+				if ( $assignment_desk->edit_flow_enabled() ) {
 					
 					// Edit Flow v0.6 and higher offers custom editorial metadata. Otherwise, fall back on old
 					if ( version_compare( EDIT_FLOW_VERSION, '0.6', '>=' ) ) {
@@ -1503,7 +1503,7 @@ class ad_public_views {
 					} // END - Check if Edit Flow v0.6+
 					
 					
-				} // END - if ( $assignment_desk->edit_flow_exists() )
+				} // END - if ( $assignment_desk->edit_flow_enabled() )
 				
 	
 				if ( $options['public_facing_categories_enabled'] ) {
@@ -1609,7 +1609,7 @@ class ad_public_views {
 		$new_content = '';
 		if ( is_single() && $post->post_status != 'publish' && !isset( $_GET['preview'] ) ) {
 			
-			if ( $assignment_desk->edit_flow_exists() ) {
+			if ( $assignment_desk->edit_flow_enabled() ) {
 				global $edit_flow;
 				$post_status_object = get_term_by( 'slug', $post->post_status, 'post_status' );
 				$post_status = $post_status_object->name;
@@ -1631,7 +1631,7 @@ class ad_public_views {
 			    $new_content .= '<p><label>Status:</label> ' . $post_status . '</p>';
 			}
 			
-			if ( $assignment_desk->edit_flow_exists() ) {
+			if ( $assignment_desk->edit_flow_enabled() ) {
 				
 				// Edit Flow v0.6 and higher offers custom editorial metadata. Otherwise, fall back on old
 				if ( version_compare( EDIT_FLOW_VERSION, '0.6', '>=' ) ) {
@@ -1695,7 +1695,7 @@ class ad_public_views {
 				} // END - Check if Edit Flow v0.6+
 				
 				
-			} // END - if ( $assignment_desk->edit_flow_exists() )
+			} // END - if ( $assignment_desk->edit_flow_enabled() )
 			
 			$new_content .= '</div>'; // END - .meta
 			

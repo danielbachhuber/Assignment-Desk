@@ -62,7 +62,7 @@ if ( !class_exists( 'ad_settings' ) ){
         global $assignment_desk, $wpdb;
         $options = $assignment_desk->general_options;
         
-        if ( $assignment_desk->edit_flow_exists() ) {
+        if ( $assignment_desk->edit_flow_enabled() ) {
             global $edit_flow;
             $default_workflow_status = get_term_by('slug', $edit_flow->options['custom_status_default_status'],
                                                     $edit_flow->custom_status->status_taxonomy);
@@ -169,7 +169,7 @@ Thanks
 	 */
 	function default_workflow_status_option() {
 		global $assignment_desk;
-		if (class_exists('edit_flow')) {
+		if ( $assignment_desk->edit_flow_enabled() ) {
 			global $edit_flow;
 			$options = $assignment_desk->general_options;
 			$post_statuses = $edit_flow->custom_status->get_custom_statuses();
@@ -249,7 +249,7 @@ Thanks
 	 */
 	function pitch_form_elements_option() {
 		global $assignment_desk;
-		if ($assignment_desk->edit_flow_exists()) {
+		if ($assignment_desk->edit_flow_enabled()) {
 			global $edit_flow;
 		}
 		$options = $assignment_desk->pitch_form_options;
@@ -330,7 +330,7 @@ Thanks
 		echo ' /><label for="pitch_form_tags_required">Required</label></span>';
 		echo '</span></li>';
 		// If Edit Flow exists, we can offer editorial metadata
-		if ( $assignment_desk->edit_flow_exists() ) {
+		if ( $assignment_desk->edit_flow_enabled() ) {
 			
 			// Edit Flow v0.6 and higher offers custom editorial metadata. We should give the option to add those fields
 			if ( version_compare( EDIT_FLOW_VERSION, '0.6', '>=' ) ) {
@@ -598,7 +598,7 @@ Thanks
 
 	function public_facing_elements_option() {
 		global $assignment_desk;
-		if ($assignment_desk->edit_flow_exists()) {
+		if ($assignment_desk->edit_flow_enabled()) {
 			global $edit_flow;
 		}
 		$options = $assignment_desk->public_facing_options;
@@ -625,7 +625,7 @@ Thanks
 		}
 		echo ' />&nbsp;<label for="public_facing_post_status_enabled">Post Status</label></li>';
 		
-		if ( $assignment_desk->edit_flow_exists() ) {
+		if ( $assignment_desk->edit_flow_enabled() ) {
 			// Edit Flow v0.6 and higher offers custom editorial metadata. We should give the option to add those fields
 			if ( version_compare( EDIT_FLOW_VERSION, '0.6', '>=' ) ) {
 				
@@ -681,7 +681,7 @@ Thanks
 
 	function public_facing_functionality_option() {
 		global $assignment_desk;
-		if ($assignment_desk->edit_flow_exists()) {
+		if ($assignment_desk->edit_flow_enabled()) {
 			global $edit_flow;
 		}
 		$options = $assignment_desk->public_facing_options;

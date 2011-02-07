@@ -64,7 +64,7 @@ if (!function_exists('ad_get_unassigned_posts')){
 function ad_get_unassigned_posts(){
     global $assignment_desk, $wpdb;
     $unassigned = array();
-    if ( $assignment_desk->edit_flow_exists() ) {
+    if ( $assignment_desk->edit_flow_enabled() ) {
         global $edit_flow;
         $ef_statuses = $edit_flow->custom_status->get_custom_statuses();
         $status_slugs = array();
