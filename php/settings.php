@@ -151,8 +151,8 @@ Thanks
 		if ( count($assignment_statuses) ) {
 			echo '<select id="default_new_assignment_status" name="' . $assignment_desk->get_plugin_option_fullname('general') . '[default_new_assignment_status]">';
 			foreach ( $assignment_statuses as $assignment_status ) {
-				echo "<option value='$assignment_status->term_taxonomy_id'";
-				if ($options['default_new_assignment_status'] == $assignment_status->term_taxonomy_id) {
+				echo "<option value='$assignment_status->term_id'";
+				if ($options['default_new_assignment_status'] == $assignment_status->term_id) {
 					echo ' selected="selected"';
 				}
 				echo ">$assignment_status->name</option>";
