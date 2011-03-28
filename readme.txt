@@ -1,8 +1,8 @@
 === Plugin Name ===
-Contributors: efroese, danielbachhuber
+Contributors: danielbachhuber, efroese
 Tags: editorial workflow, journalism, crowdsourcing, assignment management
-Requires at least: 2.9.2
-Tested up to: 3.0.4
+Requires at least: 3.0
+Tested up to: 3.1
 Stable tag: 0.9.4
 
 Empower the users to participate in the journalism being done at your site and guide them along the way.
