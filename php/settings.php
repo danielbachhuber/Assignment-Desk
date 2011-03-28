@@ -261,13 +261,13 @@ Thanks
 		echo '<span class="copy"><label for="pitch_form_title_label">Label</label>';
 		echo '<input id="pitch_form_title_label" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_title_label]" type="text" value="';
 		if ( isset( $options['pitch_form_title_label'] ) ) {
-			echo $options['pitch_form_title_label'];
+			echo htmlentities( $options['pitch_form_title_label'] );
 		}
 		echo '" size="15" />';
 		echo '<label for="pitch_form_title_description">Description</label>';
 		echo '<input id="pitch_form_title_description" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_title_description]" type="text" value="';
 		if ( isset( $options['pitch_form_title_description'] ) ) {
-			echo $options['pitch_form_title_description'];
+			echo htmlentities( $options['pitch_form_title_description'] );
 		}
 		echo '" size="35" />';	
 		echo '<input type="checkbox" disabled="disabled" checked="checked" />';
@@ -287,13 +287,13 @@ Thanks
 		echo '"><label for="pitch_form_categories_label">Label</label>';
 		echo '<input id="pitch_form_categories_label" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_categories_label]" type="text" value="';
 		if ( isset( $options['pitch_form_categories_label'] ) ) {
-			echo $options['pitch_form_categories_label'];
+			echo htmlentities( $options['pitch_form_categories_label'] );
 		}
 		echo '" size="15" />';
 		echo '<label for="pitch_form_categories_description">Description</label>';
 		echo '<input id="pitch_form_categories_description" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_categories_description]" type="text" value="';
 		if ( isset( $options['pitch_form_categories_description'] ) ) {
-			echo $options['pitch_form_categories_description'];
+			echo htmlentities( $options['pitch_form_categories_description'] );
 		}
 		echo '" size="35" />';	
 		echo '<input id="pitch_form_categories_required" type="checkbox" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_categories_required]"';
@@ -315,13 +315,13 @@ Thanks
 		echo '"><label for="pitch_form_tags_label">Label</label>';
 		echo '<input id="pitch_form_tags_label" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_tags_label]" type="text" value="';
 		if ( isset( $options['pitch_form_tags_label'] ) ) {
-			echo $options['pitch_form_tags_label'];
+			echo htmlentities( $options['pitch_form_tags_label'] );
 		}
 		echo '" size="15" />';
 		echo '<label for="pitch_form_tags_description">Description</label>';
 		echo '<input id="pitch_form_tags_description" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_tags_description]" type="text" value="';
 		if ( isset( $options['pitch_form_tags_description'] ) ) {
-			echo $options['pitch_form_tags_description'];
+			echo htmlentities( $options['pitch_form_tags_description'] );
 		}
 		echo '" size="35" />';
 		echo '<input id="pitch_form_tags_required" type="checkbox" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_tags_required]"';
@@ -355,13 +355,13 @@ Thanks
 					echo '"><label for="' . $label_key . '">Label</label>';
 					echo '<input id="' . $label_key . '" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[' . $label_key . ']" type="text" value="';
 					if ( isset( $options[$label_key] ) ) {
-						echo $options[$label_key];
+						echo htmlentities( $options[$label_key] );
 					}
 					echo '" size="15" />';
 					echo '<label for="' . $description_key . '">Description</label>';
 					echo '<input id="' . $description_key . '" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[' . $description_key . ']" type="text" value="';
 					if ( isset( $options[$description_key] ) ) {
-						echo $options[$description_key];
+						echo htmlentities( $options[$description_key] );
 					}
 					echo '" size="35" />';	
 					echo '<input id="' . $required_key . '" type="checkbox" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[' . $required_key . ']"';
@@ -385,13 +385,13 @@ Thanks
 				echo '"><label for="pitch_form_description_label">Label</label>';
 				echo '<input id="pitch_form_description_label" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_description_label]" type="text" value="';
 				if ( isset( $options['pitch_form_description_label'] ) ) {
-					echo $options['pitch_form_description_label'];
+					echo htmlentities( $options['pitch_form_description_label'] );
 				}
 				echo '" size="15" />';
 				echo '<label for="pitch_form_description_description">Description</label>';
 				echo '<input id="pitch_form_description_description" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_description_description]" type="text" value="';
 				if ( isset( $options['pitch_form_description_description'] ) ) {
-					echo $options['pitch_form_description_description'];
+					echo htmlentities( $options['pitch_form_description_description'] );
 				}
 				echo '" size="35" />';	
 				echo '<input id="pitch_form_description_required" type="checkbox" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_description_required]"';
@@ -412,10 +412,10 @@ Thanks
 				}
 				echo '"><label for="pitch_form_duedate_label">Label</label>';
 				echo '<input id="pitch_form_duedate_label" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_duedate_label]" type="text" value="'
-					. $options['pitch_form_duedate_label'] . '" size="15" />';
+					. htmlentities( $options['pitch_form_duedate_label'] ) . '" size="15" />';
 				echo '<label for="pitch_form_duedate_description">Description</label>';
 				echo '<input id="pitch_form_duedate_description" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_duedate_description]" type="text" value="'
-					. $options['pitch_form_duedate_description'] . '" size="35" />';	
+					. htmlentities( $options['pitch_form_duedate_description'] ) . '" size="35" />';	
 				echo '<input id="pitch_form_duedate_required" type="checkbox" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_duedate_required]"';
 				if ( isset( $options['pitch_form_duedate_required'] ) && $options['pitch_form_duedate_required'] ) {
 				    echo 'checked="checked"';
@@ -434,10 +434,10 @@ Thanks
 				}
 				echo '"><label for="pitch_form_location_label">Label</label>';
 				echo '<input id="pitch_form_location_label" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_location_label]" type="text" value="'
-					. $options['pitch_form_location_label'] . '" size="15" />';
+					. htmlentities( $options['pitch_form_location_label'] ) . '" size="15" />';
 				echo '<label for="pitch_form_location_description">Description</label>';
 				echo '<input id="pitch_form_location_description" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_location_description]" type="text" value="'
-					. $options['pitch_form_location_description'] . '" size="35" />';	
+					. htmlentities( $options['pitch_form_location_description'] ) . '" size="35" />';	
 			    echo '<input id="pitch_form_location_required" type="checkbox" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_location_required]"';
 				if ( isset( $options['pitch_form_location_required'] ) && $options['pitch_form_location_required'] == 'on' ){
 				    echo 'checked="checked"';
@@ -462,13 +462,13 @@ Thanks
 		echo '"><label for="pitch_form_volunteer_label">Label</label>';
 		echo '<input id="pitch_form_volunteer_label" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_volunteer_label]" type="text" value="';
 		if ( isset( $options['pitch_form_volunteer_label'] ) ) {
-			echo $options['pitch_form_volunteer_label'];
+			echo htmlentities( $options['pitch_form_volunteer_label'] );
 		}
 		echo '" size="15" />';
 		echo '<label for="pitch_form_volunteer_description">Description</label>';
 		echo '<input id="pitch_form_volunteer_description" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_volunteer_description]" type="text" value="';
 		if ( isset( $options['pitch_form_volunteer_description'] ) ) {
-			echo $options['pitch_form_volunteer_description'];
+			echo htmlentities( $options['pitch_form_volunteer_description'] );
 		}
 		echo '" size="35" />';
 		echo '<input id="pitch_form_volunteer_required" type="checkbox" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_volunteer_required]"';
@@ -487,7 +487,7 @@ Thanks
 		 	. 'name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_success_message]"'
 			. ' cols="45" rows="4">';
 		if ( isset( $options['pitch_form_success_message'] ) ) {
-			echo $options['pitch_form_success_message'];
+			echo htmlentities( $options['pitch_form_success_message'] );
 		}
 		echo '</textarea>';
 		echo '<p class="description">'
@@ -518,7 +518,7 @@ Thanks
 		 	. 'name="' . $assignment_desk->get_plugin_option_fullname('pitch_form')  . '[pitch_form_email_template_subject]"'
 			. 'size="60" maxlength="60" value="';
 		if ( isset( $options['pitch_form_email_template_subject'] ) ) {
-			echo $options['pitch_form_email_template_subject'];
+			echo htmlentities( $options['pitch_form_email_template_subject'] );
 		}
 		echo '">';
     }
@@ -529,7 +529,7 @@ Thanks
 		
 		echo '<textarea id="pitch_form_email_template" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_email_template]" rows="8" cols="60">';
 		if ( isset( $options['pitch_form_email_template'] ) ) {
-			echo $options['pitch_form_email_template'];
+			echo htmlentities( $options['pitch_form_email_template'] );
 		}
 		echo '</textarea>';
 		echo '<p class="description">' . 
@@ -733,7 +733,7 @@ Thanks
 		$options = $assignment_desk->public_facing_options;
 		echo '<input id="public_facing_no_pitches_message"'
 		 	. 'name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_no_pitches_message]"'
-			. ' size="60" maxlength="120" value="' . $options['public_facing_no_pitches_message'] . '">';
+			. ' size="60" maxlength="120" value="' . htmlentities( $options['public_facing_no_pitches_message'] ) . '">';
 	}
 	
 	function public_facing_logged_out_message_option() {
@@ -741,7 +741,7 @@ Thanks
 		$options = $assignment_desk->public_facing_options;
 		echo '<input id="public_facing_logged_out_message"'
 		 	. 'name="' . $assignment_desk->get_plugin_option_fullname('public_facing') . '[public_facing_logged_out_message]"'
-			. ' size="60" maxlength="120" value="' . $options['public_facing_logged_out_message'] . '">';
+			. ' size="60" maxlength="120" value="' . htmlentities( $options['public_facing_logged_out_message'] ) . '">';
 	}
 	
 	/**
