@@ -3,7 +3,7 @@ Contributors: danielbachhuber, efroese
 Tags: editorial workflow, journalism, crowdsourcing, assignment management
 Requires at least: 3.0
 Tested up to: 3.1
-Stable tag: 0.9.4
+Stable tag: 0.9.5
 
 Empower the users to participate in the journalism being done at your site and guide them along the way.
 
@@ -165,5 +165,3 @@ Support for Edit Flow v0.6's custom editorial metadata while keeping backwards-c
 
 = 0.1 =
 * First implementation from Spring 2010. Significant refactoring planned for the next release.
-
-== Upgrade Notice ==
