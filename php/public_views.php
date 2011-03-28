@@ -153,7 +153,7 @@ class ad_public_views {
 		$pitch_form .= '<form method="post" id="assignment_desk_pitch_form">';
            
 		// Title
-		if ( $options['pitch_form_title_label'] ) {
+		if ( isset( $options['pitch_form_title_label'] ) && $options['pitch_form_title_label'] ) {
 			$title_label = $options['pitch_form_title_label'];
 		} else {
 			$title_label = 'Title';
