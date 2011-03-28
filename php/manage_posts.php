@@ -341,8 +341,14 @@ class ad_manage_posts {
      * @todo - When edit-flow includes this check the edit-flow version and enable/disable
      */ 
     function add_ef_custom_statuses_where_all_filter($where){
-        global $wpdb, $edit_flow;
+        global $wpdb, $assignment_desk;
         
+		if ( !$assignment_desk->edit_flow_enabled() ) {
+			return $where;
+		} else {
+			global $edit_flow;
+		}
+		
         if( isset( $_GET['post_status'] ) && ( $_GET['post_status'] == 'all' || $_POST['post_status'] == 'all' ) ) {			
     		$custom_statuses = $edit_flow->custom_status->get_custom_statuses();
     		//insert custom post_status where statements into the existing the post_status where statements - "post_status = publish OR"
