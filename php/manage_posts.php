@@ -44,9 +44,6 @@ class ad_manage_posts {
 		add_action('restrict_manage_posts', array(&$this, 'add_sortby_option'));
         add_action('parse_query', array(&$this, 'parse_query_sortby'));
 
-        // Filter by assignment status
-        add_action('restrict_manage_posts', array(&$this, 'add_assignment_status_filter'));
-
         // Add postmeta to the manage_posts query
         add_filter('posts_join', array(&$this, 'posts_join_meta' ));
         // Add the taxonomy tables to the mange_posts query 
@@ -55,8 +52,6 @@ class ad_manage_posts {
         add_filter('posts_where', array(&$this, 'posts_contributor_type_where' ));
         // Workaround to show posts with EF custom statuses when post_status=='all'
         add_filter('posts_where', array(&$this, 'add_ef_custom_statuses_where_all_filter' ), 20);
-        // Filter by assignment_status
-        add_filter('posts_where', array(&$this, 'add_ad_assignment_statuses_where' ), 20);
         
 	}
     
@@ -247,36 +242,6 @@ class ad_manage_posts {
     <?php
     }
     
-    /**
-     * Add links to filter posts by assignment_status.
-     */
-    function add_assignment_status_filter() {
-        global $assignment_desk;
-        $assignment_statuses = $assignment_desk->custom_taxonomies->get_assignment_statuses();
-    
-        echo "<div><ul class='subsubsub'>";
-
-		if ( isset( $_GET['ad-assignment-status'] ) ) {
-			$assignment_status_filter = $_GET['ad-assignment-status'];
-		} else {
-			$assignment_status_filter = '';
-		}
-        
-        $class = '';
-        if ( ! $assignment_status_filter ) {
-            $class = 'current';
-        }
-        $status_links = array("<a href='?' class='$class'>All</a>");
-        foreach($assignment_statuses as $assignment_status){
-            $class = '';
-            if( $assignment_status_filter == $assignment_status->term_id ){
-                $class = 'current';
-            }
-            $status_links[]= "<a href='?ad-assignment-status=$assignment_status->term_id' class='$class'>{$assignment_status->name}</a>";            
-        }
-        echo implode(' | ', $status_links) . "</div> <br style='clear:both'>";
-    }
-    
     function add_sortby_option(){
         global $assignment_desk;
 		if ( isset( $_GET['ad-sortby'] ) ) {
@@ -379,19 +344,7 @@ class ad_manage_posts {
         }
         return $where;
     }
-    
-    /**
-     * Modify the where SQL clause to filter by assignment_status 
-     */
-    function add_ad_assignment_statuses_where($where){
-        global $assignment_desk, $wpdb, $pagenow;
-        if ( is_admin() && $pagenow == 'edit.php' ){
-            if ( isset( $_GET['ad-assignment-status'] ) ){
-                $where .= " AND $wpdb->terms.term_id = {$_GET['ad-assignment-status']}";
-            }
-        }
-        return $where;
-    }
+
 }
 
 } // end if(!class_exists)
