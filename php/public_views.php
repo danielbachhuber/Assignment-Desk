@@ -18,7 +18,7 @@ class ad_public_views {
 		$public_facing_options = $assignment_desk->public_facing_options;
 		
 		// The datepicker UI is used on the pitch submission form. Only load if enabled
-		if ( $pitch_form_options['pitch_form_enabled'] ) {
+		if ( isset( $pitch_form_options['pitch_form_enabled'] ) && $pitch_form_options['pitch_form_enabled'] ) {
 			wp_enqueue_script( 'jquery-datepicker-js', ASSIGNMENT_DESK_URL .'js/jquery.datepicker.js', array('jquery-ui-core'), ASSIGMENT_DESK_VERSION, true );
 			wp_enqueue_script( 'ad-public-views', ASSIGNMENT_DESK_URL . 'js/public_views.js', array('jquery', 'jquery-datepicker-js' ), ASSIGMENT_DESK_VERSION, true );
 		}
@@ -46,7 +46,7 @@ class ad_public_views {
 			add_filter( 'the_content', array(&$this, 'append_actions_to_post') );		
 		}
 		// Only show pitch forms if the functionality is enabled
-		if ( $pitch_form_options['pitch_form_enabled'] ) {
+		if ( isset( $pitch_form_options['pitch_form_enabled'] ) && $pitch_form_options['pitch_form_enabled'] ) {
 			add_filter( 'the_content', array(&$this, 'show_pitch_form') );
 		}
 	}
@@ -76,7 +76,7 @@ class ad_public_views {
 		    $_REQUEST['assignment_desk_messages']['volunteer_form'] = $this->save_volunteer_form();	
 		}
 		// Only process pitch forms if the functionality is enabled
-		if ( $pitch_form_options['pitch_form_enabled'] ) {
+		if (isset( $pitch_form_options['pitch_form_enabled'] ) && $pitch_form_options['pitch_form_enabled'] ) {
 		    $_REQUEST['assignment_desk_messages']['pitch_form'] = $this->save_pitch_form();
 		}
 	}
