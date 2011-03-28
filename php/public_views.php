@@ -450,7 +450,15 @@ class ad_public_views {
 						. '/>';
 			// Show a registration link if users can register
 			if ( get_option('users_can_register') ) {
-				$pitch_form .= '<p>If you need a username, you can <a href="' . site_url('wp-login.php?action=register', 'login') . '">' . _('register a new account') . '</a>';
+				$pitch_form_url = get_permalink( $post->ID );
+				$pitch_form_url = apply_filters( 'ad_pitch_form_register_redirect_url', $pitch_form_url );
+				if ( $pitch_form_url ) {
+					$pitch_form_url = urlencode( $pitch_form_url );
+					$registration_url = site_url( 'wp-login.php?action=register&redirect_to=' . $pitch_form_url, 'login' ); 
+				} else {
+					$registration_url = site_url( 'wp-login.php?action=register', 'login' ); 
+				}
+				$pitch_form .= '<p>If you need a username, you can <a href="' . $registration_url . '">' . _('register a new account') . '</a>';
 			}
 			if ( isset($_REQUEST['assignment_desk_messages']['pitch_form']['errors']['login']) ) {
    				$pitch_form .= '<p class="error">'
