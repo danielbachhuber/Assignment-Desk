@@ -83,9 +83,9 @@ class ad_public_views {
 	/**
 	 * Helper function which returns a value if the variable is set
 	 */
-	function return_if_set( $var = null ) {
-		if ( isset( $var ) ) {
-			return $var;
+	function return_if_set( $array = array(), $key = null ) {
+		if ( isset( $array[$key] ) ) {
+			return $array[$key];
 		} else {
 			return null;
 		}
@@ -160,7 +160,7 @@ class ad_public_views {
 		}
 		$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_title">' . $title_label . '</label>'
 					. '<input type="text" id="assignment_desk_title" name="assignment_desk_title" ';
-		$pitch_form .= 'value="' . $this->return_if_set( $_POST['assignment_desk_title'] ) . '"/>';
+		$pitch_form .= 'value="' . $this->return_if_set( $_POST, 'assignment_desk_title' ) . '"/>';
 		if ( $options['pitch_form_title_description'] ) {
 		$pitch_form .= '<p class="description">'
 					. $options['pitch_form_title_description']
@@ -200,29 +200,29 @@ class ad_public_views {
 						switch ( $term_type = $edit_flow->editorial_metadata->get_metadata_type( $term ) ) {
 							case 'checkbox':
 								$html_input = '<input type="checkbox" id="' . $form_key . '" name="' . $form_key . '" ';
-								if ( $this->return_if_set( $_POST[$form_key] ) ) $html_input = ' checked="checked"';
+								if ( $this->return_if_set( $_POST, $form_key ) ) $html_input = ' checked="checked"';
 								$html_input .= ' />';
 								break;
 							case 'date':
 								$html_input = '<input type="text" id="' . $form_key . '" name="' . $form_key . '" ';
-								$html_input .= 'value="' . $this->return_if_set( $_POST[$form_key] ) . '" ';
+								$html_input .= 'value="' . $this->return_if_set( $_POST, $form_key ) . '" ';
 								$html_input .= ' class="ad_datepicker" size="12" />';
 								break;
 							case 'location':
 								$html_input = '<input type="text" id="' . $form_key . '" name="' . $form_key . '" ';
-								$html_input .= 'value="' . $this->return_if_set( $_POST[$form_key] ) . '"/>';
+								$html_input .= 'value="' . $this->return_if_set( $_POST, $form_key ) . '"/>';
 								break;
 							case 'paragraph':
 								$html_input = '<textarea id="' . $form_key . '" name="' . $form_key . '">';
-								$html_input .= $this->return_if_set( $_POST[$form_key] );
+								$html_input .= $this->return_if_set( $_POST, $form_key );
 								$html_input .= '</textarea>';
 								break;
 							case 'text':
 								$html_input = '<input type="text" id="' . $form_key . '" name="' . $form_key . '" ';
-								$html_input .= 'value="' . $this->return_if_set( $_POST[$form_key] ) . '"/>';
+								$html_input .= 'value="' . $this->return_if_set( $_POST, $form_key ) . '"/>';
 								break;
 							case 'user':
-								$selected = ( $this->return_if_set( $_POST[$form_key] ) ) ? $this->return_if_set( $_POST[$form_key] ) : false;
+								$selected = ( $this->return_if_set( $_POST, $form_key ) ) ? $this->return_if_set( $_POST, $form_key ) : false;
 								$user_dropdown_args = array( 
 										'show_option_all' => __( '- Select user -', 'assignment-desk' ), 
 										'name'     => $form_key,
@@ -269,7 +269,7 @@ class ad_public_views {
 					$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_description">' . $description_label . '</label>'
 								. '<textarea id="assignment_desk_description"'
 								. ' name="assignment_desk_description">';
-					$pitch_form .= $this->return_if_set($_POST['assignment_desk_description']);
+					$pitch_form .= $this->return_if_set( $_POST, 'assignment_desk_description' );
 					$pitch_form .= '</textarea>';
 					if ( $options['pitch_form_description_description'] ) {
 					$pitch_form .= '<p class="description">'
@@ -295,7 +295,7 @@ class ad_public_views {
 					}	
 					$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_duedate">' . $duedate_label . '</label>';
 					$pitch_form .= '<input type="text" size="12" name="assignment_desk_duedate" id="assignment_desk_duedate" ';
-					$pitch_form .= 'value="' . $this->return_if_set($_POST['assignment_desk_duedate']) . '" class="ad_datepicker"/>';
+					$pitch_form .= 'value="' . $this->return_if_set( $_POST, 'assignment_desk_duedate' ) . '" class="ad_datepicker"/>';
 					if ( $options['pitch_form_duedate_description'] ) {
 					    $pitch_form .= '<p class="description">' . $options['pitch_form_dudedate_description'] . '</p>';
 					}
@@ -316,7 +316,7 @@ class ad_public_views {
 					}
 					$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_location">' . $location_label . '</label>'
 								. '<input type="text" id="assignment_desk_location" name="assignment_desk_location" ';
-					$pitch_form .= 'value="' . $this->return_if_set($_POST['assignment_desk_location']) . '"/>';
+					$pitch_form .= 'value="' . $this->return_if_set( $_POST, 'assignment_desk_location' ) . '"/>';
 					if ( $options['pitch_form_location_description'] ) {
 					$pitch_form .= '<p class="description">'
 								. $options['pitch_form_location_description']
@@ -345,7 +345,7 @@ class ad_public_views {
 			$pitch_form .= '<select id="assignment_desk_categories" name="assignment_desk_categories">';
 			foreach ( $categories as $category ) {
 				$pitch_form .= '<option value="' . $category->term_id . '"';
-				if ( $category->term_id == $this->return_if_set($_POST['assignment_desk_categories']) ) {
+				if ( $category->term_id == $this->return_if_set( $_POST, 'assignment_desk_categories' ) ) {
 					$pitch_form .= ' selected="selected"';
 				}
 				$pitch_form .= '>'
@@ -375,7 +375,7 @@ class ad_public_views {
 			}	
 			$pitch_form .= '<fieldset class="standard"><label for="assignment_desk_tags">' . $tags_label . '</label>'
 						. '<input type="text" id="assignment_desk_tags" name="assignment_desk_tags"';
-			$pitch_form .= 'value="' . $this->return_if_set($_POST['assignment_desk_tags']) . '"/>';							
+			$pitch_form .= 'value="' . $this->return_if_set( $_POST, 'assignment_desk_tags' ) . '"/>';							
 			if ( $options['pitch_form_tags_description'] ) {
 			$pitch_form .= '<p class="description">'
 						. $options['pitch_form_tags_description']
@@ -401,7 +401,7 @@ class ad_public_views {
 				$pitch_form .= '<li><input type="checkbox" '
 							. 'id="assignment_desk_volunteer_' . $user_role->term_id
 							. '" name="assignment_desk_volunteer[]"';
-				if ( $this->return_if_set($_POST['assignment_desk_volunteer']) && in_array( $user_role->term_id, $this->return_if_set($_POST['assignment_desk_volunteer']) ) ) {
+				if ( $this->return_if_set( $_POST, 'assignment_desk_volunteer' ) && in_array( $user_role->term_id, $this->return_if_set( $_POST, 'assignment_desk_volunteer' ) ) ) {
 					$pitch_form .= ' checked="checked"';
 				}
 				$pitch_form .= ' value="' . $user_role->term_id . '"'
@@ -442,8 +442,8 @@ class ad_public_views {
 			
 			$pitch_form .= '<fieldset class="standard assignment-desk-login">'
 						. '<label for="assignment_desk_username">Username:</label> '
-						. '<input id="assignment_desk_username" name="assignment_desk_username" type="text" '
-						. 'value="' . $this->return_if_set($_POST['assignment_desk_username']) . '" />'							
+						. '<input id="assignment_desk_username" name="assignment_desk_username" type="text" '										
+						. 'value="' . $this->return_if_set( $_POST, 'assignment_desk_username' ) . '" />'							
 						. '<br /><label for="assignment_desk_password">Password:</label> '
 						. '<input id="assignment_desk_password" name="assignment_desk_password" type="password" '
 						. '/>';
@@ -492,6 +492,7 @@ class ad_public_views {
 
 		if ( $_POST && isset($_POST['assignment_desk_pitch_submit']) ) {
 		    $form_messages = array();
+			$form_messages['errors'] = array();
 
 			// Ensure that it was the user who submitted the form, not a bot
 			if ( !wp_verify_nonce($_POST['assignment_desk_pitch_nonce'], 'assignment_desk_pitch') ) {
@@ -621,7 +622,7 @@ class ad_public_views {
 
 			
 			$sanitized_tags = '';
-			if ( $_POST['assignment_desk_tags'] ){
+			if ( isset( $_POST['assignment_desk_tags'] ) ){
 			    $sanitized_tags = $_POST['assignment_desk_tags'];
 			}
 			else {
@@ -631,7 +632,7 @@ class ad_public_views {
 			}
 			
 			$sanitized_categories = '';
-			if ( $_POST['assignment_desk_categories'] ){
+			if ( isset( $_POST['assignment_desk_categories'] ) ){
 			    $sanitized_categories = (int)$_POST['assignment_desk_categories'];
 			}
 			else {
@@ -642,7 +643,7 @@ class ad_public_views {
 
 			
 			$sanitized_volunteer = false;
-			if ( $_POST['assignment_desk_volunteer'] ){
+			if ( isset( $_POST['assignment_desk_volunteer'] ) ){
 			    $sanitized_volunteer = $_POST['assignment_desk_volunteer'];
 			    if (! is_array($sanitized_volunteer) ) {
 			        $sanitized_volunteer = array((int)$sanitized_volunteer);
