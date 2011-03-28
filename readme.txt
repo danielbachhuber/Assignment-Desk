@@ -1,9 +1,9 @@
 === Plugin Name ===
-Contributors: efroese, danielbachhuber
+Contributors: danielbachhuber, efroese
 Tags: editorial workflow, journalism, crowdsourcing, assignment management
-Requires at least: 2.9.2
-Tested up to: 3.0.4
-Stable tag: 0.9.4
+Requires at least: 3.0
+Tested up to: 3.1
+Stable tag: 0.9.5
 
 Empower the users to participate in the journalism being done at your site and guide them along the way.
 
@@ -28,7 +28,7 @@ This section describes how to install and configure the Assignment Desk.
 1. Download the plugin from WordPress.org
 2. Upload it to the wp-contents/plugins directory of your website. 
 3. Activate it. The first time you activate the plugin, the Assignment Desk will install a default set of contributor types, contributor roles, and assignment statuses.
-5. Optionally install Edit-Flow. Assignment Desk has been tested with 0.6.1. Edit-Flow gives us several editorial tools with enable a fully integrated newsroom workflow. Installation of this plugin is highly recommended.
+5. Optionally install Edit-Flow. Assignment Desk has been tested with 0.6.3. Edit-Flow gives us several editorial tools with enable a fully integrated newsroom workflow. Installation of this plugin is highly recommended.
 4. Optionally install Co-Authors Plus. Assignment Desk has been tested with 2.1.1. Co-Authors Plus allows us to assign multiple users to a post as authors. Multiple authors can then edit the post. Installation of this plugin is highly recommended.
 6. Optionally install Adminimize. Assignment Desk has been tested with 1.7.7. Adminimize allows you the ability to hide certain boxes on the post edit screen based on the users user type. The Assignment Desk is not dependent on this plugin.
 
@@ -42,6 +42,9 @@ Hit us with questions in the forum http://wordpress.org/tags/assignment-desk
 
 == Upgrade Notice ==
 
+== 0.9.5 ==
+Support for Edit Flow v0.6.3, WordPress 2.9.2 is no longer officially supported, and a few bug fixes
+
 == 0.9.4 ==
 Bug fixes: don't add Assignment Desk functionality on post preview, and allow admin to create and properly use assignment status
 
@@ -49,6 +52,15 @@ Bug fixes: don't add Assignment Desk functionality on post preview, and allow ad
 Support for Edit Flow v0.6's custom editorial metadata while keeping backwards-compatibility with prior versions.
 
 == Changelog ==
+
+= 0.9.5 (Mar. 28, 2011) =
+* WordPress 2.9.2 is no longer officially supported
+* Fixed a number of error notices
+* Support for Edit Flow v0.6.3
+* Bug fix: Double quotes no longer break field subscriptions
+* Bug fix: Only include datepicker.js and supplemental field if pitch form is enabled
+* Bug fix: No fatal errors when filtering posts in manage posts view with Edit Flow disabled
+* Disabled filtering by assignment status on manage posts view
 
 = 0.9.4 (Feb. 7, 2011) =
 * Bug fix: Don't apply Assignment Desk functionality when a writer is previewing a post
@@ -153,5 +165,3 @@ Support for Edit Flow v0.6's custom editorial metadata while keeping backwards-c
 
 = 0.1 =
 * First implementation from Spring 2010. Significant refactoring planned for the next release.
-
-== Upgrade Notice ==

@@ -3,12 +3,12 @@
 Plugin Name: Assignment Desk
 Plugin URI: http://openassignment.org/
 Description: News pitch and story tools for local news blogs.
-Author: Erik Froese, Daniel Bachhuber
-Version: 0.9.4
+Author: Daniel Bachhuber, Erik Froese
+Version: 0.9.5
 Author URI: http://openassignment.org/
 */   
    
-/*  Copyright 2010  
+/*  Copyright 2010-2011
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 define( 'ASSIGNMENT_DESK_ROOT' , dirname(__FILE__) );	
 define( 'ASSIGNMENT_DESK_FILE_PATH' , ASSIGNMENT_DESK_ROOT . '/' . basename(__FILE__) );
 define( 'ASSIGNMENT_DESK_URL', plugins_url(plugin_basename(dirname(__FILE__)) .'/') );
-define( 'ASSIGMENT_DESK_VERSION', '0.9.4' );
+define( 'ASSIGMENT_DESK_VERSION', '0.9.5' );
 
 require_once( ASSIGNMENT_DESK_ROOT . '/' . 'php/user.php');
 require_once( ASSIGNMENT_DESK_ROOT . '/' . 'php/dashboard_widgets.php');
@@ -225,8 +225,8 @@ if (!class_exists('assignment_desk')) {
 			
 			switch( $functionality ) {
 				case 'custom_post_statuses':
-					if ( version_compare( EDIT_FLOW_VERSION, '0.6.1', '>=' ) ) {
-						$enabled = $edit_flow->post_type_supports( 'post', 'ef_custom_statuses' );
+					if ( version_compare( EDIT_FLOW_VERSION, '0.6.1', '>=' ) && function_exists( 'post_type_supports' ) ) {
+						$enabled = post_type_supports( 'post', 'ef_custom_statuses' );
 					} else {
 						$enabled = (bool) $edit_flow->get_plugin_option( 'custom_statuses_enabled' );
 					}

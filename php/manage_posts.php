@@ -44,9 +44,6 @@ class ad_manage_posts {
 		add_action('restrict_manage_posts', array(&$this, 'add_sortby_option'));
         add_action('parse_query', array(&$this, 'parse_query_sortby'));
 
-        // Filter by assignment status
-        add_action('restrict_manage_posts', array(&$this, 'add_assignment_status_filter'));
-
         // Add postmeta to the manage_posts query
         add_filter('posts_join', array(&$this, 'posts_join_meta' ));
         // Add the taxonomy tables to the mange_posts query 
@@ -55,8 +52,6 @@ class ad_manage_posts {
         add_filter('posts_where', array(&$this, 'posts_contributor_type_where' ));
         // Workaround to show posts with EF custom statuses when post_status=='all'
         add_filter('posts_where', array(&$this, 'add_ef_custom_statuses_where_all_filter' ), 20);
-        // Filter by assignment_status
-        add_filter('posts_where', array(&$this, 'add_ad_assignment_statuses_where' ), 20);
         
 	}
     
@@ -247,39 +242,20 @@ class ad_manage_posts {
     <?php
     }
     
-    /**
-     * Add links to filter posts by assignment_status.
-     */
-    function add_assignment_status_filter() {
-        global $assignment_desk;
-        $assignment_statuses = $assignment_desk->custom_taxonomies->get_assignment_statuses();
-    
-        echo "<div><ul class='subsubsub'>";
-        
-        $class = '';
-        if ( ! $_GET['ad-assignment-status'] ) {
-            $class = 'current';
-        }
-        $status_links = array("<a href='?' class='$class'>All</a>");
-        foreach($assignment_statuses as $assignment_status){
-            $class = '';
-            if($_GET['ad-assignment-status'] == $assignment_status->term_id){
-                $class = 'current';
-            }
-            $status_links[]= "<a href='?ad-assignment-status=$assignment_status->term_id' class='$class'>{$assignment_status->name}</a>";            
-        }
-        echo implode(' | ', $status_links) . "</div> <br style='clear:both'>";
-    }
-    
     function add_sortby_option(){
         global $assignment_desk;
+		if ( isset( $_GET['ad-sortby'] ) ) {
+			$sortby_filter = $_GET['ad-sortby'];
+		} else {
+			$sortby_filter = '';
+		}
     ?>
         <label for"ad-sortby-select"><?php _e('Sort by'); ?>:</label>
         <select name='ad-sortby' id='ad-sortby-select' class='postform'>
             <option value="">None</option>
-            <option value="_ad_pitched_by_timestamp" <?php echo ($_GET['ad-sortby'] == '_ad_pitched_by_timestamp')? 'selected': ''?>>Age</option>
-            <option value="_ad_votes_total" <?php echo ($_GET['ad-sortby'] == '_ad_votes_total')? 'selected': ''?>>Votes</option>
-            <option value="_ad_total_volunteers" <?php echo ($_GET['ad-sortby'] == '_ad_total_volunteers')? 'selected': ''?>>Volunteers</option>
+            <option value="_ad_pitched_by_timestamp" <?php echo ( $sortby_filter == '_ad_pitched_by_timestamp')? 'selected': ''?>>Age</option>
+            <option value="_ad_votes_total" <?php echo ( $sortby_filter == '_ad_votes_total' )? 'selected': ''?>>Votes</option>
+            <option value="_ad_total_volunteers" <?php echo ( $sortby_filter == '_ad_total_volunteers')? 'selected': ''?>>Volunteers</option>
         </select>
         <input type="hidden" name="ad-sortby-reverse" value="<?php echo ($_GET['ad-sortby-reverse'])? '': '1'; ?>">
 <?php
@@ -301,7 +277,7 @@ class ad_manage_posts {
     function posts_join_meta($join){
         global $wpdb, $pagenow;
         if(is_admin() && $pagenow == 'edit.php'){
-            if($_GET['ad-eligible-user-type']){
+            if ( isset( $_GET['ad-eligible-user-type'] ) ){
                 $join .= " LEFT JOIN $wpdb->postmeta ON($wpdb->posts.ID = $wpdb->postmeta.post_id) ";
             }
         }
@@ -315,7 +291,7 @@ class ad_manage_posts {
     function posts_join_taxonomy($join){
         global $wpdb, $pagenow;
         if(is_admin() && $pagenow == 'edit.php'){
-            if($_GET['ad-assignment-status']){
+            if( isset( $_GET['ad-assignment-status'] ) ) {
                 $join .= "LEFT JOIN $wpdb->term_relationships ON($wpdb->posts.ID = $wpdb->term_relationships.object_id)
                           LEFT JOIN $wpdb->term_taxonomy ON($wpdb->term_relationships.term_taxonomy_id = $wpdb->term_taxonomy.term_taxonomy_id)
                           LEFT JOIN $wpdb->terms ON($wpdb->term_taxonomy.term_id = $wpdb->terms.term_id)";
@@ -330,9 +306,15 @@ class ad_manage_posts {
      * @todo - When edit-flow includes this check the edit-flow version and enable/disable
      */ 
     function add_ef_custom_statuses_where_all_filter($where){
-        global $wpdb, $edit_flow;
+        global $wpdb, $assignment_desk;
         
-        if($_GET['post_status'] == 'all' || $_POST['post_status'] == 'all') {			
+		if ( !$assignment_desk->edit_flow_enabled() ) {
+			return $where;
+		} else {
+			global $edit_flow;
+		}
+		
+        if( isset( $_GET['post_status'] ) && ( $_GET['post_status'] == 'all' || $_POST['post_status'] == 'all' ) ) {			
     		$custom_statuses = $edit_flow->custom_status->get_custom_statuses();
     		//insert custom post_status where statements into the existing the post_status where statements - "post_status = publish OR"
     		//the search string
@@ -355,26 +337,14 @@ class ad_manage_posts {
     function posts_contributor_type_where( $where ){
         global $assignment_desk, $wpdb, $pagenow;
         if(is_admin() && $pagenow == 'edit.php'){
-            if($_GET['ad-eligible-user-type']){
+            if( isset( $_GET['ad-eligible-user-type'] ) ){
                 $where .= " AND $wpdb->postmeta.meta_key = '_ad_participant_type_{$_GET['ad-eligible-user-type']}'
                             AND $wpdb->postmeta.meta_value = 'on' ";
             }
         }
         return $where;
     }
-    
-    /**
-     * Modify the where SQL clause to filter by assignment_status 
-     */
-    function add_ad_assignment_statuses_where($where){
-        global $assignment_desk, $wpdb, $pagenow;
-        if(is_admin() && $pagenow == 'edit.php'){
-            if($_GET['ad-assignment-status']){
-                $where .= " AND $wpdb->terms.term_id = {$_GET['ad-assignment-status']}";
-            }
-        }
-        return $where;
-    }
+
 }
 
 } // end if(!class_exists)
