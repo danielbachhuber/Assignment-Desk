@@ -19,10 +19,11 @@ class ad_public_views {
 		
 		// The datepicker UI is used on the pitch submission form. Only load if enabled
 		if ( $pitch_form_options['pitch_form_enabled'] ) {
-			wp_enqueue_script('jquery-datepicker-js', ASSIGNMENT_DESK_URL .'js/jquery.datepicker.js', array('jquery-ui-core'));
+			wp_enqueue_script( 'jquery-datepicker-js', ASSIGNMENT_DESK_URL .'js/jquery.datepicker.js', array('jquery-ui-core'), ASSIGMENT_DESK_VERSION, true );
+			wp_enqueue_script( 'ad-public-views', ASSIGNMENT_DESK_URL . 'js/public_views.js', array('jquery', 'jquery-datepicker-js' ), ASSIGMENT_DESK_VERSION, true );
 		}
-		wp_enqueue_script('ad-public-views', ASSIGNMENT_DESK_URL . 'js/public_views.js', array('jquery', 'jquery-datepicker-js'));
-		wp_enqueue_style('ad-public', ASSIGNMENT_DESK_URL . 'css/public.css');
+		
+		wp_enqueue_style('ad-public', ASSIGNMENT_DESK_URL . 'css/public.css');		
 		
 		add_filter( 'the_content', array( &$this, 'show_all_posts' ) );
 		add_filter( 'the_posts', array( &$this, 'show_single_post' ) );
