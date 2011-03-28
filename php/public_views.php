@@ -189,7 +189,7 @@ class ad_public_views {
 					$required_key = 'pitch_form_' . $term->slug . '_required';
 					
 					// Only show the field if it's enabled
-					if ( $options[$enabled_key] ) {
+					if ( isset( $options[$enabled_key] ) && $options[$enabled_key] ) {
 						
 						// Build the label and description field
 						$html_label = ( $options[$label_key] ) ? $options[$label_key] : $term->name;
