@@ -239,7 +239,7 @@ Thanks
 		global $assignment_desk;
 		$options = $assignment_desk->pitch_form_options;
 		echo '<input id="pitch_form_enabled" name="' . $assignment_desk->get_plugin_option_fullname('pitch_form') . '[pitch_form_enabled]" type="checkbox"';
-		if ($options['pitch_form_enabled']) {
+		if ( isset( $options['pitch_form_enabled'] ) && $options['pitch_form_enabled'] ) {
 			echo ' checked="checked"';
 		}
 		echo ' />';
@@ -759,6 +759,7 @@ Thanks
 	 */
 	function validate_pitch_form_settings( $input ){
 		// Sanitize the list of email addresses that receive new pitch notififcations.
+				
 		$email_addresses = explode(',', $input['pitch_form_notification_emails']);
 		$sanitized_email_addresses = array();
 		foreach ( $email_addresses as $email_address ) {
@@ -777,7 +778,7 @@ Thanks
 	 * Validation for the public facing settings elements
 	 */
 	function validate_public_facing_settings( $input ){
-	    // @todo - Validate the public settings.
+		
 	    return $input;
 	}
     
