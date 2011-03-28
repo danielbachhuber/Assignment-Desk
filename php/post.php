@@ -384,7 +384,9 @@ class ad_post {
 
         // The user who pitched this story
         if ( current_user_can( $assignment_desk->define_editor_permissions ) ) {
-		    update_post_meta($post_id, '_ad_pitched_by_participant', (int)$_POST['ad-pitched-by-participant']);
+			if ( isset( $_POST['ad-pitched-by-participant'] ) ) {
+		    	update_post_meta($post_id, '_ad_pitched_by_participant', (int)$_POST['ad-pitched-by-participant']);
+			}
 			// Save the pitch time if it doesn't already exist
 			if ( !get_post_meta( $post_id, '_ad_pitched_by_timestamp', true ) ) {
 				update_post_meta($post_id, '_ad_pitched_by_timestamp', date_i18n('U'));
@@ -393,7 +395,7 @@ class ad_post {
        
  		// If current user can edit assignment status, let them
 		// Otherwise, set to default if contributor
-		if (current_user_can($assignment_desk->define_editor_permissions)) {
+		if ( current_user_can( $assignment_desk->define_editor_permissions ) && isset( $_POST['ad-assignment-status'] ) ) {
 			wp_set_object_terms($post_id, (int)$_POST['ad-assignment-status'], $assignment_desk->custom_taxonomies->assignment_status_label);
 		} else {
 			$current_status = wp_get_object_terms($post_id, $assignment_desk->custom_taxonomies->assignment_status_label);
@@ -411,7 +413,7 @@ class ad_post {
 			foreach ($user_types as $user_type) {
 			    $participant_types = array();
 				// If $_POST['ad-participant-types'] isn't set, then we have no contributor types
-			    if ( $_POST['ad-participant-types'] ) {
+			    if ( isset( $_POST['ad-participant-types'] ) ) {
 			        $participant_types = $_POST['ad-participant-types'];
 					if ( in_array($user_type->term_id, $participant_types) ) {
 						update_post_meta($post_id, "_ad_participant_type_$user_type->term_id", 'on');
@@ -439,7 +441,7 @@ class ad_post {
 			foreach ($user_roles as $user_role) {
 			    $participant_roles = array();
 				// If $_POST['ad-participant-roles'] isn't set, then we have no contributor roles
-			    if ( $_POST['ad-participant-roles'] ) {
+			    if ( isset( $_POST['ad-participant-roles'] ) ) {
 			        $participant_roles = $_POST['ad-participant-roles'];
 					if ( in_array($user_role->term_id, $participant_roles) ) {
 						update_post_meta($post_id, "_ad_participant_role_status_$user_role->term_id", 'on');
@@ -469,7 +471,7 @@ class ad_post {
 			    $role_participants = array();
 			}
 			// Remove a participant from a post
-    		if( $_POST['ad-participant-remove'] ){
+    		if ( isset( $_POST['ad-participant-remove'] ) ) {
     			if (!is_array($_POST['ad-participant-remove'])){
 		            $_POST['ad-participant-remove'] = array($_POST['ad-participant-remove']);
 		        }
@@ -494,7 +496,7 @@ class ad_post {
 		    }
 		    
 		    // Assign a participant to a post
-		    if( $_POST['ad-participant-assign'] ){
+			if ( isset( $_POST['ad-participant-assign'] ) ) {
 		        if (!is_array($_POST['ad-participant-assign'])){
 		            $_POST['ad-participant-assign'] = array($_POST['ad-participant-assign']);
 		        }

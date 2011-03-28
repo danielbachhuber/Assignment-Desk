@@ -50,6 +50,9 @@ Support for Edit Flow v0.6's custom editorial metadata while keeping backwards-c
 
 == Changelog ==
 
+= 0.9.5 (Mar. 28, 2011) =
+* Fixed a number of error notices
+
 = 0.9.4 (Feb. 7, 2011) =
 * Bug fix: Don't apply Assignment Desk functionality when a writer is previewing a post
 * Bug fix: Allow admin to create new assignment statuses and use them in proper contexts (thanks meganknight!)
